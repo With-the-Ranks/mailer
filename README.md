@@ -1,11 +1,11 @@
 <a href="https://app.vercel.pub">
-  <img alt="Platforms Starter Kit" src="/public/thumbnail.png">
-  <h1 align="center">Platforms Starter Kit</h1>
+  <img alt="Intrepid Email Campaigning Tool" src="/public/thumbnail.png">
+  <h1 align="center">Intrepid Email Campaigning Tool</h1>
 </a>
 
 <p align="center">
-  The <em>all-in-one</em> starter kit <br/>
-  for building multi-tenant applications.
+  <em>Revolutionize</em> your email campaign management <br/>
+  with advanced features and intuitive design.
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## Introduction
 
-The [Platforms Starter Kit](https://app.vercel.pub/) is a full-stack Next.js app with multi-tenancy and custom domain support. Built with [Next.js App Router](https://nextjs.org/docs/app), [Vercel Postgres](https://vercel.com/storage/postgres) and the [Vercel Domains API](https://vercel.com/docs/rest-api/endpoints#domains).
+The Intrepid Email Campaigning Tool is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
 
 Here's a quick 30-second demo:
 
