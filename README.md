@@ -3,7 +3,7 @@
 </a>
 
 <p align="center">
-  <em>Revolutionize</em> your email campaign management <br/>
+  <em>Revolutionize</em> your email campaign management<br/>
   with advanced features and intuitive design.
 </p>
 
