@@ -60,7 +60,7 @@ dependencies:
     specifier: 14.0.2
     version: 14.0.2(react-dom@18.2.0)(react@18.2.0)
   next-auth:
-    specifier: 4.24.7
+    specifier: ^4.24.7
     version: 4.24.7(next@14.0.2)(react-dom@18.2.0)(react@18.2.0)
   next-mdx-remote:
     specifier: ^4.4.1
