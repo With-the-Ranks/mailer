@@ -1,5 +1,5 @@
 <a href="https://app.vercel.pub">
-  <h1 align="center">Intrepid Email Campaigning Tool</h1>
+  <h1 align="center">Intrepid Email Campaigning Tool </h1>
 </a>
 
 <p align="center">
