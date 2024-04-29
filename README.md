@@ -46,7 +46,7 @@ Deploy your own version of this starter kit with Vercel.
 
 You can also [read the guide](https://vercel.com/guides/nextjs-multi-tenant-application) to learn how to develop your own version of this template.
 
-## Built on open source
+## Built on open source 
 
 This working demo site was built using the Platforms Starter Kit and:
 
