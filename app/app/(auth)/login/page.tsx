@@ -1,6 +1,7 @@
 import Image from "next/image";
 import LoginButton from "./login-button";
 import { Suspense } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -35,6 +36,9 @@ export default function LoginPage() {
         >
           <LoginButton />
         </Suspense>
+      </div>
+      <div className="text-center text-sm text-stone-400 mt-5">
+        Don&apos;t have an account?<Link href="/register" className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200">Sign up</Link>
       </div>
     </div>
   );

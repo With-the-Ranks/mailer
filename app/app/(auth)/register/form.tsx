@@ -46,7 +46,7 @@ export default function FormPage() {
       onSubmit={onSubmit}
       className="rounded-lg border border-stone-200 bg-white dark:border-stone-700 dark:bg-black p-5 sm:p-10"
     >
-      <h2 className="font-cal text-xl dark:text-white">Register Intrepid Email App</h2>
+      <h2 className="font-cal text-3xl dark:text-white mb-2">Register Intrepid Email App</h2>
       <p className="text-sm text-stone-500 dark:text-stone-400">
         Create your account.
       </p>
@@ -56,7 +56,7 @@ export default function FormPage() {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         placeholder="Username"
-        className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 my-4"
+        className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 mt-4"
         required
       />
       <input
@@ -69,8 +69,8 @@ export default function FormPage() {
         required
       />
       <FormButton />
-      <div className="text-stone-400 mt-5">
-        Already have an account?<Link href="/login" className="rounded-lg p-2 hover:underline hover:text-stone-200 dark:hover:text-stone-200">Log in here.</Link>
+      <div className="text-sm text-stone-400 mt-5">
+        Already have an account?<Link href="/login" className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200">Log in</Link>
       </div>
     </form>
   );
