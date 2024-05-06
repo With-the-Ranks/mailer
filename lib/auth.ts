@@ -1,5 +1,6 @@
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 
@@ -18,6 +19,16 @@ export const authOptions: NextAuthOptions = {
           email: profile.email,
           image: profile.avatar_url,
         };
+      },
+    }),
+    CredentialsProvider({
+      name: "Sign in with email",
+      credentials: {
+        email: {},
+        password: {},
+      },
+      async authorize(credentials, req) {
+        return null;
       },
     }),
   ],
