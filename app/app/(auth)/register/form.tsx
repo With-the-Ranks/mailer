@@ -5,25 +5,32 @@ import { toast } from "sonner";
 import LoadingDots from "@/components/icons/loading-dots";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function FormPage() {
-  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const router = useRouter(); 
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsSubmitting(true);
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: username, password }),
+        body: JSON.stringify({ email, password }),
       });
       if (!response.ok) throw new Error("Network response was not ok");
       toast.success("Registration Successful");
+      router.push('/login');
     } catch (error: unknown) {
       if (error instanceof Error) {
-        toast.error("Registration Failed");
+        setIsSubmitting(false); 
+        setPassword(""); 
+        setEmail(""); 
+        toast.error(`Registration Failed: ${error.message}`);
       }
     }
   };
@@ -51,11 +58,11 @@ export default function FormPage() {
         Create your account.
       </p>
       <input
-        name="username"
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Username"
+        name="email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
         className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 mt-4"
         required
       />
