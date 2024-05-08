@@ -3,6 +3,7 @@ import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
+import bcrypt from "bcrypt";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
@@ -22,13 +23,46 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     CredentialsProvider({
-      name: "Sign in with email",
+      name: "Email and Password",
       credentials: {
-        email: {},
-        password: {},
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "you@example.com",
+        },
+        password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        return null;
+      async authorize(credentials) {
+        if (!credentials || !credentials.email || !credentials.password) {
+          return null;
+        }
+
+        const { email, password } = credentials;
+
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user) {
+            throw new Error("No user found with the entered email");
+          }
+
+          // Here bcrypt compares the provided password with the hashed password in the database
+          const passwordIsValid = await bcrypt.compare(
+            password,
+            user.password || "",
+          );
+
+          if (!passwordIsValid) {
+            throw new Error("Password is incorrect");
+          }
+
+          return user; // Successful authentication, return user object
+        } catch (error) {
+          console.error("Login error:", error);
+          return null;
+        }
       },
     }),
   ],
