@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, FormEvent } from "react";
 import { toast } from "sonner";
@@ -6,36 +6,24 @@ import LoadingDots from "@/components/icons/loading-dots";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { registerUser } from "@/lib/actions";
 
 export default function FormPage() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const router = useRouter(); 
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!response.ok) throw new Error("Network response was not ok");
-      toast.success("Registration Successful");
-      router.push('/login');
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setIsSubmitting(false); 
-        setPassword(""); 
-        setEmail(""); 
-        toast.error(`Registration Failed: ${error.message}`);
-      }
-    }
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
   const FormButton = () => (
     <button
+      type="submit"
       className={cn(
         "flex h-8 w-32 items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
         isSubmitting
@@ -50,34 +38,52 @@ export default function FormPage() {
 
   return (
     <form
-      onSubmit={onSubmit}
-      className="rounded-lg border border-stone-200 bg-white dark:border-stone-700 dark:bg-black p-5 sm:p-10"
+      action={async (data: FormData) => {
+        setIsSubmitting(true);
+        const result = await registerUser(data);
+        if (result?.error) {
+          toast.error(`Register Failed: ${result.error}`);
+          setIsSubmitting(false);
+        } else {
+          toast.success("Registration Successful");
+          router.push("/login");
+        }
+      }}
+      className="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-black sm:p-10"
     >
-      <h2 className="font-cal text-3xl dark:text-white mb-2">Register Intrepid Email App</h2>
+      <h2 className="mb-2 font-cal text-3xl dark:text-white">
+        Register Intrepid Email App
+      </h2>
       <p className="text-sm text-stone-500 dark:text-stone-400">
         Create your account.
       </p>
       <input
         name="email"
         type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={formData.email}
+        onChange={handleChange}
         placeholder="Email"
-        className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 mt-4"
+        className="mt-4 w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
         required
       />
       <input
         name="password"
         type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        value={formData.password}
+        onChange={handleChange}
         placeholder="Password"
-        className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 my-4"
+        className="my-4 w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
         required
       />
       <FormButton />
-      <div className="text-sm text-stone-400 mt-5">
-        Already have an account?<Link href="/login" className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200">Log in</Link>
+      <div className="mt-5 text-sm text-stone-400">
+        Already have an account?
+        <Link
+          href="/login"
+          className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200"
+        >
+          Log in
+        </Link>
       </div>
     </form>
   );
