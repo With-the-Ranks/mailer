@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import LoadingDots from "@/components/icons/loading-dots";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/lib/actions";
+import FormButton from "@/components/form/form-button";
 
 export default function FormPage() {
   const [formData, setFormData] = useState({
@@ -20,21 +19,6 @@ export default function FormPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  const FormButton = () => (
-    <button
-      type="submit"
-      className={cn(
-        "flex h-8 w-32 items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
-        isSubmitting
-          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300"
-          : "border-black bg-black text-white hover:bg-white hover:text-black dark:border-stone-700 dark:hover:border-stone-200 dark:hover:bg-black dark:hover:text-white dark:active:bg-stone-800",
-      )}
-      disabled={isSubmitting}
-    >
-      {isSubmitting ? <LoadingDots color="#808080" /> : <p>Register</p>}
-    </button>
-  );
 
   return (
     <form
@@ -75,7 +59,7 @@ export default function FormPage() {
         className="my-4 w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
         required
       />
-      <FormButton />
+      <FormButton isSubmitting={isSubmitting} label="Register" />
       <div className="mt-5 text-sm text-stone-400">
         Already have an account?
         <Link
