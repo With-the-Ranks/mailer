@@ -19,7 +19,7 @@ export default function NotFoundSite() {
         className="hidden dark:block"
       />
       <p className="text-lg text-stone-500 dark:text-stone-400">
-        Site does not exist, or you do not have permission to view it
+        Organization does not exist, or you do not have permission to view it
       </p>
     </div>
   );

@@ -40,7 +40,7 @@ export default function CreateSiteModal() {
             va.track("Created Site");
             const { id } = res;
             router.refresh();
-            router.push(`/site/${id}`);
+            router.push(`/organization/${id}`);
             modal?.hide();
             toast.success(`Successfully created site!`);
           }

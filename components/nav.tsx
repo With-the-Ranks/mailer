@@ -77,28 +77,28 @@ export default function Nav({ children }: { children: ReactNode }) {
   }, [segments, id]);
 
   const tabs = useMemo(() => {
-    if (segments[0] === "site" && id) {
+    if (segments[0] === "organization" && id) {
       return [
         {
-          name: "Back to All Sites",
-          href: "/sites",
+          name: "Back to Organization",
+          href: "/organizations",
           icon: <ArrowLeft width={18} />,
         },
         {
           name: "Posts",
-          href: `/site/${id}`,
+          href: `/organization/${id}`,
           isActive: segments.length === 2,
           icon: <Newspaper width={18} />,
         },
         {
           name: "Analytics",
-          href: `/site/${id}/analytics`,
+          href: `/organization/${id}/analytics`,
           isActive: segments.includes("analytics"),
           icon: <BarChart3 width={18} />,
         },
         {
           name: "Settings",
-          href: `/site/${id}/settings`,
+          href: `/organization/${id}/settings`,
           isActive: segments.includes("settings"),
           icon: <Settings width={18} />,
         },
@@ -107,7 +107,7 @@ export default function Nav({ children }: { children: ReactNode }) {
       return [
         {
           name: "Back to All Posts",
-          href: siteId ? `/site/${siteId}` : "/sites",
+          href: siteId ? `/organization/${siteId}` : "/organizations",
           icon: <ArrowLeft width={18} />,
         },
         {
@@ -132,9 +132,9 @@ export default function Nav({ children }: { children: ReactNode }) {
         icon: <LayoutDashboard width={18} />,
       },
       {
-        name: "Sites",
-        href: "/sites",
-        isActive: segments[0] === "sites",
+        name: "Organizations",
+        href: "/organizations",
+        isActive: segments[0] === "organizations",
         icon: <Globe width={18} />,
       },
       {
