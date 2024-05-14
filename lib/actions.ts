@@ -23,7 +23,7 @@ const nanoid = customAlphabet(
 ); // 7-character random string
 
 // User registration function
-export const registerUser = async (formData: FormData) => {
+export const registerUser = async (formData: FormData, organizationId: number) => {
   try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -43,11 +43,44 @@ export const registerUser = async (formData: FormData) => {
       data: {
         email,
         password: hashedPassword,
+        organizationId,
       },
     });
     return { message: "success", user: { email: user.email, id: user.id } };
   } catch (e:any) {
     return { error: "Error creating user.", details: e.message };
+  }
+};
+
+export const registerOrganization = async (formData: FormData) => {
+  try {
+    const name = formData.get("organizationName") as string;
+    const domain = formData.get("domain") as string;
+    const address = formData.get("address") as string;
+
+    const existingOrg = await prisma.organization.findFirst({
+      where: { 
+        name: name
+       }
+    });
+
+    // Add user to existing organization
+    if (existingOrg) {
+      return { message: "success", organization: {id: existingOrg.id, name: existingOrg.name}};  
+    } else {
+      const organization = await prisma.organization.create({
+        data: {
+          name,
+          domain,
+          address,
+        }
+      });
+      return { message: "success", organization: {id: organization.id, name: organization.name}};  
+    }
+  } catch (error: any) {
+    return {
+      error: error.message,
+    };
   }
 };
 

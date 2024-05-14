@@ -27,6 +27,8 @@ model User {
   sessions      Session[]
   sites         Site[]
   posts         Post[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
 }
 
 model Account {
@@ -119,4 +121,12 @@ model Example {
   url           String?
   image         String? @db.Text
   imageBlurhash String? @db.Text
+}
+
+model Organization {
+  id            Int     @id @default(autoincrement())
+  name          String  @unique
+  address       String?
+  domain        String?
+  users         User[]
 }
