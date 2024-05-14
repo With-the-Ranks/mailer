@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import Sites from "@/components/sites";
+import Organizations from "@/components/organizations";
 import PlaceholderCard from "@/components/placeholder-card";
-import CreateSiteButton from "@/components/create-site-button";
-import CreateSiteModal from "@/components/modal/create-site";
+import CreateOrganizationButton from "@/components/create-organization-button";
+import CreateOrganizationModal from "@/components/modal/create-organization";
 
 export default function AllOrganizations({ params }: { params: { id: string } }) {
   return (
@@ -12,9 +12,9 @@ export default function AllOrganizations({ params }: { params: { id: string } })
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             All Organizations
           </h1>
-          <CreateSiteButton>
-            <CreateSiteModal />
-          </CreateSiteButton>
+          <CreateOrganizationButton>
+            <CreateOrganizationModal />
+          </CreateOrganizationButton>
         </div>
         <Suspense
           fallback={
@@ -26,7 +26,7 @@ export default function AllOrganizations({ params }: { params: { id: string } })
           }
         >
           {/* @ts-expect-error Server Component */}
-          <Sites siteId={decodeURIComponent(params.id)} />
+          <Organizations organizationId={decodeURIComponent(params.id)} />
         </Suspense>
       </div>
     </div>

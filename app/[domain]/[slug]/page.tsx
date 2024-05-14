@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { getPostData, getSiteData } from "@/lib/fetchers";
+import { getPostData, getOrganizationData } from "@/lib/fetchers";
 import BlogCard from "@/components/blog-card";
 import BlurImage from "@/components/blur-image";
 import MDX from "@/components/mdx";
@@ -14,11 +14,11 @@ export async function generateMetadata({
   const domain = decodeURIComponent(params.domain);
   const slug = decodeURIComponent(params.slug);
 
-  const [data, siteData] = await Promise.all([
+  const [data, organizationData] = await Promise.all([
     getPostData(domain, slug),
-    getSiteData(domain),
+    getOrganizationData(domain),
   ]);
-  if (!data || !siteData) {
+  if (!data || !organizationData) {
     return null;
   }
   const { title, description } = data;
@@ -47,17 +47,17 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const allPosts = await prisma.post.findMany({
+  const allPosts = await prisma.email.findMany({
     select: {
       slug: true,
-      site: {
+      organization: {
         select: {
           subdomain: true,
           customDomain: true,
         },
       },
     },
-    // feel free to remove this filter if you want to generate paths for all posts
+    // feel free to remove this filter if you want to generate paths for all emails
     // where: {
     //   site: {
     //     subdomain: "demo",
@@ -66,13 +66,13 @@ export async function generateStaticParams() {
   });
 
   const allPaths = allPosts
-    .flatMap(({ site, slug }) => [
-      site?.subdomain && {
-        domain: `${site.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    .flatMap(({ organization, slug }) => [
+      organization?.subdomain && {
+        domain: `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
         slug,
       },
-      site?.customDomain && {
-        domain: site.customDomain,
+      organization?.customDomain && {
+        domain: organization.customDomain,
         slug,
       },
     ])
@@ -81,7 +81,7 @@ export async function generateStaticParams() {
   return allPaths;
 }
 
-export default async function SitePostPage({
+export default async function OrganizationPostPage({
   params,
 }: {
   params: { domain: string; slug: string };
@@ -110,31 +110,20 @@ export default async function SitePostPage({
         </div>
         <a
           // if you are using Github OAuth, you can get rid of the Twitter option
-          href={
-            data.site?.user?.username
-              ? `https://twitter.com/${data.site.user.username}`
-              : `https://github.com/${data.site?.user?.gh_username}`
-          }
+          href="#"
           rel="noreferrer"
           target="_blank"
         >
           <div className="my-8">
             <div className="relative inline-block h-8 w-8 overflow-hidden rounded-full align-middle md:h-12 md:w-12">
-              {data.site?.user?.image ? (
-                <BlurImage
-                  alt={data.site?.user?.name ?? "User Avatar"}
-                  height={80}
-                  src={data.site.user.image}
-                  width={80}
-                />
-              ) : (
+               (
                 <div className="absolute flex h-full w-full select-none items-center justify-center bg-stone-100 text-4xl text-stone-500">
                   ?
                 </div>
-              )}
+              )
             </div>
             <div className="text-md ml-3 inline-block align-middle dark:text-white md:text-lg">
-              by <span className="font-semibold">{data.site?.user?.name}</span>
+              by <span className="font-semibold">User Name</span>
             </div>
           </div>
         </a>

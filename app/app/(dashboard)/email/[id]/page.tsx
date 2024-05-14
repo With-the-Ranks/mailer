@@ -3,17 +3,17 @@ import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Editor from "@/components/editor";
 
-export default async function PostPage({ params }: { params: { id: string } }) {
+export default async function EmailPage({ params }: { params: { id: string } }) {
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
-  const data = await prisma.post.findUnique({
+  const data = await prisma.email.findUnique({
     where: {
       id: decodeURIComponent(params.id),
     },
     include: {
-      site: {
+      organization: {
         select: {
           subdomain: true,
         },
@@ -24,5 +24,5 @@ export default async function PostPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  return <Editor post={data} />;
+  return <Editor email={data} />;
 }
