@@ -297,6 +297,7 @@ export const createEmail = withOrgAuth(async (_: FormData, organization: Organiz
 // creating a separate function for this because we're not using FormData
 export const updateEmail = async (data: Email) => {
   const session = await getSession();
+  console.log(data);
   if (!session?.user.id) {
     return {
       error: "Not authenticated",
@@ -324,6 +325,7 @@ export const updateEmail = async (data: Email) => {
         title: data.title,
         description: data.description,
         content: data.content,
+        emailsTo: data.emailsTo,
       },
     });
 

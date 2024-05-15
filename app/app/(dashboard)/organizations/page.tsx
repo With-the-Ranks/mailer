@@ -5,10 +5,10 @@ import PlaceholderCard from "@/components/placeholder-card";
 import CreateOrganizationButton from "@/components/create-organization-button";
 import CreateOrganizationModal from "@/components/modal/create-organization";
 
-export default async function AllOrganizations({ params, limit }: { params: { id: string }, limit?: number }) {
+export default async function AllOrganizations({ params }: { params: { id: string, limit?: number  }}) {
   const session = await getSession();
 
-  const organizations = await prisma.organization.findMany({
+  const organizations = await prisma!.organization.findMany({
     where: {
       users: {
         some: {
@@ -21,7 +21,7 @@ export default async function AllOrganizations({ params, limit }: { params: { id
     orderBy: {
       createdAt: "asc",
     },
-    ...(limit ? { take: limit } : {}),
+    ...(params.limit ? { take: params.limit } : {}),
   });
 
   return (

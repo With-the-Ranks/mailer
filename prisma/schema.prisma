@@ -74,6 +74,7 @@ model VerificationToken {
 model Email {
   id             String        @id @default(cuid())
   title          String?       @db.Text
+  emailsTo       String[]
   description    String?       @db.Text
   content        String?       @db.Text
   slug           String        @default(cuid())

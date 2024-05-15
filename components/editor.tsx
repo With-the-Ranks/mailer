@@ -9,6 +9,18 @@ import { cn } from "@/lib/utils";
 import LoadingDots from "./icons/loading-dots";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { ReactMultiEmail } from "react-multi-email";
+import 'react-multi-email/dist/style.css';
+
+
+const styles = {
+  fontFamily: "sans-serif",
+  width: "500px",
+  border: "1px solid #eee",
+  background: "#f3f3f3",
+  padding: "25px",
+  margin: "20px"
+};
 
 type EmailWithSite = Email & { organization: { subdomain: string | null } | null };
 
@@ -28,7 +40,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       if (e.metaKey && e.key === "s") {
         e.preventDefault();
         startTransitionSaving(async () => {
-          await updateEmail(data);
+          const response = await updateEmail(data);
+          console.log(response);
         });
       }
     };
@@ -96,12 +109,34 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           onChange={(e) => setData({ ...data, title: e.target.value })}
           className="dark:placeholder-text-600 border-none px-0 font-cal text-3xl placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
         />
-        <TextareaAutosize
+        <ReactMultiEmail
+          style={styles}
+          placeholder="Input your Email Address"
+          emails={email.emailsTo}
+          onChange={(_emails: string[]) => {
+            setData({ ...data, emailsTo: _emails });
+          }}
+          getLabel={(
+            email: string,
+            index: number,
+            removeEmail: (index: number) => void
+          ) => {
+            return (
+              <div data-tag key={index}>
+                {email}
+                <span data-tag-handle onClick={() => removeEmail(index)}>
+                  ×
+                </span>
+              </div>
+            );
+          }}
+        />
+        {/* <TextareaAutosize
           placeholder="Description"
           defaultValue={email?.description || ""}
           onChange={(e) => setData({ ...data, description: e.target.value })}
           className="dark:placeholder-text-600 w-full resize-none border-none px-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
-        />
+        /> */}
       </div>
       <NovelEditor
         className="relative block"
@@ -116,6 +151,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           if (
             data.title === email.title &&
             data.description === email.description &&
+            data.emailsTo === email.emailsTo &&
             data.content === email.content
           ) {
             return;
