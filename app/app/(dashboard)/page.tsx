@@ -34,6 +34,7 @@ export default function Overview() {
             </div>
           }
         >
+          {/* @ts-expect-error Server Component */}
           <Organizations limit={4} />
         </Suspense>
       </div>

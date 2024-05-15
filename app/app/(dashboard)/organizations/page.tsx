@@ -1,20 +1,41 @@
+import { getSession } from "@/lib/auth";
 import { Suspense } from "react";
 import Organizations from "@/components/organizations";
 import PlaceholderCard from "@/components/placeholder-card";
 import CreateOrganizationButton from "@/components/create-organization-button";
 import CreateOrganizationModal from "@/components/modal/create-organization";
 
-export default function AllOrganizations({ params }: { params: { id: string } }) {
+export default async function AllOrganizations({ params, limit }: { params: { id: string }, limit?: number }) {
+  const session = await getSession();
+
+  const organizations = await prisma.organization.findMany({
+    where: {
+      users: {
+        some: {
+          id: {
+            in: [session!.user.id as string]
+          }
+        }
+      } 
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    ...(limit ? { take: limit } : {}),
+  });
+
   return (
     <div className="flex max-w-screen-xl flex-col space-y-12 p-8">
       <div className="flex flex-col space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="font-cal text-3xl font-bold dark:text-white">
-            All Organizations
+            Your Organization
           </h1>
-          <CreateOrganizationButton>
-            <CreateOrganizationModal />
-          </CreateOrganizationButton>
+          { organizations.length === 0 && 
+            <CreateOrganizationButton>
+              <CreateOrganizationModal />
+            </CreateOrganizationButton>
+          }
         </div>
         <Suspense
           fallback={
@@ -26,7 +47,7 @@ export default function AllOrganizations({ params }: { params: { id: string } })
           }
         >
           {/* @ts-expect-error Server Component */}
-          <Organizations organizationId={decodeURIComponent(params.id)} />
+          <Organizations organizations={organizations} organizationId={decodeURIComponent(params.id)} />
         </Suspense>
       </div>
     </div>
