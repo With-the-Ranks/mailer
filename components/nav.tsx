@@ -77,28 +77,28 @@ export default function Nav({ children }: { children: ReactNode }) {
   }, [segments, id]);
 
   const tabs = useMemo(() => {
-    if (segments[0] === "site" && id) {
+    if (segments[0] === "organization" && id) {
       return [
         {
-          name: "Back to All Sites",
-          href: "/sites",
+          name: "Back to Organization",
+          href: "/organizations",
           icon: <ArrowLeft width={18} />,
         },
         {
           name: "Posts",
-          href: `/site/${id}`,
+          href: `/organization/${id}`,
           isActive: segments.length === 2,
           icon: <Newspaper width={18} />,
         },
         {
           name: "Analytics",
-          href: `/site/${id}/analytics`,
+          href: `/organization/${id}/analytics`,
           isActive: segments.includes("analytics"),
           icon: <BarChart3 width={18} />,
         },
         {
           name: "Settings",
-          href: `/site/${id}/settings`,
+          href: `/organization/${id}/settings`,
           isActive: segments.includes("settings"),
           icon: <Settings width={18} />,
         },
@@ -107,7 +107,7 @@ export default function Nav({ children }: { children: ReactNode }) {
       return [
         {
           name: "Back to All Posts",
-          href: siteId ? `/site/${siteId}` : "/sites",
+          href: siteId ? `/organization/${siteId}` : "/organizations",
           icon: <ArrowLeft width={18} />,
         },
         {
@@ -132,9 +132,9 @@ export default function Nav({ children }: { children: ReactNode }) {
         icon: <LayoutDashboard width={18} />,
       },
       {
-        name: "Sites",
-        href: "/sites",
-        isActive: segments[0] === "sites",
+        name: "Organizations",
+        href: "/organizations",
+        isActive: segments[0] === "organizations",
         icon: <Globe width={18} />,
       },
       {
@@ -175,26 +175,6 @@ export default function Nav({ children }: { children: ReactNode }) {
       >
         <div className="grid gap-2">
           <div className="flex items-center space-x-2 rounded-lg px-2 py-1.5">
-            <a
-              href="https://vercel.com/templates/next.js/platforms-starter-kit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg p-1.5 hover:bg-stone-200 dark:hover:bg-stone-700"
-            >
-              <svg
-                width="26"
-                viewBox="0 0 76 65"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-black dark:text-white"
-              >
-                <path
-                  d="M37.5274 0L75.0548 65H0L37.5274 0Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </a>
-            <div className="h-6 rotate-[30deg] border-l border-stone-400 dark:border-stone-500" />
             <Link
               href="/"
               className="rounded-lg p-2 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -224,7 +204,7 @@ export default function Nav({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div>
-          <div className="grid gap-1">
+          {/* <div className="grid gap-1">
             {externalLinks.map(({ name, href, icon }) => (
               <a
                 key={name}
@@ -240,7 +220,7 @@ export default function Nav({ children }: { children: ReactNode }) {
                 <p>↗</p>
               </a>
             ))}
-          </div>
+          </div> */}
           <div className="my-2 border-t border-stone-200 dark:border-stone-700" />
           {children}
         </div>

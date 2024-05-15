@@ -22,7 +22,7 @@ export default function DeleteSiteForm({ siteName }: { siteName: string }) {
             } else {
               va.track("Deleted Site");
               router.refresh();
-              router.push("/sites");
+              router.push("/organizations");
               toast.success(`Successfully deleted site!`);
             }
           })

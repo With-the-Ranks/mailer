@@ -50,24 +50,17 @@ export default async function middleware(req: NextRequest) {
       new URL(`/app${path === "/" ? "" : path}`, req.url),
     );
   }
-
-  // special case for `vercel.pub` domain
-  if (hostname === "vercel.pub") {
-    return NextResponse.redirect(
-      "https://vercel.com/blog/platforms-starter-kit",
-    );
-  }
-
-  // rewrite root application to `/home` folder
+  // Update this block to rewrite root application to `/login` instead of `/home`
   if (
     hostname === "localhost:3000" ||
     hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN
   ) {
-    return NextResponse.rewrite(
-      new URL(`/home${path === "/" ? "" : path}`, req.url),
-    );
+    if (path === "/") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    } else {
+      return NextResponse.rewrite(new URL(`/home${path}`, req.url));
+    }
   }
-
   // rewrite everything else to `/[domain]/[slug] dynamic route
   return NextResponse.rewrite(new URL(`/${hostname}${path}`, req.url));
 }
