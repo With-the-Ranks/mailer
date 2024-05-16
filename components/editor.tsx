@@ -41,7 +41,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         e.preventDefault();
         startTransitionSaving(async () => {
           const response = await updateEmail(data);
-          console.log(response);
         });
       }
     };
