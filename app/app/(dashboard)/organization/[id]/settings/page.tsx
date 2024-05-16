@@ -1,14 +1,14 @@
 import prisma from "@/lib/prisma";
 import Form from "@/components/form";
-import { updateSite } from "@/lib/actions";
-import DeleteSiteForm from "@/components/form/delete-site-form";
+import { updateOrganization } from "@/lib/actions";
+import DeleteOrganizationForm from "@/components/form/delete-organization-form";
 
-export default async function SiteSettingsIndex({
+export default async function OrganizationSettingsIndex({
   params,
 }: {
   params: { id: string };
 }) {
-  const data = await prisma.site.findUnique({
+  const data = await prisma.organization.findUnique({
     where: {
       id: decodeURIComponent(params.id),
     },
@@ -27,7 +27,7 @@ export default async function SiteSettingsIndex({
           placeholder: "My Campaign Organization",
           maxLength: 32,
         }}
-        handleSubmit={updateSite}
+        handleSubmit={updateOrganization}
       />
 
       <Form
@@ -40,10 +40,10 @@ export default async function SiteSettingsIndex({
           defaultValue: data?.description!,
           placeholder: "An organzation with great email campaign tool.",
         }}
-        handleSubmit={updateSite}
+        handleSubmit={updateOrganization}
       />
 
-      <DeleteSiteForm siteName={data?.name!} />
+      <DeleteOrganizationForm organizationName={data?.name!} />
     </div>
   );
 }

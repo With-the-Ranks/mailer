@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSite } from "@/lib/actions";
+import { createOrganization } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { useModal } from "./provider";
 import va from "@vercel/analytics";
 import { useEffect, useState } from "react";
 
-export default function CreateSiteModal() {
+export default function CreateOrganizationModal() {
   const router = useRouter();
   const modal = useModal();
 
@@ -33,7 +33,7 @@ export default function CreateSiteModal() {
   return (
     <form
       action={async (data: FormData) =>
-        createSite(data).then((res: any) => {
+        createOrganization(data).then((res: any) => {
           if (res.error) {
             toast.error(res.error);
           } else {
@@ -42,14 +42,14 @@ export default function CreateSiteModal() {
             router.refresh();
             router.push(`/organization/${id}`);
             modal?.hide();
-            toast.success(`Successfully created site!`);
+            toast.success(`Successfully created organization!`);
           }
         })
       }
       className="w-full rounded-md bg-white dark:bg-black md:max-w-md md:border md:border-stone-200 md:shadow dark:md:border-stone-700"
     >
       <div className="relative flex flex-col space-y-4 p-5 md:p-10">
-        <h2 className="font-cal text-2xl dark:text-white">Create a new site</h2>
+        <h2 className="font-cal text-2xl dark:text-white">Create a new organization</h2>
 
         <div className="flex flex-col space-y-2">
           <label
@@ -106,7 +106,7 @@ export default function CreateSiteModal() {
           </label>
           <textarea
             name="description"
-            placeholder="Description about why my site is so awesome"
+            placeholder="Description about why my organization is so awesome"
             value={data.description}
             onChange={(e) => setData({ ...data, description: e.target.value })}
             maxLength={140}

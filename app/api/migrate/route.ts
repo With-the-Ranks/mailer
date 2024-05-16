@@ -12,21 +12,21 @@ export async function GET() {
   //   Download data from old database
   //  const users = await prisma.user.findMany();
   //  const accounts = await prisma.account.findMany();
-  //  const sites = await prisma.site.findMany();
-  //  const posts = await prisma.post.findMany();
+  //  const organizations = await prisma.organization.findMany();
+  //  const emails = await prisma.email.findMany();
   //  const examples = await prisma.example.findMany();
 
   //  fs.writeFileSync("users.json", JSON.stringify(users));
   //  fs.writeFileSync("accounts.json", JSON.stringify(accounts));
-  //   fs.writeFileSync("sites.json", JSON.stringify(sites));
-  //   fs.writeFileSync("posts.json", JSON.stringify(posts));
+  //   fs.writeFileSync("organizations.json", JSON.stringify(organizations));
+  //   fs.writeFileSync("emails.json", JSON.stringify(emails));
   //   fs.writeFileSync("examples.json", JSON.stringify(examples));
 
   // Upload data to new database
   //   const users = JSON.parse(fs.readFileSync("users.json", "utf8"));
   //   const accounts = JSON.parse(fs.readFileSync("accounts.json", "utf8"));
-  //   const sites = JSON.parse(fs.readFileSync("sites.json", "utf8"));
-  //   const posts = JSON.parse(fs.readFileSync("posts.json", "utf8"));
+  //   const organizations = JSON.parse(fs.readFileSync("organizations.json", "utf8"));
+  //   const emails = JSON.parse(fs.readFileSync("emails.json", "utf8"));
   //   const examples = JSON.parse(fs.readFileSync("examples.json", "utf8"));
 
   //   const response = await Promise.all([
@@ -38,12 +38,12 @@ export async function GET() {
   //       data: accounts,
   //       skipDuplicates: true,
   //     }),
-  //     prisma.site.createMany({
-  //       data: sites,
+  //     prisma.organization.createMany({
+  //       data: organizations,
   //       skipDuplicates: true,
   //     }),
-  //     prisma.post.createMany({
-  //       data: posts,
+  //     prisma.email.createMany({
+  //       data: emails,
   //       skipDuplicates: true,
   //     }),
   //   prisma.example.createMany({

@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import AnalyticsMockup from "@/components/analytics";
 
-export default async function SiteAnalytics({
+export default async function OrganizationAnalytics({
   params,
 }: {
   params: { id: string };
@@ -12,12 +12,19 @@ export default async function SiteAnalytics({
   if (!session) {
     redirect("/login");
   }
-  const data = await prisma.site.findUnique({
+  const data = await prisma.organization.findUnique({
     where: {
       id: decodeURIComponent(params.id),
+      users: {
+        some: {
+          id: {
+            in: [session!.user.id as string]
+          }
+        }
+      } 
     },
   });
-  if (!data || data.userId !== session.user.id) {
+  if (!data) {
     notFound();
   }
 
