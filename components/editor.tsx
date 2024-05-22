@@ -1,26 +1,38 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Post } from "@prisma/client";
-import { updatePost, updatePostMetadata } from "@/lib/actions";
+import { Email } from "@prisma/client";
+import { updateEmail, updatePostMetadata } from "@/lib/actions";
 import { Editor as NovelEditor } from "novel";
 import TextareaAutosize from "react-textarea-autosize";
 import { cn } from "@/lib/utils";
 import LoadingDots from "./icons/loading-dots";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { ReactMultiEmail } from "react-multi-email";
+import 'react-multi-email/dist/style.css';
 
-type PostWithSite = Post & { site: { subdomain: string | null } | null };
 
-export default function Editor({ post }: { post: PostWithSite }) {
+const styles = {
+  fontFamily: "sans-serif",
+  width: "500px",
+  border: "1px solid #eee",
+  background: "#f3f3f3",
+  padding: "25px",
+  margin: "20px"
+};
+
+type EmailWithSite = Email & { organization: { subdomain: string | null } | null };
+
+export default function Editor({ email }: { email: EmailWithSite }) {
   let [isPendingSaving, startTransitionSaving] = useTransition();
   let [isPendingPublishing, startTransitionPublishing] = useTransition();
-  const [data, setData] = useState<PostWithSite>(post);
+  const [data, setData] = useState<EmailWithSite>(email);
   const [hydrated, setHydrated] = useState(false);
 
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
-    ? `https://${data.site?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
-    : `http://${data.site?.subdomain}.localhost:3000/${data.slug}`;
+    ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
+    : `http://${data.organization?.subdomain}.localhost:3000/${data.slug}`;
 
   // listen to CMD + S and override the default behavior
   useEffect(() => {
@@ -28,7 +40,7 @@ export default function Editor({ post }: { post: PostWithSite }) {
       if (e.metaKey && e.key === "s") {
         e.preventDefault();
         startTransitionSaving(async () => {
-          await updatePost(data);
+          const response = await updateEmail(data);
         });
       }
     };
@@ -60,12 +72,12 @@ export default function Editor({ post }: { post: PostWithSite }) {
             console.log(data.published, typeof data.published);
             formData.append("published", String(!data.published));
             startTransitionPublishing(async () => {
-              await updatePostMetadata(formData, post.id, "published").then(
+              await updatePostMetadata(formData, email.id, "published").then(
                 () => {
                   toast.success(
                     `Successfully ${
                       data.published ? "unpublished" : "published"
-                    } your post.`,
+                    } your email.`,
                   );
                   setData((prev) => ({ ...prev, published: !prev.published }));
                 },
@@ -91,21 +103,43 @@ export default function Editor({ post }: { post: PostWithSite }) {
         <input
           type="text"
           placeholder="Title"
-          defaultValue={post?.title || ""}
+          defaultValue={email?.title || ""}
           autoFocus
           onChange={(e) => setData({ ...data, title: e.target.value })}
           className="dark:placeholder-text-600 border-none px-0 font-cal text-3xl placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
         />
-        <TextareaAutosize
+        <ReactMultiEmail
+          style={styles}
+          placeholder="Input your Email Address"
+          emails={email.emailsTo}
+          onChange={(_emails: string[]) => {
+            setData({ ...data, emailsTo: _emails });
+          }}
+          getLabel={(
+            email: string,
+            index: number,
+            removeEmail: (index: number) => void
+          ) => {
+            return (
+              <div data-tag key={index}>
+                {email}
+                <span data-tag-handle onClick={() => removeEmail(index)}>
+                  ×
+                </span>
+              </div>
+            );
+          }}
+        />
+        {/* <TextareaAutosize
           placeholder="Description"
-          defaultValue={post?.description || ""}
+          defaultValue={email?.description || ""}
           onChange={(e) => setData({ ...data, description: e.target.value })}
           className="dark:placeholder-text-600 w-full resize-none border-none px-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
-        />
+        /> */}
       </div>
       <NovelEditor
         className="relative block"
-        defaultValue={post?.content || undefined}
+        defaultValue={email?.content || undefined}
         onUpdate={(editor) => {
           setData((prev) => ({
             ...prev,
@@ -114,14 +148,15 @@ export default function Editor({ post }: { post: PostWithSite }) {
         }}
         onDebouncedUpdate={() => {
           if (
-            data.title === post.title &&
-            data.description === post.description &&
-            data.content === post.content
+            data.title === email.title &&
+            data.description === email.description &&
+            data.emailsTo === email.emailsTo &&
+            data.content === email.content
           ) {
             return;
           }
           startTransitionSaving(async () => {
-            await updatePost(data);
+            await updateEmail(data);
           });
         }}
       />

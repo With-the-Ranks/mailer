@@ -120,10 +120,10 @@ export function getSession() {
   } | null>;
 }
 
-export function withSiteAuth(action: any) {
+export function withOrgAuth(action: any) {
   return async (
     formData: FormData | null,
-    siteId: string,
+    organizationId: string,
     key: string | null,
   ) => {
     const session = await getSession();
@@ -132,25 +132,32 @@ export function withSiteAuth(action: any) {
         error: "Not authenticated",
       };
     }
-    const site = await prisma.site.findUnique({
+    const organization = await prisma.organization.findUnique({
       where: {
-        id: siteId,
+        id: organizationId,
+        users: {
+          some: {
+            id: {
+              in: [session.user.id as string]
+            }
+          }
+        }   
       },
     });
-    if (!site || site.userId !== session.user.id) {
+    if (!organization) {
       return {
         error: "Not authorized",
       };
     }
 
-    return action(formData, site, key);
+    return action(formData, organization, key);
   };
 }
 
-export function withPostAuth(action: any) {
+export function withEmailAuth(action: any) {
   return async (
     formData: FormData | null,
-    postId: string,
+    emailId: string,
     key: string | null,
   ) => {
     const session = await getSession();
@@ -159,20 +166,20 @@ export function withPostAuth(action: any) {
         error: "Not authenticated",
       };
     }
-    const post = await prisma.post.findUnique({
+    const email = await prisma.email.findUnique({
       where: {
-        id: postId,
+        id: emailId,
       },
       include: {
-        site: true,
+        organization: true,
       },
     });
-    if (!post || post.userId !== session.user.id) {
+    if (!email || email.userId !== session.user.id) {
       return {
-        error: "Post not found",
+        error: "Email not found",
       };
     }
 
-    return action(formData, post, key);
+    return action(formData, email, key);
   };
 }
