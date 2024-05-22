@@ -56,7 +56,8 @@ export default async function middleware(req: NextRequest) {
     hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN
   ) {
     if (path === "/") {
-      return NextResponse.redirect(new URL("/login", req.url));
+      const appUrl = req.url.replace(hostname, `app.${hostname}`);
+      return NextResponse.redirect(new URL("/login", appUrl));
     } else {
       return NextResponse.rewrite(new URL(`/home${path}`, req.url));
     }
