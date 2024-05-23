@@ -4,11 +4,12 @@ import Organizations from "@/components/organizations";
 import PlaceholderCard from "@/components/placeholder-card";
 import CreateOrganizationButton from "@/components/create-organization-button";
 import CreateOrganizationModal from "@/components/modal/create-organization";
+import prisma from "@/lib/prisma";
 
 export default async function AllOrganizations({ params }: { params: { id: string, limit?: number  }}) {
   const session = await getSession();
 
-  const organizations = await prisma!.organization.findMany({
+  const organizations = await prisma.organization.findMany({
     where: {
       users: {
         some: {
