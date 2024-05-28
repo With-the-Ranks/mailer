@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { Email, Organization } from "@prisma/client";
 import { revalidateTag } from "next/cache";
-import { withEmailAuth, withOrgAuth } from "./auth";
+import { withEmailAuth, withOrgAuth } from "../auth";
 import { getSession } from "@/lib/auth";
 import {
   addDomainToVercel,
