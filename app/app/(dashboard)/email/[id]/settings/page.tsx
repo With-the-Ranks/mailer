@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Form from "@/components/form";
 import { updatePostMetadata } from "@/lib/actions";
-import DeletePostForm from "@/components/form/delete-post-form";
+import DeleteEmailForm from "@/components/form/delete-email-form";
 
 export default async function PostSettings({
   params,
@@ -14,7 +14,7 @@ export default async function PostSettings({
   if (!session) {
     redirect("/login");
   }
-  const data = await prisma.post.findUnique({
+  const data = await prisma.email.findUnique({
     where: {
       id: decodeURIComponent(params.id),
     },
@@ -31,7 +31,7 @@ export default async function PostSettings({
         <Form
           title="Post Slug"
           description="The slug is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens."
-          helpText="Please use a slug that is unique to this post."
+          helpText="Please use a slug that is unique to this email."
           inputAttrs={{
             name: "slug",
             type: "text",
@@ -43,7 +43,7 @@ export default async function PostSettings({
 
         <Form
           title="Thumbnail image"
-          description="The thumbnail image for your post. Accepted formats: .png, .jpg, .jpeg"
+          description="The thumbnail image for your email. Accepted formats: .png, .jpg, .jpeg"
           helpText="Max file size 50MB. Recommended size 1200x630."
           inputAttrs={{
             name: "image",
@@ -53,7 +53,7 @@ export default async function PostSettings({
           handleSubmit={updatePostMetadata}
         />
 
-        <DeletePostForm postName={data?.title!} />
+        <DeleteEmailForm emailName={data?.title!} />
       </div>
     </div>
   );

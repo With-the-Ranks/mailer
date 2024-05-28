@@ -1,51 +1,52 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import PostCard from "./post-card";
+import { Email } from "@prisma/client";
+import EmailCard from "./email-card";
 import Image from "next/image";
 
-export default async function Posts({
-  siteId,
+export default async function Emails({
+  organizationId,
   limit,
 }: {
-  siteId?: string;
+  organizationId?: string;
   limit?: number;
 }) {
   const session = await getSession();
   if (!session?.user) {
     redirect("/login");
   }
-  const posts = await prisma.post.findMany({
+  const emails = await prisma.email.findMany({
     where: {
-      userId: session.user.id as string,
-      ...(siteId ? { siteId } : {}),
+      userId: session!.user.id as string,
+      ...(organizationId ? { organizationId } : {}),
     },
     orderBy: {
       updatedAt: "desc",
     },
     include: {
-      site: true,
+      organization: true,
     },
     ...(limit ? { take: limit } : {}),
   });
 
-  return posts.length > 0 ? (
+  return emails.length > 0 ? (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {posts.map((post) => (
-        <PostCard key={post.id} data={post} />
+      {emails.map((email: Email) => (
+        <EmailCard key={email.id} data={email} />
       ))}
     </div>
   ) : (
     <div className="flex flex-col items-center space-x-4">
       <h1 className="font-cal text-4xl">No Posts Yet</h1>
       <Image
-        alt="missing post"
+        alt="missing email"
         src="https://illustrations.popsy.co/gray/graphic-design.svg"
         width={400}
         height={400}
       />
       <p className="text-lg text-stone-500">
-        You do not have any posts yet. Create one to get started.
+        You do not have any emails yet. Create one to get started.
       </p>
     </div>
   );

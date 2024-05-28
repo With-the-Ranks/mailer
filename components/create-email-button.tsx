@@ -1,13 +1,13 @@
 "use client";
 
 import { useTransition } from "react";
-import { createPost } from "@/lib/actions";
+import { createEmail } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import LoadingDots from "@/components/icons/loading-dots";
 import va from "@vercel/analytics";
 
-export default function CreatePostButton() {
+export default function CreateEmailButton() {
   const router = useRouter();
   const { id } = useParams() as { id: string };
   const [isPending, startTransition] = useTransition();
@@ -16,10 +16,10 @@ export default function CreatePostButton() {
     <button
       onClick={() =>
         startTransition(async () => {
-          const post = await createPost(null, id, null);
-          va.track("Created Post");
+          const email = await createEmail(null, id, null);
+          va.track("Created Email");
           router.refresh();
-          router.push(`/post/${post.id}`);
+          router.push(`/email/${email.id}`);
         })
       }
       className={cn(
@@ -30,7 +30,7 @@ export default function CreatePostButton() {
       )}
       disabled={isPending}
     >
-      {isPending ? <LoadingDots color="#808080" /> : <p>Create New Post</p>}
+      {isPending ? <LoadingDots color="#808080" /> : <p>Create New Email</p>}
     </button>
   );
 }
