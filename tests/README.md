@@ -18,4 +18,4 @@
 ## Test Locations
 
 - E2E tests should go in this folder
-- Unit tests should go in the same folder as what they're testing (ex. see )
+- Unit tests should go in the same folder as what they're testing (ex. see [`components/form/form-button.test.tsx`](https://github.com/With-the-Ranks/intrepid-email/blob/715e9dddf9b55cbc050c2fd85f02942ebebfdede/components/form/form-button.test.tsx) )
