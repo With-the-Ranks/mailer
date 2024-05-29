@@ -3,15 +3,14 @@
 import { useEffect, useState, useTransition } from "react";
 import { Email } from "@prisma/client";
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
-import { Editor as NovelEditor } from "novel";
-import TextareaAutosize from "react-textarea-autosize";
+import NovelEditor from "./novel-editor";
 import { cn } from "@/lib/utils";
 import LoadingDots from "./icons/loading-dots";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { ReactMultiEmail } from "react-multi-email";
+import Select from 'react-select';
 import 'react-multi-email/dist/style.css';
-
 
 const styles = {
   fontFamily: "sans-serif",
@@ -22,7 +21,7 @@ const styles = {
   margin: "20px"
 };
 
-type EmailWithSite = Email & { organization: { subdomain: string | null } | null };
+export type EmailWithSite = Email & { organization: { subdomain: string | null } | null };
 
 export default function Editor({ email }: { email: EmailWithSite }) {
   let [isPendingSaving, startTransitionSaving] = useTransition();
@@ -40,7 +39,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       if (e.metaKey && e.key === "s") {
         e.preventDefault();
         startTransitionSaving(async () => {
-          const response = await updateEmail(data);
+          const response = await updateEmail(data, false);
         });
       }
     };
@@ -48,7 +47,16 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [data, startTransitionSaving]);
+  }, [data]);
+
+  const selectOptions = [
+    {value: 'fundraising', label: 'Fundraising'},
+    {value: 'signup', label: 'Signup'}
+  ];
+  const selectDict = {
+    'fundraising': {value: 'fundraising', label: 'Fundraising'},
+    'signup': {value: 'signup', label: 'Signup'}
+  }
 
   return (
     <div className="relative min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
@@ -136,29 +144,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           onChange={(e) => setData({ ...data, description: e.target.value })}
           className="dark:placeholder-text-600 w-full resize-none border-none px-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
         /> */}
+        <Select 
+          defaultValue={selectDict[data.template || 'fundraising']}
+          options={selectOptions}
+          onChange={(value,_) => setData({ ...data, template: value.value })}
+        />
       </div>
       <NovelEditor
-        className="relative block"
-        defaultValue={email?.content || undefined}
-        onUpdate={(editor) => {
-          setData((prev) => ({
-            ...prev,
-            content: editor?.storage.markdown.getMarkdown(),
-          }));
-        }}
-        onDebouncedUpdate={() => {
-          if (
-            data.title === email.title &&
-            data.description === email.description &&
-            data.emailsTo === email.emailsTo &&
-            data.content === email.content
-          ) {
-            return;
-          }
-          startTransitionSaving(async () => {
-            await updateEmail(data);
-          });
-        }}
+        email={email}
       />
     </div>
   );

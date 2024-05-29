@@ -265,9 +265,8 @@ export const createEmail = withOrgAuth(async (_: FormData, organization: Organiz
 });
 
 // creating a separate function for this because we're not using FormData
-export const updateEmail = async (data: Email) => {
+export const updateEmail = async (submitData: Email, onlyUpdateContent: boolean) => {
   const session = await getSession();
-  console.log(data);
   if (!session?.user.id) {
     return {
       error: "Not authenticated",
@@ -275,7 +274,7 @@ export const updateEmail = async (data: Email) => {
   }
   const email = await prisma.email.findUnique({
     where: {
-      id: data.id,
+      id: submitData.id,
     },
     include: {
       organization: true,
@@ -287,16 +286,25 @@ export const updateEmail = async (data: Email) => {
     };
   }
   try {
+    let data = {}
+    if (onlyUpdateContent) {
+      data = {
+        content: submitData.content
+      }
+    } else {
+      data = {
+        title: submitData.title,
+        description: submitData.description,
+        content: submitData.content,
+        emailsTo: submitData.emailsTo,
+        template: submitData.template
+      };
+    }
     const response = await prisma.email.update({
       where: {
-        id: data.id,
+        id: submitData.id,
       },
-      data: {
-        title: data.title,
-        description: data.description,
-        content: data.content,
-        emailsTo: data.emailsTo,
-      },
+      data
     });
 
     await revalidateTag(

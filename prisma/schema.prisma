@@ -87,6 +87,7 @@ model Email {
   organizationId String?
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId         String?
+  template       String?       @db.Text
 
   @@unique([slug, organizationId])
   @@index([organizationId])
