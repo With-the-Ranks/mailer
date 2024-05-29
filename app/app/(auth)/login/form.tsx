@@ -32,10 +32,10 @@ function SignInForm() {
 
         if (result?.error) {
           toast.error(`Login Failed: ${result.error}`);
-          setIsSubmitting(false); 
+          setIsSubmitting(false);
         } else {
           toast.success("Login Successful");
-          router.push("/"); 
+          router.push("/");
         }
       }}
     >

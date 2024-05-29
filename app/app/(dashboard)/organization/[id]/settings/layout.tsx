@@ -21,10 +21,10 @@ export default async function OrganizationAnalyticsLayout({
       users: {
         some: {
           id: {
-            in: [session!.user.id as string]
-          }
-        }
-      } 
+            in: [session!.user.id as string],
+          },
+        },
+      },
     },
   });
 
@@ -37,7 +37,7 @@ export default async function OrganizationAnalyticsLayout({
   return (
     <>
       <div className="flex flex-col items-center space-x-4 space-y-2 sm:flex-row sm:space-y-0">
-        <h1 className="font-cal text-xl font-bold dark:text-white sm:text-3xl">
+        <h1 className="font-cal text-xl font-bold sm:text-3xl dark:text-white">
           Settings for {data.name}
         </h1>
         <a

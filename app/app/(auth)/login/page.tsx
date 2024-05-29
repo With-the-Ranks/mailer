@@ -2,11 +2,11 @@ import Image from "next/image";
 import LoginButton from "./login-button";
 import { Suspense } from "react";
 import Link from "next/link";
-import SignInForm from "./form"; 
+import SignInForm from "./form";
 
 export default function LoginPage() {
   return (
-    <div className="mx-5 border border-stone-200 py-10 dark:border-stone-700 sm:mx-auto sm:w-full sm:max-w-md sm:rounded-lg sm:shadow-md">
+    <div className="mx-5 border border-stone-200 py-10 sm:mx-auto sm:w-full sm:max-w-md sm:rounded-lg sm:shadow-md dark:border-stone-700">
       <Image
         alt="Intrepid Email Campaign"
         width={100}
@@ -18,13 +18,20 @@ export default function LoginPage() {
         Intrepid Email Campaign
       </h1>
       <p className="mt-2 text-center text-sm text-stone-600 dark:text-stone-400">
-        Build engaging email campaigns.<br />
+        Build engaging email campaigns.
+        <br />
       </p>
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
-          <SignInForm />
+        <SignInForm />
       </div>
-      <div className="text-center text-sm text-stone-400 mt-5">
-        Don&apos;t have an account?<Link href="/register" className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200">Sign up</Link>
+      <div className="mt-5 text-center text-sm text-stone-400">
+        Don&apos;t have an account?
+        <Link
+          href="/register"
+          className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200"
+        >
+          Sign up
+        </Link>
       </div>
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
         <Suspense

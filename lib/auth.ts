@@ -138,10 +138,10 @@ export function withOrgAuth(action: any) {
         users: {
           some: {
             id: {
-              in: [session.user.id as string]
-            }
-          }
-        }   
+              in: [session.user.id as string],
+            },
+          },
+        },
       },
     });
     if (!organization) {

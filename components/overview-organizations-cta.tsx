@@ -14,10 +14,10 @@ export default async function OverviewOrganizationCTA() {
       users: {
         some: {
           id: {
-            in: [session.user.id as string]
-          }
-        }
-      } 
+            in: [session.user.id as string],
+          },
+        },
+      },
     },
   });
 

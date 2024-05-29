@@ -33,7 +33,7 @@ export default function FormPage() {
           router.push("/login");
         }
       }}
-      className="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-black sm:p-10"
+      className="rounded-lg border border-stone-200 bg-white p-5 sm:p-10 dark:border-stone-700 dark:bg-black"
     >
       <h2 className="mb-2 font-cal text-3xl dark:text-white">
         Register Intrepid Email App

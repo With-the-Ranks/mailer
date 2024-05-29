@@ -46,7 +46,7 @@ export const registerUser = async (formData: FormData) => {
       },
     });
     return { message: "success", user: { email: user.email, id: user.id } };
-  } catch (e:any) {
+  } catch (e: any) {
     return { error: "Error creating user.", details: e.message };
   }
 };
@@ -77,9 +77,9 @@ export const createOrganization = async (formData: FormData) => {
           id: session.user.id,
         },
         data: {
-          organizationId: response.id
-        }
-      });  
+          organizationId: response.id,
+        },
+      });
     } catch (error: any) {
       console.log(error);
     }
@@ -143,7 +143,9 @@ export const updateOrganization = withOrgAuth(
 
         // if the organization had a different customDomain before, we need to remove it from Vercel
         if (organization.customDomain && organization.customDomain !== value) {
-          response = await removeDomainFromVercelProject(organization.customDomain);
+          response = await removeDomainFromVercelProject(
+            organization.customDomain,
+          );
 
           /* Optional: remove domain from Vercel team 
 
@@ -240,25 +242,27 @@ export const updateOrganization = withOrgAuth(
   },
 );
 
-export const deleteOrganization = withOrgAuth(async (_: FormData, organization: Organization) => {
-  try {
-    const response = await prisma.organization.delete({
-      where: {
-        id: organization.id,
-      },
-    });
-    await revalidateTag(
-      `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-    );
-    response.customDomain &&
-      (await revalidateTag(`${organization.customDomain}-metadata`));
-    return response;
-  } catch (error: any) {
-    return {
-      error: error.message,
-    };
-  }
-});
+export const deleteOrganization = withOrgAuth(
+  async (_: FormData, organization: Organization) => {
+    try {
+      const response = await prisma.organization.delete({
+        where: {
+          id: organization.id,
+        },
+      });
+      await revalidateTag(
+        `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
+      );
+      response.customDomain &&
+        (await revalidateTag(`${organization.customDomain}-metadata`));
+      return response;
+    } catch (error: any) {
+      return {
+        error: error.message,
+      };
+    }
+  },
+);
 
 export const getOrganizationFromEmailId = async (emailId: string) => {
   const email = await prisma.email.findUnique({
@@ -272,27 +276,30 @@ export const getOrganizationFromEmailId = async (emailId: string) => {
   return email?.organizationId;
 };
 
-export const createEmail = withOrgAuth(async (_: FormData, organization: Organization) => {
-  const session = await getSession();
-  if (!session?.user.id) {
-    return {
-      error: "Not authenticated",
-    };
-  }
-  const response = await prisma.email.create({
-    data: {
-      organizationId: organization.id,
-      userId: session.user.id,
-    },
-  });
+export const createEmail = withOrgAuth(
+  async (_: FormData, organization: Organization) => {
+    const session = await getSession();
+    if (!session?.user.id) {
+      return {
+        error: "Not authenticated",
+      };
+    }
+    const response = await prisma.email.create({
+      data: {
+        organizationId: organization.id,
+        userId: session.user.id,
+      },
+    });
 
-  await revalidateTag(
-    `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-  );
-  organization.customDomain && (await revalidateTag(`${organization.customDomain}-emails`));
+    await revalidateTag(
+      `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
+    );
+    organization.customDomain &&
+      (await revalidateTag(`${organization.customDomain}-emails`));
 
-  return response;
-});
+    return response;
+  },
+);
 
 // creating a separate function for this because we're not using FormData
 export const updateEmail = async (data: Email) => {
@@ -401,7 +408,9 @@ export const updatePostMetadata = withEmailAuth(
       // if the organization has a custom domain, we need to revalidate those tags too
       email.organization?.customDomain &&
         (await revalidateTag(`${email.organization?.customDomain}-emails`),
-        await revalidateTag(`${email.organization?.customDomain}-${email.slug}`));
+        await revalidateTag(
+          `${email.organization?.customDomain}-${email.slug}`,
+        ));
 
       return response;
     } catch (error: any) {

@@ -98,13 +98,13 @@ export default async function OrganizationPostPage({
     <>
       <div className="flex flex-col items-center justify-center">
         <div className="m-auto w-full text-center md:w-7/12">
-          <p className="m-auto my-5 w-10/12 text-sm font-light text-stone-500 dark:text-stone-400 md:text-base">
+          <p className="m-auto my-5 w-10/12 text-sm font-light text-stone-500 md:text-base dark:text-stone-400">
             {toDateString(data.createdAt)}
           </p>
-          <h1 className="mb-10 font-title text-3xl font-bold text-stone-800 dark:text-white md:text-6xl">
+          <h1 className="mb-10 font-title text-3xl font-bold text-stone-800 md:text-6xl dark:text-white">
             {data.title}
           </h1>
-          <p className="text-md m-auto w-10/12 text-stone-600 dark:text-stone-400 md:text-lg">
+          <p className="text-md m-auto w-10/12 text-stone-600 md:text-lg dark:text-stone-400">
             {data.description}
           </p>
         </div>
@@ -116,13 +116,13 @@ export default async function OrganizationPostPage({
         >
           <div className="my-8">
             <div className="relative inline-block h-8 w-8 overflow-hidden rounded-full align-middle md:h-12 md:w-12">
-               (
-                <div className="absolute flex h-full w-full select-none items-center justify-center bg-stone-100 text-4xl text-stone-500">
-                  ?
-                </div>
+              (
+              <div className="absolute flex h-full w-full select-none items-center justify-center bg-stone-100 text-4xl text-stone-500">
+                ?
+              </div>
               )
             </div>
-            <div className="text-md ml-3 inline-block align-middle dark:text-white md:text-lg">
+            <div className="text-md ml-3 inline-block align-middle md:text-lg dark:text-white">
               by <span className="font-semibold">User Name</span>
             </div>
           </div>
