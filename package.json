@@ -1,5 +1,10 @@
 {
   "private": true,
+  "engines": {
+    "npm": "please-use-pnpm",
+    "pnpm": "8.x",
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "prisma generate && next dev",
     "build": "prisma generate && prisma db push && next build",
