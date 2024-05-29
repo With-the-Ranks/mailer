@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { registerUser } from "@/lib/actions";
+import { registerUser } from "@/lib/actions/auth";
 import FormButton from "@/components/form/form-button";
 import { sendEmail } from "@/lib/utils"; 
 

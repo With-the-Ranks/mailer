@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { Email, Organization } from "@prisma/client";
 import { revalidateTag } from "next/cache";
-import { withEmailAuth, withOrgAuth } from "./auth";
+import { withEmailAuth, withOrgAuth } from "../auth";
 import { getSession } from "@/lib/auth";
 import {
   addDomainToVercel,
@@ -15,41 +15,11 @@ import {
 import { put } from "@vercel/blob";
 import { customAlphabet } from "nanoid";
 import { getBlurDataURL } from "@/lib/utils";
-import { hash } from "bcrypt";
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   7,
 ); // 7-character random string
-
-// User registration function
-export const registerUser = async (formData: FormData) => {
-  try {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const hashedPassword = await hash(password, 10);
-
-    // Check if the user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return { error: "User already exists." };
-    }
-
-    // Using Prisma to create a new user in the 'User' table
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
-    });
-    return { message: "success", user: { email: user.email, id: user.id } };
-  } catch (e:any) {
-    return { error: "Error creating user.", details: e.message };
-  }
-};
 
 export const createOrganization = async (formData: FormData) => {
   const session = await getSession();
