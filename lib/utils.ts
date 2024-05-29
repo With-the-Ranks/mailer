@@ -57,24 +57,3 @@ export const toDateString = (date: Date) => {
 export const random = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
-
-export const sendEmail = async ({ email, from, subject }: { email: string; from: string; subject: string; }) => {
-  try {
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, from, subject }),
-    };
-
-    const response = await fetch('/api/send', requestOptions);
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to send email');
-    }
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};

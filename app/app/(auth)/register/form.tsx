@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/lib/actions/auth";
+import { sendEmail } from "@/lib/actions/send-email"; 
 import FormButton from "@/components/form/form-button";
-import { sendEmail } from "@/lib/utils"; 
 
 export default function FormPage() {
   const [formData, setFormData] = useState({
