@@ -8,12 +8,12 @@ const domain = process.env.EMAIL_DOMAIN;
 export async function POST(request: NextRequest) {
   try {
     const requestBody = await request.json();
-    const { email, from, subject, content } = requestBody;  
+    const { email, from, subject } = requestBody;  
     const { data, error } = await resend.emails.send({
       from: `${from} <${domain}>`,
       to: [email],
-      subject: subject || "Hello Bernie & Friends!",
-      react: WelcomeTemplate({}) as React.ReactElement,
+      subject: subject,
+      react: WelcomeTemplate({email}) as React.ReactElement,
     });
 
     if (error) {
