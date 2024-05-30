@@ -21,11 +21,12 @@ const styles = {
   margin: "20px"
 };
 
-export type EmailWithSite = Email & { organization: { subdomain: string | null } | null };
+export type EmailWithSite = Email & { organization: { subdomain: string | null } | null } & { key: number };
 
 export default function Editor({ email }: { email: EmailWithSite }) {
   let [isPendingSaving, startTransitionSaving] = useTransition();
   let [isPendingPublishing, startTransitionPublishing] = useTransition();
+  email.key = 0;
   const [data, setData] = useState<EmailWithSite>(email);
   const [hydrated, setHydrated] = useState(false);
 
@@ -145,13 +146,13 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           className="dark:placeholder-text-600 w-full resize-none border-none px-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
         /> */}
         <Select 
-          defaultValue={selectDict[data.template || 'fundraising']}
+          defaultValue={data.template ? selectDict[data.template as keyof typeof selectDict] : selectDict['fundraising']}
           options={selectOptions}
-          onChange={(value,_) => setData({ ...data, template: value.value })}
+          onChange={(value,_) => setData({ ...data, template: value!.value, key: data.key+=1 })}
         />
       </div>
       <NovelEditor
-        email={email}
+        email={data} key={data.key}
       />
     </div>
   );
