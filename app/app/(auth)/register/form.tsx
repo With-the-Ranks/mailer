@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/lib/actions/auth";
+import { sendEmail } from "@/lib/actions/send-email"; 
 import FormButton from "@/components/form/form-button";
 
 export default function FormPage() {
@@ -30,6 +31,18 @@ export default function FormPage() {
           setIsSubmitting(false);
         } else {
           toast.success("Registration Successful");
+          // Send welcome email
+          try {
+            await sendEmail({
+              to: formData.email,
+              from: "Intrepid",
+              subject: "Welcome to Intrepid!",
+            });
+            toast.success("Welcome email sent");
+          } catch (error) {
+            toast.error("Failed to send welcome email");
+          }
+          
           router.push("/login");
         }
       }}
