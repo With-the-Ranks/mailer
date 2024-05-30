@@ -25,7 +25,7 @@ describe('sendEmail Functionality', () => {
     const mockSuccessResponse = { data: { message: 'Email sent successfully' }, error: null };
     mockResend(mockSuccessResponse);
 
-    const email = faker.internet.email();
+    const to = faker.internet.email();
     const from = faker.internet.email();
     const subject = 'Welcome!';
 
@@ -33,7 +33,7 @@ describe('sendEmail Functionality', () => {
     vi.resetModules();
     const { sendEmail } = await import('@/lib/actions/send-email');
 
-    const result = await sendEmail({ email, from, subject });
+    const result = await sendEmail({ to, from, subject });
     expect(result.error).toBeUndefined();
     expect(result.data).toEqual({ message: 'Email sent successfully' });
   });
@@ -42,7 +42,7 @@ describe('sendEmail Functionality', () => {
     const mockFailureResponse = { data: null, error: 'Something went wrong' };
     mockResend(mockFailureResponse);
 
-    const email = 'fail@example.com'; // Explicitly testing the failure case
+    const to = 'fail@example.com'; // Explicitly testing the failure case
     const from = faker.internet.email();
     const subject = 'Welcome!';
 
@@ -50,7 +50,7 @@ describe('sendEmail Functionality', () => {
     vi.resetModules();
     const { sendEmail } = await import('@/lib/actions/send-email');
 
-    const result = await sendEmail({ email, from, subject });
+    const result = await sendEmail({ to, from, subject });
     expect(result.data).toBeUndefined();
     expect(result.error).toBe('Something went wrong');
   });
