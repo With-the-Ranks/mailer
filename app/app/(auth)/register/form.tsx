@@ -34,7 +34,7 @@ export default function FormPage() {
           // Send welcome email
           try {
             await sendEmail({
-              email: formData.email,
+              to: formData.email,
               from: "Intrepid",
               subject: "Welcome to Intrepid!",
             });
