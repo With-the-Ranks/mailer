@@ -3,16 +3,16 @@ import prisma from "@/lib/prisma";
 import { serialize } from "next-mdx-remote/serialize";
 import { replaceExamples, replaceTweets } from "@/lib/remark-plugins";
 
-export async function getSiteData(domain: string) {
+export async function getOrganizationData(domain: string) {
   const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`)
     ? domain.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
     : null;
 
   return await unstable_cache(
     async () => {
-      return prisma.site.findUnique({
+      return prisma.organization.findUnique({
         where: subdomain ? { subdomain } : { customDomain: domain },
-        include: { user: true },
+        include: { users: true },
       });
     },
     [`${domain}-metadata`],
@@ -23,16 +23,16 @@ export async function getSiteData(domain: string) {
   )();
 }
 
-export async function getPostsForSite(domain: string) {
+export async function getEmailsForOrganization(domain: string) {
   const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`)
     ? domain.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
     : null;
 
   return await unstable_cache(
     async () => {
-      return prisma.post.findMany({
+      return prisma.email.findMany({
         where: {
-          site: subdomain ? { subdomain } : { customDomain: domain },
+          organization: subdomain ? { subdomain } : { customDomain: domain },
           published: true,
         },
         select: {
@@ -50,10 +50,10 @@ export async function getPostsForSite(domain: string) {
         ],
       });
     },
-    [`${domain}-posts`],
+    [`${domain}-emails`],
     {
       revalidate: 900,
-      tags: [`${domain}-posts`],
+      tags: [`${domain}-emails`],
     },
   )();
 }
@@ -65,16 +65,16 @@ export async function getPostData(domain: string, slug: string) {
 
   return await unstable_cache(
     async () => {
-      const data = await prisma.post.findFirst({
+      const data = await prisma.email.findFirst({
         where: {
-          site: subdomain ? { subdomain } : { customDomain: domain },
+          organization: subdomain ? { subdomain } : { customDomain: domain },
           slug,
           published: true,
         },
         include: {
-          site: {
+          organization: {
             include: {
-              user: true,
+              users: true,
             },
           },
         },
@@ -84,9 +84,9 @@ export async function getPostData(domain: string, slug: string) {
 
       const [mdxSource, adjacentPosts] = await Promise.all([
         getMdxSource(data.content!),
-        prisma.post.findMany({
+        prisma.email.findMany({
           where: {
-            site: subdomain ? { subdomain } : { customDomain: domain },
+            organization: subdomain ? { subdomain } : { customDomain: domain },
             published: true,
             NOT: {
               id: data.id,

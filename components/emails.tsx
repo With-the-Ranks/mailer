@@ -1,0 +1,53 @@
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
+import { Email } from "@prisma/client";
+import EmailCard from "./email-card";
+import Image from "next/image";
+
+export default async function Emails({
+  organizationId,
+  limit,
+}: {
+  organizationId?: string;
+  limit?: number;
+}) {
+  const session = await getSession();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  const emails = await prisma.email.findMany({
+    where: {
+      userId: session!.user.id as string,
+      ...(organizationId ? { organizationId } : {}),
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    include: {
+      organization: true,
+    },
+    ...(limit ? { take: limit } : {}),
+  });
+
+  return emails.length > 0 ? (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {emails.map((email: Email) => (
+        <EmailCard key={email.id} data={email} />
+      ))}
+    </div>
+  ) : (
+    <div className="flex flex-col items-center space-x-4">
+      <h1 className="font-cal text-4xl">No Posts Yet</h1>
+      <Image
+        alt="missing email"
+        src="https://illustrations.popsy.co/gray/graphic-design.svg"
+        width={400}
+        height={400}
+      />
+      <p className="text-lg text-stone-500">
+        You do not have any emails yet. Create one to get started.
+      </p>
+    </div>
+  );
+}

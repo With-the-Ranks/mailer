@@ -1,7 +1,9 @@
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
+import bcrypt from "bcrypt";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
@@ -18,6 +20,49 @@ export const authOptions: NextAuthOptions = {
           email: profile.email,
           image: profile.avatar_url,
         };
+      },
+    }),
+    CredentialsProvider({
+      name: "Email and Password",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "you@example.com",
+        },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials || !credentials.email || !credentials.password) {
+          return null;
+        }
+
+        const { email, password } = credentials;
+
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user) {
+            throw new Error("No user found with the entered email");
+          }
+
+          // Here bcrypt compares the provided password with the hashed password in the database
+          const passwordIsValid = await bcrypt.compare(
+            password,
+            user.password || "",
+          );
+
+          if (!passwordIsValid) {
+            throw new Error("Password is incorrect");
+          }
+
+          return user; // Successful authentication, return user object
+        } catch (error) {
+          console.error("Login error:", error);
+          return null;
+        }
       },
     }),
   ],
@@ -75,10 +120,10 @@ export function getSession() {
   } | null>;
 }
 
-export function withSiteAuth(action: any) {
+export function withOrgAuth(action: any) {
   return async (
     formData: FormData | null,
-    siteId: string,
+    organizationId: string,
     key: string | null,
   ) => {
     const session = await getSession();
@@ -87,25 +132,32 @@ export function withSiteAuth(action: any) {
         error: "Not authenticated",
       };
     }
-    const site = await prisma.site.findUnique({
+    const organization = await prisma.organization.findUnique({
       where: {
-        id: siteId,
+        id: organizationId,
+        users: {
+          some: {
+            id: {
+              in: [session.user.id as string]
+            }
+          }
+        }   
       },
     });
-    if (!site || site.userId !== session.user.id) {
+    if (!organization) {
       return {
         error: "Not authorized",
       };
     }
 
-    return action(formData, site, key);
+    return action(formData, organization, key);
   };
 }
 
-export function withPostAuth(action: any) {
+export function withEmailAuth(action: any) {
   return async (
     formData: FormData | null,
-    postId: string,
+    emailId: string,
     key: string | null,
   ) => {
     const session = await getSession();
@@ -114,20 +166,20 @@ export function withPostAuth(action: any) {
         error: "Not authenticated",
       };
     }
-    const post = await prisma.post.findUnique({
+    const email = await prisma.email.findUnique({
       where: {
-        id: postId,
+        id: emailId,
       },
       include: {
-        site: true,
+        organization: true,
       },
     });
-    if (!post || post.userId !== session.user.id) {
+    if (!email || email.userId !== session.user.id) {
       return {
-        error: "Post not found",
+        error: "Email not found",
       };
     }
 
-    return action(formData, post, key);
+    return action(formData, email, key);
   };
 }
