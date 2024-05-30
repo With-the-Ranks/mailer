@@ -1,36 +1,57 @@
 import { describe, expect, test, vi } from 'vitest';
-import { sendEmail } from '@/lib/actions/send-email';
+import { faker } from '@faker-js/faker';
 
-vi.mock('resend', () => {
-  return {
-    Resend: vi.fn().mockImplementation(() => ({
-      emails: {
-        send: vi.fn((emailDetails) => {
-          if (emailDetails.to[0] === 'test@example.com') {
-            return Promise.resolve({ data: { message: 'Email sent successfully' }, error: null });
-          } else {
-            return Promise.resolve({ data: null, error: 'Failed to send email' });
-          }
-        })
-      }
-    }))
-  };
-});
+type MockResponse = { data: { message: string } | null, error: string | null };
+
+const mockResend = (mockResponse: MockResponse) => {
+  vi.doMock('resend', () => {
+    return {
+      Resend: vi.fn().mockImplementation(() => ({
+        emails: {
+          send: vi.fn().mockImplementation(({ to }: { to: string[] }) => {
+            if (to[0] === 'fail@example.com') {
+              return Promise.resolve({ data: null, error: 'Something went wrong' });
+            }
+            return Promise.resolve(mockResponse);
+          })
+        }
+      }))
+    };
+  });
+};
 
 describe('sendEmail Functionality', () => {
-  const email = 'test@example.com';
-  const from = 'noreply@example.com';
-  const subject = 'Welcome!';
-
   test('sendEmail should successfully send an email', async () => {
+    const mockSuccessResponse = { data: { message: 'Email sent successfully' }, error: null };
+    mockResend(mockSuccessResponse);
+
+    const email = faker.internet.email();
+    const from = faker.internet.email();
+    const subject = 'Welcome!';
+
+    // Clear the module cache and re-import sendEmail
+    vi.resetModules();
+    const { sendEmail } = await import('@/lib/actions/send-email');
+
     const result = await sendEmail({ email, from, subject });
     expect(result.error).toBeUndefined();
     expect(result.data).toEqual({ message: 'Email sent successfully' });
   });
 
   test('sendEmail should handle failure in sending email', async () => {
-    const result = await sendEmail({ email: 'fail@example.com', from, subject });
+    const mockFailureResponse = { data: null, error: 'Something went wrong' };
+    mockResend(mockFailureResponse);
+
+    const email = 'fail@example.com'; // Explicitly testing the failure case
+    const from = faker.internet.email();
+    const subject = 'Welcome!';
+
+    // Clear the module cache and re-import sendEmail
+    vi.resetModules();
+    const { sendEmail } = await import('@/lib/actions/send-email');
+
+    const result = await sendEmail({ email, from, subject });
     expect(result.data).toBeUndefined();
-    expect(result.error).toBe('Failed to send email');
+    expect(result.error).toBe('Something went wrong');
   });
 });
