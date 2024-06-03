@@ -4,16 +4,29 @@ import { faker } from '@faker-js/faker';
 const getMockUserDefaults = () => {
   const dateNow = new Date()
   return {
-    id: faker.string.uuid(),
+    id: '1',
     name: faker.person.fullName(),
     username: faker.internet.userName(),
     gh_username: null,
-    email: faker.internet.email(),
+    email: 'test@test.com',
     password: faker.internet.password(),
     emailVerified: dateNow,
     image: null,
     createdAt: dateNow,
-    updatedAt: dateNow
+    updatedAt: dateNow,
+    organizationId: '1',
+  }
+}
+
+export const mockPartialUser = () => {
+  return {
+    user: {
+      id: '1',
+      name: faker.person.fullName(),
+      username: faker.internet.userName(),
+      email: 'test@test.com',
+      image: ''
+    }
   }
 }
 
