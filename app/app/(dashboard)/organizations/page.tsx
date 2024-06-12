@@ -51,7 +51,6 @@ export default async function AllOrganizations({
             </div>
           }
         >
-          {/* @ts-expect-error Server Component */}
           <Organizations
             organizations={organizations}
             organizationId={decodeURIComponent(params.id)}
