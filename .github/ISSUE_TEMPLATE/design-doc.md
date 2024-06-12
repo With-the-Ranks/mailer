@@ -68,7 +68,7 @@ Provide a big picture first, then fill in lots of details. Aim for a world where
 
 <!--
 
-How will this increase on call and dev-ops burden?
+How will this increase on call and devops burden?
 How much money will it cost?
 Does it cause any latency regression to the system?
 Does it expose any security vulnerabilities?
