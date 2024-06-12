@@ -51,10 +51,7 @@ export default async function AllOrganizations({
             </div>
           }
         >
-          <Organizations
-            organizations={organizations}
-            organizationId={decodeURIComponent(params.id)}
-          />
+          <Organizations organizations={organizations} />
         </Suspense>
       </div>
     </div>
