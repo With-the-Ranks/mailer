@@ -36,7 +36,7 @@ A list of measurable checkpoints, so stakeholders can skim it and know roughly w
 Use calendar dates to take into account unrelated delays, vacations, meetings, and so on. It should look something like this:
 
 Start Date: June 7, 2018
-Milestone 1 — New system MVP running in dark-mode: June 28, 2018
+Milestone 1 - New system MVP running in dark-mode: June 28, 2018
 Milestone 2 - Retire old system: July 4th, 2018
 End Date: Add feature X, Y, Z to new system: July 14th, 2018
 
@@ -68,7 +68,7 @@ Provide a big picture first, then fill in lots of details. Aim for a world where
 
 <!--
 
-How will this increase on call and dev-ops burden?
+How will this increase on call and devops burden?
 How much money will it cost?
 Does it cause any latency regression to the system?
 Does it expose any security vulnerabilities?

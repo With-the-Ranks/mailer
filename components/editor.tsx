@@ -10,8 +10,7 @@ import LoadingDots from "./icons/loading-dots";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { ReactMultiEmail } from "react-multi-email";
-import 'react-multi-email/dist/style.css';
-
+import "react-multi-email/dist/style.css";
 
 const styles = {
   fontFamily: "sans-serif",
@@ -19,10 +18,12 @@ const styles = {
   border: "1px solid #eee",
   background: "#f3f3f3",
   padding: "25px",
-  margin: "20px"
+  margin: "20px",
 };
 
-type EmailWithSite = Email & { organization: { subdomain: string | null } | null };
+type EmailWithSite = Email & {
+  organization: { subdomain: string | null } | null;
+};
 
 export default function Editor({ email }: { email: EmailWithSite }) {
   let [isPendingSaving, startTransitionSaving] = useTransition();
@@ -51,7 +52,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   }, [data, startTransitionSaving]);
 
   return (
-    <div className="relative min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
+    <div className="relative min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg dark:border-stone-700">
       <div className="absolute right-5 top-5 mb-5 flex items-center space-x-3">
         {data.published && (
           <a
@@ -118,7 +119,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           getLabel={(
             email: string,
             index: number,
-            removeEmail: (index: number) => void
+            removeEmail: (index: number) => void,
           ) => {
             return (
               <div data-tag key={index}>

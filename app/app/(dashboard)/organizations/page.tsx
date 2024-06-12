@@ -6,7 +6,11 @@ import CreateOrganizationButton from "@/components/create-organization-button";
 import CreateOrganizationModal from "@/components/modal/create-organization";
 import prisma from "@/lib/prisma";
 
-export default async function AllOrganizations({ params }: { params: { id: string, limit?: number  }}) {
+export default async function AllOrganizations({
+  params,
+}: {
+  params: { id: string; limit?: number };
+}) {
   const session = await getSession();
 
   const organizations = await prisma.organization.findMany({
@@ -14,10 +18,10 @@ export default async function AllOrganizations({ params }: { params: { id: strin
       users: {
         some: {
           id: {
-            in: [session!.user.id as string]
-          }
-        }
-      } 
+            in: [session!.user.id as string],
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: "asc",
@@ -32,11 +36,11 @@ export default async function AllOrganizations({ params }: { params: { id: strin
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             Your Organization
           </h1>
-          { organizations.length === 0 && 
+          {organizations.length === 0 && (
             <CreateOrganizationButton>
               <CreateOrganizationModal />
             </CreateOrganizationButton>
-          }
+          )}
         </div>
         <Suspense
           fallback={
@@ -47,8 +51,7 @@ export default async function AllOrganizations({ params }: { params: { id: strin
             </div>
           }
         >
-          {/* @ts-expect-error Server Component */}
-          <Organizations organizations={organizations} organizationId={decodeURIComponent(params.id)} />
+          <Organizations organizations={organizations} />
         </Suspense>
       </div>
     </div>

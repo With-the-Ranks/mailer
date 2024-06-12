@@ -5,7 +5,13 @@ import { Organization } from "@prisma/client";
 import OrganizationCard from "./organization-card";
 import Image from "next/image";
 
-export default async function Organizations({ organizations, limit }: { organizations?: Organization[], limit?: number }) {
+export default async function Organizations({
+  organizations,
+  limit,
+}: {
+  organizations?: Organization[];
+  limit?: number;
+}) {
   const session = await getSession();
   if (!session) {
     redirect("/login");
@@ -17,10 +23,10 @@ export default async function Organizations({ organizations, limit }: { organiza
         users: {
           some: {
             id: {
-              in: [session!.user.id as string]
-            }
-          }
-        } 
+              in: [session!.user.id as string],
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: "asc",

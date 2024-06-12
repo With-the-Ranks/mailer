@@ -35,7 +35,7 @@ To get started with the Intrepid Email Campaigning Tool, follow these steps:
    ```bash
     pnpm i && pnpm dev
    ```
-Your localhost should now be live at http://app.localhost:3000
+   Your localhost should now be live at http://app.localhost:3000
 
 ### Create a production build
 
@@ -43,7 +43,7 @@ Your localhost should now be live at http://app.localhost:3000
 pnpm build
 ```
 
-###  Database Commands
+### Database Commands
 
 Publish Prisma Schema
 
@@ -56,7 +56,6 @@ Open Prisma studio
 ```bash
 npx prisma studio
 ```
-
 
 ## Features
 

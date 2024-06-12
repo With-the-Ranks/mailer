@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/lib/actions/auth";
-import { sendEmail } from "@/lib/actions/send-email"; 
+import { sendEmail } from "@/lib/actions/send-email";
 import FormButton from "@/components/form/form-button";
 
 export default function FormPage() {
@@ -42,11 +42,11 @@ export default function FormPage() {
           } catch (error) {
             toast.error("Failed to send welcome email");
           }
-          
+
           router.push("/login");
         }
       }}
-      className="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-black sm:p-10"
+      className="rounded-lg border border-stone-200 bg-white p-5 sm:p-10 dark:border-stone-700 dark:bg-black"
     >
       <h2 className="mb-2 font-cal text-3xl dark:text-white">
         Register Intrepid Email App

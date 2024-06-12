@@ -10,7 +10,7 @@ export default async function RegisterPage() {
   }
 
   return (
-    <section className="bg-black flex items-center justify-center">
+    <section className="flex items-center justify-center bg-black">
       <div className="w-sm">
         <FormPage />
       </div>

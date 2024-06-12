@@ -27,7 +27,7 @@ export const registerUser = async (formData: FormData) => {
       },
     });
     return { message: "success", user: { email: user.email, id: user.id } };
-  } catch (e:any) {
+  } catch (e: any) {
     return { error: "Error creating user.", details: e.message };
   }
 };
