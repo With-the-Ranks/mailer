@@ -1,9 +1,10 @@
+import { notFound, redirect } from "next/navigation";
+
+import Form from "@/components/form";
+import DeleteEmailForm from "@/components/form/delete-email-form";
+import { updatePostMetadata } from "@/lib/actions";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { notFound, redirect } from "next/navigation";
-import Form from "@/components/form";
-import { updatePostMetadata } from "@/lib/actions";
-import DeleteEmailForm from "@/components/form/delete-email-form";
 
 export default async function PostSettings({
   params,

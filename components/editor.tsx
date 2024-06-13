@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { Email } from "@prisma/client";
-import { updateEmail, updatePostMetadata } from "@/lib/actions";
-import { Editor as NovelEditor } from "novel";
-import TextareaAutosize from "react-textarea-autosize";
-import { cn } from "@/lib/utils";
-import LoadingDots from "./icons/loading-dots";
-import { ExternalLink } from "lucide-react";
-import { toast } from "sonner";
-import { ReactMultiEmail } from "react-multi-email";
 import "react-multi-email/dist/style.css";
+
+import type { Email } from "@prisma/client";
+import { ExternalLink } from "lucide-react";
+import { Editor as NovelEditor } from "novel";
+import { useEffect, useState, useTransition } from "react";
+import { ReactMultiEmail } from "react-multi-email";
+import { toast } from "sonner";
+
+import { updateEmail, updatePostMetadata } from "@/lib/actions";
+import { cn } from "@/lib/utils";
+
+import LoadingDots from "./icons/loading-dots";
 
 const styles = {
   fontFamily: "sans-serif",
@@ -29,7 +31,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   let [isPendingSaving, startTransitionSaving] = useTransition();
   let [isPendingPublishing, startTransitionPublishing] = useTransition();
   const [data, setData] = useState<EmailWithSite>(email);
-  const [hydrated, setHydrated] = useState(false);
 
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
     ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
@@ -41,7 +42,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       if (e.metaKey && e.key === "s") {
         e.preventDefault();
         startTransitionSaving(async () => {
-          const response = await updateEmail(data);
+          await updateEmail(data);
         });
       }
     };
@@ -119,7 +120,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           getLabel={(
             email: string,
             index: number,
-            removeEmail: (index: number) => void,
+            removeEmail: (_index: number) => void,
           ) => {
             return (
               <div data-tag key={index}>

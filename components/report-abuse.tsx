@@ -1,13 +1,32 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import va from "@vercel/analytics";
 import { AlertTriangle } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import LoadingDots from "./icons/loading-dots";
-import va from "@vercel/analytics";
 import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
+
+import LoadingDots from "./icons/loading-dots";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      className={cn(
+        "h flex h-8 w-full items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
+        pending
+          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400"
+          : "border-black bg-black text-white hover:bg-white hover:text-black",
+      )}
+      disabled={pending}
+    >
+      {pending ? <LoadingDots color="#808080" /> : <p>Report Abuse</p>}
+    </button>
+  );
+}
 
 export default function ReportAbuse() {
   const [open, setOpen] = useState(false);
@@ -68,22 +87,5 @@ export default function ReportAbuse() {
         </form>
       )}
     </div>
-  );
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      className={cn(
-        "h flex h-8 w-full items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
-        pending
-          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400"
-          : "border-black bg-black text-white hover:bg-white hover:text-black",
-      )}
-      disabled={pending}
-    >
-      {pending ? <LoadingDots color="#808080" /> : <p>Report Abuse</p>}
-    </button>
   );
 }

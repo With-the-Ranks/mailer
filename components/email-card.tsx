@@ -1,8 +1,8 @@
-import BlurImage from "@/components/blur-image";
-import { placeholderBlurhash, random } from "@/lib/utils";
-import { Email, Organization } from "@prisma/client";
-import { BarChart, ExternalLink } from "lucide-react";
+import type { Organization } from "@prisma/client";
 import Link from "next/link";
+
+import BlurImage from "@/components/blur-image";
+import { placeholderBlurhash } from "@/lib/utils";
 
 export default function EmailCard({
   data,

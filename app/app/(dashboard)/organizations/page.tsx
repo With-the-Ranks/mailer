@@ -1,9 +1,10 @@
-import { getSession } from "@/lib/auth";
 import { Suspense } from "react";
-import Organizations from "@/components/organizations";
-import PlaceholderCard from "@/components/placeholder-card";
+
 import CreateOrganizationButton from "@/components/create-organization-button";
 import CreateOrganizationModal from "@/components/modal/create-organization";
+import Organizations from "@/components/organizations";
+import PlaceholderCard from "@/components/placeholder-card";
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export default async function AllOrganizations({

@@ -1,8 +1,9 @@
 "use client";
 
-import { random } from "@/lib/utils";
-import { Card, Metric, Text, AreaChart, BadgeDelta, Flex } from "@tremor/react";
+import { AreaChart, BadgeDelta, Card, Flex, Metric, Text } from "@tremor/react";
 import { useMemo } from "react";
+
+import { random } from "@/lib/utils";
 
 export default function OverviewStats() {
   const data = useMemo(() => {

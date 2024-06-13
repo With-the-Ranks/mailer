@@ -1,6 +1,7 @@
-import { getOrganizationData } from "@/lib/fetchers";
 import { headers } from "next/headers";
 import Image from "next/image";
+
+import { getOrganizationData } from "@/lib/fetchers";
 
 export default async function NotFound() {
   const headersList = headers();

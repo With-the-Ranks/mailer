@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
 import { sendEmail } from "@/lib/actions/send-email";
-import FormButton from "@/components/form/form-button";
 
 export default function FormPage() {
   const [formData, setFormData] = useState({

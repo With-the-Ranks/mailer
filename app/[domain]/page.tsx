@@ -1,11 +1,12 @@
-import Link from "next/link";
-import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import BlurImage from "@/components/blur-image";
-import { placeholderBlurhash, toDateString } from "@/lib/utils";
-import BlogCard from "@/components/blog-card";
-import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
 import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import BlogCard from "@/components/blog-card";
+import BlurImage from "@/components/blur-image";
+import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
+import prisma from "@/lib/prisma";
+import { placeholderBlurhash, toDateString } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const allOrganizations = await prisma.organization.findMany({
