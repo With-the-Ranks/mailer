@@ -1,6 +1,6 @@
 # Tests
 
-## Intrepid Test Guidelines
+## Intrepid Testing Guidelines
 
 - Unit Testing
 
