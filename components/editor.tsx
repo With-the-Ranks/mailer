@@ -50,13 +50,23 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     };
   }, [data]);
 
-  const selectOptions = [
+  type SelectOption = {
+    value: string;
+    label: string;
+  }
+
+  const selectOptions: SelectOption[] = [
     {value: 'fundraising', label: 'Fundraising'},
     {value: 'signup', label: 'Signup'}
   ];
-  const selectDict: Record<string, object> = {
+  const selectDict: Record<string, SelectOption> = {
     'fundraising': {value: 'fundraising', label: 'Fundraising'},
     'signup': {value: 'signup', label: 'Signup'}
+  }
+
+  const selectOnChange = (selectOption: any) => {
+    const { value } = selectOption;
+    setData({ ...data, template: value, key: data.key+=1 })
   }
 
   return (
@@ -148,7 +158,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         <Select 
           defaultValue={data.template ? selectDict[data.template] : selectDict['fundraising']}
           options={selectOptions}
-          onChange={(value) => setData({ ...data, template: value!.value, key: data.key+=1 })}
+          onChange={selectOnChange}
         />
       </div>
       <NovelEditor
