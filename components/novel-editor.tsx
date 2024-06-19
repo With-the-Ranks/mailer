@@ -29,10 +29,10 @@ const NovelEditor = ({ email }: { email: EmailWithSite }) => {
     // listen to CMD + S and override the default behavior
     useEffect(() => {
       const onKeyDown = (e: KeyboardEvent) => {
-        if (e.metaKey && e.key === "s") {
+        if (e.metaKey || e.ctrlKey && e.key === "s") {
           e.preventDefault();
           startTransitionSaving(async () => {
-            const response = await updateEmail(data, true);
+            await updateEmail(data, true);
           });
         }
       };

@@ -37,7 +37,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   // listen to CMD + S and override the default behavior
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === "s") {
+      if (e.metaKey || e.ctrlKey && e.key === "s") {
         e.preventDefault();
         startTransitionSaving(async () => {
           const response = await updateEmail(data, false);
@@ -54,7 +54,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     {value: 'fundraising', label: 'Fundraising'},
     {value: 'signup', label: 'Signup'}
   ];
-  const selectDict = {
+  const selectDict: Record<string, object> = {
     'fundraising': {value: 'fundraising', label: 'Fundraising'},
     'signup': {value: 'signup', label: 'Signup'}
   }
@@ -146,9 +146,9 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           className="dark:placeholder-text-600 w-full resize-none border-none px-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
         /> */}
         <Select 
-          defaultValue={data.template ? selectDict[data.template as keyof typeof selectDict] : selectDict['fundraising']}
+          defaultValue={data.template ? selectDict[data.template] : selectDict['fundraising']}
           options={selectOptions}
-          onChange={(value,_) => setData({ ...data, template: value!.value, key: data.key+=1 })}
+          onChange={(value) => setData({ ...data, template: value!.value, key: data.key+=1 })}
         />
       </div>
       <NovelEditor
