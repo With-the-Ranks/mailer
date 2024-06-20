@@ -46,7 +46,7 @@ export default async function Organizations({
       <h1 className="font-cal text-4xl">No Sites Yet</h1>
       <Image
         alt="missing organization"
-        src="https://illustrations.popsy.co/gray/web-design.svg"
+        src="/empty-state.png"
         width={400}
         height={400}
       />
