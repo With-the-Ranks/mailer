@@ -20,12 +20,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [isPendingPublishing, startTransitionPublishing] = useTransition();
   const [data, setData] = useState<EmailWithSite>(email);
   const [hydrated, setHydrated] = useState(true);
-
-  const [subject, setSubject] = useState(email.subject || "");
   const [from, setFrom] = useState(email.from || "noreply@painatthepump.com");
-  const [replyTo, setReplyTo] = useState(email.replyTo || "");
-  const [to, setTo] = useState(email.to || "");
-  const [previewText, setPreviewText] = useState(email.previewText || "");
   const [showReplyTo, setShowReplyTo] = useState(false);
 
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
@@ -53,11 +48,11 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     try {
       const content = data.content;
       const result = await sendEmail({
-        to,
+        to: data.emailsTo[0],
         from,
-        subject,
+        subject: data.subject,
         content,
-        previewText,
+        previewText: data.previewText,
       });
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
@@ -125,7 +120,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       <div className="mb-5 flex flex-col space-y-3 border-b border-stone-200 pb-5 dark:border-stone-700">
         <input
           type="text"
-          placeholder="Title"
+          placeholder="Campaign Name"
           defaultValue={email?.title || ""}
           autoFocus
           onChange={(e) => setData({ ...data, title: e.target.value })}
@@ -138,12 +133,10 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         </span>
         <Input
           className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => {
-            setSubject(e.target.value);
-          }}
+          onChange={(e) => setData({ ...data, subject: e.target.value })}
           placeholder="Email Subject"
           type="text"
-          value={subject}
+          value={data.subject || ""}
         />
       </Label>
       <div className="flex items-center gap-1.5">
@@ -181,17 +174,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           <div className="align-content-stretch flex grow items-center">
             <Input
               className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-              onChange={(e) => {
-                setReplyTo(e.target.value);
-              }}
+              onChange={(e) => setData({ ...data, replyTo: e.target.value })}
               placeholder="noreply@intrepid.com"
               type="text"
-              value={replyTo}
+              value={data.replyTo || ""}
             />
             <button
               className="flex h-10 shrink-0 items-center bg-transparent px-1 text-gray-500 hover:text-gray-700"
               onClick={() => {
-                setReplyTo("");
                 setShowReplyTo(false);
               }}
               type="button"
@@ -205,24 +195,20 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         <span className="w-20 shrink-0 font-normal text-gray-600">To</span>
         <Input
           className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => {
-            setTo(e.target.value);
-          }}
+          onChange={(e) => setData({ ...data, emailsTo: [e.target.value] })}
           placeholder="Email Recipient(s)"
           type="text"
-          value={to}
+          value={data.emailsTo?.[0] || ""}
         />
       </Label>
 
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => {
-            setPreviewText(e.target.value);
-          }}
+          onChange={(e) => setData({ ...data, previewText: e.target.value })}
           placeholder="Preview Text"
           type="text"
-          value={previewText}
+          value={data.previewText || ""}
         />
       </div>
       <div>
