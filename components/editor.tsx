@@ -22,7 +22,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [hydrated, setHydrated] = useState(true);
 
   const [subject, setSubject] = useState(email.subject || "");
-  const [from, setFrom] = useState(email.from || "");
+  const [from, setFrom] = useState(email.from || "noreply@painatthepump.com");
   const [replyTo, setReplyTo] = useState(email.replyTo || "");
   const [to, setTo] = useState(email.to || "");
   const [previewText, setPreviewText] = useState(email.previewText || "");
@@ -154,9 +154,10 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             onChange={(e) => {
               setFrom(e.target.value);
             }}
-            placeholder="Intrepid Email <noreply@email.endpainatthepump.com>"
+            placeholder="noreply@painatthepump.com"
             type="text"
             value={from}
+            disabled
           />
         </Label>
 
