@@ -65,7 +65,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   };
 
   return (
-    <div className="relative min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
+    <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex items-center space-x-3">
         {data.published && (
           <a
@@ -222,7 +222,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               hasMenuBar: false,
               wrapClassName: "editor-wrap",
               bodyClassName: "!mt-0 !border-0 !p-0",
-              contentClassName: "editor-content",
+              contentClassName: "editor-content mx-auto mt-20",
               toolbarClassName: "flex-wrap !items-start",
               spellCheck: false,
               autofocus: false,
