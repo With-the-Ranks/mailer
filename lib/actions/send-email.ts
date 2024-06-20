@@ -3,18 +3,22 @@
 import { Resend } from "resend";
 import { Maily } from "@maily-to/render";
 import WelcomeTemplate from "@/lib/email-templates/welcome-template";
-import { parse } from "path";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.EMAIL_DOMAIN;
 
-const parseContent = (content: string, previewText: string | null) => {
-  const jsonContent = JSON.parse(content);
-  const maily = new Maily(jsonContent);
-  if (previewText) {
-    maily.setPreviewText(previewText);
+const parseContent = async (content: string, previewText: string | null) => {
+  try {
+    const jsonContent = JSON.parse(content);
+    const maily = new Maily(jsonContent);
+    if (previewText) {
+      maily.setPreviewText(previewText);
+    }
+    return await maily.renderAsync();
+  } catch (error) {
+    console.error("Error parsing content:", error);
+    throw new Error("Failed to parse email content");
   }
-  return maily.renderAsync();
 };
 
 export const sendEmail = async ({
