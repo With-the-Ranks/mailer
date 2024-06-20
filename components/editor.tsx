@@ -51,10 +51,13 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const handleSendEmail = async () => {
     try {
+      const content = data.content;
       const result = await sendEmail({
         to,
         from,
         subject,
+        content,
+        previewText,
       });
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
