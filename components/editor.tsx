@@ -64,6 +64,15 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   };
 
+  const handleSaveContent = async () => {
+    try {
+      await updateEmail(data);
+      toast.success("Content saved successfully");
+    } catch (error) {
+      toast.error("Failed to save content");
+    }
+  };
+
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex items-center space-x-3">
@@ -82,22 +91,21 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         </div>
         <button
           onClick={async () => {
-            const formData = new FormData();
-            formData.append("published", String(!data.published));
             startTransitionPublishing(async () => {
+              await handleSaveContent();
+              if (!data.published) {
+                await handleSendEmail();
+              }
+              const formData = new FormData();
+              formData.append("published", String(!data.published));
               await updatePostMetadata(formData, email.id, "published").then(
-                async () => {
+                () => {
                   toast.success(
                     `Successfully ${
                       data.published ? "unpublished" : "published"
                     } your email.`,
                   );
                   setData((prev) => ({ ...prev, published: !prev.published }));
-
-                  // Send email if publishing
-                  if (!data.published) {
-                    await handleSendEmail();
-                  }
                 },
               );
             });
@@ -229,8 +237,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             }}
             contentHtml={defaultHtml}
             contentJson={data.content ? JSON.parse(data.content) : undefined}
-            onCreate={() => {
+            onCreate={(editor) => {
               setHydrated(true);
+              setData((prev) => ({
+                ...prev,
+                content: JSON.stringify(editor?.getJSON() || {}),
+              }));
             }}
             onUpdate={(editor) => {
               setData((prev) => ({
