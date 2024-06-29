@@ -3,14 +3,9 @@
 import "react-multi-email/dist/style.css";
 
 import { Editor as MailyEditor } from "@maily-to/core";
-import { Editor as MailyEditor } from "@maily-to/core";
 import type { Email } from "@prisma/client";
-import { ExternalLink } from "lucide-react";
-import { ExternalLink, Loader2, X } from "lucide-react";
 import { ExternalLink, Loader2, X } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
-import { toast } from "sonner";
 import { toast } from "sonner";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";

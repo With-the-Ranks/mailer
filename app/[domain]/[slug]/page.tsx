@@ -1,8 +1,6 @@
 import { Maily } from "@maily-to/render";
-import { Maily } from "@maily-to/render";
 import { notFound } from "next/navigation";
 
-import { getOrganizationData, getPostData } from "@/lib/fetchers";
 import { getOrganizationData, getPostData } from "@/lib/fetchers";
 import prisma from "@/lib/prisma";
 import { toDateString } from "@/lib/utils";
