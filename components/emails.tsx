@@ -43,7 +43,7 @@ export default async function Emails({
       <h1 className="font-cal text-4xl">No Posts Yet</h1>
       <Image
         alt="missing email"
-        src="https://illustrations.popsy.co/gray/graphic-design.svg"
+        src="/empty-state.png"
         width={400}
         height={400}
       />

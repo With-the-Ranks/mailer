@@ -15,7 +15,7 @@ export default async function NotFound() {
       <h1 className="font-cal text-4xl">{data ? `${data.name}: ` : ""}404</h1>
       <Image
         alt="missing organization"
-        src="https://illustrations.popsy.co/gray/timed-out-error.svg"
+        src="/empty-state.png"
         width={400}
         height={400}
       />
