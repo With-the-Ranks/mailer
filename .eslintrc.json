@@ -1,6 +1,11 @@
 {
   "extends": "next/core-web-vitals",
   "plugins": ["@typescript-eslint", "eslint-plugin-simple-import-sort"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "project": ["./tsconfig.json"]
+  },
   "rules": {
     "simple-import-sort/imports": "error",
     "no-unused-vars": [
@@ -12,5 +17,6 @@
       "error",
       { "prefer": "type-imports" }
     ]
-  }
+  },
+  "ignorePatterns": ["tailwind.config.js"]
 }
