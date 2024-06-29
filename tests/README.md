@@ -13,7 +13,7 @@
   - Write these as needed for testing important interactions between components
   - Use [Vitest](https://vitest.dev)
 
-- End-to-End Testing
+- End-to-end Testing
   - Use sparingly, required only for the most important app pathways (ex. onboarding flow, email sending flow)
   - Use [Playwright](https://playwright.dev/)
 
