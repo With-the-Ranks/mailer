@@ -1,6 +1,6 @@
-import prisma from "@/lib/prisma";
 import Form from "@/components/form";
 import { updateOrganization } from "@/lib/actions";
+import prisma from "@/lib/prisma";
 
 export default async function OrganizationSettingsDomains({
   params,

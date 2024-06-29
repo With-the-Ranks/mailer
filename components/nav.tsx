@@ -1,66 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import {
   ArrowLeft,
   BarChart3,
   Edit3,
   Globe,
-  Layout,
   LayoutDashboard,
-  Megaphone,
   Menu,
   Newspaper,
   Settings,
-  FileCode,
-  Github,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import {
   useParams,
   usePathname,
   useSelectedLayoutSegments,
 } from "next/navigation";
-import { ReactNode, useEffect, useMemo, useState } from "react";
-import { getOrganizationFromEmailId } from "@/lib/actions";
-import Image from "next/image";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const externalLinks = [
-  {
-    name: "Read announcement",
-    href: "https://vercel.com/blog/platforms-starter-kit",
-    icon: <Megaphone width={18} />,
-  },
-  {
-    name: "Star on GitHub",
-    href: "https://github.com/vercel/platforms",
-    icon: <Github width={18} />,
-  },
-  {
-    name: "Read the guide",
-    href: "https://vercel.com/guides/nextjs-multi-tenant-application",
-    icon: <FileCode width={18} />,
-  },
-  {
-    name: "View demo site",
-    href: "https://demo.vercel.pub",
-    icon: <Layout width={18} />,
-  },
-  {
-    name: "Deploy your own",
-    href: "https://vercel.com/templates/next.js/platforms-starter-kit",
-    icon: (
-      <svg
-        width={18}
-        viewBox="0 0 76 76"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="py-1 text-black dark:text-white"
-      >
-        <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor" />
-      </svg>
-    ),
-  },
-];
+import { getOrganizationFromEmailId } from "@/lib/actions";
 
 export default function Nav({ children }: { children: ReactNode }) {
   const segments = useSelectedLayoutSegments();

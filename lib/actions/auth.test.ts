@@ -1,8 +1,9 @@
-import { describe, expect, test, vi } from "vitest";
 import { faker } from "@faker-js/faker";
-import { registerUser } from "@/lib/actions/auth";
+import { describe, expect, test, vi } from "vitest";
+
 import prisma from "@/lib/__mocks__/prisma";
 import mockUser from "@/lib/__mocks__/user";
+import { registerUser } from "@/lib/actions/auth";
 
 vi.mock("@/lib/prisma");
 

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback, useMemo, ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+
 import LoadingDots from "@/components/icons/loading-dots";
 
 export default function Uploader() {

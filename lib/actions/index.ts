@@ -1,9 +1,10 @@
 "use server";
 
-import prisma from "@/lib/prisma";
-import { Email, Organization } from "@prisma/client";
+import type { Email, Organization } from "@prisma/client";
+import { put } from "@vercel/blob";
+import { customAlphabet } from "nanoid";
 import { revalidateTag } from "next/cache";
-import { withEmailAuth, withOrgAuth } from "../auth";
+
 import { getSession } from "@/lib/auth";
 import {
   addDomainToVercel,
@@ -12,9 +13,10 @@ import {
   // removeDomainFromVercelTeam,
   validDomainRegex,
 } from "@/lib/domains";
-import { put } from "@vercel/blob";
-import { customAlphabet } from "nanoid";
+import prisma from "@/lib/prisma";
 import { getBlurDataURL } from "@/lib/utils";
+
+import { withEmailAuth, withOrgAuth } from "../auth";
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -42,7 +44,7 @@ export const createOrganization = async (formData: FormData) => {
     });
 
     try {
-      const userResponse = await prisma.user.update({
+      await prisma.user.update({
         where: {
           id: session.user.id,
         },

@@ -1,8 +1,9 @@
+import { notFound, redirect } from "next/navigation";
+
+import CreateEmailButton from "@/components/create-email-button";
+import Emails from "@/components/emails";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { notFound, redirect } from "next/navigation";
-import Emails from "@/components/emails";
-import CreateEmailButton from "@/components/create-email-button";
 
 export default async function SiteEmails({
   params,

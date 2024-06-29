@@ -1,7 +1,8 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { useModal } from "@/components/modal/provider";
-import { ReactNode } from "react";
 
 export default function CreateOrganizationButton({
   children,

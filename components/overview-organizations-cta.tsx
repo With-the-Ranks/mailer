@@ -1,8 +1,10 @@
+import Link from "next/link";
+
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+
 import CreateOrganizationButton from "./create-organization-button";
 import CreateOrganizationModal from "./modal/create-organization";
-import Link from "next/link";
 
 export default async function OverviewOrganizationCTA() {
   const session = await getSession();

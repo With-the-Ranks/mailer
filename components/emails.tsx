@@ -1,9 +1,11 @@
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { Email } from "@prisma/client";
-import EmailCard from "./email-card";
+import type { Email } from "@prisma/client";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+
+import { getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+import EmailCard from "./email-card";
 
 export default async function Emails({
   organizationId,

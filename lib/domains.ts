@@ -1,6 +1,6 @@
-import {
-  DomainResponse,
+import type {
   DomainConfigResponse,
+  DomainResponse,
   DomainVerificationResponse,
 } from "@/lib/types";
 

@@ -1,10 +1,9 @@
-import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { getPostData, getOrganizationData } from "@/lib/fetchers";
-import BlogCard from "@/components/blog-card";
-import BlurImage from "@/components/blur-image";
-import { placeholderBlurhash, toDateString } from "@/lib/utils";
 import { Maily } from "@maily-to/render";
+import { notFound } from "next/navigation";
+
+import { getOrganizationData, getPostData } from "@/lib/fetchers";
+import prisma from "@/lib/prisma";
+import { toDateString } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -66,6 +65,29 @@ export async function generateStaticParams() {
     .filter(Boolean);
 
   return allPaths;
+}
+
+async function parseEmailContent(
+  content: string | null,
+  previewText: string | null,
+) {
+  if (!content) {
+    return "";
+  }
+
+  let jsonContent;
+  try {
+    jsonContent = JSON.parse(content);
+  } catch (error) {
+    console.error("Invalid JSON content:", content);
+    return "Invalid email content.";
+  }
+
+  const maily = new Maily(jsonContent);
+  if (previewText) {
+    maily.setPreviewText(previewText);
+  }
+  return await maily.renderAsync();
 }
 
 export default async function OrganizationPostPage({
@@ -132,27 +154,4 @@ export default async function OrganizationPostPage({
       />
     </>
   );
-}
-
-async function parseEmailContent(
-  content: string | null,
-  previewText: string | null,
-) {
-  if (!content) {
-    return "";
-  }
-
-  let jsonContent;
-  try {
-    jsonContent = JSON.parse(content);
-  } catch (error) {
-    console.error("Invalid JSON content:", content);
-    return "Invalid email content.";
-  }
-
-  const maily = new Maily(jsonContent);
-  if (previewText) {
-    maily.setPreviewText(previewText);
-  }
-  return await maily.renderAsync();
 }

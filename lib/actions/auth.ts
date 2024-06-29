@@ -1,7 +1,8 @@
 "use server";
 
-import prisma from "@/lib/prisma";
 import { hash } from "bcrypt";
+
+import prisma from "@/lib/prisma";
 
 // User registration function
 export const registerUser = async (formData: FormData) => {

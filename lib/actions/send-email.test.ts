@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from "vitest";
 import { faker } from "@faker-js/faker";
+import { describe, expect, test, vi } from "vitest";
 
 type MockResponse = { data: { message: string } | null; error: string | null };
 

@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import LoadingDots from "@/components/icons/loading-dots";
+import { cn } from "@/lib/utils";
 
 interface FormButtonProps {
   isSubmitting: boolean;

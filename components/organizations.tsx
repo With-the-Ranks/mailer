@@ -1,9 +1,11 @@
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { Organization } from "@prisma/client";
-import OrganizationCard from "./organization-card";
+import type { Organization } from "@prisma/client";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+
+import { getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+import OrganizationCard from "./organization-card";
 
 export default async function Organizations({
   organizations,

@@ -1,15 +1,19 @@
 "use client";
 
+import "react-multi-email/dist/style.css";
+
+import { Editor as MailyEditor } from "@maily-to/core";
+import type { Email } from "@prisma/client";
+import { ExternalLink, Loader2, X } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { Email } from "@prisma/client";
+import { toast } from "sonner";
+
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
 import { sendEmail } from "@/lib/actions/send-email";
-import { Editor as MailyEditor, type EditorProps } from "@maily-to/core";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { ExternalLink, Loader2, X } from "lucide-react";
 
 type EmailWithSite = Email & {
   organization: { subdomain: string | null } | null;

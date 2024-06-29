@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  Card,
-  Text,
-  Title,
+  AreaChart,
   BarList,
+  Bold,
+  Card,
   Flex,
   Grid,
-  Bold,
-  AreaChart,
+  Text,
+  Title,
 } from "@tremor/react";
 import Image from "next/image";
 

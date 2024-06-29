@@ -1,11 +1,12 @@
 "use client";
 
+import va from "@vercel/analytics";
+import { useParams, useRouter } from "next/navigation";
 import { useTransition } from "react";
+
+import LoadingDots from "@/components/icons/loading-dots";
 import { createEmail } from "@/lib/actions";
 import { cn } from "@/lib/utils";
-import { useParams, useRouter } from "next/navigation";
-import LoadingDots from "@/components/icons/loading-dots";
-import va from "@vercel/analytics";
 
 export default function CreateEmailButton() {
   const router = useRouter();

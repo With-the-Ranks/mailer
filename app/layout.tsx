@@ -1,9 +1,12 @@
 import "@/styles/globals.css";
-import { cal, inter } from "@/styles/fonts";
+
 import { Analytics } from "@vercel/analytics/react";
-import { Providers } from "./providers";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+
 import { cn } from "@/lib/utils";
+import { cal, inter } from "@/styles/fonts";
+
+import { Providers } from "./providers";
 
 const title =
   "Intrepid Email Campaign – The ultimate solution for managing and automating digital campaigns.";
