@@ -37,6 +37,7 @@ export function AddAudienceModal({
 
     if ("error" in response) {
       setError(response.error);
+      toast.error(response.error);
     } else {
       router.refresh();
       toast.success("Audience added successfully");

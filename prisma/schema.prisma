@@ -139,7 +139,7 @@ model AudienceList {
 
 model Audience {
   id             String        @id @default(cuid())
-  email          String
+  email          String        @unique
   firstName      String
   lastName       String
   audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
