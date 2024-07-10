@@ -6,6 +6,7 @@ import { Editor as MailyEditor } from "@maily-to/core";
 import type { Email } from "@prisma/client";
 import { ExternalLink, Loader2, X } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
+import Select from "react-select";
 import { toast } from "sonner";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
@@ -46,7 +47,9 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     };
   }, [data, startTransitionSaving]);
 
-  const defaultHtml = `<img src="https://app.kahbob.com/_next/image?url=%2Flogo.png&w=128&q=75" data-maily-component="logo" data-size="md" data-alignment="left" style="position:relative;margin-top:0;height:48px;margin-right:auto;margin-left:0"><div data-maily-component="spacer" data-height="xl" style="width: 100%; height: 64px;" class="spacer" contenteditable="false"></div><h2><strong>Discover Intrepid Email Campaign</strong></h2><p>Are you ready to take your digital marketing to the next level? Introducing Intrepid Email Campaign, the ultimate solution for managing and automating your digital campaigns effortlessly.</p><p>Elevate your marketing efforts with Intrepid Email Campaign! Click below to try it out:</p><a data-maily-component="button" mailycomponent="button" text="Try Intrepid Now →" url="" alignment="left" variant="filled" borderradius="round" buttoncolor="#141313" textcolor="#ffffff"></a><div data-maily-component="spacer" data-height="xl" style="width: 100%; height: 64px;" class="spacer" contenteditable="false"></div><p>Join our vibrant community of users and developers on GitHub, where Intrepid is an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/arikchakma/maily.to"><em>open-source</em></a> project. Together, we'll shape the future of digital marketing.</p><p>Regards,<br>The Intrepid Team</p>`;
+  const donationHtml = `<img src="https://app.kahbob.com/_next/image?url=%2Flogo.png&w=128&q=75" data-maily-component="logo" data-size="md" data-alignment="left" style="position:relative;margin-top:0;height:48px;margin-right:auto;margin-left:0"><div data-maily-component="spacer" data-height="xl" style="width: 100%; height: 64px;" class="spacer" contenteditable="false"></div><h2><strong>Donation Intrepid Email</strong></h2><p>Are you ready to take your digital marketing to the next level? Introducing Intrepid Email Campaign, the ultimate solution for managing and automating your digital campaigns effortlessly.</p><p>Elevate your marketing efforts with Intrepid Email Campaign! Click below to try it out:</p><a data-maily-component="button" mailycomponent="button" text="Try Intrepid Now →" url="" alignment="left" variant="filled" borderradius="round" buttoncolor="#141313" textcolor="#ffffff"></a><div data-maily-component="spacer" data-height="xl" style="width: 100%; height: 64px;" class="spacer" contenteditable="false"></div><p>Join our vibrant community of users and developers on GitHub, where Intrepid is an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/arikchakma/maily.to"><em>open-source</em></a> project. Together, we'll shape the future of digital marketing.</p><p>Regards,<br>The Intrepid Team</p>`;
+
+  const signupHtml = `<img src="https://app.kahbob.com/_next/image?url=%2Flogo.png&w=128&q=75" data-maily-component="logo" data-size="md" data-alignment="left" style="position:relative;margin-top:0;height:48px;margin-right:auto;margin-left:0"><div data-maily-component="spacer" data-height="xl" style="width: 100%; height: 64px;" class="spacer" contenteditable="false"></div><h2><strong>Signup Intrepid Email</strong></h2><p>Are you ready to take your digital marketing to the next level? Introducing Intrepid Email Campaign, the ultimate solution for managing and automating your digital campaigns effortlessly.</p><p>Elevate your marketing efforts with Intrepid Email Campaign! Click below to try it out:</p><a data-maily-component="button" mailycomponent="button" text="Try Intrepid Now →" url="" alignment="left" variant="filled" borderradius="round" buttoncolor="#141313" textcolor="#ffffff"></a><div data-maily-component="spacer" data-height="xl" style="width: 100%; height: 64px;" class="spacer" contenteditable="false"></div><p>Join our vibrant community of users and developers on GitHub, where Intrepid is an <a target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/arikchakma/maily.to"><em>open-source</em></a> project. Together, we'll shape the future of digital marketing.</p><p>Regards,<br>The Intrepid Team</p>`;
 
   const handleSendEmail = async () => {
     try {
@@ -65,6 +68,19 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       }
     } catch (error) {
       toast.error("Failed to send email");
+    }
+  };
+
+  const templateOptions = [
+    { value: "signup", label: "Signup" },
+    { value: "donation", label: "Donation" },
+  ];
+
+  const getDefaultValueSelect = (value: string | null) => {
+    if (value === "signup") {
+      return { value: "signup", label: "Signup" };
+    } else {
+      return { value: "donation", label: "Donation" };
     }
   };
 
@@ -215,6 +231,17 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           value={data.previewText || ""}
         />
       </div>
+
+      <div className="relative my-6">
+        <Select
+          className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+          onChange={(e) => (e ? setData({ ...data, template: e.value }) : null)}
+          placeholder="Template"
+          defaultValue={getDefaultValueSelect(data.template)}
+          options={templateOptions}
+        />
+      </div>
+
       <div>
         {!hydrated ? (
           <div className="flex items-center justify-center">
@@ -231,8 +258,9 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               spellCheck: false,
               autofocus: false,
             }}
-            contentHtml={defaultHtml}
+            contentHtml={data.template == "signup" ? signupHtml : donationHtml}
             contentJson={data.content ? JSON.parse(data.content) : undefined}
+            key={data.template}
             onCreate={() => {
               setHydrated(true);
             }}
