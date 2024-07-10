@@ -52,8 +52,36 @@ export const addAudience = async (formData: FormData) => {
     return newAudience;
   } catch (error: any) {
     if (error.code === "P2002" && error.meta?.target?.includes("email")) {
-      return { error: "Email already exists on the list." };
+      return { error: "Email already exists." };
     }
     return { error: "Unable to add audience." };
+  }
+};
+
+// Update an individual audience
+export const updateAudience = async (id: string, data: any) => {
+  try {
+    const updatedAudience = await prisma.audience.update({
+      where: { id },
+      data,
+    });
+    return updatedAudience;
+  } catch (error: any) {
+    if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+      return { error: "Email already exists." };
+    }
+    return { error: "Unable to update audience." };
+  }
+};
+
+// Delete an individual audience
+export const deleteAudience = async (id: string) => {
+  try {
+    await prisma.audience.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { error: "Unable to delete audience." };
   }
 };
