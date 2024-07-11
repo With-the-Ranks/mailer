@@ -73,7 +73,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   };
 
-  const handlePublish = async () => {
+  const handleClickPublish = async () => {
     if (!data.title || !data.subject || !data.emailsTo[0]) {
       toast.error("Campaign name, subject, and recipient are required.");
       return;
