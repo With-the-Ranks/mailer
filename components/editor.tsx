@@ -68,6 +68,39 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   };
 
+  const handleSaveContent = async () => {
+    try {
+      await updateEmail(data);
+      toast.success("Content saved successfully");
+    } catch (error) {
+      toast.error("Failed to save content");
+    }
+  };
+
+  const handleClickPublish = async () => {
+    if (!data.title || !data.subject || !data.emailsTo[0]) {
+      toast.error("Campaign name, subject, and recipient are required.");
+      return;
+    }
+
+    try {
+      await handleSaveContent();
+      if (!data.published) {
+        await handleSendEmail();
+      }
+      const formData = new FormData();
+      formData.append("published", String(!data.published));
+      await updatePostMetadata(formData, email.id, "published").then(() => {
+        toast.success(
+          `Successfully ${data.published ? "unpublished" : "published"} your email.`,
+        );
+        setData((prev) => ({ ...prev, published: !prev.published }));
+      });
+    } catch (error) {
+      toast.error("Failed to publish email.");
+    }
+  };
+
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex items-center space-x-3">
@@ -85,27 +118,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
         <button
-          onClick={async () => {
-            const formData = new FormData();
-            formData.append("published", String(!data.published));
-            startTransitionPublishing(async () => {
-              await updatePostMetadata(formData, email.id, "published").then(
-                async () => {
-                  toast.success(
-                    `Successfully ${
-                      data.published ? "unpublished" : "published"
-                    } your email.`,
-                  );
-                  setData((prev) => ({ ...prev, published: !prev.published }));
-
-                  // Send email if publishing
-                  if (!data.published) {
-                    await handleSendEmail();
-                  }
-                },
-              );
-            });
-          }}
+          onClick={() => startTransitionPublishing(handleClickPublish)}
           className={cn(
             "flex h-7 w-24 items-center justify-center space-x-2 rounded-lg border text-sm transition-all focus:outline-none",
             isPendingPublishing
@@ -129,6 +142,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           autoFocus
           onChange={(e) => setData({ ...data, title: e.target.value })}
           className="dark:placeholder-text-600 border-none px-0 font-cal text-3xl placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
+          required
         />
       </div>
       <Label className="flex items-center font-normal">
@@ -141,6 +155,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           placeholder="Email Subject"
           type="text"
           value={data.subject || ""}
+          required
         />
       </Label>
       <div className="flex items-center gap-1.5">
@@ -196,13 +211,16 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         </Label>
       ) : null}
       <Label className="flex items-center font-normal">
-        <span className="w-20 shrink-0 font-normal text-gray-600">To</span>
+        <span className="w-20 shrink-0 font-normal text-gray-600 after:text-red-400 after:content-['*']">
+          To{" "}
+        </span>
         <Input
           className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
           onChange={(e) => setData({ ...data, emailsTo: [e.target.value] })}
           placeholder="Email Recipient(s)"
           type="text"
           value={data.emailsTo?.[0] || ""}
+          required
         />
       </Label>
 
@@ -233,8 +251,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             }}
             contentHtml={defaultHtml}
             contentJson={data.content ? JSON.parse(data.content) : undefined}
-            onCreate={() => {
+            onCreate={(editor) => {
               setHydrated(true);
+              setData((prev) => ({
+                ...prev,
+                content: JSON.stringify(editor?.getJSON() || {}),
+              }));
             }}
             onUpdate={(editor) => {
               setData((prev) => ({
