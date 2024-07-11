@@ -2,7 +2,7 @@
 
 import type { Audience } from "@prisma/client";
 import { MoveHorizontalIcon, PlusIcon, UploadIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -34,13 +34,17 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [audiences, setAudiences] = useState<Audience[]>(audienceList);
 
+  useEffect(() => {
+    setAudiences(audienceList);
+  }, [audienceList]);
+
   const handleAddEntryClick = () => {
     setIsModalOpen(true);
   };
 
   const handleDeleteEntryClick = async (audienceId: string) => {
     const response = await deleteAudience(audienceId);
-    if (response.error) {
+    if ("error" in response) {
       toast.error(response.error);
     } else {
       setAudiences(audiences.filter((audience) => audience.id !== audienceId));
