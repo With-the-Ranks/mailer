@@ -114,7 +114,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
         <button
-          onClick={() => startTransitionPublishing(handlePublish)}
+          onClick={() => startTransitionPublishing(handleClickPublish)}
           className={cn(
             "flex h-7 w-24 items-center justify-center space-x-2 rounded-lg border text-sm transition-all focus:outline-none",
             isPendingPublishing
