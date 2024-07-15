@@ -51,8 +51,11 @@ export const addAudience = async (formData: FormData) => {
     });
     return newAudience;
   } catch (error: any) {
-    if (error.code === "P2002" && error.meta?.target?.includes("email")) {
-      return { error: "Email already exists." };
+    if (
+      error.code === "P2002" &&
+      error.meta?.target?.includes("audienceListId_email")
+    ) {
+      return { error: "This email already exists in the audience list" };
     }
     return { error: "Unable to add audience." };
   }
