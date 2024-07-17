@@ -101,6 +101,9 @@ dependencies:
   openai-edge:
     specifier: ^1.2.2
     version: 1.2.2
+  papaparse:
+    specifier: ^5.4.1
+    version: 5.4.1
   react:
     specifier: ^18.2.0
     version: 18.3.1
@@ -166,6 +169,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.9.0
     version: 20.12.13
+  '@types/papaparse':
+    specifier: ^5.3.14
+    version: 5.3.14
   '@types/react':
     specifier: ^18.2.37
     version: 18.3.3
@@ -3756,6 +3762,12 @@ packages:
     resolution: {integrity: sha512-gBGeanV41c1L171rR7wjbMiEpEI/l5XFQdLLfhr/REwpgDy/4U8y89+i8kRiLzDyZdOkXh+cRaTetUnCYutoXA==}
     dependencies:
       undici-types: 5.26.5
+
+  /@types/papaparse@5.3.14:
+    resolution: {integrity: sha512-LxJ4iEFcpqc6METwp9f6BV6VVc43m6MfH0VqFosHvrUgfXiFe6ww7R3itkOQ+TCK6Y+Iv/+RnnvtRZnkc5Kc9g==}
+    dependencies:
+      '@types/node': 20.12.13
+    dev: true
 
   /@types/pg@8.6.6:
     resolution: {integrity: sha512-O2xNmXebtwVekJDD+02udOncjVcMZQuTEQEMpKJ0ZRf5E7/9JJX3izhKUcUifBkyKpljyUM6BTgy2trmviKlpw==}
@@ -8483,6 +8495,10 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       p-limit: 3.1.0
+
+  /papaparse@5.4.1:
+    resolution: {integrity: sha512-HipMsgJkZu8br23pW15uvo6sib6wne/4woLZPlFf3rpDyMe9ywEXUsuD7+6K9PRkJlVT51j/sCOYDKGGS3ZJrw==}
+    dev: false
 
   /parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}

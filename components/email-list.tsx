@@ -2,7 +2,8 @@
 
 import type { Audience } from "@prisma/client";
 import { MoveHorizontalIcon, PlusIcon, UploadIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import Papa from "papaparse";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { deleteAudience, updateAudience } from "@/lib/actions/audience-list";
+import {
+  addAudience,
+  deleteAudience,
+  updateAudience,
+} from "@/lib/actions/audience-list";
 
 import { AddAudienceModal } from "./add-audience-modal";
 
@@ -33,6 +38,7 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [audiences, setAudiences] = useState<Audience[]>(audienceList);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setAudiences(audienceList);
@@ -80,6 +86,50 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
     setAudiences(updatedAudiences);
   };
 
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        complete: async (results) => {
+          const newEntries = results.data.map((entry: any) => ({
+            email: entry.email,
+            firstName: entry.firstName,
+            lastName: entry.lastName,
+            audienceListId: audienceListId,
+          }));
+
+          for (const entry of newEntries) {
+            const formData = new FormData();
+            formData.append("email", entry.email);
+            formData.append("firstName", entry.firstName);
+            formData.append("lastName", entry.lastName);
+            formData.append("audienceListId", audienceListId);
+
+            const response = await addAudience(formData);
+            if ("error" in response) {
+              toast.error(`Failed to add: ${entry.email}`);
+            } else {
+              setAudiences((prev) => [...prev, response as Audience]);
+            }
+          }
+
+          toast.success("Entries imported successfully");
+        },
+        error: (error) => {
+          toast.error("Failed to process CSV file");
+          console.error(error);
+        },
+      });
+    }
+  };
+
+  const handleImportEntriesClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="mx-auto w-full max-w-4xl">
       <div className="mb-4 flex items-center justify-between">
@@ -89,10 +139,17 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Entry
           </Button>
-          <Button variant="custom">
+          <Button variant="custom" onClick={handleImportEntriesClick}>
             <UploadIcon className="mr-2 h-4 w-4" />
             Import Entries
           </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
         </div>
       </div>
       <div className="overflow-hidden rounded-lg border">
