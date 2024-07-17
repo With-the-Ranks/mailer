@@ -453,3 +453,22 @@ export const editUser = async (
     }
   }
 };
+
+export const fetchAudienceLists = async () => {
+  try {
+    const audienceLists = await prisma.audienceList.findMany({
+      include: {
+        audiences: true,
+      },
+    });
+
+    return audienceLists.map((list) => ({
+      id: list.id,
+      name: list.name,
+      contactCount: list.audiences.length,
+    }));
+  } catch (error) {
+    console.error("Error fetching audience lists:", error);
+    throw new Error("Failed to fetch audience lists");
+  }
+};
