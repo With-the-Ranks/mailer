@@ -29,6 +29,7 @@ const mockMailyRender = () => {
       Maily: vi.fn().mockImplementation(() => ({
         setPreviewText: vi.fn(),
         renderAsync: vi.fn().mockResolvedValue("<html>Email content</html>"),
+        setVariableValues: vi.fn(),
       })),
     };
   });
