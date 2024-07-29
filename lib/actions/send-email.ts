@@ -10,10 +10,15 @@ import prisma from "@/lib/prisma";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.EMAIL_DOMAIN;
 
-const parseContent = async (content: string, previewText: string | null) => {
+const parseContent = async (
+  content: string,
+  variables: Record<string, string>,
+  previewText: string | null,
+) => {
   try {
     const jsonContent = JSON.parse(content);
     const maily = new Maily(jsonContent);
+    maily.setVariableValues(variables);
     if (previewText) {
       maily.setPreviewText(previewText);
     }
@@ -44,7 +49,7 @@ export const sendEmail = async ({
       subject: subject,
     };
     if (content) {
-      const htmlContent = await parseContent(content, previewText);
+      const htmlContent = await parseContent(content, {}, previewText);
       resendEmail.html = htmlContent;
     } else {
       resendEmail.react = WelcomeTemplate({ email: to }) as React.ReactElement;
@@ -91,28 +96,36 @@ export const sendBulkEmail = async ({
     return { error: "Audience list not found" };
   }
 
-  const emails = audienceList.audiences.map((audience) => audience.email);
-
   try {
-    const htmlContent = content
-      ? await parseContent(content, previewText)
-      : null;
+    for (const audience of audienceList.audiences) {
+      const htmlContent = content
+        ? await parseContent(
+            content,
+            {
+              email: audience.email,
+              first_name: audience.firstName,
+              last_name: audience.lastName,
+            },
+            previewText,
+          )
+        : null;
 
-    const emailBatch = emails.map((email) => ({
-      from: `${from} <${domain}>`,
-      to: [email],
-      subject: subject || "No Subject",
-      html: htmlContent || "",
-      text: "",
-    }));
+      const emailData = {
+        from: `${from} <${domain}>`,
+        to: [audience.email],
+        subject: subject || "No Subject",
+        html: htmlContent || "",
+        text: "",
+      };
 
-    const { data, error } = await resend.batch.send(emailBatch);
+      const { error } = await resend.emails.send(emailData);
 
-    if (error) {
-      return { error };
+      if (error) {
+        console.error(`Failed to send email to ${audience.email}: ${error}`);
+      }
     }
 
-    return { data };
+    return { success: true };
   } catch (e) {
     console.error("Error sending bulk email:", e);
     return { error: "Something went wrong" };

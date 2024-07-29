@@ -30,7 +30,11 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
   >(null);
-
+  const variables = [
+    { name: "email" },
+    { name: "first_name" },
+    { name: "last_name" },
+  ];
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
     ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
     : `http://${data.organization?.subdomain}.localhost:3000/${data.slug}`;
@@ -256,6 +260,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 content: JSON.stringify(editor?.getJSON() || {}),
               }));
             }}
+            variables={variables}
           />
         )}
       </div>
