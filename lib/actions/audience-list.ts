@@ -3,6 +3,14 @@
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+// Custom Error Class for Handling Specific Errors
+class DuplicateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DuplicateError";
+  }
+}
+
 // Create an audience list
 export const createAudienceList = async (formData: FormData) => {
   const session = await getSession();
@@ -71,7 +79,7 @@ export const updateAudience = async (id: string, data: any) => {
     return updatedAudience;
   } catch (error: any) {
     if (error.code === "P2002" && error.meta?.target?.includes("email")) {
-      return { error: "Email already exists." };
+      throw new DuplicateError("Email already exists.");
     }
     return { error: "Unable to update audience." };
   }
@@ -86,5 +94,17 @@ export const deleteAudience = async (id: string) => {
     return { success: true };
   } catch (error: any) {
     return { error: "Unable to delete audience." };
+  }
+};
+
+// Fetch all audiences
+export const getAudiences = async (audienceListId: string) => {
+  try {
+    const audiences = await prisma.audience.findMany({
+      where: { audienceListId },
+    });
+    return audiences;
+  } catch (error: any) {
+    return { error: "Unable to fetch audiences." };
   }
 };
