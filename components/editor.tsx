@@ -10,9 +10,10 @@ import Select from "react-select";
 import { toast } from "sonner";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
-import { sendEmail } from "@/lib/actions/send-email";
+import { sendBulkEmail } from "@/lib/actions/send-email";
 import { cn } from "@/lib/utils";
 
+import { AudienceListDropdown } from "./audience-list-dropdown";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -28,6 +29,9 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [hydrated, setHydrated] = useState(true);
   const [from, setFrom] = useState(email.from || "noreply@painatthepump.com");
   const [showReplyTo, setShowReplyTo] = useState(false);
+  const [selectedAudienceList, setSelectedAudienceList] = useState<
+    string | null
+  >(null);
 
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
     ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
@@ -54,9 +58,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const handleSendEmail = async () => {
     try {
+      if (!selectedAudienceList) {
+        toast.error("Please select an audience list.");
+        return;
+      }
+
       const content = data.content;
-      const result = await sendEmail({
-        to: data.emailsTo[0],
+      const result = await sendBulkEmail({
+        audienceListId: selectedAudienceList,
         from,
         subject: data.subject,
         content,
@@ -65,7 +74,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
       } else {
-        toast.success("Email sent successfully");
+        toast.success("Emails sent successfully");
       }
     } catch (error) {
       toast.error("Failed to send email");
@@ -163,7 +172,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         />
       </div>
       <Label className="flex items-center font-normal">
-        <span className="w-20 shrink-0 font-normal text-gray-600 after:ml-0.5 after:text-red-400 after:content-['*']">
+        <span className="w-40 shrink-0 font-normal text-gray-600 after:ml-0.5 after:text-red-400 after:content-['*']">
           Subject
         </span>
         <Input
@@ -177,7 +186,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       </Label>
       <div className="flex items-center gap-1.5">
         <Label className="flex grow items-center font-normal">
-          <span className="w-20 shrink-0 font-normal text-gray-600">From</span>
+          <span className="w-40 shrink-0 font-normal text-gray-600">From</span>
           <Input
             className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
             onChange={(e) => {
@@ -204,7 +213,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       </div>
       {showReplyTo ? (
         <Label className="flex items-center font-normal">
-          <span className="w-20 shrink-0 font-normal text-gray-600">
+          <span className="w-40 shrink-0 font-normal text-gray-600">
             Reply-To
           </span>
           <div className="align-content-stretch flex grow items-center">
@@ -227,8 +236,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </div>
         </Label>
       ) : null}
-      <Label className="flex items-center font-normal">
-        <span className="w-20 shrink-0 font-normal text-gray-600 after:text-red-400 after:content-['*']">
+      {/* <Label className="flex items-center font-normal">
+        <span className="w-40 shrink-0 font-normal text-gray-600 after:text-red-400 after:content-['*']">
           To{" "}
         </span>
         <Input
@@ -239,7 +248,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           value={data.emailsTo?.[0] || ""}
           required
         />
-      </Label>
+      </Label> */}
+
+      <AudienceListDropdown
+        selectedAudienceList={selectedAudienceList}
+        setSelectedAudienceList={setSelectedAudienceList}
+      />
 
       <div className="relative my-6">
         <Input

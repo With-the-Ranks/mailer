@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Menu,
   Newspaper,
+  RadioTower,
   Settings,
 } from "lucide-react";
 import Image from "next/image";
@@ -51,6 +52,12 @@ export default function Nav({ children }: { children: ReactNode }) {
           icon: <Newspaper width={18} />,
         },
         {
+          name: "Audience",
+          href: `/organization/${id}/audience`,
+          isActive: segments.includes("audience"),
+          icon: <RadioTower width={18} />,
+        },
+        {
           name: "Analytics",
           href: `/organization/${id}/analytics`,
           isActive: segments.includes("analytics"),
@@ -82,6 +89,26 @@ export default function Nav({ children }: { children: ReactNode }) {
           isActive: segments.includes("settings"),
           icon: <Settings width={18} />,
         },
+      ];
+    } else if (segments[0] === "audience" && id) {
+      return [
+        {
+          name: "Back to Audience Lists",
+          href: siteId ? `/organization/${siteId}/audience` : "/organizations",
+          icon: <ArrowLeft width={18} />,
+        },
+        {
+          name: "Audience",
+          href: `/audience/${id}`,
+          isActive: segments.length === 2,
+          icon: <RadioTower width={18} />,
+        },
+        // {
+        //   name: "Settings",
+        //   href: `/audience/${id}/settings`,
+        //   isActive: segments.includes("settings"),
+        //   icon: <Settings width={18} />,
+        // },
       ];
     }
     return [
@@ -131,7 +158,7 @@ export default function Nav({ children }: { children: ReactNode }) {
       <div
         className={`transform ${
           showSidebar ? "w-full translate-x-0" : "-translate-x-full"
-        } fixed z-10 flex h-full flex-col justify-between border-r border-stone-200 bg-stone-100 p-4 transition-all sm:w-60 sm:translate-x-0 dark:border-stone-700 dark:bg-stone-900`}
+        } fixed z-10 flex h-full flex-col justify-between border-r border-stone-200 bg-stone-100 p-4 transition-all dark:border-stone-700 dark:bg-stone-900 sm:w-60 sm:translate-x-0`}
       >
         <div className="grid gap-2">
           <div className="flex items-center space-x-2 rounded-lg px-2 py-1.5">

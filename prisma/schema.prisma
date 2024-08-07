@@ -114,6 +114,7 @@ model Organization {
   updatedAt     DateTime @updatedAt
   users         User[]
   emails        Email[]
+  audienceLists AudienceList[]
 }
 
 model Example {
@@ -124,4 +125,27 @@ model Example {
   url           String?
   image         String? @db.Text
   imageBlurhash String? @db.Text
+}
+
+model AudienceList {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  audiences      Audience[]
+}
+
+model Audience {
+  id             String        @id @default(cuid())
+  email          String
+  firstName      String
+  lastName       String
+  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+  audienceListId String
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([audienceListId, email])
 }

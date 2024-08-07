@@ -3,7 +3,9 @@
 import { Maily } from "@maily-to/render";
 import { Resend } from "resend";
 
+import { getSession } from "@/lib/auth";
 import WelcomeTemplate from "@/lib/email-templates/welcome-template";
+import prisma from "@/lib/prisma";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.EMAIL_DOMAIN;
@@ -58,6 +60,61 @@ export const sendEmail = async ({
 
     return { data };
   } catch (e) {
+    return { error: "Something went wrong" };
+  }
+};
+
+export const sendBulkEmail = async ({
+  audienceListId,
+  from,
+  subject,
+  content,
+  previewText,
+}: {
+  audienceListId: string;
+  from: string;
+  subject: string | null;
+  content: string | null;
+  previewText: string | null;
+}) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const audienceList = await prisma.audienceList.findUnique({
+    where: { id: audienceListId },
+    include: { audiences: true },
+  });
+
+  if (!audienceList) {
+    return { error: "Audience list not found" };
+  }
+
+  const emails = audienceList.audiences.map((audience) => audience.email);
+
+  try {
+    const htmlContent = content
+      ? await parseContent(content, previewText)
+      : null;
+
+    const emailBatch = emails.map((email) => ({
+      from: `${from} <${domain}>`,
+      to: [email],
+      subject: subject || "No Subject",
+      html: htmlContent || "",
+      text: "",
+    }));
+
+    const { data, error } = await resend.batch.send(emailBatch);
+
+    if (error) {
+      return { error };
+    }
+
+    return { data };
+  } catch (e) {
+    console.error("Error sending bulk email:", e);
     return { error: "Something went wrong" };
   }
 };
