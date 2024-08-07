@@ -306,6 +306,7 @@ export const updateEmail = async (data: Email) => {
         emailsTo: data.emailsTo,
         previewText: data.previewText,
         subject: data.subject,
+        template: data.template,
       },
     });
 
