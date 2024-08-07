@@ -24,6 +24,8 @@ import {
 import {
   addAudience,
   deleteAudience,
+  getAudiences,
+  isErrorResponse,
   updateAudience,
 } from "@/lib/actions/audience-list";
 
@@ -50,11 +52,16 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
 
   const handleDeleteEntryClick = async (audienceId: string) => {
     const response = await deleteAudience(audienceId);
-    if ("error" in response) {
+    if (isErrorResponse(response)) {
       toast.error(response.error);
     } else {
-      setAudiences(audiences.filter((audience) => audience.id !== audienceId));
-      toast.success("Audience deleted successfully");
+      const updatedAudiences = await getAudiences(audienceListId);
+      if (isErrorResponse(updatedAudiences)) {
+        toast.error(updatedAudiences.error);
+      } else {
+        setAudiences(updatedAudiences);
+        toast.success("Audience deleted successfully");
+      }
     }
   };
 
@@ -65,7 +72,7 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
       firstName: audience.firstName,
       lastName: audience.lastName,
     });
-    if ("error" in response) {
+    if (isErrorResponse(response)) {
       toast.error(response.error);
     } else {
       const updatedAudiences = [...audiences];
@@ -109,7 +116,7 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
             formData.append("audienceListId", audienceListId);
 
             const response = await addAudience(formData);
-            if ("error" in response) {
+            if (isErrorResponse(response)) {
               toast.error(`Failed to add: ${entry.email}`);
             } else {
               setAudiences((prev) => [...prev, response as Audience]);
