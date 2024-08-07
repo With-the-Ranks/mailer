@@ -11,13 +11,6 @@ class DuplicateError extends Error {
   }
 }
 
-// Type Guard for Error Response
-export const isErrorResponse = (
-  response: any,
-): response is { error: string } => {
-  return "error" in response;
-};
-
 // Create an audience list
 export const createAudienceList = async (formData: FormData) => {
   const session = await getSession();

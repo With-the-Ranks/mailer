@@ -25,9 +25,9 @@ import {
   addAudience,
   deleteAudience,
   getAudiences,
-  isErrorResponse,
   updateAudience,
 } from "@/lib/actions/audience-list";
+import { isErrorResponse } from "@/lib/utils";
 
 import { AddAudienceModal } from "./add-audience-modal";
 
