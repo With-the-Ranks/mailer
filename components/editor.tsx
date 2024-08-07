@@ -108,8 +108,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   };
 
   const handleClickPublish = async () => {
-    if (!data.title || !data.subject || !data.emailsTo[0]) {
-      toast.error("Campaign name, subject, and recipient are required.");
+    if (!data.title || !data.subject) {
+      toast.error("Campaign name and subject are required.");
       return;
     }
 
@@ -258,7 +258,18 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         selectedAudienceList={selectedAudienceList}
         setSelectedAudienceList={setSelectedAudienceList}
       />
-
+      <Label className="flex items-center font-normal">
+        <span className="w-40 shrink-0 font-normal text-gray-600">
+          Template
+        </span>
+        <Select
+          className="h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+          onChange={(e) => (e ? setData({ ...data, template: e.value }) : null)}
+          placeholder="Select a template"
+          defaultValue={getDefaultValueSelect(data.template ?? null)}
+          options={templateOptions}
+        />
+      </Label>
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -266,16 +277,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           placeholder="Preview Text"
           type="text"
           value={data.previewText || ""}
-        />
-      </div>
-
-      <div className="relative my-6">
-        <Select
-          className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => (e ? setData({ ...data, template: e.value }) : null)}
-          placeholder="Template"
-          defaultValue={getDefaultValueSelect(data.template ?? null)}
-          options={templateOptions}
         />
       </div>
 

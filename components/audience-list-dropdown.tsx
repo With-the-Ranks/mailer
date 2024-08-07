@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { fetchAudienceLists } from "@/lib/actions";
 
+import { Label } from "./ui/label";
+
 interface AudienceListDropdownProps {
   selectedAudienceList: string | null;
   // eslint-disable-next-line no-unused-vars
@@ -26,7 +28,7 @@ export function AudienceListDropdown({
   }, []);
 
   return (
-    <label className="flex items-center font-normal">
+    <Label className="flex items-center font-normal">
       <span className="w-40 shrink-0 font-normal text-gray-600">
         Audience List
       </span>
@@ -44,6 +46,6 @@ export function AudienceListDropdown({
           </option>
         ))}
       </select>
-    </label>
+    </Label>
   );
 }
