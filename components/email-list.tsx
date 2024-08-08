@@ -1,11 +1,13 @@
 "use client";
 
 import type { Audience } from "@prisma/client";
-import { MoveHorizontalIcon, PlusIcon, UploadIcon } from "lucide-react";
+import { MoveHorizontalIcon, UploadIcon } from "lucide-react";
 import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import CreateAudienceButton from "@/components/create-audience-button";
+import AddAudienceModal from "@/components/modal/add-audience-modal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -29,15 +31,12 @@ import {
 } from "@/lib/actions/audience-list";
 import { isErrorResponse } from "@/lib/utils";
 
-import { AddAudienceModal } from "./add-audience-modal";
-
 interface EmailListProps {
   audienceList: Audience[];
   audienceListId: string;
 }
 
 export function EmailList({ audienceList, audienceListId }: EmailListProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [audiences, setAudiences] = useState<Audience[]>(audienceList);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,10 +44,6 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
   useEffect(() => {
     setAudiences(audienceList);
   }, [audienceList]);
-
-  const handleAddEntryClick = () => {
-    setIsModalOpen(true);
-  };
 
   const handleDeleteEntryClick = async (audienceId: string) => {
     const response = await deleteAudience(audienceId);
@@ -142,10 +137,9 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Email List</h1>
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={handleAddEntryClick}>
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Add Entry
-          </Button>
+          <CreateAudienceButton>
+            <AddAudienceModal audienceListId={audienceListId} />
+          </CreateAudienceButton>
           <Button variant="custom" onClick={handleImportEntriesClick}>
             <UploadIcon className="mr-2 h-4 w-4" />
             Import Entries
@@ -263,12 +257,6 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
           </TableBody>
         </Table>
       </div>
-      {isModalOpen && (
-        <AddAudienceModal
-          closeModal={() => setIsModalOpen(false)}
-          audienceListId={audienceListId}
-        />
-      )}
     </div>
   );
 }
