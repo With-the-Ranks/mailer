@@ -40,7 +40,7 @@ export default async function Emails({
     </div>
   ) : (
     <div className="flex flex-col items-center space-x-4">
-      <h1 className="font-cal text-4xl">No Posts Yet</h1>
+      {/* <h1 className="font-cal text-4xl">No Posts Yet</h1> */}
       <Image
         alt="missing email"
         src="/empty-state.png"
