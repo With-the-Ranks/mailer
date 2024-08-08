@@ -248,6 +248,34 @@ export const getOrganizationFromEmailId = async (emailId: string) => {
   return email?.organizationId;
 };
 
+export const getOrganizationFromUserId = async () => {
+  const session = await getSession();
+  if (!session?.user.id) return null;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      organizationId: true,
+    },
+  });
+
+  return user?.organizationId;
+};
+
+export const getOrganizationFromAudienceId = async (audienceId: string) => {
+  const audience = await prisma.audienceList.findUnique({
+    where: {
+      id: audienceId,
+    },
+    select: {
+      organizationId: true,
+    },
+  });
+  return audience?.organizationId;
+};
+
 export const createEmail = withOrgAuth(
   async (_: FormData, organization: Organization) => {
     const session = await getSession();
