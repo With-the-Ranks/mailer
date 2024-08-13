@@ -45,7 +45,7 @@ export default async function Organizations({
     </div>
   ) : (
     <div className="mt-20 flex flex-col items-center space-x-4">
-      <h1 className="font-cal text-4xl">No Sites Yet</h1>
+      {/* <h1 className="font-cal text-4xl">No Sites Yet</h1> */}
       <Image
         alt="missing organization"
         src="/empty-state.png"

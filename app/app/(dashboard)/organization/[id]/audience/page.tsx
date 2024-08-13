@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 
 import Audiences from "@/components/audiences";
-import CreateAudienceButton from "@/components/create-audience-button";
+import CreateAudienceListButton from "@/components/create-audience-list-button";
+import CreateAudienceModal from "@/components/modal/create-audience-list";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -51,7 +52,9 @@ export default async function AudienceList({
             {url} ↗
           </a>
         </div>
-        <CreateAudienceButton />
+        <CreateAudienceListButton>
+          <CreateAudienceModal organizationId={decodeURIComponent(params.id)} />
+        </CreateAudienceListButton>
       </div>
       <Audiences organizationId={decodeURIComponent(params.id)} />
     </>
