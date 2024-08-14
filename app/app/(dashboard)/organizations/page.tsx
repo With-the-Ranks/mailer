@@ -1,9 +1,6 @@
-import { Suspense } from "react";
-
 import CreateOrganizationButton from "@/components/create-organization-button";
 import CreateOrganizationModal from "@/components/modal/create-organization";
 import Organizations from "@/components/organizations";
-import PlaceholderCard from "@/components/placeholder-card";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -43,17 +40,7 @@ export default async function AllOrganizations({
             </CreateOrganizationButton>
           )}
         </div>
-        <Suspense
-          fallback={
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <PlaceholderCard key={i} />
-              ))}
-            </div>
-          }
-        >
-          <Organizations organizations={organizations} />
-        </Suspense>
+        <Organizations organizations={organizations} />
       </div>
     </div>
   );
