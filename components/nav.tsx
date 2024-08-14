@@ -108,16 +108,16 @@ export default function Nav({ children }: { children: ReactNode }) {
           icon: <Globe width={18} />,
         },
         {
-          name: "Emails",
-          href: `/organization/${siteId}`,
-          isActive: segments.length === 2,
-          icon: <Newspaper width={18} />,
-        },
-        {
           name: "Audience",
           href: `/organization/${siteId}/audience`,
           isActive: segments.includes("audience"),
           icon: <RadioTower width={18} />,
+        },
+        {
+          name: "Emails",
+          href: `/organization/${siteId}`,
+          isActive: segments.length === 2,
+          icon: <Newspaper width={18} />,
         },
         {
           name: "Settings",

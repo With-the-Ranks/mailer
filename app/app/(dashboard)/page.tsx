@@ -21,21 +21,9 @@ export default function Overview() {
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             Your Organization
           </h1>
-          <Suspense fallback={null}>
-            <OverviewOrganizationCTA />
-          </Suspense>
+          <OverviewOrganizationCTA />
         </div>
-        <Suspense
-          fallback={
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <PlaceholderCard key={i} />
-              ))}
-            </div>
-          }
-        >
-          <Organizations limit={4} />
-        </Suspense>
+        <Organizations limit={1} />
       </div>
 
       <div className="flex flex-col space-y-6">
@@ -45,7 +33,7 @@ export default function Overview() {
         <Suspense
           fallback={
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
+              {Array.from({ length: 4 }).map((_, i) => (
                 <PlaceholderCard key={i} />
               ))}
             </div>

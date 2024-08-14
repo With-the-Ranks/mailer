@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -46,7 +47,20 @@ export default function FormPage() {
             toast.error("Failed to send welcome email");
           }
 
-          router.push("/login");
+          // Automatically sign in the user after registration
+          const signInResult = await signIn("credentials", {
+            redirect: false,
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (signInResult?.error) {
+            toast.error(`Login Failed: ${signInResult.error}`);
+            router.push("/login");
+          } else {
+            toast.success("Login Successful");
+            router.push("/");
+          }
         }
       }}
       className="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-black sm:p-10"
