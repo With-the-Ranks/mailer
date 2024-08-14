@@ -67,6 +67,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const logoUrl =
     (data && data.organization && data.organization.logo) ||
     "https://upload.wikimedia.org/wikipedia/commons/d/d4/Bernie_Sanders_2016_logo.png";
+
+  console.log(logoUrl);
   const donationHtml = DonationTemplate({ logoUrl });
   const donationJSON = DonationJSON({ logoUrl });
   const signupHtml = SignupTemplate({ logoUrl });
