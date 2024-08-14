@@ -21,9 +21,7 @@ export default function Overview() {
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             Your Organization
           </h1>
-          <Suspense fallback={null}>
-            <OverviewOrganizationCTA />
-          </Suspense>
+          <OverviewOrganizationCTA />
         </div>
         <Organizations limit={1} />
       </div>
