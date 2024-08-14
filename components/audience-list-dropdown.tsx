@@ -10,18 +10,20 @@ interface AudienceListDropdownProps {
   selectedAudienceList: string | null;
   // eslint-disable-next-line no-unused-vars
   setSelectedAudienceList: (value: string | null) => void;
+  organizationId: string;
 }
 
 export function AudienceListDropdown({
   selectedAudienceList,
   setSelectedAudienceList,
+  organizationId,
 }: AudienceListDropdownProps) {
   const [audienceLists, setAudienceLists] = useState<any[]>([]);
 
   useEffect(() => {
     // Fetch audience lists
     const fetchLists = async () => {
-      const lists = await fetchAudienceLists();
+      const lists = await fetchAudienceLists(organizationId);
       setAudienceLists(lists);
     };
     fetchLists();

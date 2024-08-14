@@ -483,9 +483,10 @@ export const editUser = async (
   }
 };
 
-export const fetchAudienceLists = async () => {
+export const fetchAudienceLists = async (organizationId: string) => {
   try {
     const audienceLists = await prisma.audienceList.findMany({
+      where: { organizationId },
       include: {
         audiences: true,
       },

@@ -257,6 +257,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       <AudienceListDropdown
         selectedAudienceList={selectedAudienceList}
         setSelectedAudienceList={setSelectedAudienceList}
+        organizationId={data.organizationId ?? ""}
       />
       <Label className="flex items-center font-normal">
         <span className="w-40 shrink-0 font-normal text-gray-600">
