@@ -21,6 +21,7 @@ export default async function EmailPage({
       organization: {
         select: {
           subdomain: true,
+          logo: true,
         },
       },
     },
