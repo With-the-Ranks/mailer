@@ -115,6 +115,8 @@ export default function CreateEmailModal({
             onChange={(e) => setData({ ...data, template: e ? e.value : null })}
             placeholder="Select a template"
             options={templateOptions}
+            isSearchable={false}
+            isClearable={false}
           />
         </Label>
       </div>

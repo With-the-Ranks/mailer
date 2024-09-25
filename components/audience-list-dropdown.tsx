@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import Select from "react-select"; // Import react-select
 
 import { fetchAudienceLists } from "@/lib/actions";
 
@@ -23,10 +24,13 @@ export function AudienceListDropdown({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch audience lists
     const fetchLists = async () => {
       const lists = await fetchAudienceLists(organizationId);
-      setAudienceLists(lists);
+      const formattedLists = lists.map((list: any) => ({
+        value: list.id,
+        label: `${list.name} (${list.contactCount} contacts)`,
+      }));
+      setAudienceLists(formattedLists);
       setLoading(false);
     };
     fetchLists();
@@ -42,21 +46,25 @@ export function AudienceListDropdown({
           <Loader2 className="mr-2 animate-spin" />
         </span>
       ) : (
-        <select
-          className="h-auto w-full rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-          value={selectedAudienceList || ""}
-          onChange={(e) => setSelectedAudienceList(e.target.value)}
-        >
-          <option value="" disabled>
-            Select Audience List
-          </option>
-          {!loading &&
-            audienceLists.map((list) => (
-              <option key={list.id} value={list.id}>
-                {list.name} ({list.contactCount} contacts)
-              </option>
-            ))}
-        </select>
+        <Select
+          className="w-full"
+          value={
+            selectedAudienceList
+              ? audienceLists.find(
+                  (list) => list.value === selectedAudienceList,
+                )
+              : null
+          }
+          onChange={(selectedOption) =>
+            setSelectedAudienceList(
+              selectedOption ? selectedOption.value : null,
+            )
+          }
+          options={audienceLists}
+          placeholder="Select Audience List"
+          isClearable={false}
+          isSearchable={false}
+        />
       )}
     </Label>
   );
