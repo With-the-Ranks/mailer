@@ -171,6 +171,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
     setAudiences(updatedAudiences);
   };
 
+  // Handle CSV import with prompt for custom fields
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -179,15 +180,35 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
       Papa.parse(file, {
         header: true,
         complete: async (results) => {
-          const newEntries = results.data.map((entry: any) => ({
-            email: entry.email,
-            firstName: entry.firstName,
-            lastName: entry.lastName,
-            audienceListId: audienceListId,
-            customFields: JSON.stringify(entry.customFields || {}), // Handle custom fields as JSON string
-          }));
+          const newEntries = results.data.map((entry: any) => {
+            // Map custom fields from CSV into the expected format
+            const customFieldsData = customFields.reduce(
+              (acc, field) => {
+                if (entry[field] !== undefined) {
+                  acc[field] = entry[field];
+                }
+                return acc;
+              },
+              {} as Record<string, any>,
+            );
+
+            return {
+              email: entry.email || "", // Ensure email exists
+              firstName: entry.firstName || "", // Ensure first name exists
+              lastName: entry.lastName || "", // Ensure last name exists
+              audienceListId: audienceListId,
+              customFields: JSON.stringify(customFieldsData), // Handle custom fields as JSON string
+            };
+          });
 
           for (const entry of newEntries) {
+            if (!entry.email || !entry.firstName || !entry.lastName) {
+              toast.error(
+                `Skipping entry with missing required fields: ${entry.email || "Unknown Email"}`,
+              );
+              continue;
+            }
+
             const formData = new FormData();
             formData.append("email", entry.email);
             formData.append("firstName", entry.firstName);
@@ -195,11 +216,17 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
             formData.append("audienceListId", audienceListId);
             formData.append("customFields", entry.customFields); // Add custom fields
 
-            const response = await addAudience(formData);
-            if (isErrorResponse(response)) {
+            try {
+              const response = await addAudience(formData);
+              if (isErrorResponse(response)) {
+                console.error(`Failed to add ${entry.email}:`, response); // Log the error
+                toast.error(`Failed to add: ${entry.email}`);
+              } else {
+                setAudiences((prev) => [...prev, response as Audience]);
+              }
+            } catch (error) {
+              console.error(`Error adding ${entry.email}:`, error);
               toast.error(`Failed to add: ${entry.email}`);
-            } else {
-              setAudiences((prev) => [...prev, response as Audience]);
             }
           }
 
@@ -213,8 +240,23 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
     }
   };
 
+  // Prompt for custom fields first, then open file selector
   const handleImportEntriesClick = () => {
-    fileInputRef.current?.click();
+    if (customFields.length > 0) {
+      const confirmFields = confirm(
+        `The following custom fields are present: ${customFields.join(
+          ", ",
+        )}. Please ensure your CSV contains columns for these fields.`,
+      );
+      if (confirmFields) {
+        fileInputRef.current?.click();
+      }
+    } else {
+      alert(
+        "Please prepare a CSV with columns for Email, First Name, and Last Name.",
+      );
+      fileInputRef.current?.click();
+    }
   };
 
   return (
