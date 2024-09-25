@@ -34,9 +34,14 @@ import { isErrorResponse } from "@/lib/utils";
 interface EmailListProps {
   audienceList: Audience[];
   audienceListId: string;
+  listName: string;
 }
 
-export function EmailList({ audienceList, audienceListId }: EmailListProps) {
+export function EmailList({
+  audienceList,
+  audienceListId,
+  listName,
+}: EmailListProps) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [audiences, setAudiences] = useState<Audience[]>(audienceList);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -135,7 +140,7 @@ export function EmailList({ audienceList, audienceListId }: EmailListProps) {
   return (
     <div className="mx-auto w-full max-w-4xl">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Email List</h1>
+        <h1 className="text-2xl font-bold">Audience List: {listName}</h1>
         <div className="flex items-center gap-4">
           <CreateAudienceButton>
             <AddAudienceModal audienceListId={audienceListId} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { fetchAudienceLists } from "@/lib/actions";
@@ -19,12 +20,14 @@ export function AudienceListDropdown({
   organizationId,
 }: AudienceListDropdownProps) {
   const [audienceLists, setAudienceLists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch audience lists
     const fetchLists = async () => {
       const lists = await fetchAudienceLists(organizationId);
       setAudienceLists(lists);
+      setLoading(false);
     };
     fetchLists();
   }, [organizationId]);
@@ -34,20 +37,27 @@ export function AudienceListDropdown({
       <span className="w-40 shrink-0 font-normal text-gray-600">
         Audience List
       </span>
-      <select
-        className="h-auto w-full rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-        value={selectedAudienceList || ""}
-        onChange={(e) => setSelectedAudienceList(e.target.value)}
-      >
-        <option value="" disabled>
-          Select Audience List
-        </option>
-        {audienceLists.map((list) => (
-          <option key={list.id} value={list.id}>
-            {list.name} ({list.contactCount} contacts)
+      {loading ? (
+        <span className="flex items-center">
+          <Loader2 className="mr-2 animate-spin" />
+        </span>
+      ) : (
+        <select
+          className="h-auto w-full rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
+          value={selectedAudienceList || ""}
+          onChange={(e) => setSelectedAudienceList(e.target.value)}
+        >
+          <option value="" disabled>
+            Select Audience List
           </option>
-        ))}
-      </select>
+          {!loading &&
+            audienceLists.map((list) => (
+              <option key={list.id} value={list.id}>
+                {list.name} ({list.contactCount} contacts)
+              </option>
+            ))}
+        </select>
+      )}
     </Label>
   );
 }

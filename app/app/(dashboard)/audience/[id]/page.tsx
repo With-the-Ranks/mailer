@@ -32,5 +32,11 @@ export default async function AudiencePage({
     notFound();
   }
 
-  return <EmailList audienceList={data.audiences} audienceListId={data.id} />;
+  return (
+    <EmailList
+      audienceList={data.audiences}
+      listName={data.name}
+      audienceListId={data.id}
+    />
+  );
 }
