@@ -277,7 +277,7 @@ export const getOrganizationFromAudienceId = async (audienceId: string) => {
 };
 
 export const createEmail = withOrgAuth(
-  async (_: FormData, organization: Organization) => {
+  async (campaignName: string | null, organization: Organization) => {
     const session = await getSession();
     if (!session?.user.id) {
       return {
@@ -288,6 +288,7 @@ export const createEmail = withOrgAuth(
       data: {
         organizationId: organization.id,
         userId: session.user.id,
+        title: campaignName || "New Campaign",
       },
     });
 

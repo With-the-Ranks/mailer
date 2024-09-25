@@ -27,7 +27,7 @@ export function AudienceListDropdown({
       setAudienceLists(lists);
     };
     fetchLists();
-  }, []);
+  }, [organizationId]);
 
   return (
     <Label className="flex items-center font-normal">
@@ -35,7 +35,7 @@ export function AudienceListDropdown({
         Audience List
       </span>
       <select
-        className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="h-auto w-full rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
         value={selectedAudienceList || ""}
         onChange={(e) => setSelectedAudienceList(e.target.value)}
       >
