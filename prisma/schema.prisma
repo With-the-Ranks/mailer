@@ -88,6 +88,10 @@ model Email {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   published      Boolean       @default(false)
+
+  audienceListId String        
+  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String?
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -136,6 +140,7 @@ model AudienceList {
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
   audiences      Audience[]
+  emails         Email[]       @relation
 }
 
 model Audience {

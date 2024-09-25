@@ -276,31 +276,44 @@ export const getOrganizationFromAudienceId = async (audienceId: string) => {
   return audience?.organizationId;
 };
 
-export const createEmail = withOrgAuth(
-  async (campaignName: string | null, organization: Organization) => {
-    const session = await getSession();
-    if (!session?.user.id) {
-      return {
-        error: "Not authenticated",
-      };
-    }
+export const createEmail = async (
+  campaignName: string | null,
+  organizationId: string,
+  selectedAudienceList: string | null,
+  template: string | null,
+) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  // Ensure audienceListId is not null
+  if (!selectedAudienceList) {
+    return { error: "Invalid audience list." };
+  }
+
+  // Validate campaignName
+  if (!campaignName || typeof campaignName !== "string") {
+    return { error: "Invalid campaign name." };
+  }
+
+  try {
+    // Create email in Prisma
     const response = await prisma.email.create({
       data: {
-        organizationId: organization.id,
+        organizationId,
         userId: session.user.id,
         title: campaignName || "New Campaign",
+        audienceListId: selectedAudienceList,
+        template,
       },
     });
 
-    await revalidateTag(
-      `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-    );
-    organization.customDomain &&
-      (await revalidateTag(`${organization.customDomain}-emails`));
-
     return response;
-  },
-);
+  } catch (error) {
+    return { error: "An error occurred while creating the email." };
+  }
+};
 
 // creating a separate function for this because we're not using FormData
 export const updateEmail = async (data: Email) => {

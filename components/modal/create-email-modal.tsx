@@ -49,28 +49,26 @@ export default function CreateEmailModal({
       return;
     }
 
-    const formData = new FormData();
-    formData.append("campaignName", data.campaignName);
-    formData.append("selectedAudienceList", data.selectedAudienceList);
-    formData.append("template", data.template);
+    try {
+      const email = await createEmail(
+        data.campaignName,
+        organizationId,
+        data.selectedAudienceList,
+        data.template,
+      );
 
-    // Create email with initial data
-    const email = await createEmail(
-      formData,
-      organizationId,
-      data.selectedAudienceList,
-    );
-
-    setIsPending(false);
-
-    if ("error" in email) {
-      toast.error(email.error);
-      return;
+      if ("error" in email) {
+        toast.error(email.error);
+      } else {
+        toast.success("Successfully created email!");
+        modal?.hide();
+        router.push(`/email/${email.id}`);
+      }
+    } catch (error) {
+      toast.error("An error occurred while creating the email.");
+    } finally {
+      setIsPending(false);
     }
-
-    toast.success("Successfully created email!");
-    modal?.hide();
-    router.push(`/email/${email.id}`);
   };
 
   return (
