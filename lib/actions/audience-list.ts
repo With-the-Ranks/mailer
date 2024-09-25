@@ -48,10 +48,18 @@ export const addAudience = async (formData: FormData) => {
   const lastName = formData.get("lastName") as string;
   const audienceListId = formData.get("audienceListId") as string;
 
-  // Get custom fields from formData as JSON
-  const customFields = formData.get("customFields")
-    ? JSON.parse(formData.get("customFields") as string)
-    : {};
+  // Get custom fields from formData as JSON or an empty object
+  let customFields = {};
+  const customFieldsRaw = formData.get("customFields");
+
+  // Safely parse custom fields if it's a valid JSON string
+  if (typeof customFieldsRaw === "string") {
+    try {
+      customFields = JSON.parse(customFieldsRaw);
+    } catch (error) {
+      return { error: "Invalid custom fields format" };
+    }
+  }
 
   try {
     const newAudience = await prisma.audience.create({

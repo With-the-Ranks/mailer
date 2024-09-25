@@ -111,6 +111,11 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
     }
   };
 
+  // Function to add new audience directly to the list without refreshing
+  const addNewAudience = (newAudience: Audience) => {
+    setAudiences((prevAudiences) => [...prevAudiences, newAudience]);
+  };
+
   const handleDeleteEntryClick = async (audienceId: string) => {
     const response = await deleteAudience(audienceId);
     if (isErrorResponse(response)) {
@@ -225,7 +230,10 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
             Add Custom Field
           </button>
           <CreateAudienceButton>
-            <AddAudienceModal audienceListId={audienceListId} />
+            <AddAudienceModal
+              audienceListId={audienceListId}
+              addNewAudience={addNewAudience}
+            />
           </CreateAudienceButton>
           <Button variant="custom" onClick={handleImportEntriesClick}>
             <UploadIcon className="mr-2 h-4 w-4" />
