@@ -4,12 +4,12 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 // Custom Error Class for Handling Specific Errors
-class DuplicateError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "DuplicateError";
-  }
-}
+// class DuplicateError extends Error {
+//   constructor(message: string) {
+//     super(message);
+//     this.name = "DuplicateError";
+//   }
+// }
 
 // Create an audience list
 export const createAudienceList = async (formData: FormData) => {
@@ -48,6 +48,11 @@ export const addAudience = async (formData: FormData) => {
   const lastName = formData.get("lastName") as string;
   const audienceListId = formData.get("audienceListId") as string;
 
+  // Get custom fields from formData as JSON
+  const customFields = formData.get("customFields")
+    ? JSON.parse(formData.get("customFields") as string)
+    : {};
+
   try {
     const newAudience = await prisma.audience.create({
       data: {
@@ -55,6 +60,7 @@ export const addAudience = async (formData: FormData) => {
         firstName,
         lastName,
         audienceListId,
+        customFields,
       },
     });
     return newAudience;
@@ -69,17 +75,108 @@ export const addAudience = async (formData: FormData) => {
   }
 };
 
+// Add a custom field to an audience list
+export const addCustomFieldToAudienceList = async (
+  audienceListId: string,
+  newField: string,
+) => {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    const audienceList = await prisma.audienceList.findUnique({
+      where: { id: audienceListId },
+    });
+
+    if (!audienceList) {
+      return { error: "Audience list not found" };
+    }
+
+    // Safely cast or check if customFields is an array
+    const existingFields = Array.isArray(audienceList.customFields)
+      ? (audienceList.customFields as string[])
+      : [];
+
+    // Add new field to customFields if it doesn't already exist
+    if (existingFields.includes(newField)) {
+      return { error: "Custom field already exists" };
+    }
+
+    // Update the AudienceList with the new custom field
+    const updatedAudienceList = await prisma.audienceList.update({
+      where: { id: audienceListId },
+      data: {
+        customFields: [...existingFields, newField], // Add the new custom field
+      },
+    });
+
+    return updatedAudienceList;
+  } catch (error) {
+    return { error: "Unable to add custom field." };
+  }
+};
+
+export const removeCustomFieldFromAudienceList = async (
+  audienceListId: string,
+  fieldToRemove: string,
+) => {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    const audienceList = await prisma.audienceList.findUnique({
+      where: { id: audienceListId },
+    });
+
+    if (!audienceList) {
+      return { error: "Audience list not found" };
+    }
+
+    const existingFields = Array.isArray(audienceList.customFields)
+      ? (audienceList.customFields as string[])
+      : [];
+
+    // Filter out the field to remove
+    const updatedFields = existingFields.filter(
+      (field) => field !== fieldToRemove,
+    );
+
+    // Update the AudienceList with the remaining custom fields
+    const updatedAudienceList = await prisma.audienceList.update({
+      where: { id: audienceListId },
+      data: {
+        customFields: updatedFields,
+      },
+    });
+
+    return updatedAudienceList;
+  } catch (error) {
+    return { error: "Unable to remove custom field." };
+  }
+};
+
 // Update an individual audience
 export const updateAudience = async (id: string, data: any) => {
+  const { email, firstName, lastName, customFields } = data;
+
   try {
     const updatedAudience = await prisma.audience.update({
       where: { id },
-      data,
+      data: {
+        email,
+        firstName,
+        lastName,
+        customFields: customFields || {},
+      },
     });
     return updatedAudience;
   } catch (error: any) {
     if (error.code === "P2002" && error.meta?.target?.includes("email")) {
-      throw new DuplicateError("Email already exists.");
+      return { error: "Email already exists." };
     }
     return { error: "Unable to update audience." };
   }
@@ -100,10 +197,26 @@ export const deleteAudience = async (id: string) => {
 // Fetch all audiences
 export const getAudiences = async (audienceListId: string) => {
   try {
-    const audiences = await prisma.audience.findMany({
-      where: { audienceListId },
+    const audienceList = await prisma.audienceList.findUnique({
+      where: { id: audienceListId },
+      include: {
+        audiences: true,
+      },
     });
-    return audiences;
+
+    if (!audienceList) {
+      return { error: "Audience list not found." };
+    }
+
+    // Safely cast customFields to an array of strings
+    const customFields = Array.isArray(audienceList.customFields)
+      ? (audienceList.customFields as string[])
+      : [];
+
+    return {
+      audiences: audienceList.audiences,
+      customFields,
+    };
   } catch (error: any) {
     return { error: "Unable to fetch audiences." };
   }

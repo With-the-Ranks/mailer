@@ -141,6 +141,7 @@ model AudienceList {
   organizationId String
   audiences      Audience[]
   emails         Email[]       @relation
+  customFields   Json? 
 }
 
 model Audience {
@@ -148,6 +149,7 @@ model Audience {
   email          String
   firstName      String
   lastName       String
+  customFields   Json?
   audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
   audienceListId String
   updatedAt      DateTime      @updatedAt
