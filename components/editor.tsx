@@ -5,12 +5,14 @@ import "react-multi-email/dist/style.css";
 import { Editor as MailyEditor } from "@maily-to/core";
 import type { Email } from "@prisma/client";
 import { ExternalLink, Loader2, X } from "lucide-react";
+import type { Moment } from "moment";
+import moment from "moment";
 import { useEffect, useState, useTransition } from "react";
 import Select from "react-select";
 import { toast } from "sonner";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
-import { sendBulkEmail } from "@/lib/actions/send-email";
+import { sendBulkEmail, unscheduleEmail } from "@/lib/actions/send-email";
 import {
   DonationJSON,
   DonationTemplate,
@@ -22,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
+import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -33,6 +36,9 @@ type EmailWithSite = Email & {
 export default function Editor({ email }: { email: EmailWithSite }) {
   const [isPendingSaving, startTransitionSaving] = useTransition();
   const [isPendingPublishing, startTransitionPublishing] = useTransition();
+  const [scheduledDate, setScheduledDate] = useState<Moment>(
+    moment(email.scheduledTime) || null,
+  );
   const [data, setData] = useState<EmailWithSite>(email);
   const [hydrated, setHydrated] = useState(true);
   const [from, setFrom] = useState(email.from || "noreply@painatthepump.com");
@@ -40,6 +46,11 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
   >(email.audienceListId || null);
+
+  function isValidTime(current: Moment) {
+    return current.isSameOrAfter(new Date(), "day");
+  }
+
   const variables = [
     { name: "email" },
     { name: "first_name" },
@@ -51,11 +62,17 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     : `http://${data.organization?.subdomain}.localhost:3000/${data.slug}`;
 
   useEffect(() => {
+    startTransitionSaving(async () => {
+      await updateEmail(data, scheduledDate.toDate());
+    });
+  }, [scheduledDate]);
+
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.metaKey && e.key === "s") {
         e.preventDefault();
         startTransitionSaving(async () => {
-          await updateEmail(data);
+          await updateEmail(data, scheduledDate.toDate());
         });
       }
     };
@@ -69,11 +86,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     (data && data.organization && data.organization.logo) ||
     "https://upload.wikimedia.org/wikipedia/commons/d/d4/Bernie_Sanders_2016_logo.png";
 
-  console.log(logoUrl);
   const donationHtml = DonationTemplate({ logoUrl });
   const donationJSON = DonationJSON({ logoUrl });
   const signupHtml = SignupTemplate({ logoUrl });
   const signupJSON = SignupJSON({ logoUrl });
+
+  const isScheduledForFuture = () => {
+    return scheduledDate > moment();
+  };
 
   useEffect(() => {
     if (!data.content) {
@@ -88,25 +108,41 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   }, [data.content, data.template, donationJSON, signupJSON]);
 
+  const handleUnscheduleEmail = async () => {
+    try {
+      await unscheduleEmail({
+        resendId: data.resendId!,
+      });
+    } catch (error) {
+      toast.error("Failed to unschedule email");
+    }
+  };
+
   const handleSendEmail = async () => {
     try {
       if (!selectedAudienceList) {
         toast.error("Please select an audience list.");
         return;
       }
-
       const content = data.content;
+      const emailScheduleTime = isScheduledForFuture()
+        ? scheduledDate.toISOString()
+        : "";
       const result = await sendBulkEmail({
         audienceListId: selectedAudienceList,
         from,
         subject: data.subject,
         content,
         previewText: data.previewText,
+        scheduledTime: emailScheduleTime,
+        id: data.id,
       });
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
       } else {
-        toast.success("Emails sent successfully");
+        if (!isScheduledForFuture()) {
+          toast.success("Emails sent successfully");
+        }
       }
     } catch (error) {
       toast.error("Failed to send email");
@@ -123,11 +159,29 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const handleSaveContent = async () => {
     try {
-      await updateEmail(data);
+      await updateEmail(data, scheduledDate.toDate());
       toast.success("Content saved successfully");
     } catch (error) {
       toast.error("Failed to save content");
     }
+  };
+
+  const getButtonLabel = () => {
+    var label = "";
+    if (isScheduledForFuture()) {
+      if (!data.published) {
+        label = "scheduled";
+      } else {
+        label = "unscheduled";
+      }
+    } else {
+      if (!data.published) {
+        label = "published";
+      } else {
+        label = "unpublished";
+      }
+    }
+    return label;
   };
 
   const handleClickPublish = async () => {
@@ -140,13 +194,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       await handleSaveContent();
       if (!data.published) {
         await handleSendEmail();
+      } else if (isScheduledForFuture()) {
+        await handleUnscheduleEmail();
       }
       const formData = new FormData();
       formData.append("published", String(!data.published));
       await updatePostMetadata(formData, email.id, "published").then(() => {
-        toast.success(
-          `Successfully ${data.published ? "unpublished" : "published"} your email.`,
-        );
+        var toastLabel = getButtonLabel();
+        toast.success(`Successfully ${toastLabel} your email.`);
         setData((prev) => ({ ...prev, published: !prev.published }));
       });
     } catch (error) {
@@ -183,7 +238,15 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           {isPendingPublishing ? (
             <Loader2 className="animate-spin" />
           ) : (
-            <p>{data.published ? "Unpublish" : "Send Email"}</p>
+            <p>
+              {data.published && isScheduledForFuture()
+                ? "Unschedule"
+                : !isScheduledForFuture() && data.published
+                  ? "Unpublish"
+                  : isScheduledForFuture() && !data.published
+                    ? "Schedule"
+                    : "Send Email"}
+            </p>
           )}
         </button>
       </div>
@@ -280,6 +343,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           isDisabled // Lock the template dropdown
         />
       </Label>
+      <ScheduleEmailButton
+        scheduledTimeValue={scheduledDate}
+        isValidTime={isValidTime}
+        setScheduledTimeValue={setScheduledDate}
+        isDisabled={isScheduledForFuture() && data.published}
+      />
 
       <div className="relative my-6">
         <Input
