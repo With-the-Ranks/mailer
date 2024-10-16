@@ -39,12 +39,13 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [showReplyTo, setShowReplyTo] = useState(false);
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
-  >(null);
+  >(email.audienceListId || null);
   const variables = [
     { name: "email" },
     { name: "first_name" },
     { name: "last_name" },
   ];
+
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
     ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
     : `http://${data.organization?.subdomain}.localhost:3000/${data.slug}`;
@@ -74,6 +75,19 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const signupHtml = SignupTemplate({ logoUrl });
   const signupJSON = SignupJSON({ logoUrl });
 
+  useEffect(() => {
+    if (!data.content) {
+      let content = JSON.stringify(donationJSON);
+      if (data.template === "signup") {
+        content = JSON.stringify(signupJSON);
+      }
+      setData((prevData) => ({
+        ...prevData,
+        content: content,
+      }));
+    }
+  }, [data.content, data.template, donationJSON, signupJSON]);
+
   const handleSendEmail = async () => {
     try {
       if (!selectedAudienceList) {
@@ -98,11 +112,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       toast.error("Failed to send email");
     }
   };
-
-  const templateOptions = [
-    { value: "signup", label: "Signup" },
-    { value: "donation", label: "Donation" },
-  ];
 
   const getDefaultValueSelect = (value: string | null) => {
     if (value === "signup") {
@@ -254,47 +263,24 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </div>
         </Label>
       ) : null}
-      {/* <Label className="flex items-center font-normal">
-        <span className="w-40 shrink-0 font-normal text-gray-600 after:text-red-400 after:content-['*']">
-          To{" "}
-        </span>
-        <Input
-          className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => setData({ ...data, emailsTo: [e.target.value] })}
-          placeholder="Email Recipient(s)"
-          type="text"
-          value={data.emailsTo?.[0] || ""}
-          required
-        />
-      </Label> */}
 
       <AudienceListDropdown
         selectedAudienceList={selectedAudienceList}
         setSelectedAudienceList={setSelectedAudienceList}
+        organizationId={data.organizationId ?? ""}
       />
+
       <Label className="flex items-center font-normal">
         <span className="w-40 shrink-0 font-normal text-gray-600">
           Template
         </span>
         <Select
           className="h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => {
-            if (!e) return;
-            let content = JSON.stringify(donationJSON);
-            if (e.value == "signup") {
-              content = JSON.stringify(signupJSON);
-            }
-            setData({
-              ...data,
-              template: e.value,
-              content: content,
-            });
-          }}
-          placeholder="Select a template"
-          defaultValue={getDefaultValueSelect(data.template ?? null)}
-          options={templateOptions}
+          value={getDefaultValueSelect(data.template)}
+          isDisabled // Lock the template dropdown
         />
       </Label>
+
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"

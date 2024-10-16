@@ -20,11 +20,7 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  getOrganizationFromAudienceId,
-  getOrganizationFromEmailId,
-  getOrganizationFromUserId,
-} from "@/lib/actions";
+import { getOrganizationFromUserId } from "@/lib/actions";
 
 export default function Nav({ children }: { children: ReactNode }) {
   const segments = useSelectedLayoutSegments();
@@ -35,30 +31,12 @@ export default function Nav({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (segments[0] === "email" && id) {
-      getOrganizationFromEmailId(id).then((orgId) => {
-        setSiteId(orgId ?? null);
-        setOrganizationFound(!!orgId);
-        setLoading(false);
-      });
-    } else if (segments[0] === "audience" && id) {
-      getOrganizationFromAudienceId(id).then((orgId) => {
-        setSiteId(orgId ?? null);
-        setOrganizationFound(!!orgId);
-        setLoading(false);
-      });
-    } else if (!id) {
-      getOrganizationFromUserId().then((orgId) => {
-        setSiteId(orgId ?? null);
-        setOrganizationFound(!!orgId);
-        setLoading(false);
-      });
-    } else {
-      setSiteId(id);
-      setOrganizationFound(true);
+    getOrganizationFromUserId().then((orgId) => {
+      setSiteId(orgId ?? null);
+      setOrganizationFound(!!orgId);
       setLoading(false);
-    }
-  }, [segments, id]);
+    });
+  }, [id]);
 
   const tabs = useMemo(() => {
     if (loading) return []; // Avoid showing incomplete menu while loading
