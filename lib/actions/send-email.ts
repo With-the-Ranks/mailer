@@ -75,12 +75,16 @@ export const sendBulkEmail = async ({
   subject,
   content,
   previewText,
+  scheduledTime,
+  id,
 }: {
   audienceListId: string;
   from: string;
   subject: string | null;
   content: string | null;
   previewText: string | null;
+  scheduledTime: string | undefined;
+  id: string;
 }) => {
   const session = await getSession();
   if (!session?.user.id) {
@@ -116,12 +120,23 @@ export const sendBulkEmail = async ({
         subject: subject || "No Subject",
         html: htmlContent || "",
         text: "",
+        scheduledAt: scheduledTime,
+        react: "",
       };
 
-      const { error } = await resend.emails.send(emailData);
-
+      const { data, error } = await resend.emails.send(emailData);
       if (error) {
         console.error(`Failed to send email to ${audience.email}: ${error}`);
+      } else {
+        const resendId = data?.id;
+        await prisma.email.update({
+          where: {
+            id: id,
+          },
+          data: {
+            resendId,
+          },
+        });
       }
     }
 
@@ -130,4 +145,8 @@ export const sendBulkEmail = async ({
     console.error("Error sending bulk email:", e);
     return { error: "Something went wrong" };
   }
+};
+
+export const unscheduleEmail = async ({ resendId }: { resendId: string }) => {
+  await resend.emails.cancel(resendId);
 };

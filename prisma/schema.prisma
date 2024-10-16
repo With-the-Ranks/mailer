@@ -88,6 +88,8 @@ model Email {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   published      Boolean       @default(false)
+  scheduledTime  DateTime      @default(now())
+  resendId       String?       @db.Text
 
   audienceListId String        
   audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)

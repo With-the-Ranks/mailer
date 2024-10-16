@@ -316,7 +316,7 @@ export const createEmail = async (
 };
 
 // creating a separate function for this because we're not using FormData
-export const updateEmail = async (data: Email) => {
+export const updateEmail = async (data: Email, scheduledTime: Date | null) => {
   const session = await getSession();
   if (!session?.user.id) {
     return {
@@ -337,6 +337,7 @@ export const updateEmail = async (data: Email) => {
     };
   }
   try {
+    const scheduledDateTime = scheduledTime ? scheduledTime : new Date();
     const response = await prisma.email.update({
       where: {
         id: data.id,
@@ -349,6 +350,7 @@ export const updateEmail = async (data: Email) => {
         previewText: data.previewText,
         subject: data.subject,
         template: data.template,
+        scheduledTime: scheduledDateTime,
       },
     });
 
