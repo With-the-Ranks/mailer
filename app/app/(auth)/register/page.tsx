@@ -1,5 +1,6 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+
 import FormPage from "./form";
 
 export default async function RegisterPage() {
@@ -10,7 +11,7 @@ export default async function RegisterPage() {
   }
 
   return (
-    <section className="bg-black flex items-center justify-center">
+    <section className="flex items-center justify-center dark:bg-black">
       <div className="w-sm">
         <FormPage />
       </div>

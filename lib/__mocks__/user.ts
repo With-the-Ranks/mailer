@@ -1,8 +1,8 @@
-import type { User } from '@prisma/client'
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
+import type { User } from "@prisma/client";
 
 const getMockUserDefaults = () => {
-  const dateNow = new Date()
+  const dateNow = new Date();
   return {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
@@ -13,13 +13,13 @@ const getMockUserDefaults = () => {
     emailVerified: dateNow,
     image: null,
     createdAt: dateNow,
-    updatedAt: dateNow
-  }
-}
+    updatedAt: dateNow,
+  };
+};
 
 const mockUser = (user: Partial<User>) => {
-  const defaultUser = getMockUserDefaults()
-  return {...defaultUser, ...user}
-}
+  const defaultUser = getMockUserDefaults();
+  return { ...defaultUser, ...user };
+};
 
-export default mockUser
+export default mockUser;

@@ -1,6 +1,10 @@
 import useSWR from "swr";
+
+import type {
+  DomainResponse,
+  DomainVerificationStatusProps,
+} from "@/lib/types";
 import { fetcher } from "@/lib/utils";
-import { DomainResponse, DomainVerificationStatusProps } from "@/lib/types";
 
 export function useDomainStatus({ domain }: { domain: string }) {
   const { data, isValidating } = useSWR<{

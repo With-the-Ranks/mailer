@@ -1,36 +1,46 @@
 "use client";
 
-import { useTransition } from "react";
-import { createEmail } from "@/lib/actions";
-import { cn } from "@/lib/utils";
-import { useParams, useRouter } from "next/navigation";
-import LoadingDots from "@/components/icons/loading-dots";
-import va from "@vercel/analytics";
+import { useState } from "react";
+import { toast } from "sonner";
 
-export default function CreateEmailButton() {
-  const router = useRouter();
-  const { id } = useParams() as { id: string };
-  const [isPending, startTransition] = useTransition();
+import { useModal } from "@/components/modal/provider";
+import { fetchAudienceLists } from "@/lib/actions";
+
+import CreateAudienceModal from "./modal/create-audience-list";
+import CreateEmailModal from "./modal/create-email-modal";
+
+export default function CreateEmailButton({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
+  const modal = useModal();
+  const [isFetching, setIsFetching] = useState(false);
+
+  const handleClick = async () => {
+    setIsFetching(true);
+
+    // Fetch audience lists
+    const lists = await fetchAudienceLists(organizationId);
+    setIsFetching(false);
+
+    // If no audience lists exist, show Create Audience List Modal
+    if (lists.length === 0) {
+      toast.error("You need to create an audience list first.");
+      modal?.show(<CreateAudienceModal organizationId={organizationId} />);
+    } else {
+      // Otherwise, show Create Email Modal
+      modal?.show(<CreateEmailModal organizationId={organizationId} />);
+    }
+  };
 
   return (
     <button
-      onClick={() =>
-        startTransition(async () => {
-          const email = await createEmail(null, id, null);
-          va.track("Created Email");
-          router.refresh();
-          router.push(`/email/${email.id}`);
-        })
-      }
-      className={cn(
-        "flex h-8 w-36 items-center justify-center space-x-2 rounded-lg border text-sm transition-all focus:outline-none sm:h-9",
-        isPending
-          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300"
-          : "border border-black bg-black text-white hover:bg-white hover:text-black active:bg-stone-100 dark:border-stone-700 dark:hover:border-stone-200 dark:hover:bg-black dark:hover:text-white dark:active:bg-stone-800",
-      )}
-      disabled={isPending}
+      onClick={handleClick}
+      className="create-email-button rounded-lg border border-black bg-black px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-white hover:text-black active:bg-stone-100 dark:border-stone-700 dark:hover:border-stone-200 dark:hover:bg-black dark:hover:text-white dark:active:bg-stone-800"
+      disabled={isFetching}
     >
-      {isPending ? <LoadingDots color="#808080" /> : <p>Create New Email</p>}
+      {isFetching ? "Loading..." : "Create New Email"}
     </button>
   );
 }

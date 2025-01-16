@@ -1,11 +1,19 @@
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { Organization } from "@prisma/client";
-import OrganizationCard from "./organization-card";
+import type { Organization } from "@prisma/client";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
-export default async function Organizations({ organizations, limit }: { organizations?: Organization[], limit?: number }) {
+import { getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+import OrganizationCard from "./organization-card";
+
+export default async function Organizations({
+  organizations,
+  limit,
+}: {
+  organizations?: Organization[];
+  limit?: number;
+}) {
   const session = await getSession();
   if (!session) {
     redirect("/login");
@@ -17,10 +25,10 @@ export default async function Organizations({ organizations, limit }: { organiza
         users: {
           some: {
             id: {
-              in: [session!.user.id as string]
-            }
-          }
-        } 
+              in: [session!.user.id as string],
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: "asc",
@@ -37,10 +45,10 @@ export default async function Organizations({ organizations, limit }: { organiza
     </div>
   ) : (
     <div className="mt-20 flex flex-col items-center space-x-4">
-      <h1 className="font-cal text-4xl">No Sites Yet</h1>
+      {/* <h1 className="font-cal text-4xl">No Sites Yet</h1> */}
       <Image
         alt="missing organization"
-        src="https://illustrations.popsy.co/gray/web-design.svg"
+        src="/empty-state.png"
         width={400}
         height={400}
       />

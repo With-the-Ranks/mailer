@@ -1,12 +1,13 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ReactNode } from "react";
+import { notFound, redirect } from "next/navigation";
+import type { ReactNode } from "react";
+
 import CTA from "@/components/cta";
 import ReportAbuse from "@/components/report-abuse";
-import { notFound, redirect } from "next/navigation";
 import { getOrganizationData as getOrganizationData } from "@/lib/fetchers";
 import { fontMapper } from "@/styles/fonts";
-import { Metadata } from "next";
 
 export async function generateMetadata({
   params,

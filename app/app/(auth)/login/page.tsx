@@ -1,8 +1,9 @@
 import Image from "next/image";
-import LoginButton from "./login-button";
-import { Suspense } from "react";
 import Link from "next/link";
-import SignInForm from "./form"; 
+
+// import { Suspense } from "react";
+import SignInForm from "./form";
+// import LoginButton from "./login-button";
 
 export default function LoginPage() {
   return (
@@ -18,15 +19,22 @@ export default function LoginPage() {
         Intrepid Email Campaign
       </h1>
       <p className="mt-2 text-center text-sm text-stone-600 dark:text-stone-400">
-        Build engaging email campaigns.<br />
+        Build engaging email campaigns.
+        <br />
       </p>
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
-          <SignInForm />
+        <SignInForm />
       </div>
-      <div className="text-center text-sm text-stone-400 mt-5">
-        Don&apos;t have an account?<Link href="/register" className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200">Sign up</Link>
+      <div className="mt-5 text-center text-sm text-stone-400">
+        Don&apos;t have an account?
+        <Link
+          href="/register"
+          className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200"
+        >
+          Sign up
+        </Link>
       </div>
-      <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
+      {/* <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
         <Suspense
           fallback={
             <div className="my-2 h-10 w-full rounded-md border border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-stone-800" />
@@ -34,7 +42,7 @@ export default function LoginPage() {
         >
           <LoginButton />
         </Suspense>
-      </div>
+      </div> */}
     </div>
   );
 }

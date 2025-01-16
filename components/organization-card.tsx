@@ -1,8 +1,9 @@
+import type { Organization } from "@prisma/client";
+import { BarChart } from "lucide-react";
+import Link from "next/link";
+
 import BlurImage from "@/components/blur-image";
 import { placeholderBlurhash, random } from "@/lib/utils";
-import { Organization } from "@prisma/client";
-import { BarChart, ExternalLink } from "lucide-react";
-import Link from "next/link";
 
 export default function OrganizationCard({ data }: { data: Organization }) {
   const url = `${data.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;

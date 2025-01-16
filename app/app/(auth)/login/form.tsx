@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import FormButton from "@/components/form/form-button";
 
 function SignInForm() {
@@ -32,10 +33,10 @@ function SignInForm() {
 
         if (result?.error) {
           toast.error(`Login Failed: ${result.error}`);
-          setIsSubmitting(false); 
+          setIsSubmitting(false);
         } else {
           toast.success("Login Successful");
-          router.push("/"); 
+          router.push("/");
         }
       }}
     >

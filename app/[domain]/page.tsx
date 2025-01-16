@@ -1,11 +1,12 @@
-import Link from "next/link";
-import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import BlurImage from "@/components/blur-image";
-import { placeholderBlurhash, toDateString } from "@/lib/utils";
-import BlogCard from "@/components/blog-card";
-import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
 import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import BlogCard from "@/components/blog-card";
+import BlurImage from "@/components/blur-image";
+import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
+import prisma from "@/lib/prisma";
+import { placeholderBlurhash, toDateString } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const allOrganizations = await prisma.organization.findMany({
@@ -103,14 +104,14 @@ export default async function OrganizationHomePage({
           <div className="flex flex-col items-center justify-center py-20">
             <Image
               alt="missing email"
-              src="https://illustrations.popsy.co/gray/success.svg"
+              src="/empty-state.png"
               width={400}
               height={400}
               className="dark:hidden"
             />
             <Image
               alt="missing email"
-              src="https://illustrations.popsy.co/white/success.svg"
+              src="/empty-state.png"
               width={400}
               height={400}
               className="hidden dark:block"

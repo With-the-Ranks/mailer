@@ -74,6 +74,11 @@ model VerificationToken {
 model Email {
   id             String        @id @default(cuid())
   title          String?       @db.Text
+  subject        String?       @db.Text
+  from           String?       @db.Text
+  replyTo        String?       @db.Text
+  to             String?       @db.Text
+  previewText    String?       @db.Text
   emailsTo       String[]
   description    String?       @db.Text
   content        String?       @db.Text
@@ -83,10 +88,17 @@ model Email {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   published      Boolean       @default(false)
+  scheduledTime  DateTime      @default(now())
+  resendId       String?       @db.Text
+
+  audienceListId String        
+  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String?
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId         String?
+  template       String?       @db.Text
 
   @@unique([slug, organizationId])
   @@index([organizationId])
@@ -108,6 +120,7 @@ model Organization {
   updatedAt     DateTime @updatedAt
   users         User[]
   emails        Email[]
+  audienceLists AudienceList[]
 }
 
 model Example {
@@ -118,4 +131,30 @@ model Example {
   url           String?
   image         String? @db.Text
   imageBlurhash String? @db.Text
+}
+
+model AudienceList {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  audiences      Audience[]
+  emails         Email[]       @relation
+  customFields   Json? 
+}
+
+model Audience {
+  id             String        @id @default(cuid())
+  email          String
+  firstName      String
+  lastName       String
+  customFields   Json?
+  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+  audienceListId String
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([audienceListId, email])
 }

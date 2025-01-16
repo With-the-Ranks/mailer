@@ -1,21 +1,22 @@
-import { afterEach, describe, expect, test } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
-import FormButton from './form-button'
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, test } from "vitest";
 
-describe('Form Button', () => {
-  afterEach(cleanup)
+import FormButton from "./form-button";
 
-  test('Enabled when not submitting', () => {
-    render(<FormButton isSubmitting={false} label='Login' />)
-    const btn = screen.getByRole('button')
-    expect(btn).toBeDefined()
-    expect(btn.hasAttribute('disabled')).toBeFalsy()
-  })
+describe("Form Button", () => {
+  afterEach(cleanup);
 
-  test('Disabled when submitting', () => {
-    render(<FormButton isSubmitting={true} label='Register' />)
-    const btn = screen.getByRole('button')
-    expect(btn).toBeDefined()
-    expect(btn.hasAttribute('disabled')).toBeTruthy()
-  })
-})
+  test("Enabled when not submitting", () => {
+    render(<FormButton isSubmitting={false} label="Login" />);
+    const btn = screen.getByRole("button");
+    expect(btn).toBeDefined();
+    expect(btn.hasAttribute("disabled")).toBeFalsy();
+  });
+
+  test("Disabled when submitting", () => {
+    render(<FormButton isSubmitting={true} label="Register" />);
+    const btn = screen.getByRole("button");
+    expect(btn).toBeDefined();
+    expect(btn.hasAttribute("disabled")).toBeTruthy();
+  });
+});

@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   body {
-    background-color: #000000;
+    background-color: #ffffff;
   }
 }
 
@@ -101,4 +101,9 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   color: #a8a29e;
   text-decoration: line-through;
   text-decoration-thickness: 2px;
+}
+
+.rdt input {
+  border: none;
+  padding: 0;
 }

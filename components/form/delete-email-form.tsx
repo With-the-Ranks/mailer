@@ -1,12 +1,30 @@
 "use client";
 
-import LoadingDots from "@/components/icons/loading-dots";
-import { cn } from "@/lib/utils";
+import va from "@vercel/analytics";
 import { useParams, useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+
+import LoadingDots from "@/components/icons/loading-dots";
 import { deleteEmail } from "@/lib/actions";
-import va from "@vercel/analytics";
+import { cn } from "@/lib/utils";
+
+function FormButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      className={cn(
+        "flex h-8 w-32 items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
+        pending
+          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300"
+          : "border-red-600 bg-red-600 text-white hover:bg-white hover:text-red-600 dark:hover:bg-transparent",
+      )}
+      disabled={pending}
+    >
+      {pending ? <LoadingDots color="#808080" /> : <p>Confirm Delete</p>}
+    </button>
+  );
+}
 
 export default function DeleteEmailForm({ emailName }: { emailName: string }) {
   const { id } = useParams() as { id: string };
@@ -45,7 +63,7 @@ export default function DeleteEmailForm({ emailName }: { emailName: string }) {
         />
       </div>
 
-      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10">
+      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10 dark:border-stone-700 dark:bg-stone-800">
         <p className="text-center text-sm text-stone-500 dark:text-stone-400">
           This action is irreversible. Please proceed with caution.
         </p>
@@ -54,22 +72,5 @@ export default function DeleteEmailForm({ emailName }: { emailName: string }) {
         </div>
       </div>
     </form>
-  );
-}
-
-function FormButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      className={cn(
-        "flex h-8 w-32 items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
-        pending
-          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300"
-          : "border-red-600 bg-red-600 text-white hover:bg-white hover:text-red-600 dark:hover:bg-transparent",
-      )}
-      disabled={pending}
-    >
-      {pending ? <LoadingDots color="#808080" /> : <p>Confirm Delete</p>}
-    </button>
   );
 }

@@ -1,9 +1,10 @@
-import { getServerSession, type NextAuthOptions } from "next-auth";
-import GitHubProvider from "next-auth/providers/github";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { getServerSession, type NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GitHubProvider from "next-auth/providers/github";
+
+import prisma from "@/lib/prisma";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
@@ -138,10 +139,10 @@ export function withOrgAuth(action: any) {
         users: {
           some: {
             id: {
-              in: [session.user.id as string]
-            }
-          }
-        }   
+              in: [session.user.id as string],
+            },
+          },
+        },
       },
     });
     if (!organization) {

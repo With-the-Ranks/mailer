@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+
 import { getEmailsForOrganization } from "@/lib/fetchers";
 
 export default async function Sitemap() {

@@ -1,9 +1,14 @@
+import { notFound, redirect } from "next/navigation";
+
+import Editor from "@/components/editor";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { notFound, redirect } from "next/navigation";
-import Editor from "@/components/editor";
 
-export default async function EmailPage({ params }: { params: { id: string } }) {
+export default async function EmailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const session = await getSession();
   if (!session) {
     redirect("/login");
@@ -16,6 +21,7 @@ export default async function EmailPage({ params }: { params: { id: string } }) 
       organization: {
         select: {
           subdomain: true,
+          logo: true,
         },
       },
     },

@@ -1,7 +1,8 @@
+import { notFound, redirect } from "next/navigation";
+
+import AnalyticsMockup from "@/components/analytics";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { notFound, redirect } from "next/navigation";
-import AnalyticsMockup from "@/components/analytics";
 
 export default async function OrganizationAnalytics({
   params,
@@ -18,10 +19,10 @@ export default async function OrganizationAnalytics({
       users: {
         some: {
           id: {
-            in: [session!.user.id as string]
-          }
-        }
-      } 
+            in: [session!.user.id as string],
+          },
+        },
+      },
     },
   });
   if (!data) {
@@ -34,7 +35,7 @@ export default async function OrganizationAnalytics({
     <>
       <div className="flex items-center justify-center sm:justify-start">
         <div className="flex flex-col items-center space-x-0 space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0">
-          <h1 className="font-cal text-xl font-bold dark:text-white sm:text-3xl">
+          <h1 className="font-cal text-xl font-bold sm:text-3xl dark:text-white">
             Analytics for {data.name}
           </h1>
           <a

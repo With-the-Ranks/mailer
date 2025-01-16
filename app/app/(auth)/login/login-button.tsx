@@ -1,10 +1,11 @@
 "use client";
 
-import LoadingDots from "@/components/icons/loading-dots";
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import LoadingDots from "@/components/icons/loading-dots";
 
 export default function LoginButton() {
   const [loading, setLoading] = useState(false);

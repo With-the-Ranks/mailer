@@ -6,7 +6,7 @@ export default function NotFoundPost() {
       <h1 className="font-cal text-4xl">404</h1>
       <Image
         alt="missing site"
-        src="https://illustrations.popsy.co/gray/falling.svg"
+        src="/empty-state.png"
         width={400}
         height={400}
       />

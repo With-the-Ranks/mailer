@@ -19,6 +19,6 @@ module.exports = {
       { hostname: "www.google.com" },
       { hostname: "flag.vercel.app" },
       { hostname: "illustrations.popsy.co" },
-    ]
+    ],
   },
 };

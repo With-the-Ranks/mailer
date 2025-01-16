@@ -1,9 +1,10 @@
 "use server";
 
-import prisma from "@/lib/prisma";
-import { Email, Organization } from "@prisma/client";
+import type { Email, Organization } from "@prisma/client";
+import { put } from "@vercel/blob";
+import { customAlphabet } from "nanoid";
 import { revalidateTag } from "next/cache";
-import { withEmailAuth, withOrgAuth } from "../auth";
+
 import { getSession } from "@/lib/auth";
 import {
   addDomainToVercel,
@@ -12,9 +13,10 @@ import {
   // removeDomainFromVercelTeam,
   validDomainRegex,
 } from "@/lib/domains";
-import { put } from "@vercel/blob";
-import { customAlphabet } from "nanoid";
+import prisma from "@/lib/prisma";
 import { getBlurDataURL } from "@/lib/utils";
+
+import { withEmailAuth, withOrgAuth } from "../auth";
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -42,14 +44,14 @@ export const createOrganization = async (formData: FormData) => {
     });
 
     try {
-      const userResponse = await prisma.user.update({
+      await prisma.user.update({
         where: {
           id: session.user.id,
         },
         data: {
-          organizationId: response.id
-        }
-      });  
+          organizationId: response.id,
+        },
+      });
     } catch (error: any) {
       console.log(error);
     }
@@ -113,7 +115,9 @@ export const updateOrganization = withOrgAuth(
 
         // if the organization had a different customDomain before, we need to remove it from Vercel
         if (organization.customDomain && organization.customDomain !== value) {
-          response = await removeDomainFromVercelProject(organization.customDomain);
+          response = await removeDomainFromVercelProject(
+            organization.customDomain,
+          );
 
           /* Optional: remove domain from Vercel team 
 
@@ -210,25 +214,27 @@ export const updateOrganization = withOrgAuth(
   },
 );
 
-export const deleteOrganization = withOrgAuth(async (_: FormData, organization: Organization) => {
-  try {
-    const response = await prisma.organization.delete({
-      where: {
-        id: organization.id,
-      },
-    });
-    await revalidateTag(
-      `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-    );
-    response.customDomain &&
-      (await revalidateTag(`${organization.customDomain}-metadata`));
-    return response;
-  } catch (error: any) {
-    return {
-      error: error.message,
-    };
-  }
-});
+export const deleteOrganization = withOrgAuth(
+  async (_: FormData, organization: Organization) => {
+    try {
+      const response = await prisma.organization.delete({
+        where: {
+          id: organization.id,
+        },
+      });
+      await revalidateTag(
+        `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
+      );
+      response.customDomain &&
+        (await revalidateTag(`${organization.customDomain}-metadata`));
+      return response;
+    } catch (error: any) {
+      return {
+        error: error.message,
+      };
+    }
+  },
+);
 
 export const getOrganizationFromEmailId = async (emailId: string) => {
   const email = await prisma.email.findUnique({
@@ -242,32 +248,76 @@ export const getOrganizationFromEmailId = async (emailId: string) => {
   return email?.organizationId;
 };
 
-export const createEmail = withOrgAuth(async (_: FormData, organization: Organization) => {
+export const getOrganizationFromUserId = async () => {
   const session = await getSession();
-  if (!session?.user.id) {
-    return {
-      error: "Not authenticated",
-    };
-  }
-  const response = await prisma.email.create({
-    data: {
-      organizationId: organization.id,
-      userId: session.user.id,
+  if (!session?.user.id) return null;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      organizationId: true,
     },
   });
 
-  await revalidateTag(
-    `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-  );
-  organization.customDomain && (await revalidateTag(`${organization.customDomain}-emails`));
+  return user?.organizationId;
+};
 
-  return response;
-});
+export const getOrganizationFromAudienceId = async (audienceId: string) => {
+  const audience = await prisma.audienceList.findUnique({
+    where: {
+      id: audienceId,
+    },
+    select: {
+      organizationId: true,
+    },
+  });
+  return audience?.organizationId;
+};
+
+export const createEmail = async (
+  campaignName: string | null,
+  organizationId: string,
+  selectedAudienceList: string | null,
+  template: string | null,
+) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  // Ensure audienceListId is not null
+  if (!selectedAudienceList) {
+    return { error: "Invalid audience list." };
+  }
+
+  // Validate campaignName
+  if (!campaignName || typeof campaignName !== "string") {
+    return { error: "Invalid campaign name." };
+  }
+
+  try {
+    // Create email in Prisma
+    const response = await prisma.email.create({
+      data: {
+        organizationId,
+        userId: session.user.id,
+        title: campaignName || "New Campaign",
+        audienceListId: selectedAudienceList,
+        template,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    return { error: "An error occurred while creating the email." };
+  }
+};
 
 // creating a separate function for this because we're not using FormData
-export const updateEmail = async (data: Email) => {
+export const updateEmail = async (data: Email, scheduledTime: Date | null) => {
   const session = await getSession();
-  console.log(data);
   if (!session?.user.id) {
     return {
       error: "Not authenticated",
@@ -287,6 +337,7 @@ export const updateEmail = async (data: Email) => {
     };
   }
   try {
+    const scheduledDateTime = scheduledTime ? scheduledTime : new Date();
     const response = await prisma.email.update({
       where: {
         id: data.id,
@@ -296,6 +347,10 @@ export const updateEmail = async (data: Email) => {
         description: data.description,
         content: data.content,
         emailsTo: data.emailsTo,
+        previewText: data.previewText,
+        subject: data.subject,
+        template: data.template,
+        scheduledTime: scheduledDateTime,
       },
     });
 
@@ -371,7 +426,9 @@ export const updatePostMetadata = withEmailAuth(
       // if the organization has a custom domain, we need to revalidate those tags too
       email.organization?.customDomain &&
         (await revalidateTag(`${email.organization?.customDomain}-emails`),
-        await revalidateTag(`${email.organization?.customDomain}-${email.slug}`));
+        await revalidateTag(
+          `${email.organization?.customDomain}-${email.slug}`,
+        ));
 
       return response;
     } catch (error: any) {
@@ -439,5 +496,25 @@ export const editUser = async (
         error: error.message,
       };
     }
+  }
+};
+
+export const fetchAudienceLists = async (organizationId: string) => {
+  try {
+    const audienceLists = await prisma.audienceList.findMany({
+      where: { organizationId },
+      include: {
+        audiences: true,
+      },
+    });
+
+    return audienceLists.map((list) => ({
+      id: list.id,
+      name: list.name,
+      contactCount: list.audiences.length,
+    }));
+  } catch (error) {
+    console.error("Error fetching audience lists:", error);
+    throw new Error("Failed to fetch audience lists");
   }
 };
