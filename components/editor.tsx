@@ -41,7 +41,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   );
   const [data, setData] = useState<EmailWithSite>(email);
   const [hydrated, setHydrated] = useState(true);
-  const [from, setFrom] = useState(email.from || "noreply@painatthepump.com");
+  const [from, setFrom] = useState(email.from || "With The Ranks");
   const [showReplyTo, setShowReplyTo] = useState(false);
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
@@ -136,6 +136,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         previewText: data.previewText,
         scheduledTime: emailScheduleTime,
         id: data.id,
+        organizationId: data.organizationId!,
       });
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
@@ -276,16 +277,17 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       </Label>
       <div className="flex items-center gap-1.5">
         <Label className="flex grow items-center font-normal">
-          <span className="w-40 shrink-0 font-normal text-gray-600">From</span>
+          <span className="w-40 shrink-0 font-normal text-gray-600">
+            From Name
+          </span>
           <Input
             className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
             onChange={(e) => {
               setFrom(e.target.value);
             }}
-            placeholder="noreply@painatthepump.com"
+            placeholder="With The Ranks"
             type="text"
             value={from}
-            disabled
           />
         </Label>
 
@@ -310,7 +312,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             <Input
               className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
               onChange={(e) => setData({ ...data, replyTo: e.target.value })}
-              placeholder="noreply@intrepid.com"
+              placeholder="noreply@withtheranks.coop"
               type="text"
               value={data.replyTo || ""}
             />
