@@ -74,8 +74,8 @@ export const WelcomeTemplate = ({
         <Body className="bg-gray-100 text-gray-800">
           <Container className="bg-white p-6">
             <Img
-              src={`${baseUrl}/logo-square.png`}
-              width="150"
+              src={`https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png`}
+              width="50"
               alt="Intrepid"
               className="mx-auto mb-4"
             />
