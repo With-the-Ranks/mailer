@@ -126,7 +126,9 @@ export const sendBulkEmail = async ({
 
       const { data, error } = await resend.emails.send(emailData);
       if (error) {
-        console.error(`Failed to send email to ${audience.email}: ${error}`);
+        console.error(
+          `Failed to send email to ${audience.email}: ${JSON.stringify(error)}`,
+        );
       } else {
         const resendId = data?.id;
         await prisma.email.update({
