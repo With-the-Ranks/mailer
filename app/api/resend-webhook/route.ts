@@ -8,14 +8,14 @@ export async function POST(req: NextRequest) {
 
   console.log("Received Resend event:", JSON.stringify(body));
 
-  const { type, data } = body;
+  const { type, data, tags } = body;
 
   try {
     switch (type) {
       case "email.opened":
         await prisma.emailEvent.create({
           data: {
-            emailId: data.email_id,
+            emailId: tags.intrepidId,
             eventType: "opened",
             timestamp: new Date(data.timestamp ?? Date.now()),
           },
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       case "email.clicked":
         await prisma.emailEvent.create({
           data: {
-            emailId: data.email_id,
+            emailId: tags.intrepidId,
             eventType: "clicked",
             link: data.click?.link,
             timestamp: new Date(data.timestamp ?? Date.now()),
