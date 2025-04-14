@@ -7,12 +7,17 @@ import type { Email } from "@prisma/client";
 import { ExternalLink, Loader2, X } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import Select from "react-select";
 import { toast } from "sonner";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
-import { sendBulkEmail, unscheduleEmail } from "@/lib/actions/send-email";
+import {
+  sendBulkEmail,
+  sendEmail,
+  unscheduleEmail,
+} from "@/lib/actions/send-email";
 import {
   DonationJSON,
   DonationTemplate,
@@ -24,6 +29,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
+import { PreviewModal } from "./modal/preview-modal";
 import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -34,6 +40,8 @@ type EmailWithSite = Email & {
 };
 
 export default function Editor({ email }: { email: EmailWithSite }) {
+  const router = useRouter();
+
   const [isPendingSaving, startTransitionSaving] = useTransition();
   const [isPendingPublishing, startTransitionPublishing] = useTransition();
   const [scheduledDate, setScheduledDate] = useState<Moment>(
@@ -46,6 +54,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
   >(email.audienceListId || null);
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Redirect if email is already published.
+  useEffect(() => {
+    if (data.published) {
+      router.push(`/email/${data.id}/analytics`);
+    }
+  }, [data.published, data.id, router]);
 
   function isValidTime(current: Moment) {
     return current.isSameOrAfter(new Date(), "day");
@@ -65,7 +81,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     startTransitionSaving(async () => {
       await updateEmail(data, scheduledDate.toDate());
     });
-  }, [scheduledDate]);
+  }, [scheduledDate, data]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -80,11 +96,10 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [data, startTransitionSaving]);
+  }, [data, startTransitionSaving, scheduledDate]);
 
-  const logoUrl =
-    (data && data.organization && data.organization.logo) ||
-    "https://upload.wikimedia.org/wikipedia/commons/d/d4/Bernie_Sanders_2016_logo.png";
+  const DEFAULT_LOGO_URL = process.env.NEXT_PUBLIC_DEFAULT_LOGO_URL || "";
+  const logoUrl = data.organization?.logo ?? DEFAULT_LOGO_URL;
 
   const donationHtml = DonationTemplate({ logoUrl });
   const donationJSON = DonationJSON({ logoUrl });
@@ -110,9 +125,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const handleUnscheduleEmail = async () => {
     try {
-      await unscheduleEmail({
-        resendId: data.resendId!,
-      });
+      await unscheduleEmail({ resendId: data.resendId! });
     } catch (error) {
       toast.error("Failed to unschedule email");
     }
@@ -149,12 +162,33 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   };
 
-  const getDefaultValueSelect = (value: string | null) => {
-    if (value === "signup") {
-      return { value: "signup", label: "Signup" };
-    } else {
-      return { value: "donation", label: "Donation" };
+  const clickPreview = () => {
+    if (!data.title || !data.subject) {
+      toast.error("Campaign name and subject are required.");
+      return;
     }
+    setShowPreview(true);
+  };
+
+  const handleSendTest = async (to: string) => {
+    try {
+      await sendEmail({
+        to,
+        from,
+        subject: data.subject!,
+        content: data.content!,
+        previewText: data.previewText!,
+      });
+      toast.success("Test email sent");
+    } catch {
+      toast.error("Failed to send test email");
+    }
+  };
+
+  const getDefaultValueSelect = (value: string | null) => {
+    return value === "signup"
+      ? { value: "signup", label: "Signup" }
+      : { value: "donation", label: "Donation" };
   };
 
   const handleSaveContent = async () => {
@@ -167,40 +201,26 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   };
 
   const getButtonLabel = () => {
-    var label = "";
-    if (isScheduledForFuture()) {
-      if (!data.published) {
-        label = "scheduled";
-      } else {
-        label = "unscheduled";
-      }
+    if (!data.published) {
+      return "Preview";
     } else {
-      if (!data.published) {
-        label = "published";
-      } else {
-        label = "unpublished";
-      }
+      return "Analytics";
     }
-    return label;
   };
 
   const handleClickPublish = async () => {
-    if (!data.title || !data.subject) {
-      toast.error("Campaign name and subject are required.");
-      return;
-    }
-
+    const wasPublished = data.published;
     try {
       await handleSaveContent();
-      if (!data.published) {
+      if (!wasPublished) {
         await handleSendEmail();
       } else if (isScheduledForFuture()) {
         await handleUnscheduleEmail();
       }
       const formData = new FormData();
-      formData.append("published", String(!data.published));
+      formData.append("published", String(!wasPublished));
       await updatePostMetadata(formData, email.id, "published").then(() => {
-        var toastLabel = getButtonLabel();
+        const toastLabel = getButtonLabel();
         toast.success(`Successfully ${toastLabel} your email.`);
         setData((prev) => ({ ...prev, published: !prev.published }));
       });
@@ -226,7 +246,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
         <button
-          onClick={() => startTransitionPublishing(handleClickPublish)}
+          onClick={() => clickPreview()}
           disabled={isPendingPublishing}
           className={cn(
             "btn text-sm",
@@ -236,15 +256,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           {isPendingPublishing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <span>
-              {data.published && isScheduledForFuture()
-                ? "Unschedule"
-                : !isScheduledForFuture() && data.published
-                  ? "Unpublish"
-                  : isScheduledForFuture() && !data.published
-                    ? "Schedule"
-                    : "Send Email"}
-            </span>
+            getButtonLabel()
           )}
         </button>
       </div>
@@ -279,28 +291,23 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </span>
           <Input
             className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-            onChange={(e) => {
-              setFrom(e.target.value);
-            }}
+            onChange={(e) => setFrom(e.target.value)}
             placeholder="With The Ranks"
             type="text"
             value={from}
           />
         </Label>
-
         {!showReplyTo ? (
           <button
             className="inline-block h-full shrink-0 bg-transparent px-1 text-sm text-gray-500 hover:text-gray-700"
-            onClick={() => {
-              setShowReplyTo(true);
-            }}
+            onClick={() => setShowReplyTo(true)}
             type="button"
           >
             Reply-To
           </button>
         ) : null}
       </div>
-      {showReplyTo ? (
+      {showReplyTo && (
         <Label className="flex items-center font-normal">
           <span className="w-40 shrink-0 font-normal text-gray-600">
             Reply-To
@@ -315,23 +322,19 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             />
             <button
               className="flex h-10 shrink-0 items-center bg-transparent px-1 text-gray-500 hover:text-gray-700"
-              onClick={() => {
-                setShowReplyTo(false);
-              }}
+              onClick={() => setShowReplyTo(false)}
               type="button"
             >
               <X className="inline-block" size={16} />
             </button>
           </div>
         </Label>
-      ) : null}
-
+      )}
       <AudienceListDropdown
         selectedAudienceList={selectedAudienceList}
         setSelectedAudienceList={setSelectedAudienceList}
         organizationId={data.organizationId ?? ""}
       />
-
       <Label className="flex items-center font-normal">
         <span className="w-40 shrink-0 font-normal text-gray-600">
           Template
@@ -339,7 +342,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         <Select
           className="h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
           value={getDefaultValueSelect(data.template)}
-          isDisabled // Lock the template dropdown
+          isDisabled
         />
       </Label>
       <ScheduleEmailButton
@@ -348,7 +351,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         setScheduledTimeValue={setScheduledDate}
         isDisabled={isScheduledForFuture() && data.published}
       />
-
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -358,7 +360,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           value={data.previewText || ""}
         />
       </div>
-
       <div>
         {!hydrated ? (
           <div className="flex items-center justify-center">
@@ -375,7 +376,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               spellCheck: false,
               autofocus: false,
             }}
-            contentHtml={data.template == "signup" ? signupHtml : donationHtml}
+            contentHtml={data.template === "signup" ? signupHtml : donationHtml}
             contentJson={data.content ? JSON.parse(data.content) : undefined}
             key={data.template}
             onCreate={(editor) => {
@@ -395,6 +396,18 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           />
         )}
       </div>
+      {showPreview && (
+        <PreviewModal
+          content={data.content ?? ""}
+          previewText={data.previewText ?? undefined}
+          onCancel={() => setShowPreview(false)}
+          onConfirm={() => {
+            setShowPreview(false);
+            startTransitionPublishing(() => handleClickPublish());
+          }}
+          onSendTest={handleSendTest}
+        />
+      )}
     </div>
   );
 }
