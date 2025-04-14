@@ -13,15 +13,15 @@ function FormButton() {
   const { pending } = useFormStatus();
   return (
     <button
-      className={cn(
-        "flex h-8 w-32 items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
-        pending
-          ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300"
-          : "border-red-600 bg-red-600 text-white hover:bg-white hover:text-red-600 dark:hover:bg-transparent",
-      )}
+      type="submit"
       disabled={pending}
+      className={cn(
+        "btn border bg-red-600 text-sm text-white",
+        "hover:bg-white hover:text-red-600 dark:hover:bg-transparent",
+        pending && "cursor-not-allowed opacity-50",
+      )}
     >
-      {pending ? <LoadingDots color="#808080" /> : <p>Confirm Delete</p>}
+      {pending ? <LoadingDots color="#fff" /> : <span>Confirm Delete</span>}
     </button>
   );
 }
@@ -63,11 +63,11 @@ export default function DeleteEmailForm({ emailName }: { emailName: string }) {
         />
       </div>
 
-      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10 dark:border-stone-700 dark:bg-stone-800">
+      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10">
         <p className="text-center text-sm text-stone-500 dark:text-stone-400">
           This action is irreversible. Please proceed with caution.
         </p>
-        <div className="w-32">
+        <div>
           <FormButton />
         </div>
       </div>

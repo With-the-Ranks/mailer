@@ -13,6 +13,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        primary: "#252753",
+        accent: "#8c9dff",
+
         // light mode
         tremor: {
           brand: {

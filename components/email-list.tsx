@@ -266,7 +266,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
         <div className="flex items-center gap-4">
           <button
             onClick={handleAddCustomFieldClick}
-            className="flex items-center justify-center space-x-2 rounded-lg border border-black px-4 py-1.5 text-sm font-medium text-black transition-all hover:bg-black hover:text-white active:bg-stone-100 dark:border-stone-700 dark:hover:border-stone-200 dark:hover:bg-black dark:hover:text-white dark:active:bg-stone-800"
+            className="btn border border-stone-300 bg-white text-black hover:bg-stone-100 hover:text-black dark:border-stone-600 dark:bg-stone-800 dark:text-white dark:hover:bg-stone-700"
           >
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Custom Field
@@ -277,10 +277,10 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
               addNewAudience={addNewAudience}
             />
           </CreateAudienceButton>
-          <Button variant="custom" onClick={handleImportEntriesClick}>
+          <button className="btn" onClick={handleImportEntriesClick}>
             <UploadIcon className="mr-2 h-4 w-4" />
             Import Entries
-          </Button>
+          </button>
           <input
             ref={fileInputRef}
             type="file"
