@@ -5,9 +5,9 @@ import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const emailId = searchParams.get("emailId");
+  const resendId = searchParams.get("emailId");
 
-  const whereClause = emailId ? { emailId } : {};
+  const whereClause = resendId ? { resendId } : {};
 
   const events = await prisma.emailEvent.findMany({
     where: whereClause,
