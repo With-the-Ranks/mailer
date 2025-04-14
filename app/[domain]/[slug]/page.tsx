@@ -107,7 +107,7 @@ export default async function OrganizationPostPage({
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center">
+      <div className="mt-10 flex flex-col items-center justify-center">
         <div className="m-auto w-full text-center md:w-7/12">
           <h1 className="mb-10 font-title text-3xl font-bold text-stone-800 dark:text-white md:text-6xl">
             Campaign: {data.title}
@@ -149,7 +149,7 @@ export default async function OrganizationPostPage({
       </div> */}
 
       <div
-        className="mt-10"
+        className="mt-10 p-5"
         dangerouslySetInnerHTML={{ __html: emailContent }}
       />
     </>

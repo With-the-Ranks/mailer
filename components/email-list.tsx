@@ -260,16 +260,18 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Audience List: {listName}</h1>
-        <div className="flex items-center gap-4">
+    <div className="w-full px-4">
+      <div className="mb-4 flex flex-col items-center justify-between xl:flex-row xl:items-start">
+        <h1 className="mb-2 text-2xl font-bold md:mb-0">
+          Audience List: {listName}
+        </h1>
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={handleAddCustomFieldClick}
             className="btn border border-stone-300 bg-white text-black hover:bg-stone-100 hover:text-black dark:border-stone-600 dark:bg-stone-800 dark:text-white dark:hover:bg-stone-700"
           >
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Add Custom Field
+            <PlusIcon className="mr-0 h-4 w-4 2xl:mr-2" />
+            <span className="hidden lg:inline">Add Custom Field</span>
           </button>
           <CreateAudienceButton>
             <AddAudienceModal
@@ -278,8 +280,8 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
             />
           </CreateAudienceButton>
           <button className="btn" onClick={handleImportEntriesClick}>
-            <UploadIcon className="mr-2 h-4 w-4" />
-            Import Entries
+            <UploadIcon className="mr-0 h-4 w-4 2xl:mr-2" />
+            <span className="hidden lg:inline">Import Entries</span>
           </button>
           <input
             ref={fileInputRef}
@@ -290,7 +292,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
           />
         </div>
       </div>
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>

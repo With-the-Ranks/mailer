@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import BlogCard from "@/components/blog-card";
 import BlurImage from "@/components/blur-image";
 import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
 import prisma from "@/lib/prisma";
@@ -50,91 +49,79 @@ export default async function OrganizationHomePage({
   }
 
   return (
-    <>
-      <div className="mb-20 w-full">
-        {emails.length > 0 ? (
-          <div className="mx-auto w-full max-w-screen-xl md:mb-28 lg:w-5/6">
-            <Link href={`/${emails[0].slug}`}>
-              <div className="group relative mx-auto h-80 w-full overflow-hidden sm:h-150 lg:rounded-xl">
-                <BlurImage
-                  alt={emails[0].title ?? ""}
-                  blurDataURL={emails[0].imageBlurhash ?? placeholderBlurhash}
-                  className="h-full w-full object-cover group-hover:scale-105 group-hover:duration-300"
-                  width={1300}
-                  height={630}
-                  placeholder="blur"
-                  src={emails[0].image ?? "/placeholder.png"}
-                />
-              </div>
-              <div className="mx-auto mt-10 w-5/6 lg:w-full">
-                <h2 className="my-10 font-title text-4xl dark:text-white md:text-6xl">
-                  {emails[0].title}
-                </h2>
-                <p className="w-full text-base dark:text-white md:text-lg lg:w-2/3">
-                  {emails[0].description}
-                </p>
-                <div className="flex w-full items-center justify-start space-x-4">
-                  <div className="relative h-8 w-8 flex-none overflow-hidden rounded-full">
-                    {data.users[0]?.image ? (
-                      <BlurImage
-                        alt={data.users[0]?.name ?? "User Avatar"}
-                        width={100}
-                        height={100}
-                        className="h-full w-full object-cover"
-                        src={data.users[0]?.image}
-                      />
-                    ) : (
-                      <div className="absolute flex h-full w-full select-none items-center justify-center bg-stone-100 text-4xl text-stone-500">
-                        ?
-                      </div>
-                    )}
-                  </div>
-                  <p className="ml-3 inline-block whitespace-nowrap align-middle text-sm font-semibold dark:text-white md:text-base">
-                    {data.users[0]?.name}
-                  </p>
-                  <div className="h-6 border-l border-stone-600 dark:border-stone-400" />
-                  <p className="m-auto my-5 w-10/12 text-sm font-light text-stone-500 dark:text-stone-400 md:text-base">
-                    {toDateString(emails[0].createdAt)}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Image
-              alt="missing email"
-              src="/empty-state.png"
-              width={400}
-              height={400}
-              className="dark:hidden"
-            />
-            <Image
-              alt="missing email"
-              src="/empty-state.png"
-              width={400}
-              height={400}
-              className="hidden dark:block"
-            />
-            <p className="font-title text-2xl text-stone-600 dark:text-stone-400">
-              No emails yet.
-            </p>
-          </div>
-        )}
+    <div className="w-full">
+      {/* Hero Section */}
+      <div className="mx-auto max-w-screen-xl px-4 py-12 text-center">
+        <h1 className="text-5xl font-bold text-stone-800 dark:text-white">
+          Email Showcase
+        </h1>
+        <p className="mt-4 text-lg text-stone-600 dark:text-stone-300">
+          Discover our unique email campaigns.
+        </p>
       </div>
 
-      {emails.length > 1 && (
-        <div className="mx-5 mb-20 max-w-screen-xl lg:mx-24 2xl:mx-auto">
-          <h2 className="mb-10 font-title text-4xl dark:text-white md:text-5xl">
-            More stories
+      {emails.length > 0 ? (
+        <div className="mx-auto max-w-screen-xl px-4 py-10">
+          <h2 className="mb-6 border-b pb-4 font-title text-4xl text-stone-800 dark:text-white md:text-5xl">
+            All Created Emails
           </h2>
-          <div className="grid w-full grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 xl:grid-cols-3">
-            {emails.slice(1).map((metadata: any, index: number) => (
-              <BlogCard key={index} data={metadata} />
+          <ul className="space-y-6">
+            {emails.map((email: any) => (
+              <li key={email.slug}>
+                <Link href={`/${email.slug}`} className="group block">
+                  <div className="flex flex-col items-center gap-4 rounded-xl border bg-white p-6 transition duration-300 hover:shadow-xl dark:border-stone-700 dark:bg-stone-800 md:flex-row">
+                    {/* Image Container – rectangular 16:9 aspect ratio */}
+                    <div className="relative aspect-video w-full flex-shrink-0 md:w-1/3 lg:w-1/4">
+                      <BlurImage
+                        alt={email.title || ""}
+                        blurDataURL={email.imageBlurhash || placeholderBlurhash}
+                        src={email.image || "/placeholder.png"}
+                        placeholder="blur"
+                        className="rounded-lg object-cover transition-transform duration-300 group-hover:scale-105"
+                        fill
+                      />
+                    </div>
+                    {/* Email details */}
+                    <div className="flex-1 text-center md:text-left">
+                      <h3 className="text-2xl font-bold text-stone-800 group-hover:text-blue-600 dark:text-white">
+                        {email.title}
+                      </h3>
+                      <p className="mt-3 text-lg text-stone-600 dark:text-stone-300">
+                        {email.description}
+                      </p>
+                      <div className="mt-4 flex flex-col items-center justify-center text-sm text-stone-500 dark:text-stone-400 md:flex-row md:justify-start">
+                        <span>{data.users[0]?.name}</span>
+                        <span className="mx-2 hidden md:inline">|</span>
+                        <span>{toDateString(email.createdAt)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Image
+            alt="missing email"
+            src="/empty-state.png"
+            width={400}
+            height={400}
+            className="dark:hidden"
+          />
+          <Image
+            alt="missing email"
+            src="/empty-state.png"
+            width={400}
+            height={400}
+            className="hidden dark:block"
+          />
+          <p className="mt-6 font-title text-2xl text-stone-600 dark:text-stone-400">
+            No emails yet.
+          </p>
         </div>
       )}
-    </>
+    </div>
   );
 }

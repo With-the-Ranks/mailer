@@ -81,25 +81,35 @@ export default async function OrganizationLayout({
 
   return (
     <div className={fontMapper[data.font]}>
-      <div className="ease left-0 right-0 top-0 z-30 flex h-16 bg-white transition-all duration-150 dark:bg-black dark:text-white">
-        <div className="mx-auto flex h-full max-w-screen-xl items-center justify-center space-x-5 px-10 sm:px-20">
-          <Link href="/" className="flex items-center justify-center">
-            <div className="inline-block h-8 w-8 align-middle">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-indigo-600 to-blue-600 shadow-lg">
+        <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4">
+          <Link href="/" className="flex items-center">
+            <div className="relative h-10 w-10">
               <Image
                 alt={data.name || ""}
-                height={40}
                 src={data.logo || ""}
                 width={40}
+                height={40}
+                className="object-contain"
               />
             </div>
-            <span className="ml-3 inline-block truncate font-title font-medium">
-              {data.name}
-            </span>
+            <div className="ml-3">
+              <h1 className="text-xl font-bold text-white">{data.name}</h1>
+              <p className="text-sm text-white opacity-75">
+                {data.description}
+              </p>
+            </div>
+          </Link>
+          <Link
+            href="/"
+            className="hidden text-white hover:underline sm:inline-block"
+          >
+            Showcase
           </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="mt-20">{children}</div>
+      <main>{children}</main>
     </div>
   );
 }
