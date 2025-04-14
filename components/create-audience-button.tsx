@@ -17,8 +17,8 @@ export default function CreateAudienceButton({
       onClick={() => modal?.show(children)}
       className="btn flex items-center"
     >
-      <PlusIcon className="mr-2 h-4 w-4" />
-      Add Entry
+      <PlusIcon className="mr-0 h-4 w-4 2xl:mr-2" />
+      <span className="hidden 2xl:inline">Add Entry</span>
     </button>
   );
 }

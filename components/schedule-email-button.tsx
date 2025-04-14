@@ -73,7 +73,7 @@ export default function ScheduleEmailButton({
             disabled: isDisabled,
             readOnly: true,
             className:
-              "cursor-pointer bg-transparent ring-0 focus:ring-0 shadow-none focus:shadow-none focus:outline-none border-none focus:border-none",
+              "cursor-pointer bg-transparent w-full ring-0 focus:ring-0 shadow-none focus:shadow-none focus:outline-none border-none focus:border-none",
           }}
           onChange={handleChange}
         />
