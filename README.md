@@ -1,5 +1,5 @@
-<a href="https://app.vercel.pub">
-  <h1 align="center">Intrepid Email Campaigning Tool </h1>
+<a href="https://app.withtheranks.coop">
+  <h1 align="center">The Mailer</h1>
 </a>
 
 <p align="center">
@@ -19,11 +19,11 @@
 
 ## Introduction
 
-The Intrepid Email Campaigning Tool is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
+The Mailer is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
 
 ## Getting Started
 
-To get started with the Intrepid Email Campaigning Tool, follow these steps:
+To get started with the The Mailer, follow these steps:
 
 1. **Install `pnpm`**:
    If you haven't installed `pnpm` yet, run:
@@ -68,12 +68,6 @@ npx prisma studio
 7. **Dark Mode**: For a better user experience at night
 8. **Multi-tenant Preview URLs**: Preview changes to your client sites using [Vercel Preview URLs](https://vercel.com/docs/deployments/generated-urls). [Learn more](https://vercel.com/guides/nextjs-multi-tenant-application#3.-multi-tenant-preview-urls).
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://images.ctfassets.net/e5382hct74si/k7XpXIE0rDsHCAYvkKhff/ff44c07588068d8fefa334cd6a318c8a/CleanShot_2023-07-05_at_08.39.02.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://images.ctfassets.net/e5382hct74si/7tiAitb8kdgUGktycr540c/d33f2834f9356bce25e0721c4ebe4f9a/CleanShot_2023-07-05_at_08.39.10.png">
-    <img alt="Demo" src="https://images.ctfassets.net/e5382hct74si/7tiAitb8kdgUGktycr540c/d33f2834f9356bce25e0721c4ebe4f9a/CleanShot_2023-07-05_at_08.39.10.png">
-</picture>
-
 ## Built on open source
 
 This project was built with open source technologies:
@@ -98,7 +92,3 @@ This project was built with open source technologies:
 The MIT License.
 
 ---
-
-<a aria-label="Vercel logo" href="https://vercel.com">
-  <img src="https://badgen.net/badge/icon/Made%20by%20Vercel?icon=zeit&label&color=black&labelColor=black">
-</a>

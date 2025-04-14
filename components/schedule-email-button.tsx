@@ -60,14 +60,23 @@ export default function ScheduleEmailButton({
       <span className="w-40 shrink-0 font-normal text-gray-600 after:ml-0.5 after:text-red-400">
         Schedule Email
       </span>
-      <Button variant="outline" className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        className="flex cursor-pointer items-center gap-2 hover:border-stone-300 hover:bg-transparent"
+      >
         <CalendarIcon className="h-4 w-4" />
         <Datetime
           value={scheduledTimeValue > moment() ? scheduledTimeValue : "Now"}
           isValidDate={isValidTime}
-          inputProps={{ placeholder: "Schedule Email", disabled: isDisabled }}
+          inputProps={{
+            placeholder: "Schedule Email",
+            disabled: isDisabled,
+            readOnly: true,
+            className:
+              "cursor-pointer bg-transparent ring-0 focus:ring-0 shadow-none focus:shadow-none focus:outline-none border-none focus:border-none",
+          }}
           onChange={handleChange}
-        ></Datetime>
+        />
       </Button>
     </Label>
   );

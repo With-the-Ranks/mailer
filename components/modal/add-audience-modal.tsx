@@ -172,15 +172,14 @@ export default function AddAudienceModal({
       <div className="flex items-center justify-end rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
         <button
           type="submit"
-          className={cn(
-            "flex h-10 w-full items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none",
-            isPending
-              ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300"
-              : "border-black bg-black text-white hover:bg-white hover:text-black dark:border-stone-700 dark:hover:border-stone-200 dark:hover:bg-black dark:hover:text-white dark:active:bg-stone-800",
-          )}
+          className={cn("btn", isPending && "cursor-not-allowed opacity-50")}
           disabled={isPending}
         >
-          {isPending ? <LoadingDots color="#808080" /> : <p>Add Audience</p>}
+          {isPending ? (
+            <LoadingDots color="#FFFCF7" />
+          ) : (
+            <span>Add Audience</span>
+          )}
         </button>
       </div>
     </form>
