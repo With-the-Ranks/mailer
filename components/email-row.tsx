@@ -1,5 +1,5 @@
 import type { Email, Organization } from "@prisma/client";
-import { Edit3, Eye, Settings } from "lucide-react";
+import { BarChart, Edit3, Eye, Settings } from "lucide-react";
 import Link from "next/link";
 
 export default function EmailRow({
@@ -43,6 +43,13 @@ export default function EmailRow({
             </Link>
             <Link href={`/email/${data.id}/`} className="btn" title="Editor">
               <Edit3 size={20} />
+            </Link>
+            <Link
+              href={`/email/${data.id}/analytics`}
+              className="btn"
+              title="Analytics"
+            >
+              <BarChart size={20} />
             </Link>
             {organization && (
               <Link
