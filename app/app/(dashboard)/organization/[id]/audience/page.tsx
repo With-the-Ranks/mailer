@@ -56,6 +56,12 @@ export default async function AudienceList({
           <CreateAudienceModal organizationId={decodeURIComponent(params.id)} />
         </CreateAudienceListButton>
       </div>
+      <section>
+        <p className="text-sm text-stone-600 dark:text-stone-400">
+          Manage your audience lists below. Create new audience, manage custom
+          fields and import data to better target your campaigns.
+        </p>
+      </section>
       <Audiences organizationId={decodeURIComponent(params.id)} />
     </>
   );

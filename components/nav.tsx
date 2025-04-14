@@ -3,7 +3,6 @@
 import {
   ArrowLeft,
   Edit3,
-  Globe,
   LayoutDashboard,
   Menu,
   Newspaper,
@@ -80,10 +79,10 @@ export default function Nav({ children }: { children: ReactNode }) {
     if (organizationFound) {
       return [
         {
-          name: "Organization",
+          name: "Dashboard",
           href: "/organizations",
           isActive: segments[0] === "organizations",
-          icon: <Globe width={18} />,
+          icon: <LayoutDashboard width={18} />,
         },
         {
           name: "Audience",
@@ -113,10 +112,10 @@ export default function Nav({ children }: { children: ReactNode }) {
           icon: <LayoutDashboard width={18} />,
         },
         {
-          name: "Organizations",
+          name: "Organization",
           href: "/organizations",
           isActive: segments[0] === "organizations",
-          icon: <Globe width={18} />,
+          icon: <LayoutDashboard width={18} />,
         },
         {
           name: "Settings",
