@@ -7,24 +7,29 @@ export default function EmailRow({
 }: {
   data: Email & { organization?: Organization | null };
 }) {
-  let status = "";
-  status = data.published ? "sent" : "draft";
-
+  const status = data.published ? "sent" : "draft";
   const lastUpdated = new Date(data.updatedAt).toLocaleDateString();
-  let organization = data.organization;
+  const organization = data.organization;
   const url =
     organization &&
     `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+
   return (
-    <tr>
+    <tr className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-        {data.title || "No Subject"}
+        <Link href={`/email/${data.id}/`} className="block">
+          {data.title || "No Subject"}
+        </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        <Link href={`/email/${data.id}/`} className="block">
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        {lastUpdated}
+        <Link href={`/email/${data.id}/`} className="block">
+          {lastUpdated}
+        </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
         {status === "sent" ? (
@@ -32,14 +37,14 @@ export default function EmailRow({
             <Link
               href={`/email/${data.id}/settings`}
               className="btn"
-              title="Performance"
+              title="Settings"
             >
               <Settings size={20} />
             </Link>
             <Link href={`/email/${data.id}/`} className="btn" title="Editor">
               <Edit3 size={20} />
             </Link>
-            {organization ? (
+            {organization && (
               <Link
                 href={
                   process.env.NEXT_PUBLIC_VERCEL_ENV
@@ -49,10 +54,11 @@ export default function EmailRow({
                 target="_blank"
                 rel="noreferrer"
                 className="btn text-sm"
+                title="Preview"
               >
                 <Eye size={20} />
               </Link>
-            ) : null}
+            )}
           </div>
         ) : (
           <Link
