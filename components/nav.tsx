@@ -24,18 +24,20 @@ import { getOrganizationFromUserId } from "@/lib/actions";
 export default function Nav({ children }: { children: ReactNode }) {
   const segments = useSelectedLayoutSegments();
   const { id } = useParams() as { id?: string };
+  const pathname = usePathname();
 
   const [siteId, setSiteId] = useState<string | null>(null);
   const [organizationFound, setOrganizationFound] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Re-run this effect when either id or pathname changes.
   useEffect(() => {
     getOrganizationFromUserId().then((orgId) => {
       setSiteId(orgId ?? null);
       setOrganizationFound(!!orgId);
       setLoading(false);
     });
-  }, [id]);
+  }, [id, pathname]);
 
   const tabs = useMemo(() => {
     if (loading) return []; // Avoid showing incomplete menu while loading
@@ -112,12 +114,6 @@ export default function Nav({ children }: { children: ReactNode }) {
           icon: <LayoutDashboard width={18} />,
         },
         {
-          name: "Organization",
-          href: "/organizations",
-          isActive: segments[0] === "organizations",
-          icon: <LayoutDashboard width={18} />,
-        },
-        {
           name: "Settings",
           href: "/settings",
           isActive: segments[0] === "settings",
@@ -128,8 +124,6 @@ export default function Nav({ children }: { children: ReactNode }) {
   }, [segments, id, siteId, organizationFound, loading]);
 
   const [showSidebar, setShowSidebar] = useState(false);
-
-  const pathname = usePathname();
 
   useEffect(() => {
     setShowSidebar(false);

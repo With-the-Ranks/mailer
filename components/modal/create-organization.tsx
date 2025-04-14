@@ -53,9 +53,8 @@ export default function CreateOrganizationModal() {
             toast.error(res.error);
           } else {
             va.track("Created Site");
-            const { id } = res;
+            router.push(`/organizations`);
             router.refresh();
-            router.push(`/organization/${id}/audience`);
             modal?.hide();
             toast.success(`Successfully created organization!`);
           }

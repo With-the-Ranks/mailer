@@ -68,11 +68,7 @@ export default function EmailRow({
             )}
           </div>
         ) : (
-          <Link
-            href={`/email/${data.id}/editor`}
-            className="btn"
-            title="Editor"
-          >
+          <Link href={`/email/${data.id}`} className="btn" title="Editor">
             <Edit3 size={20} />
           </Link>
         )}
