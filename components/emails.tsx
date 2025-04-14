@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-import EmailCard from "./email-card";
+import EmailRow from "./email-row";
 
 export default async function Emails({
   organizationId,
@@ -18,13 +18,14 @@ export default async function Emails({
   if (!session?.user) {
     redirect("/login");
   }
-  const emails = await prisma.email.findMany({
+
+  const emails: Email[] = await prisma.email.findMany({
     where: {
       userId: session!.user.id as string,
       ...(organizationId ? { organizationId } : {}),
     },
     orderBy: {
-      updatedAt: "desc",
+      createdAt: "desc",
     },
     include: {
       organization: true,
@@ -32,24 +33,47 @@ export default async function Emails({
     ...(limit ? { take: limit } : {}),
   });
 
-  return emails.length > 0 ? (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {emails.map((email: Email) => (
-        <EmailCard key={email.id} data={email} />
-      ))}
-    </div>
-  ) : (
-    <div className="flex flex-col items-center space-x-4">
-      {/* <h1 className="font-cal text-4xl">No Posts Yet</h1> */}
-      <Image
-        alt="missing email"
-        src="/empty-state.png"
-        width={400}
-        height={400}
-      />
-      <p className="text-lg text-stone-500">
-        You do not have any emails yet. Create one to get started.
-      </p>
+  if (emails.length === 0) {
+    return (
+      <div className="flex flex-col items-center space-x-4">
+        <Image
+          alt="missing email"
+          src="/empty-state.png"
+          width={400}
+          height={400}
+        />
+        <p className="text-lg text-stone-500">
+          You do not have any emails yet. Create one to get started.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-gray-50 dark:bg-gray-800">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Subject
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Status
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Last Updated
+            </th>
+            <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+          {emails.map((email: Email) => (
+            <EmailRow key={email.id} data={email} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
