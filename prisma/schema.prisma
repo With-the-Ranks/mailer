@@ -105,6 +105,14 @@ model Email {
   @@index([userId])
 }
 
+model EmailEvent {
+  id             String        @id @default(cuid())
+  emailId        String
+  eventType      String
+  link           String?
+  timestamp      DateTime      @default(now())
+}
+
 model Organization {
   id            String   @id @default(cuid())
   name          String?
