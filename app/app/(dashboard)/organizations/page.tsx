@@ -30,7 +30,9 @@ export default async function Dashboard({
   });
 
   const siteId = organizations.length > 0 ? organizations[0].id : null;
-
+  let data = organizations.length > 0 ? organizations[0] : null;
+  const url =
+    data && `${data.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
   return (
     <div className="flex h-screen">
       <main className="flex-1 overflow-y-auto p-8">
@@ -83,6 +85,20 @@ export default async function Dashboard({
             >
               Manage Emails
             </Link>
+            {data ? (
+              <Link
+                href={
+                  process.env.NEXT_PUBLIC_VERCEL_ENV
+                    ? `https://${url}`
+                    : `http://${data.subdomain}.localhost:3000`
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="btn w-full sm:w-auto"
+              >
+                Email Showcase
+              </Link>
+            ) : null}
             <Link
               href={
                 siteId ? `/organization/${siteId}/analytics` : "/organizations"

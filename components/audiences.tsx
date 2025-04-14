@@ -27,6 +27,11 @@ export default async function Audiences({
     },
     include: {
       organization: true,
+      _count: {
+        select: {
+          audiences: true,
+        },
+      },
     },
     ...(limit ? { take: limit } : {}),
   });
@@ -39,7 +44,6 @@ export default async function Audiences({
     </div>
   ) : (
     <div className="flex flex-col items-center space-x-4">
-      {/* <h1 className="font-cal text-4xl">No Audience Lists Yet</h1> */}
       <Image
         alt="missing audiences"
         src="/empty-state.png"
