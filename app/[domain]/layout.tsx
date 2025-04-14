@@ -4,8 +4,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import CTA from "@/components/cta";
-import ReportAbuse from "@/components/report-abuse";
 import { getOrganizationData as getOrganizationData } from "@/lib/fetchers";
 import { fontMapper } from "@/styles/fonts";
 
@@ -102,13 +100,6 @@ export default async function OrganizationLayout({
       </div>
 
       <div className="mt-20">{children}</div>
-
-      {domain == `demo.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}` ||
-      domain == `platformize.co` ? (
-        <CTA />
-      ) : (
-        <ReportAbuse />
-      )}
     </div>
   );
 }
