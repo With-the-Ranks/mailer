@@ -1,9 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 
+import Chart from "@/components/Chart";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-
-import Chart from "@/components/Chart";
 
 export default async function EmailAnalytics({
   params,
