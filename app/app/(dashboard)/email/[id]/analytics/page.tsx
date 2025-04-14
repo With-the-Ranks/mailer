@@ -29,7 +29,7 @@ export default async function EmailAnalytics({
         </h1>
         <h2>{data?.title}</h2>
         <h3>{data?.subject}</h3>
-        <Chart emailId={params.id} />
+        <Chart emailId={data.resendId} />
       </div>
     </div>
   );
