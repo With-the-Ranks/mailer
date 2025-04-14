@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       case "email.opened":
         await prisma.emailEvent.create({
           data: {
-            emailId: data.emailId,
+            emailId: data.email_id,
             eventType: "opened",
             timestamp: new Date(data.timestamp ?? Date.now()),
           },
@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
       case "email.clicked":
         await prisma.emailEvent.create({
           data: {
-            emailId: data.emailId,
+            emailId: data.email_id,
             eventType: "clicked",
-            link: data.link,
+            link: data.click?.link,
             timestamp: new Date(data.timestamp ?? Date.now()),
           },
         });
