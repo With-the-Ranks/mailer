@@ -49,39 +49,49 @@ export default async function OrganizationHomePage({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-gray-50 dark:bg-stone-900">
+      {/* Hero Section */}
+      <div className="mx-auto max-w-screen-xl px-4 py-12 text-center">
+        <h1 className="text-5xl font-bold text-stone-800 dark:text-white">
+          Email Showcase
+        </h1>
+        <p className="mt-4 text-lg text-stone-600 dark:text-stone-300">
+          Discover our unique email campaigns.
+        </p>
+      </div>
+
       {emails.length > 0 ? (
         <div className="mx-auto max-w-screen-xl px-4 py-10">
-          <h2 className="mb-10 font-title text-4xl dark:text-white md:text-5xl">
-            Email List
+          <h2 className="mb-6 border-b pb-4 font-title text-4xl text-stone-800 dark:text-white md:text-5xl">
+            All Created Emails
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {emails.map((email: any) => (
               <li key={email.slug}>
                 <Link href={`/${email.slug}`} className="group block">
-                  <div className="flex flex-col items-center gap-4 rounded-lg border p-4 transition hover:shadow-md md:flex-row">
-                    {/* Thumbnail image container with a rectangular (16:9) aspect ratio */}
-                    <div className="relative aspect-video w-full flex-shrink-0 md:w-1/4 lg:w-1/6">
+                  <div className="flex flex-col items-center gap-4 rounded-xl border bg-white p-6 transition duration-300 hover:shadow-xl dark:border-stone-700 dark:bg-stone-800 md:flex-row">
+                    {/* Image Container – rectangular 16:9 aspect ratio */}
+                    <div className="relative aspect-video w-full flex-shrink-0 md:w-1/3 lg:w-1/4">
                       <BlurImage
-                        alt={email.title ?? ""}
-                        blurDataURL={email.imageBlurhash ?? placeholderBlurhash}
-                        src={email.image ?? "/placeholder.png"}
+                        alt={email.title || ""}
+                        blurDataURL={email.imageBlurhash || placeholderBlurhash}
+                        src={email.image || "/placeholder.png"}
                         placeholder="blur"
-                        className="rounded-md object-cover transition duration-300 group-hover:scale-105"
+                        className="rounded-lg object-cover transition-transform duration-300 group-hover:scale-105"
                         fill
                       />
                     </div>
-                    {/* Email details with increased text size */}
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold group-hover:text-blue-600 dark:text-white">
+                    {/* Email details */}
+                    <div className="flex-1 text-center md:text-left">
+                      <h3 className="text-2xl font-bold text-stone-800 group-hover:text-blue-600 dark:text-white">
                         {email.title}
                       </h3>
-                      <p className="mt-2 text-base text-stone-600 dark:text-stone-400">
+                      <p className="mt-3 text-lg text-stone-600 dark:text-stone-300">
                         {email.description}
                       </p>
-                      <div className="mt-2 flex items-center text-xs text-stone-500 dark:text-stone-400 md:text-sm">
+                      <div className="mt-4 flex flex-col items-center justify-center text-sm text-stone-500 dark:text-stone-400 md:flex-row md:justify-start">
                         <span>{data.users[0]?.name}</span>
-                        <span className="mx-2">|</span>
+                        <span className="mx-2 hidden md:inline">|</span>
                         <span>{toDateString(email.createdAt)}</span>
                       </div>
                     </div>
@@ -107,7 +117,7 @@ export default async function OrganizationHomePage({
             height={400}
             className="hidden dark:block"
           />
-          <p className="font-title text-2xl text-stone-600 dark:text-stone-400">
+          <p className="mt-6 font-title text-2xl text-stone-600 dark:text-stone-400">
             No emails yet.
           </p>
         </div>
