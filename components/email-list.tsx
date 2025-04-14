@@ -271,7 +271,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
             className="btn border border-stone-300 bg-white text-black hover:bg-stone-100 hover:text-black dark:border-stone-600 dark:bg-stone-800 dark:text-white dark:hover:bg-stone-700"
           >
             <PlusIcon className="mr-0 h-4 w-4 2xl:mr-2" />
-            <span className="hidden 2xl:inline">Add Custom Field</span>
+            <span className="hidden lg:inline">Add Custom Field</span>
           </button>
           <CreateAudienceButton>
             <AddAudienceModal
@@ -281,7 +281,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
           </CreateAudienceButton>
           <button className="btn" onClick={handleImportEntriesClick}>
             <UploadIcon className="mr-0 h-4 w-4 2xl:mr-2" />
-            <span className="hidden 2xl:inline">Import Entries</span>
+            <span className="hidden lg:inline">Import Entries</span>
           </button>
           <input
             ref={fileInputRef}

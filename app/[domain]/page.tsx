@@ -49,7 +49,7 @@ export default async function OrganizationHomePage({
   }
 
   return (
-    <div className="w-full bg-gray-50 dark:bg-stone-900">
+    <div className="w-full">
       {/* Hero Section */}
       <div className="mx-auto max-w-screen-xl px-4 py-12 text-center">
         <h1 className="text-5xl font-bold text-stone-800 dark:text-white">

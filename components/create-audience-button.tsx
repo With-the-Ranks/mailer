@@ -18,7 +18,7 @@ export default function CreateAudienceButton({
       className="btn flex items-center"
     >
       <PlusIcon className="mr-0 h-4 w-4 2xl:mr-2" />
-      <span className="hidden 2xl:inline">Add Entry</span>
+      <span className="hidden lg:inline">Add Entry</span>
     </button>
   );
 }
