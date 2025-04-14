@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid
+  CartesianGrid,
+  Legend,
+  LineChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 interface EmailEvent {
