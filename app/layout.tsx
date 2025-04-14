@@ -9,15 +9,15 @@ import { cal, inter } from "@/styles/fonts";
 import { Providers } from "./providers";
 
 const title =
-  "Intrepid Email Campaign – The ultimate solution for managing and automating digital campaigns.";
+  "The Mailer – Simple solution for managing and automating digital campaigns.";
 const description =
-  "The Intrepid Email Campaign is a comprehensive platform designed to streamline digital marketing and campaign management.";
-const image = "https://vercel.pub/thumbnail.png";
+  "The Mailer is a comprehensive platform designed to streamline digital marketing and campaign management.";
+const image = "https://withtheranks.com/assets/meta.png";
 
 export const metadata: Metadata = {
   title,
   description,
-  icons: ["https://vercel.pub/favicon.ico"],
+  icons: ["https://withtheranks.com/favicon.svg"],
   openGraph: {
     title,
     description,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     images: [image],
     creator: "@vercel",
   },
-  metadataBase: new URL("https://vercel.pub"),
+  metadataBase: new URL("https://app.withtheranks.coop/"),
 };
 
 export default function RootLayout({

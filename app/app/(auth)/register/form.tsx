@@ -37,8 +37,8 @@ export default function FormPage() {
           try {
             await sendEmail({
               to: formData.email,
-              from: "Intrepid",
-              subject: "Welcome to Intrepid!",
+              from: "The Mailer",
+              subject: "Welcome to the Mailer app!",
               content: null,
               previewText: null,
             });
@@ -66,7 +66,7 @@ export default function FormPage() {
       className="rounded-lg border border-stone-200 bg-white p-5 dark:border-stone-700 dark:bg-black sm:p-10"
     >
       <h2 className="mb-2 font-cal text-3xl dark:text-white">
-        Register Intrepid Email App
+        Register The Mailer App
       </h2>
       <p className="text-sm text-stone-500 dark:text-stone-400">
         Create your account.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Login | Intrepid Email Campaign",
+  title: "Login | The Mailer",
 };
 
 export default function AuthLayout({ children }: { children: ReactNode }) {

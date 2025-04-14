@@ -1,5 +1,5 @@
 <a href="https://app.vercel.pub">
-  <h1 align="center">Intrepid Email Campaigning Tool </h1>
+  <h1 align="center">The Mailer</h1>
 </a>
 
 <p align="center">
@@ -19,11 +19,11 @@
 
 ## Introduction
 
-The Intrepid Email Campaigning Tool is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
+The Mailer is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
 
 ## Getting Started
 
-To get started with the Intrepid Email Campaigning Tool, follow these steps:
+To get started with the The Mailer, follow these steps:
 
 1. **Install `pnpm`**:
    If you haven't installed `pnpm` yet, run:

@@ -1,6 +1,6 @@
 # Tests
 
-## Intrepid Testing Guidelines
+## The Mailer Testing Guidelines
 
 - Unit Testing
 

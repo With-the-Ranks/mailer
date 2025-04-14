@@ -67,7 +67,7 @@ export const WelcomeTemplate = ({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to Intrepid</Preview>
+      <Preview>Welcome to The Mailer</Preview>
       <Tailwind
         config={{ theme: { extend: { colors: { brand: "#123456" } } } }}
       >
@@ -76,13 +76,13 @@ export const WelcomeTemplate = ({
             <Img
               src={`https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png`}
               width="50"
-              alt="Intrepid"
+              alt="The Mailer"
               className="mx-auto mb-4"
             />
-            <Heading className="text-center">Welcome to Intrepid</Heading>
+            <Heading className="text-center">Welcome to The Mailer</Heading>
             <Text className="mb-4 text-left">Howdy {email || "friend"},</Text>
             <Text className="mb-4 text-left">
-              Join other non-profits who trust Intrepid for their email
+              Join other non-profits who trust The Mailer for their email
               campaigns.
             </Text>
             <Text className="mb-4">Here’s how to get started:</Text>
@@ -103,7 +103,7 @@ export const WelcomeTemplate = ({
           <Container className="mt-4 text-center">
             <Link className="text-sm text-gray-500">Unsubscribe</Link>
             <Text className="mt-2 text-xs text-gray-400">
-              Intrepid, 123 Main Street, Anytown, USA
+              The Mailer, 123 Main Street, Anytown, USA
             </Text>
           </Container>
         </Body>
