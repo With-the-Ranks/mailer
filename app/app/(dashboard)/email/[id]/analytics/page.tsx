@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import Chart from "@/components/Chart";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -17,7 +18,7 @@ export default async function EmailAnalytics({
       id: decodeURIComponent(params.id),
     },
   });
-  if (!data || data.userId !== session.user.id) {
+  if (!data || data.userId !== session?.user.id) {
     notFound();
   }
   return (
@@ -26,8 +27,9 @@ export default async function EmailAnalytics({
         <h1 className="font-cal text-3xl font-bold dark:text-white">
           Email Analytics
         </h1>
-        <h2>{data.title}</h2>
-        <h3>{data.subject}</h3>
+        <h2>{data?.title}</h2>
+        <h3>{data?.subject}</h3>
+        <Chart emailId={params.id} />
       </div>
     </div>
   );
