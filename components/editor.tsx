@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { AudienceListDropdown } from "./audience-list-dropdown";
 import { PreviewModal } from "./modal/preview-modal";
 import ScheduleEmailButton from "./schedule-email-button";
+// import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -210,7 +211,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const getButtonLabel = () => {
     if (!data.published) {
-      return "Preview";
+      return "Preview & Send";
     } else {
       return "Analytics";
     }

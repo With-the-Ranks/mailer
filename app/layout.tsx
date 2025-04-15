@@ -9,9 +9,9 @@ import { cal, inter } from "@/styles/fonts";
 import { Providers } from "./providers";
 
 const title =
-  "The Mailer – Simple solution for managing and automating digital campaigns.";
+  "Mailer – Simple solution for managing and automating digital campaigns.";
 const description =
-  "The Mailer is a comprehensive platform designed to streamline digital marketing and campaign management.";
+  "Mailer is a comprehensive platform designed to streamline digital marketing and campaign management.";
 const image = "https://withtheranks.com/assets/meta.png";
 
 export const metadata: Metadata = {

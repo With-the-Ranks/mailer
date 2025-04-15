@@ -1,6 +1,6 @@
 # Tests
 
-## The Mailer Testing Guidelines
+## Mailer Testing Guidelines
 
 - Unit Testing
 

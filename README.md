@@ -1,5 +1,5 @@
 <a href="https://app.withtheranks.coop">
-  <h1 align="center">The Mailer</h1>
+  <h1 align="center">Mailer</h1>
 </a>
 
 <p align="center">
@@ -19,13 +19,13 @@
 
 ## Introduction
 
-The Mailer is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
+Mailer is a full-stack application designed for modern email campaign management. It features a drag-and-drop builder and advanced tracking, built using [Next.js](https://nextjs.org/), [React-Email](https://react-email.com/), and supported by [Vercel PostgreSQL](https://vercel.com/storage/postgres) and [Prisma ORM](https://prisma.io/).
 
 Note that this project is in pre-alpha development. We may introduce breaking changes without warning. Please review PR details regularly for summaries of changes when pulling new versions of this repo.
 
 ## Getting Started
 
-To get started with the The Mailer, follow these steps:
+To get started with the Mailer, follow these steps:
 
 1. **Install `pnpm`**:
    If you haven't installed `pnpm` yet, run:
