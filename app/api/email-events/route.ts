@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   const events = await prisma.emailEvent.findMany({
     where: whereClause,
-    orderBy: { timestamp: "asc" },
+    orderBy: { timestamp: "desc" },
   });
 
   return NextResponse.json(events);
