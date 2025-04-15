@@ -8,6 +8,7 @@ import {
   Newspaper,
   RadioTower,
   Settings,
+  TrendingUp,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -54,6 +55,12 @@ export default function Nav({ children }: { children: ReactNode }) {
           href: `/email/${id}`,
           isActive: segments.length === 2,
           icon: <Edit3 width={18} />,
+        },
+        {
+          name: "Analytics",
+          href: `/email/${id}/analytics`,
+          isActive: segments.includes("analytics"),
+          icon: <TrendingUp width={18} />,
         },
         {
           name: "Settings",

@@ -168,11 +168,15 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   };
 
   const clickPreview = () => {
-    if (!data.title || !data.subject) {
-      toast.error("Campaign name and subject are required.");
-      return;
+    if (data.published) {
+      router.push(`/email/${data.id}/analytics`);
+    } else {
+      if (!data.title || !data.subject) {
+        toast.error("Campaign name and subject are required.");
+        return;
+      }
+      setShowPreview(true);
     }
-    setShowPreview(true);
   };
 
   const handleSendTest = async (to: string) => {

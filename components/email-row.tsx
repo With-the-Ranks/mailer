@@ -7,7 +7,7 @@ export default function EmailRow({
 }: {
   data: Email & { organization?: Organization | null };
 }) {
-  const status = data.published ? "sent" : "draft";
+  const isPublished = data.published;
   const lastUpdated = new Date(data.updatedAt).toLocaleDateString();
   const organization = data.organization;
   const url =
@@ -17,61 +17,78 @@ export default function EmailRow({
   return (
     <tr className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-        <Link href={`/email/${data.id}/`} className="block">
+        <Link
+          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
+          className="block"
+        >
           {data.title || "No Subject"}
         </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        <Link href={`/email/${data.id}/`} className="block">
-          {status.charAt(0).toUpperCase() + status.slice(1)}
+        <Link
+          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
+          className="block"
+        >
+          {isPublished ? "Sent" : "Draft"}
         </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        <Link href={`/email/${data.id}/`} className="block">
+        <Link
+          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
+          className="block"
+        >
           {lastUpdated}
         </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
-        {status === "sent" ? (
-          <div className="flex justify-center gap-2">
-            <Link
-              href={`/email/${data.id}/settings`}
-              className="btn"
-              title="Settings"
-            >
-              <Settings size={20} />
-            </Link>
-            <Link href={`/email/${data.id}/`} className="btn" title="Editor">
-              <Edit3 size={20} />
-            </Link>
-            <Link
-              href={`/email/${data.id}/analytics`}
-              className="btn"
-              title="Analytics"
-            >
-              <BarChart size={20} />
-            </Link>
-            {organization && (
+        <div className="flex justify-center gap-2">
+          {isPublished ? (
+            <>
               <Link
-                href={
-                  process.env.NEXT_PUBLIC_VERCEL_ENV
-                    ? `https://${url}/${data.slug}`
-                    : `http://${organization.subdomain}.localhost:3000/${data.slug}`
-                }
-                target="_blank"
-                rel="noreferrer"
-                className="btn text-sm"
-                title="Preview"
+                href={`/email/${data.id}/analytics`}
+                className="btn"
+                title="Analytics"
               >
-                <Eye size={20} />
+                <BarChart size={20} />
               </Link>
-            )}
-          </div>
-        ) : (
-          <Link href={`/email/${data.id}`} className="btn" title="Editor">
-            <Edit3 size={20} />
-          </Link>
-        )}
+              {organization && (
+                <Link
+                  href={
+                    process.env.NEXT_PUBLIC_VERCEL_ENV
+                      ? `https://${url}/${data.slug}`
+                      : `http://${organization.subdomain}.localhost:3000/${data.slug}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn text-sm"
+                  title="Preview"
+                >
+                  <Eye size={20} />
+                </Link>
+              )}
+              <Link
+                href={`/email/${data.id}/settings`}
+                className="btn"
+                title="Settings"
+              >
+                <Settings size={20} />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href={`/email/${data.id}`} className="btn" title="Editor">
+                <Edit3 size={20} />
+              </Link>
+              <Link
+                href={`/email/${data.id}/settings`}
+                className="btn"
+                title="Settings"
+              >
+                <Settings size={20} />
+              </Link>
+            </>
+          )}
+        </div>
       </td>
     </tr>
   );

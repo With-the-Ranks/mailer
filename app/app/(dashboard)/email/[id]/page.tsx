@@ -30,6 +30,9 @@ export default async function EmailPage({
   if (!data || data.userId !== session.user.id) {
     notFound();
   }
+  if (data.published) {
+    redirect(`/email/${data.id}/analytics`);
+  }
 
   return <Editor email={data} />;
 }
