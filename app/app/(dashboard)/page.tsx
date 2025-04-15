@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import Emails from "@/components/emails";
+import EmailStats from "@/components/EmailStats";
 import Organizations from "@/components/organizations";
 import OverviewOrganizationCTA from "@/components/overview-organizations-cta";
 import PlaceholderCard from "@/components/placeholder-card";
@@ -39,6 +40,7 @@ export default async function Overview() {
         <Organizations limit={1} />
       </div>
 
+      {hasOrganization && <EmailStats userId={session.user.id} />}
       {hasOrganization && (
         <div className="flex flex-col space-y-6">
           <h1 className="font-cal text-3xl font-bold dark:text-white">

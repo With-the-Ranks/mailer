@@ -49,7 +49,6 @@ export default function Chart({ emailId }: { emailId: string }) {
         const result = Object.values(grouped).sort((a, b) =>
           a.date.localeCompare(b.date),
         );
-        console.log(result);
         setData(result);
       });
   }, [emailId]);

@@ -126,6 +126,10 @@ export const sendBulkEmail = async ({
             name: "intrepidId",
             value: id,
           },
+          {
+            name: "userId",
+            value: session.user.id,
+          },
         ],
         react: "",
       };

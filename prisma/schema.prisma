@@ -111,6 +111,7 @@ model EmailEvent {
   eventType      String
   link           String?
   timestamp      DateTime      @default(now())
+  userId         String?
 }
 
 model Organization {
