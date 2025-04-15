@@ -19,8 +19,11 @@ import {
 } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
 
 import { getOrganizationFromUserId } from "@/lib/actions";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Nav({ children }: { children: ReactNode }) {
   const segments = useSelectedLayoutSegments();
@@ -31,7 +34,11 @@ export default function Nav({ children }: { children: ReactNode }) {
   const [organizationFound, setOrganizationFound] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Re-run this effect when either id or pathname changes.
+  const { data: emailData } = useSWR(
+    id && pathname.includes("/email") ? `/api/email/${id}` : null,
+    fetcher,
+  );
+
   useEffect(() => {
     getOrganizationFromUserId().then((orgId) => {
       setSiteId(orgId ?? null);
@@ -41,22 +48,23 @@ export default function Nav({ children }: { children: ReactNode }) {
   }, [id, pathname]);
 
   const tabs = useMemo(() => {
-    if (loading) return []; // Avoid showing incomplete menu while loading
+    if (loading) return [];
 
     if (segments[0] === "email" && id) {
+      const isPublished = emailData?.published;
       return [
         {
           name: "Back to All Emails",
           href: siteId ? `/organization/${siteId}` : "/organizations",
           icon: <ArrowLeft width={18} />,
         },
-        {
+        !isPublished && {
           name: "Editor",
           href: `/email/${id}`,
           isActive: segments.length === 2,
           icon: <Edit3 width={18} />,
         },
-        {
+        isPublished && {
           name: "Analytics",
           href: `/email/${id}/analytics`,
           isActive: segments.includes("analytics"),
@@ -68,7 +76,7 @@ export default function Nav({ children }: { children: ReactNode }) {
           isActive: segments.includes("settings"),
           icon: <Settings width={18} />,
         },
-      ];
+      ].filter(Boolean);
     } else if (segments[0] === "audience" && id) {
       return [
         {
@@ -128,7 +136,7 @@ export default function Nav({ children }: { children: ReactNode }) {
         },
       ];
     }
-  }, [segments, id, siteId, organizationFound, loading]);
+  }, [segments, id, siteId, organizationFound, loading, emailData]);
 
   const [showSidebar, setShowSidebar] = useState(false);
 

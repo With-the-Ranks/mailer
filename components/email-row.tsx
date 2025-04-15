@@ -29,7 +29,7 @@ export default function EmailRow({
           href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
           className="block"
         >
-          {isPublished ? "Sent" : "Draft"}
+          {isPublished ? "Published" : "Draft"}
         </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
