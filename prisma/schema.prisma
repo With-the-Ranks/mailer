@@ -113,7 +113,7 @@ model EmailEvent {
   timestamp      DateTime      @default(now())
   userId         String?
   emailTo        String?
-  @@unique([emailId, emailTo])
+  @@unique([emailId, emailTo, eventType])
 }
 
 model Organization {
