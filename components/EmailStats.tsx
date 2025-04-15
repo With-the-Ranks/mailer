@@ -47,7 +47,14 @@ export default function EmailStats({ userId }: EmailStatsProps) {
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="subject" interval={0} textAnchor="end" height={60} />
+          <XAxis
+            dataKey="subject"
+            interval={0}
+            angle={-90}
+            textAnchor="end"
+            height={120}
+            dy={10}
+          />
           <YAxis allowDecimals={false} />
           <Tooltip />
           <Legend />
