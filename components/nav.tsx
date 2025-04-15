@@ -174,7 +174,7 @@ export default function Nav({ children }: { children: ReactNode }) {
                 alt="Logo"
                 className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
               />
-              <span className="font-bold">The Mailer</span>
+              <span className="font-bold">Mailer</span>
             </Link>
           </div>
           <div className="grid gap-1">

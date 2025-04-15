@@ -39,8 +39,8 @@ function RegisterForm() {
         try {
           await sendEmail({
             to: formData.email,
-            from: "The Mailer",
-            subject: "Welcome to the Mailer app!",
+            from: "Mailer",
+            subject: "Welcome to Mailer app!",
             content: null,
             previewText: null,
           });
