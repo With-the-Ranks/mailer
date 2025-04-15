@@ -87,7 +87,7 @@ async function parseEmailContent(
   if (previewText) {
     maily.setPreviewText(previewText);
   }
-  return await maily.renderAsync();
+  return await maily.render();
 }
 
 export default async function OrganizationPostPage({
