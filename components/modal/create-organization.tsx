@@ -20,7 +20,11 @@ function CreateSiteFormButton() {
       className={cn("btn", pending && "cursor-not-allowed opacity-50")}
       disabled={pending}
     >
-      {pending ? <LoadingDots color="#FFFCF7" /> : <span>Create Site</span>}
+      {pending ? (
+        <LoadingDots color="#FFFCF7" />
+      ) : (
+        <span>Create New Organization</span>
+      )}
     </button>
   );
 }
@@ -72,12 +76,12 @@ export default function CreateOrganizationModal() {
             htmlFor="name"
             className="text-sm font-medium text-stone-500 dark:text-stone-400"
           >
-            Site Name
+            Organization Name
           </label>
           <input
             name="name"
             type="text"
-            placeholder="My Awesome Site"
+            placeholder="My Awesome Organization"
             autoFocus
             value={data.name}
             onChange={(e) => setData({ ...data, name: e.target.value })}
@@ -87,7 +91,7 @@ export default function CreateOrganizationModal() {
           />
         </div>
 
-        <div className="flex flex-col space-y-2">
+        <div className="flex hidden flex-col space-y-2">
           <label
             htmlFor="subdomain"
             className="text-sm font-medium text-stone-500"
