@@ -53,7 +53,7 @@ export default function EmailStats({ userId }: EmailStatsProps) {
           <Legend />
           <Bar
             dataKey="sent"
-            fill="#8884d8"
+            fill="#252753"
             name="Sent"
             isAnimationActive={true}
           />

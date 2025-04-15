@@ -40,7 +40,14 @@ export default async function Overview() {
         <Organizations limit={1} />
       </div>
 
-      {hasOrganization && <EmailStats userId={session.user.id} />}
+      {hasOrganization && (
+        <div className="flex flex-col space-y-6">
+          <h1 className="font-cal text-3xl font-bold dark:text-white">
+            Organization-Wide Email Analytics
+          </h1>
+          <EmailStats userId={session.user.id} />
+        </div>
+      )}
       {hasOrganization && (
         <div className="flex flex-col space-y-6">
           <h1 className="font-cal text-3xl font-bold dark:text-white">
