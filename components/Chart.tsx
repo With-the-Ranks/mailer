@@ -27,6 +27,7 @@ interface AggregatedData {
 
 export default function Chart({ emailId }: { emailId: string }) {
   const [data, setData] = useState<AggregatedData[]>([]);
+  const [noData, setNoData] = useState<boolean>(true);
 
   useEffect(() => {
     fetch(`/api/email-events?emailId=${emailId}`)
@@ -41,8 +42,10 @@ export default function Chart({ emailId }: { emailId: string }) {
           }
           if (event.eventType === "opened") {
             grouped[date].opened++;
+            setNoData(false);
           } else if (event.eventType === "clicked") {
             grouped[date].clicked++;
+            setNoData(false);
           }
         });
 
@@ -53,6 +56,9 @@ export default function Chart({ emailId }: { emailId: string }) {
       });
   }, [emailId]);
 
+  if (noData) {
+    return <div>✨ Data will appear here shortly ✨</div>;
+  }
   return (
     <ResponsiveContainer width="100%" height={400}>
       <LineChart data={data} width={500} height={300}>

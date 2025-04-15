@@ -8,6 +8,16 @@ export default function EmailRow({
   data: Email & { organization?: Organization | null };
 }) {
   const isPublished = data.published;
+  const isScheduled = data.published && data.scheduledTime > new Date();
+
+  const getStatus = () => {
+    if (isScheduled) {
+      return "Scheduled";
+    } else if (isPublished) {
+      return "Published";
+    }
+    return "Draft";
+  };
   const lastUpdated = new Date(data.updatedAt).toLocaleDateString();
   const organization = data.organization;
   const url =
@@ -29,7 +39,7 @@ export default function EmailRow({
           href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
           className="block"
         >
-          {isPublished ? "Published" : "Draft"}
+          {getStatus()}
         </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
