@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
             userId: data.tags?.userId,
             eventType: "opened",
             timestamp: new Date(data.timestamp ?? Date.now()),
+            emailTo: data.to[0],
           },
         });
         break;
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
             eventType: "clicked",
             link: data.click?.link,
             timestamp: new Date(data.timestamp ?? Date.now()),
+            emailTo: data.to[0],
           },
         });
         break;

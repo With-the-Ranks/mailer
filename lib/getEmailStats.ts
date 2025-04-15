@@ -8,7 +8,7 @@ export async function getEmailStatsByUser(userId: string) {
       subject: true,
       audienceList: {
         select: {
-          emails: {
+          audiences: {
             select: { id: true },
           },
         },
@@ -45,7 +45,7 @@ export async function getEmailStatsByUser(userId: string) {
   return emails.map(({ id, subject, audienceList }) => ({
     emailId: id,
     subject,
-    sent: audienceList?.emails.length ?? 0,
+    sent: audienceList?.audiences.length ?? 0,
     opened: eventMap[id]?.opened.size ?? 0,
     clicked: eventMap[id]?.clicked.size ?? 0,
   }));
