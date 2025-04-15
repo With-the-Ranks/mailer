@@ -22,6 +22,7 @@ export default async function EmailPage({
         select: {
           subdomain: true,
           logo: true,
+          image: true,
         },
       },
     },

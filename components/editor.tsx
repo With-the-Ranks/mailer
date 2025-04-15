@@ -35,7 +35,11 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 type EmailWithSite = Email & {
-  organization: { subdomain: string | null; logo: string | null } | null;
+  organization: {
+    subdomain: string | null;
+    logo: string | null;
+    image: string | null;
+  } | null;
   template?: string | null;
 };
 
@@ -100,11 +104,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const DEFAULT_LOGO_URL = process.env.NEXT_PUBLIC_DEFAULT_LOGO_URL || "";
   const logoUrl = data.organization?.logo ?? DEFAULT_LOGO_URL;
+  const fullWidthImageUrl = data.organization?.image ?? "";
 
-  const donationHtml = DonationTemplate({ logoUrl });
-  const donationJSON = DonationJSON({ logoUrl });
-  const signupHtml = SignupTemplate({ logoUrl });
-  const signupJSON = SignupJSON({ logoUrl });
+  const donationHtml = DonationTemplate({ logoUrl, fullWidthImageUrl });
+  const donationJSON = DonationJSON({ logoUrl, fullWidthImageUrl });
+  const signupHtml = SignupTemplate({ logoUrl, fullWidthImageUrl });
+  const signupJSON = SignupJSON({ logoUrl, fullWidthImageUrl });
 
   const isScheduledForFuture = () => {
     return scheduledDate > moment();
