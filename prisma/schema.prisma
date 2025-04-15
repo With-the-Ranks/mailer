@@ -112,6 +112,8 @@ model EmailEvent {
   link           String?
   timestamp      DateTime      @default(now())
   userId         String?
+  emailTo        String?
+  @@unique([emailId, emailTo])
 }
 
 model Organization {
