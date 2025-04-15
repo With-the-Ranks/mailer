@@ -121,6 +121,16 @@ export const sendBulkEmail = async ({
         html: htmlContent || "",
         text: "",
         scheduledAt: scheduledTime,
+        tags: [
+          {
+            name: "intrepidId",
+            value: id,
+          },
+          {
+            name: "userId",
+            value: session.user.id,
+          },
+        ],
         react: "",
       };
 
