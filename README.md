@@ -89,6 +89,6 @@ This project was built with open source technologies:
 
 ## License
 
-The MIT License.
+[AGPLv3](https://github.com/With-the-Ranks/intrepid-email/blob/main/LICENSE)
 
 ---
