@@ -4,6 +4,10 @@ import "react-multi-email/dist/style.css";
 import "@maily-to/core/style.css";
 
 import { Editor as MailyEditor } from "@maily-to/core";
+import {
+  getVariableSuggestions,
+  VariableExtension,
+} from "@maily-to/core/extensions";
 import type { Email } from "@prisma/client";
 import { ExternalLink, Loader2, X } from "lucide-react";
 import type { Moment } from "moment";
@@ -71,12 +75,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   function isValidTime(current: Moment) {
     return current.isSameOrAfter(new Date(), "day");
   }
-
-  const variables = [
-    { name: "email" },
-    { name: "first_name" },
-    { name: "last_name" },
-  ];
 
   const url = process.env.NEXT_PUBLIC_VERCEL_ENV
     ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
@@ -388,6 +386,25 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             }}
             contentHtml={data.template === "signup" ? signupHtml : donationHtml}
             contentJson={data.content ? JSON.parse(data.content) : undefined}
+            extensions={[
+              VariableExtension.configure({
+                suggestion: getVariableSuggestions("@"),
+                variables: [
+                  {
+                    name: "first_name",
+                    required: false,
+                  },
+                  {
+                    name: "last_name",
+                    required: false,
+                  },
+                  {
+                    name: "email",
+                    required: false,
+                  },
+                ],
+              }),
+            ]}
             key={data.template}
             onCreate={(editor) => {
               setHydrated(true);
@@ -402,7 +419,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 content: JSON.stringify(editor?.getJSON() || {}),
               }));
             }}
-            variables={variables}
           />
         )}
       </div>
