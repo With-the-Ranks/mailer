@@ -304,6 +304,7 @@ export const createEmail = async (
         organizationId,
         userId: session.user.id,
         title: campaignName || "New Campaign",
+        subject: campaignName || "New Campaign",
         audienceListId: selectedAudienceList,
         template,
       },
