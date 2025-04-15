@@ -48,7 +48,7 @@ export default async function OrganizationSettingsAppearance({
         }}
         handleSubmit={updateOrganization}
       />
-      <Form
+      {/* <Form
         title="404 Page Message"
         description="Message to be displayed on the 404 page."
         helpText="Please use 240 characters maximum."
@@ -60,7 +60,7 @@ export default async function OrganizationSettingsAppearance({
           maxLength: 240,
         }}
         handleSubmit={updateOrganization}
-      />
+      /> */}
     </div>
   );
 }
