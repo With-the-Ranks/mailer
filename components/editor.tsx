@@ -289,7 +289,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           onChange={(e) => setData({ ...data, subject: e.target.value })}
           placeholder="Email Subject"
           type="text"
-          value={data.subject || ""}
+          value={email.subject || ""}
           required
         />
       </Label>
