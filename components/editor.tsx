@@ -1,6 +1,7 @@
 "use client";
 
 import "react-multi-email/dist/style.css";
+import "@maily-to/core/style.css";
 
 import { Editor as MailyEditor } from "@maily-to/core";
 import type { Email } from "@prisma/client";
