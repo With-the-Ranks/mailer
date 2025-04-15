@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
 import { PreviewModal } from "./modal/preview-modal";
+import ScheduleEmailButton from "./schedule-email-button";
 // import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -53,7 +54,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const [isPendingSaving, startTransitionSaving] = useTransition();
   const [isPendingPublishing, startTransitionPublishing] = useTransition();
-  // eslint-disable-next-line no-unused-vars
   const [scheduledDate, setScheduledDate] = useState<Moment>(
     moment(email.scheduledTime) || null,
   );
@@ -73,7 +73,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   }, [data.published, data.id, router]);
 
-  // eslint-disable-next-line no-unused-vars
   function isValidTime(current: Moment) {
     return current.isSameOrAfter(new Date(), "day");
   }
@@ -355,12 +354,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           isDisabled
         />
       </Label>
-      {/* <ScheduleEmailButton
+      <ScheduleEmailButton
         scheduledTimeValue={scheduledDate}
         isValidTime={isValidTime}
         setScheduledTimeValue={setScheduledDate}
         isDisabled={isScheduledForFuture() && data.published}
-      /> */}
+      />
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
