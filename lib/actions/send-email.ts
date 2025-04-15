@@ -22,7 +22,7 @@ const parseContent = async (
     if (previewText) {
       maily.setPreviewText(previewText);
     }
-    return await maily.renderAsync();
+    return await maily.render();
   } catch (error) {
     console.error("Error parsing content:", error);
     throw new Error("Failed to parse email content");

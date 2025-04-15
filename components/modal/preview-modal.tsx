@@ -33,7 +33,7 @@ export function PreviewModal({
         if (previewText) {
           maily.setPreviewText(previewText);
         }
-        const html = await maily.renderAsync();
+        const html = await maily.render();
         setRenderedHtml(html);
       } catch (error) {
         console.error("Error rendering email content", error);
