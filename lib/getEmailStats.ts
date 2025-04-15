@@ -3,6 +3,17 @@ import prisma from "@/lib/prisma";
 export async function getEmailStatsByUser(userId: string) {
   const emails = await prisma.email.findMany({
     where: { userId },
+    select: {
+      id: true,
+      subject: true,
+      audienceList: {
+        select: {
+          emails: {
+            select: { id: true },
+          },
+        },
+      },
+    },
   });
 
   const emailIds = emails.map((e) => e.id);
@@ -31,10 +42,10 @@ export async function getEmailStatsByUser(userId: string) {
     }
   }
 
-  return emails.map(({ id, subject }) => ({
+  return emails.map(({ id, subject, audienceList }) => ({
     emailId: id,
     subject,
-    sent: 1,
+    sent: audienceList?.emails.length ?? 0,
     opened: eventMap[id]?.opened.size ?? 0,
     clicked: eventMap[id]?.clicked.size ?? 0,
   }));
