@@ -21,6 +21,9 @@ export default async function EmailAnalytics({
   if (!data || data.userId !== session?.user.id) {
     notFound();
   }
+  if (!data.published) {
+    redirect(`/email/${data.id}`);
+  }
   return (
     <div className="flex max-w-screen-xl flex-col space-y-12 p-6">
       <div className="flex flex-col space-y-6">

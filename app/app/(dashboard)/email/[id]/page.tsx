@@ -22,12 +22,16 @@ export default async function EmailPage({
         select: {
           subdomain: true,
           logo: true,
+          image: true,
         },
       },
     },
   });
   if (!data || data.userId !== session.user.id) {
     notFound();
+  }
+  if (data.published) {
+    redirect(`/email/${data.id}/analytics`);
   }
 
   return <Editor email={data} />;
