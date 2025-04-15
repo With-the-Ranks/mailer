@@ -24,21 +24,18 @@ export async function getEmailStatsByUser(userId: string) {
     },
   });
 
-  const eventMap: Record<
-    string,
-    { opened: Set<string>; clicked: Set<string> }
-  > = {};
+  const eventMap: Record<string, { opened: number; clicked: number }> = {};
 
   for (const event of events) {
     const { emailId, eventType } = event;
     if (!eventMap[emailId]) {
-      eventMap[emailId] = { opened: new Set(), clicked: new Set() };
+      eventMap[emailId] = { opened: 0, clicked: 0 };
     }
 
     if (eventType === "opened") {
-      eventMap[emailId].opened.add(emailId);
+      eventMap[emailId].opened++;
     } else if (eventType === "clicked") {
-      eventMap[emailId].clicked.add(emailId);
+      eventMap[emailId].clicked++;
     }
   }
 
@@ -46,7 +43,7 @@ export async function getEmailStatsByUser(userId: string) {
     emailId: id,
     subject,
     sent: audienceList?.audiences.length ?? 0,
-    opened: eventMap[id]?.opened.size ?? 0,
-    clicked: eventMap[id]?.clicked.size ?? 0,
+    opened: eventMap[id]?.opened ?? 0,
+    clicked: eventMap[id]?.clicked ?? 0,
   }));
 }
