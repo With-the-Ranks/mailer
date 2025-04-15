@@ -50,7 +50,7 @@ export default function EmailStats({ userId }: EmailStatsProps) {
           <XAxis
             dataKey="subject"
             interval={0}
-            angle={-90}
+            angle={-20}
             textAnchor="end"
             height={120}
             dy={10}
