@@ -41,23 +41,6 @@ export const WelcomeTemplate = () => (
       />
       <style>
         {`
-          @font-face {
-            font-family: Passion One;
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url('https://fonts.cdnfonts.com/s/15566/PassionOne-Regular.woff') format('woff');
-            mso-font-alt: Georgia;
-          }
-
-          @font-face {
-            font-family: Roboto;
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url('https://fonts.cdnfonts.com/s/12165/Roboto-Regular.woff2') format('woff2');
-            mso-font-alt: Arial;
-          }
           @media only screen and (max-width: 600px) {
             .heading {
               font-size: 22px !important;
@@ -96,8 +79,14 @@ export const WelcomeTemplate = () => (
         <Container className="container-responsive mx-auto -mt-2 flex flex-col items-stretch">
           <Container>
             <Img
+              src={`https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png`}
+              height="35"
+              alt="Mailer"
+              className="mx-auto mb-4 mt-6"
+            />
+            <Img
               src="https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png"
-              className="mt-10 w-full max-w-full rounded-t-[24px]"
+              className="mt-6 max-h-[300px] w-full max-w-full rounded-t-[24px]  object-cover object-top"
               alt="Bernie Sanders & AOC"
             />
           </Container>
