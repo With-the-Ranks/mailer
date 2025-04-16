@@ -51,7 +51,7 @@ export default function EmailRow({
         </Link>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-end gap-2">
           {isPublished ? (
             <>
               <Link
