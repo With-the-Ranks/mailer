@@ -19,7 +19,7 @@
 
 ## Documentation Changes
 
-<!--- Does your code change the way users interact with Intrepid? If so please include proposed documentation changes below -->
+<!--- Does your code change the way users interact with Mailer? If so please include proposed documentation changes below -->
 
 ## Checklist:
 

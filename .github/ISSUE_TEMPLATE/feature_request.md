@@ -6,7 +6,7 @@ labels: ""
 assignees: ""
 ---
 
-Intrepid is used in many different ways by many different organizations. Before submitting a feature request please think about whether it addresses a use case specific to your organization or whether it will provide value across many different use cases.
+Mailer is used in many different ways by many different organizations. Before submitting a feature request please think about whether it addresses a use case specific to your organization or whether it will provide value across many different use cases.
 
 If you're unsure, drop us a line at support@withtheranks and we would be more than happy to talk through it with you!
 
