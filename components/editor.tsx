@@ -23,20 +23,13 @@ import {
   sendEmail,
   unscheduleEmail,
 } from "@/lib/actions/send-email";
-import {
-  DonationJSON,
-  DonationTemplate,
-} from "@/lib/email-templates/donation-template";
-import {
-  SignupJSON,
-  SignupTemplate,
-} from "@/lib/email-templates/signup-template";
+import { DonationJSON } from "@/lib/email-templates/donation-template";
+import { SignupJSON } from "@/lib/email-templates/signup-template";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
 import { PreviewModal } from "./modal/preview-modal";
 import ScheduleEmailButton from "./schedule-email-button";
-// import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -57,7 +50,23 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [scheduledDate, setScheduledDate] = useState<Moment>(
     moment(email.scheduledTime) || null,
   );
-  const [data, setData] = useState<EmailWithSite>(email);
+  const DEFAULT_LOGO_URL = process.env.NEXT_PUBLIC_DEFAULT_LOGO_URL || "";
+
+  const [data, setData] = useState<EmailWithSite>(() => {
+    const initLogo = email.organization?.logo ?? DEFAULT_LOGO_URL;
+    const initImage = email.organization?.image ?? "";
+    const dq = DonationJSON({
+      logoUrl: initLogo,
+      fullWidthImageUrl: initImage,
+    });
+    const sq = SignupJSON({ logoUrl: initLogo, fullWidthImageUrl: initImage });
+    return {
+      ...email,
+      content:
+        email.content ?? JSON.stringify(email.template === "signup" ? sq : dq),
+    };
+  });
+
   const [hydrated, setHydrated] = useState(true);
   const [from, setFrom] = useState(email.from || "With The Ranks");
   const [showReplyTo, setShowReplyTo] = useState(false);
@@ -87,46 +96,9 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     });
   }, [scheduledDate, data]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === "s") {
-        e.preventDefault();
-        startTransitionSaving(async () => {
-          await updateEmail(data, scheduledDate.toDate());
-        });
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [data, startTransitionSaving, scheduledDate]);
-
-  const DEFAULT_LOGO_URL = process.env.NEXT_PUBLIC_DEFAULT_LOGO_URL || "";
-  const logoUrl = data.organization?.logo ?? DEFAULT_LOGO_URL;
-  const fullWidthImageUrl = data.organization?.image ?? "";
-
-  const donationHtml = DonationTemplate({ logoUrl, fullWidthImageUrl });
-  const donationJSON = DonationJSON({ logoUrl, fullWidthImageUrl });
-  const signupHtml = SignupTemplate({ logoUrl, fullWidthImageUrl });
-  const signupJSON = SignupJSON({ logoUrl, fullWidthImageUrl });
-
   const isScheduledForFuture = () => {
     return scheduledDate > moment();
   };
-
-  useEffect(() => {
-    if (!data.content) {
-      let content = JSON.stringify(donationJSON);
-      if (data.template === "signup") {
-        content = JSON.stringify(signupJSON);
-      }
-      setData((prevData) => ({
-        ...prevData,
-        content: content,
-      }));
-    }
-  }, [data.content, data.template, donationJSON, signupJSON]);
 
   const handleUnscheduleEmail = async () => {
     try {
@@ -289,7 +261,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           onChange={(e) => setData({ ...data, subject: e.target.value })}
           placeholder="Email Subject"
           type="text"
-          value={email.subject || ""}
+          value={data.subject || ""}
           required
         />
       </Label>
@@ -385,7 +357,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               spellCheck: false,
               autofocus: false,
             }}
-            contentHtml={data.template === "signup" ? signupHtml : donationHtml}
             contentJson={data.content ? JSON.parse(data.content) : undefined}
             extensions={[
               VariableExtension.configure({
