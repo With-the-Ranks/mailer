@@ -132,6 +132,20 @@ model Organization {
   users         User[]
   emails        Email[]
   audienceLists AudienceList[]
+
+  Template Template[]
+}
+
+model Template {
+  id             String      @id @default(cuid())
+  name           String
+  content        Json
+  organizationId String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId])
 }
 
 model Example {

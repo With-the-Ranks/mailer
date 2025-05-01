@@ -13,7 +13,8 @@ import { ExternalLink, Loader2, X } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import type { SingleValue } from "react-select";
 import Select from "react-select";
 import { toast } from "sonner";
 
@@ -23,6 +24,7 @@ import {
   sendEmail,
   unscheduleEmail,
 } from "@/lib/actions/send-email";
+import { getTemplateById, getTemplates } from "@/lib/actions/template";
 import { DonationJSON } from "@/lib/email-templates/donation-template";
 import { SignupJSON } from "@/lib/email-templates/signup-template";
 import { cn } from "@/lib/utils";
@@ -33,6 +35,8 @@ import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
+type Option = { value: string; label: string };
+
 type EmailWithSite = Email & {
   organization: {
     subdomain: string | null;
@@ -42,6 +46,11 @@ type EmailWithSite = Email & {
   template?: string | null;
 };
 
+const BUILT_IN_TEMPLATES = [
+  { value: "signup", label: "Signup" },
+  { value: "donation", label: "Donation" },
+];
+
 export default function Editor({ email }: { email: EmailWithSite }) {
   const router = useRouter();
 
@@ -50,22 +59,85 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [scheduledDate, setScheduledDate] = useState<Moment>(
     moment(email.scheduledTime) || null,
   );
-  const DEFAULT_LOGO_URL = process.env.NEXT_PUBLIC_DEFAULT_LOGO_URL || "";
+  const DEFAULT_LOGO_URL = email.organization?.logo || "";
+  const DEFAULT_IMAGE_URL = email.organization?.image || "";
 
-  const [data, setData] = useState<EmailWithSite>(() => {
-    const initLogo = email.organization?.logo ?? DEFAULT_LOGO_URL;
-    const initImage = email.organization?.image ?? "";
-    const dq = DonationJSON({
-      logoUrl: initLogo,
-      fullWidthImageUrl: initImage,
+  const [templates, setTemplates] = useState<Option[]>([]);
+  useEffect(() => {
+    getTemplates(email.organizationId!).then((list) => {
+      setTemplates(list.map((t) => ({ value: t.id, label: t.name })));
     });
-    const sq = SignupJSON({ logoUrl: initLogo, fullWidthImageUrl: initImage });
+  }, [email.organizationId]);
+
+  const allTemplateOptions = useMemo(
+    () => [...BUILT_IN_TEMPLATES, ...templates],
+    [templates],
+  );
+
+  const [data, setData] = useState<EmailWithSite & { content: string }>(() => {
+    if (email.content) return { ...email, content: email.content } as any;
+    const dq = DonationJSON({
+      logoUrl: DEFAULT_LOGO_URL,
+      fullWidthImageUrl: DEFAULT_IMAGE_URL,
+    });
+    const sq = SignupJSON({
+      logoUrl: DEFAULT_LOGO_URL,
+      fullWidthImageUrl: DEFAULT_IMAGE_URL,
+    });
+    const defaultJson = email.template === "donation" ? dq : sq;
     return {
       ...email,
-      content:
-        email.content ?? JSON.stringify(email.template === "signup" ? sq : dq),
-    };
+      content: JSON.stringify(defaultJson),
+    } as any;
   });
+  const [selectedTemplate, setSelectedTemplate] = useState<Option>(() => {
+    const initialId = email.template || "signup";
+    let match = BUILT_IN_TEMPLATES.find((t) => t.value === initialId);
+    if (!match) match = templates.find((t) => t.value === initialId);
+    return match || BUILT_IN_TEMPLATES[0];
+  });
+
+  useEffect(() => {
+    if (!email.template) return;
+    const match =
+      BUILT_IN_TEMPLATES.find((t) => t.value === email.template) ||
+      templates.find((t) => t.value === email.template);
+    if (match) setSelectedTemplate(match);
+  }, [templates, email.template]);
+
+  const onSelectTemplate = async (
+    opt: SingleValue<{ value: string; label: string }>,
+  ) => {
+    if (!opt) return;
+    setSelectedTemplate(opt);
+
+    let json: any = null;
+    if (opt.value === "signup") {
+      json = SignupJSON({
+        logoUrl: DEFAULT_LOGO_URL,
+        fullWidthImageUrl: DEFAULT_IMAGE_URL,
+      });
+    } else if (opt.value === "donation") {
+      json = DonationJSON({
+        logoUrl: DEFAULT_LOGO_URL,
+        fullWidthImageUrl: DEFAULT_IMAGE_URL,
+      });
+    } else {
+      const tpl = await getTemplateById(opt.value);
+      json = tpl?.content;
+    }
+
+    if (json) {
+      setData(
+        (d) =>
+          ({
+            ...d,
+            content: JSON.stringify(json),
+            template: opt.value,
+          }) as any,
+      );
+    }
+  };
 
   const [hydrated, setHydrated] = useState(true);
   const [from, setFrom] = useState(email.from || "With The Ranks");
@@ -164,12 +236,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     } catch {
       toast.error("Failed to send test email");
     }
-  };
-
-  const getDefaultValueSelect = (value: string | null) => {
-    return value === "signup"
-      ? { value: "signup", label: "Signup" }
-      : { value: "donation", label: "Donation" };
   };
 
   const handleSaveContent = async () => {
@@ -322,8 +388,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         </span>
         <Select
           className="h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-          value={getDefaultValueSelect(data.template)}
-          isDisabled
+          options={allTemplateOptions}
+          value={selectedTemplate}
+          onChange={onSelectTemplate}
+          placeholder="Select a template…"
+          isClearable={false}
+          isSearchable={false}
         />
       </Label>
       <ScheduleEmailButton
@@ -357,7 +427,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               spellCheck: false,
               autofocus: false,
             }}
-            contentJson={data.content ? JSON.parse(data.content) : undefined}
+            contentJson={JSON.parse(data.content)}
             extensions={[
               VariableExtension.configure({
                 suggestion: getVariableSuggestions("@"),
@@ -377,18 +447,18 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 ],
               }),
             ]}
-            key={data.template}
+            key={selectedTemplate.value}
             onCreate={(editor) => {
               setHydrated(true);
-              setData((prev) => ({
-                ...prev,
-                content: JSON.stringify(editor?.getJSON() || {}),
+              setData((d) => ({
+                ...d,
+                content: JSON.stringify(editor.getJSON()),
               }));
             }}
             onUpdate={(editor) => {
-              setData((prev) => ({
-                ...prev,
-                content: JSON.stringify(editor?.getJSON() || {}),
+              setData((d) => ({
+                ...d,
+                content: JSON.stringify(editor.getJSON()),
               }));
             }}
           />
