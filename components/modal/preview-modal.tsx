@@ -46,7 +46,7 @@ export function PreviewModal({
   }, [content, previewText]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-50">
       <div className="w-full rounded-md bg-white dark:bg-black md:max-w-3xl md:border md:border-stone-200 md:shadow dark:md:border-stone-700">
         {/* Content Area */}
         <div className="flex flex-col space-y-4 p-5 md:p-10">
