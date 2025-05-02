@@ -109,7 +109,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     opt: SingleValue<{ value: string; label: string }>,
   ) => {
     if (!opt) return;
-    setSelectedTemplate(opt);
 
     let json: any = null;
     if (opt.value === "signup") {
@@ -137,6 +136,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           }) as any,
       );
     }
+
+    setSelectedTemplate(opt);
   };
 
   const [hydrated, setHydrated] = useState(true);
@@ -387,7 +388,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           Template
         </span>
         <Select
-          className="h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="z-[10000] h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
           options={allTemplateOptions}
           value={selectedTemplate}
           onChange={onSelectTemplate}
