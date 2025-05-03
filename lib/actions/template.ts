@@ -35,7 +35,7 @@ export async function updateTemplate({
 export async function getTemplates(orgId: string) {
   return prisma.template.findMany({
     where: { organizationId: orgId },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { updatedAt: "asc" },
   });
 }
 

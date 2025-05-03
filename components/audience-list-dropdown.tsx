@@ -47,7 +47,7 @@ export function AudienceListDropdown({
         </span>
       ) : (
         <Select
-          className="w-full"
+          className="z-[10001] w-full"
           value={
             selectedAudienceList
               ? audienceLists.find(

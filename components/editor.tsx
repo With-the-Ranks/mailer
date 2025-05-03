@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
 import { PreviewModal } from "./modal/preview-modal";
+import SaveTemplateButton from "./save-template-button";
 import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -63,6 +64,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const DEFAULT_IMAGE_URL = email.organization?.image || "";
 
   const [templates, setTemplates] = useState<Option[]>([]);
+
   useEffect(() => {
     getTemplates(email.organizationId!).then((list) => {
       setTemplates(list.map((t) => ({ value: t.id, label: t.name })));
@@ -74,28 +76,43 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     [templates],
   );
 
-  const [data, setData] = useState<EmailWithSite & { content: string }>(() => {
-    if (email.content) return { ...email, content: email.content } as any;
-    const dq = DonationJSON({
-      logoUrl: DEFAULT_LOGO_URL,
-      fullWidthImageUrl: DEFAULT_IMAGE_URL,
-    });
-    const sq = SignupJSON({
-      logoUrl: DEFAULT_LOGO_URL,
-      fullWidthImageUrl: DEFAULT_IMAGE_URL,
-    });
-    const defaultJson = email.template === "donation" ? dq : sq;
-    return {
-      ...email,
-      content: JSON.stringify(defaultJson),
-    } as any;
-  });
+  const defaultJson = useMemo(() => {
+    if (email.content) return JSON.parse(email.content);
+    return email.template === "donation"
+      ? DonationJSON({
+          logoUrl: DEFAULT_LOGO_URL,
+          fullWidthImageUrl: DEFAULT_IMAGE_URL,
+        })
+      : SignupJSON({
+          logoUrl: DEFAULT_LOGO_URL,
+          fullWidthImageUrl: DEFAULT_IMAGE_URL,
+        });
+  }, [email.content, email.template, DEFAULT_LOGO_URL, DEFAULT_IMAGE_URL]);
+
+  const [contentObj, setContentObj] = useState(defaultJson);
+  const [baseContent, setBaseContent] = useState(() =>
+    JSON.stringify(defaultJson),
+  );
+  const [hasEdited, setHasEdited] = useState(false);
+
+  const [data, setData] = useState({
+    ...email,
+    content: JSON.stringify(defaultJson),
+  } as EmailWithSite & { content: string });
+
   const [selectedTemplate, setSelectedTemplate] = useState<Option>(() => {
     const initialId = email.template || "signup";
     let match = BUILT_IN_TEMPLATES.find((t) => t.value === initialId);
     if (!match) match = templates.find((t) => t.value === initialId);
     return match || BUILT_IN_TEMPLATES[0];
   });
+
+  useEffect(() => {
+    setContentObj(defaultJson);
+    const str = JSON.stringify(defaultJson);
+    setBaseContent(str);
+    setHasEdited(false);
+  }, [defaultJson]);
 
   useEffect(() => {
     if (!email.template) return;
@@ -125,18 +142,15 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       const tpl = await getTemplateById(opt.value);
       json = tpl?.content;
     }
-
-    if (json) {
-      setData(
-        (d) =>
-          ({
-            ...d,
-            content: JSON.stringify(json),
-            template: opt.value,
-          }) as any,
-      );
-    }
-
+    const str = JSON.stringify(json);
+    setBaseContent(str);
+    setHasEdited(false);
+    setContentObj(json);
+    setData((d) => ({
+      ...d,
+      template: opt.value,
+      content: JSON.stringify(json),
+    }));
     setSelectedTemplate(opt);
   };
 
@@ -396,6 +410,25 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           isClearable={false}
           isSearchable={false}
         />
+        {email.organizationId && (
+          <SaveTemplateButton
+            contentJson={JSON.stringify(contentObj)}
+            organizationId={email.organizationId}
+            disabled={!hasEdited}
+            onCreate={({ id, name }) => {
+              setTemplates((t) => [...t, { value: id, label: name }]);
+              setSelectedTemplate({ value: id, label: name });
+              const jsonStr = JSON.stringify(contentObj);
+              setData((d) => ({
+                ...d,
+                template: id,
+                content: jsonStr,
+              }));
+              setBaseContent(jsonStr);
+              setHasEdited(false);
+            }}
+          />
+        )}
       </Label>
       <ScheduleEmailButton
         scheduledTimeValue={scheduledDate}
@@ -428,7 +461,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               spellCheck: false,
               autofocus: false,
             }}
-            contentJson={JSON.parse(data.content)}
+            contentJson={contentObj}
             extensions={[
               VariableExtension.configure({
                 suggestion: getVariableSuggestions("@"),
@@ -449,25 +482,22 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               }),
             ]}
             key={selectedTemplate.value}
-            onCreate={(editor) => {
+            onCreate={() => {
               setHydrated(true);
-              setData((d) => ({
-                ...d,
-                content: JSON.stringify(editor.getJSON()),
-              }));
             }}
             onUpdate={(editor) => {
-              setData((d) => ({
-                ...d,
-                content: JSON.stringify(editor.getJSON()),
-              }));
+              const updated = editor.getJSON();
+              setContentObj(updated);
+              if (JSON.stringify(updated) !== baseContent) {
+                setHasEdited(true);
+              }
             }}
           />
         )}
       </div>
       {showPreview && (
         <PreviewModal
-          content={data.content ?? ""}
+          content={JSON.stringify(contentObj)}
           previewText={data.previewText ?? undefined}
           onCancel={() => setShowPreview(false)}
           onConfirm={() => {
