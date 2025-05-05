@@ -91,12 +91,13 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [baseContent, setBaseContent] = useState(() =>
     JSON.stringify(defaultJson),
   );
-  const [hasEdited, setHasEdited] = useState(false);
 
   const [data, setData] = useState({
     ...email,
     content: JSON.stringify(defaultJson),
   } as EmailWithSite & { content: string });
+
+  const [hasEdited, setHasEdited] = useState(false);
 
   const [selectedTemplate, setSelectedTemplate] = useState<Option>(() => {
     const initialId = email.template || "signup";
@@ -109,7 +110,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     setContentObj(defaultJson);
     const str = JSON.stringify(defaultJson);
     setBaseContent(str);
-    setHasEdited(false);
   }, [defaultJson]);
 
   useEffect(() => {
@@ -256,7 +256,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       toast.error("Failed to publish email.");
     }
   };
-
+  console.log(hasEdited);
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex flex-wrap items-center gap-3">
@@ -400,7 +400,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               content: JSON.stringify(json),
             }));
             setBaseContent(JSON.stringify(json));
-            setHasEdited(false);
           }}
           onDelete={async (id) => {
             try {
@@ -431,7 +430,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 content: JSON.stringify(nextJson),
               }));
               setBaseContent(JSON.stringify(nextJson));
-              setHasEdited(false);
             } catch {
               toast.error("Failed to delete template.");
             }
@@ -452,7 +450,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 content: jsonStr,
               }));
               setBaseContent(jsonStr);
-              setHasEdited(false);
             }}
           />
         )}
@@ -514,10 +511,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             }}
             onUpdate={(editor) => {
               const updated = editor.getJSON();
+              const updatedStr = JSON.stringify(updated);
+
               setContentObj(updated);
-              if (JSON.stringify(updated) !== baseContent) {
-                setHasEdited(true);
-              }
+              setData((d) => ({
+                ...d,
+                content: updatedStr,
+              }));
+              setHasEdited(updatedStr !== baseContent);
             }}
           />
         )}
