@@ -2,8 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { SingleValue } from "react-select";
-import Select from "react-select";
 import { toast } from "sonner";
 
 import LoadingDots from "@/components/icons/loading-dots";
@@ -12,6 +10,7 @@ import { getTemplates } from "@/lib/actions/template";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "../audience-list-dropdown";
+import { ScrollableTemplateSelect } from "../select-template";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useModal } from "./provider";
@@ -132,18 +131,25 @@ export default function CreateEmailModal({
           <span className="w-40 shrink-0 font-normal text-gray-600">
             Template
           </span>
-          <Select<Option>
-            className="h-auto grow rounded-none border-x-0 border-gray-300 px-0 py-2.5 text-base"
-            options={templateOptions}
-            value={
-              templateOptions.find((o) => o.value === data.template) || null
-            }
-            onChange={(opt: SingleValue<Option>) =>
-              setData({ ...data, template: opt?.value || "signup" })
-            }
-            isSearchable={false}
-            isClearable={false}
-          />
+          <div className="grow">
+            <ScrollableTemplateSelect
+              templates={templateOptions.map((t) => ({
+                id: t.value,
+                name: t.label,
+              }))}
+              selectedTemplateId={data.template}
+              onSelect={(id) => setData((prev) => ({ ...prev, template: id }))}
+              onDelete={(id) => {
+                const updated = templateOptions.filter(
+                  (tpl) => tpl.value !== id,
+                );
+                setTemplateOptions(updated);
+
+                const fallback = updated[0]?.value || "signup";
+                setData((prev) => ({ ...prev, template: fallback }));
+              }}
+            />
+          </div>
         </Label>
       </div>
 
