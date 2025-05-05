@@ -52,12 +52,12 @@ export default function CreateEmailModal({
       setTemplateOptions(opts);
 
       if (list.length > 0) {
-        const first = list[0];
+        const last = list[list.length - 1];
         setData((prev) => ({
           ...prev,
-          template: prev.template || first.id,
+          template: prev.template || last.id,
         }));
-        setTemplateContent(JSON.stringify(first.content));
+        setTemplateContent(JSON.stringify(last.content));
       }
     });
   }, [organizationId]);
