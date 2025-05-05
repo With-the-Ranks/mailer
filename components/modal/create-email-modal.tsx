@@ -20,6 +20,12 @@ interface Option {
   label: string;
 }
 
+interface TemplateRecord {
+  id: string;
+  name: string;
+  content: any; // Json
+}
+
 export default function CreateEmailModal({
   organizationId,
 }: {
@@ -28,27 +34,44 @@ export default function CreateEmailModal({
   const router = useRouter();
   const modal = useModal();
 
-  const builtInOptions: Option[] = [
-    { value: "signup", label: "Signup" },
-    { value: "donation", label: "Donation" },
-  ];
-
-  const [templateOptions, setTemplateOptions] =
-    useState<Option[]>(builtInOptions);
+  const [templatesList, setTemplatesList] = useState<TemplateRecord[]>([]);
+  const [templateOptions, setTemplateOptions] = useState<Option[]>([]);
   const [data, setData] = useState({
-    campaignName: "",
+    campaignName: "New Email Campaign",
     selectedAudienceList: null as string | null,
-    template: "signup",
+    template: "",
   });
+  const [templateContent, setTemplateContent] = useState<string>("");
   const [isPending, setIsPending] = useState(false);
 
-  // load org templates + merge with built-ins
   useEffect(() => {
     getTemplates(organizationId).then((list) => {
-      const org = list.map((t) => ({ value: t.id, label: t.name }));
-      setTemplateOptions([...builtInOptions, ...org]);
+      setTemplatesList(list as TemplateRecord[]);
+
+      const opts = list.map((t) => ({ value: t.id, label: t.name }));
+      setTemplateOptions(opts);
+
+      if (list.length > 0) {
+        const first = list[0];
+        setData((prev) => ({
+          ...prev,
+          template: prev.template || first.id,
+        }));
+        setTemplateContent(JSON.stringify(first.content));
+      }
     });
   }, [organizationId]);
+
+  useEffect(() => {
+    if (!data.template) {
+      setTemplateContent("");
+      return;
+    }
+    const tpl = templatesList.find((t) => t.id === data.template);
+    if (tpl) {
+      setTemplateContent(JSON.stringify(tpl.content));
+    }
+  }, [data.template, templatesList]);
 
   const handleCreateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +82,9 @@ export default function CreateEmailModal({
       setIsPending(false);
       return;
     }
-    if (!data.template) {
-      toast.error("Please select a template.");
+
+    if (!templateContent) {
+      toast.error("Template content not loaded yet.");
       setIsPending(false);
       return;
     }
@@ -71,6 +95,7 @@ export default function CreateEmailModal({
         organizationId,
         data.selectedAudienceList,
         data.template,
+        templateContent,
       );
       if ("error" in email) {
         toast.error(email.error);
@@ -94,7 +119,7 @@ export default function CreateEmailModal({
         "md:border md:border-stone-200 md:shadow dark:md:border-stone-700",
       )}
     >
-      <div className="relative flex flex-col space-y-4 p-5 md:p-10">
+      <div className="space-y-4 p-5 md:p-10">
         <h2 className="font-cal text-2xl dark:text-white">
           Create a new email
         </h2>
@@ -120,17 +145,15 @@ export default function CreateEmailModal({
         {/* Audience List */}
         <AudienceListDropdown
           selectedAudienceList={data.selectedAudienceList}
-          setSelectedAudienceList={(value) =>
-            setData({ ...data, selectedAudienceList: value })
+          setSelectedAudienceList={(val) =>
+            setData({ ...data, selectedAudienceList: val })
           }
           organizationId={organizationId}
         />
 
         {/* Template Picker */}
         <Label className="flex items-center font-normal">
-          <span className="w-40 shrink-0 font-normal text-gray-600">
-            Template
-          </span>
+          <span className="w-40 shrink-0 text-gray-600">Template</span>
           <div className="grow">
             <ScrollableTemplateSelect
               templates={templateOptions.map((t) => ({
@@ -139,13 +162,18 @@ export default function CreateEmailModal({
               }))}
               selectedTemplateId={data.template}
               onSelect={(id) => setData((prev) => ({ ...prev, template: id }))}
-              onDelete={(id) => {
-                const updated = templateOptions.filter(
-                  (tpl) => tpl.value !== id,
+              onDelete={(deletedId) => {
+                // remove from both lists
+                const remainingList = templatesList.filter(
+                  (t) => t.id !== deletedId,
                 );
-                setTemplateOptions(updated);
-
-                const fallback = updated[0]?.value || "signup";
+                const remainingOpts = templateOptions.filter(
+                  (o) => o.value !== deletedId,
+                );
+                setTemplatesList(remainingList);
+                setTemplateOptions(remainingOpts);
+                // pick a new default
+                const fallback = remainingList[0]?.id || "";
                 setData((prev) => ({ ...prev, template: fallback }));
               }}
             />
@@ -154,7 +182,14 @@ export default function CreateEmailModal({
       </div>
 
       {/* Submit */}
-      <div className="flex items-center justify-end rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
+      <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
+        <button
+          type="button"
+          onClick={modal?.hide}
+          className="btn-outline btn-sm btn"
+        >
+          Cancel
+        </button>
         <button
           type="submit"
           className={cn("btn", isPending && "cursor-not-allowed opacity-50")}

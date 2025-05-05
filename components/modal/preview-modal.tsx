@@ -23,7 +23,6 @@ export function PreviewModal({
   const [testEmail, setTestEmail] = useState("");
   const [renderedHtml, setRenderedHtml] = useState("");
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     async function renderEmail() {
       setLoading(true);

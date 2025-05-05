@@ -27,8 +27,6 @@ import {
   getTemplateById,
   getTemplates,
 } from "@/lib/actions/template";
-import { DonationJSON } from "@/lib/email-templates/donation-template";
-import { SignupJSON } from "@/lib/email-templates/signup-template";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
@@ -50,11 +48,6 @@ type EmailWithSite = Email & {
   template?: string | null;
 };
 
-const BUILT_IN_TEMPLATES = [
-  { value: "signup", label: "Signup" },
-  { value: "donation", label: "Donation" },
-];
-
 export default function Editor({ email }: { email: EmailWithSite }) {
   const router = useRouter();
 
@@ -63,31 +56,31 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [scheduledDate, setScheduledDate] = useState<Moment>(
     moment(email.scheduledTime) || null,
   );
-  const DEFAULT_LOGO_URL = email.organization?.logo || "";
-  const DEFAULT_IMAGE_URL = email.organization?.image || "";
 
   const [templates, setTemplates] = useState<Option[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<Option | null>(null);
 
   useEffect(() => {
     getTemplates(email.organizationId!).then((list) => {
-      setTemplates(list.map((t) => ({ value: t.id, label: t.name })));
+      const opts = list.map((t) => ({ value: t.id, label: t.name }));
+      setTemplates(opts);
+      if (email.template) {
+        const match = opts.find((o) => o.value === email.template);
+        if (match) setSelectedTemplate(match);
+      }
     });
-  }, [email.organizationId]);
+  }, [email.organizationId, email.template]);
 
   const defaultJson = useMemo(() => {
-    if (email.content) return JSON.parse(email.content);
-    return email.template === "donation"
-      ? DonationJSON({
-          logoUrl: DEFAULT_LOGO_URL,
-          fullWidthImageUrl: DEFAULT_IMAGE_URL,
-        })
-      : SignupJSON({
-          logoUrl: DEFAULT_LOGO_URL,
-          fullWidthImageUrl: DEFAULT_IMAGE_URL,
-        });
-  }, [email.content, email.template, DEFAULT_LOGO_URL, DEFAULT_IMAGE_URL]);
+    return email.content
+      ? JSON.parse(email.content)
+      : {
+          type: "doc",
+          content: [],
+        };
+  }, [email.content]);
 
-  const [contentObj, setContentObj] = useState(defaultJson);
+  const [contentObj, setContentObj] = useState<any>(defaultJson);
   const [baseContent, setBaseContent] = useState(() =>
     JSON.stringify(defaultJson),
   );
@@ -99,26 +92,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const [hasEdited, setHasEdited] = useState(false);
 
-  const [selectedTemplate, setSelectedTemplate] = useState<Option>(() => {
-    const initialId = email.template || "signup";
-    let match = BUILT_IN_TEMPLATES.find((t) => t.value === initialId);
-    if (!match) match = templates.find((t) => t.value === initialId);
-    return match || BUILT_IN_TEMPLATES[0];
-  });
-
   useEffect(() => {
     setContentObj(defaultJson);
     const str = JSON.stringify(defaultJson);
     setBaseContent(str);
+    setData((d) => ({ ...d, content: str }));
   }, [defaultJson]);
-
-  useEffect(() => {
-    if (!email.template) return;
-    const match =
-      BUILT_IN_TEMPLATES.find((t) => t.value === email.template) ||
-      templates.find((t) => t.value === email.template);
-    if (match) setSelectedTemplate(match);
-  }, [templates, email.template]);
 
   const [hydrated, setHydrated] = useState(true);
   const [from, setFrom] = useState(email.from || "With The Ranks");
@@ -256,7 +235,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       toast.error("Failed to publish email.");
     }
   };
-  console.log(hasEdited);
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex flex-wrap items-center gap-3">
@@ -369,69 +347,34 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         </span>
         <ScrollableTemplateSelect
           templates={templates.map((t) => ({ id: t.value, name: t.label }))}
-          selectedTemplateId={selectedTemplate?.value ?? null}
+          selectedTemplateId={selectedTemplate?.value || null}
           onSelect={async (id) => {
-            const match =
-              BUILT_IN_TEMPLATES.find((t) => t.value === id) ||
-              templates.find((t) => t.value === id);
+            const match = templates.find((t) => t.value === id);
             if (!match) return;
-
-            let json;
-            if (id === "signup") {
-              json = SignupJSON({
-                logoUrl: DEFAULT_LOGO_URL,
-                fullWidthImageUrl: DEFAULT_IMAGE_URL,
-              });
-            } else if (id === "donation") {
-              json = DonationJSON({
-                logoUrl: DEFAULT_LOGO_URL,
-                fullWidthImageUrl: DEFAULT_IMAGE_URL,
-              });
-            } else {
-              const tpl = await getTemplateById(id);
-              json = tpl?.content;
-            }
-
+            const tpl = await getTemplateById(id);
             setSelectedTemplate(match);
-            setContentObj(json);
-            setData((d) => ({
-              ...d,
-              template: id,
-              content: JSON.stringify(json),
-            }));
-            setBaseContent(JSON.stringify(json));
+            setContentObj(tpl?.content);
+            const str = JSON.stringify(tpl?.content || {});
+            setData((d) => ({ ...d, template: id, content: str }));
+            setBaseContent(str);
           }}
           onDelete={async (id) => {
-            try {
-              await deleteTemplate(id);
-              const updated = templates.filter((tpl) => tpl.value !== id);
-              setTemplates(updated);
-
-              const nextTemplate =
-                updated.length > 0 ? updated[0] : BUILT_IN_TEMPLATES[0];
-
-              setSelectedTemplate(nextTemplate);
-
-              const nextJson =
-                nextTemplate.value === "donation"
-                  ? DonationJSON({
-                      logoUrl: DEFAULT_LOGO_URL,
-                      fullWidthImageUrl: DEFAULT_IMAGE_URL,
-                    })
-                  : SignupJSON({
-                      logoUrl: DEFAULT_LOGO_URL,
-                      fullWidthImageUrl: DEFAULT_IMAGE_URL,
-                    });
-
-              setContentObj(nextJson);
-              setData((d) => ({
-                ...d,
-                template: nextTemplate.value,
-                content: JSON.stringify(nextJson),
-              }));
-              setBaseContent(JSON.stringify(nextJson));
-            } catch {
-              toast.error("Failed to delete template.");
+            await deleteTemplate(id);
+            const remaining = templates.filter((t) => t.value !== id);
+            setTemplates(remaining);
+            if (remaining.length > 0) {
+              const next = remaining[0];
+              const tpl = await getTemplateById(next.value);
+              setSelectedTemplate(next);
+              setContentObj(tpl?.content);
+              const str = JSON.stringify(tpl?.content || {});
+              setData((d) => ({ ...d, template: next.value, content: str }));
+              setBaseContent(str);
+            } else {
+              setSelectedTemplate(null);
+              setContentObj({});
+              setData((d) => ({ ...d, template: null, content: "" }));
+              setBaseContent("");
             }
           }}
         />
@@ -505,7 +448,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 ],
               }),
             ]}
-            key={selectedTemplate.value}
+            key={selectedTemplate?.value || "editor"}
             onCreate={() => {
               setHydrated(true);
             }}
