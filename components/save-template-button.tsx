@@ -30,9 +30,11 @@ export default function SaveTemplateButton({
     if (!name.trim()) return;
     startTransition(async () => {
       try {
+        const cleanContent = JSON.parse(JSON.stringify(contentJson));
+
         const tpl = await createTemplate({
           name: name.trim(),
-          content: contentJson,
+          content: cleanContent,
           organizationId,
         });
         toast.success("Template created");

@@ -42,3 +42,7 @@ export async function getTemplates(orgId: string) {
 export async function getTemplateById(id: string) {
   return prisma.template.findUnique({ where: { id } });
 }
+
+export async function deleteTemplate(id: string) {
+  return prisma.template.delete({ where: { id } });
+}

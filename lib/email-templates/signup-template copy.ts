@@ -134,7 +134,7 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                                 },
                                 { type: "bold" },
                               ],
-                              text: "Sign up to Mailer: email built for organizers",
+                              text: "Join Bernie and AOC in Philly this Sunday!",
                             },
                           ],
                         },
@@ -150,17 +150,46 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                                   attrs: { color: "rgb(255, 255, 255)" },
                                 },
                               ],
-                              text: "Hey friend,",
+                              text: "Hey friend",
                             },
+                            { type: "text", text: " " },
                             {
                               type: "text",
-                              text: " Mailer is an open source tool by With The Ranks, made to help you send beautiful, effective emails without needing a design team or complex tools.",
                               marks: [
                                 {
                                   type: "textStyle",
                                   attrs: { color: "rgb(255, 255, 255)" },
                                 },
                               ],
+                              text: "— did you hear the news?",
+                            },
+                            {
+                              type: "hardBreak",
+                              marks: [
+                                {
+                                  type: "textStyle",
+                                  attrs: { color: "rgb(255, 255, 255)" },
+                                },
+                              ],
+                            },
+                            {
+                              type: "hardBreak",
+                              marks: [
+                                {
+                                  type: "textStyle",
+                                  attrs: { color: "rgb(255, 255, 255)" },
+                                },
+                              ],
+                            },
+                            {
+                              type: "text",
+                              marks: [
+                                {
+                                  type: "textStyle",
+                                  attrs: { color: "rgb(255, 255, 255)" },
+                                },
+                              ],
+                              text: "Bernie is joining a rally with Helen Gym and AOC in Philadelphia this Sunday, and he is hoping he can count on you to attend.",
                             },
                             {
                               type: "hardBreak",
@@ -189,7 +218,7 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                                 },
                                 { type: "bold" },
                               ],
-                              text: "Here’s what to expect:",
+                              text: "Here are all the details:",
                             },
                           ],
                         },
@@ -201,7 +230,7 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                             align: "left",
                             borderWidth: 0,
                             borderColor: "#e2e2e2",
-                            paddingTop: 0,
+                            paddingTop: 16,
                             paddingRight: 16,
                             paddingBottom: 16,
                             paddingLeft: 16,
@@ -230,7 +259,7 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                                     },
                                     { type: "bold" },
                                   ],
-                                  text: "A SIMPLE MAILER TOOL WITH",
+                                  text: "RALLY WITH SENATOR BERNIE SANDERS, HELEN GYM AND AOC",
                                 },
                               ],
                             },
@@ -241,54 +270,94 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                             { type: "horizontalRule" },
                             {
                               type: "paragraph",
-                              attrs: { textAlign: "left" },
+                              attrs: { textAlign: "center", showIfKey: null },
                               content: [
                                 {
                                   type: "text",
-                                  marks: [{ type: "bold" }],
-                                  text: "• Intuitive editor built for organizers — no design experience required",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                    { type: "bold" },
+                                  ],
+                                  text: "Sunday, May 14",
                                 },
-                              ],
-                            },
-                            {
-                              type: "paragraph",
-                              attrs: { textAlign: "left" },
-                              content: [
                                 {
-                                  type: "text",
-                                  marks: [{ type: "bold" }],
-                                  text: "• Custom fields and filters for smart audience targeting",
+                                  type: "hardBreak",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                  ],
                                 },
-                              ],
-                            },
-                            {
-                              type: "paragraph",
-                              attrs: { textAlign: "left" },
-                              content: [
                                 {
                                   type: "text",
-                                  marks: [{ type: "bold" }],
-                                  text: "• Clear analytics to help you track performance and improve results",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                  ],
+                                  text: "Doors open at 4:00 p.m.",
                                 },
-                              ],
-                            },
-                            {
-                              type: "paragraph",
-                              attrs: { textAlign: "center" },
-                              content: [
+                                {
+                                  type: "hardBreak",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                  ],
+                                },
                                 {
                                   type: "text",
-                                  marks: [{ type: "italic" }],
-                                  text: "Mailer is currently in pre-alpha. Things may change — and your feedback helps shape what’s next.",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                  ],
+                                  text: "Event starts at 5:00 p.m.",
+                                },
+                                {
+                                  type: "hardBreak",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                  ],
+                                },
+                                {
+                                  type: "hardBreak",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                  ],
+                                },
+                                {
+                                  type: "text",
+                                  marks: [
+                                    {
+                                      type: "textStyle",
+                                      attrs: { color: "#125B9E" },
+                                    },
+                                    { type: "bold" },
+                                  ],
+                                  text: "Franklin Music Hall 421 N 7th Street Philadelphia, PA 19123",
                                 },
                               ],
                             },
                             {
                               type: "button",
                               attrs: {
-                                text: "Sign up to Mailer",
+                                text: "RSVP",
                                 isTextVariable: false,
-                                url: "https://app.withtheranks.coop/register",
+                                url: "",
                                 isUrlVariable: false,
                                 alignment: "center",
                                 variant: "filled",
@@ -316,7 +385,7 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                           marks: [
                             { type: "textStyle", attrs: { color: "#ffffff" } },
                           ],
-                          text: "Thanks for joining us on this journey!",
+                          text: "We hope to see you there!",
                         },
                       ],
                     },
@@ -330,7 +399,7 @@ export const SignupJSON = ({ logoUrl, fullWidthImageUrl }: EmailProps) => ({
                             { type: "textStyle", attrs: { color: "#ffffff" } },
                             { type: "italic" },
                           ],
-                          text: "- With The Ranks Team",
+                          text: "- Team Bernie",
                         },
                       ],
                     },
