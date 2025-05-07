@@ -1,12 +1,19 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import Select from "react-select"; // Import react-select
 
 import { fetchAudienceLists } from "@/lib/actions";
 
 import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface AudienceListDropdownProps {
   selectedAudienceList: string | null;
@@ -20,18 +27,18 @@ export function AudienceListDropdown({
   setSelectedAudienceList,
   organizationId,
 }: AudienceListDropdownProps) {
-  const [audienceLists, setAudienceLists] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [audienceLists, setAudienceLists] = useState<
+    {
+      id: string;
+      name: string;
+      contactCount: number;
+    }[]
+  >([]);
 
   useEffect(() => {
     const fetchLists = async () => {
       const lists = await fetchAudienceLists(organizationId);
-      const formattedLists = lists.map((list: any) => ({
-        value: list.id,
-        label: `${list.name} (${list.contactCount} contacts)`,
-      }));
-      setAudienceLists(formattedLists);
-      setLoading(false);
+      setAudienceLists(lists);
     };
     fetchLists();
   }, [organizationId]);
@@ -41,31 +48,37 @@ export function AudienceListDropdown({
       <span className="w-40 shrink-0 font-normal text-gray-600">
         Audience List
       </span>
-      {loading ? (
-        <span className="flex items-center">
-          <Loader2 className="mr-2 animate-spin" />
-        </span>
-      ) : (
+      <div className="w-full">
         <Select
-          className="w-full"
-          value={
-            selectedAudienceList
-              ? audienceLists.find(
-                  (list) => list.value === selectedAudienceList,
-                )
-              : null
-          }
-          onChange={(selectedOption) =>
-            setSelectedAudienceList(
-              selectedOption ? selectedOption.value : null,
-            )
-          }
-          options={audienceLists}
-          placeholder="Select Audience List"
-          isClearable={false}
-          isSearchable={false}
-        />
-      )}
+          value={selectedAudienceList || ""}
+          onValueChange={(value) => setSelectedAudienceList(value)}
+        >
+          <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400">
+            <SelectValue placeholder="Select an audience list…" />
+          </SelectTrigger>
+          <SelectContent
+            position="popper"
+            side="bottom"
+            align="start"
+            className="max-h-[300px] overflow-y-auto bg-white"
+          >
+            <SelectGroup>
+              {audienceLists.length > 0 ? (
+                audienceLists.map((list) => (
+                  <SelectItem key={list.id} value={list.id}>
+                    {list.name} ({list.contactCount} contacts)
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="flex items-center justify-center py-4 text-sm text-gray-500">
+                  <AlertCircle className="mr-2 h-4 w-4" />
+                  No audience lists available
+                </div>
+              )}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
     </Label>
   );
 }

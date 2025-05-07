@@ -2,113 +2,183 @@ import {
   Body,
   Button,
   Container,
+  Font,
   Head,
-  Heading,
   Html,
   Img,
-  Link,
   Preview,
-  Section,
   Tailwind,
   Text,
 } from "@react-email/components";
 import * as React from "react";
 
-interface EmailCampaignProps {
-  steps?: {
-    id: number;
-    Description: React.ReactNode;
-  }[];
-  links?: string[];
-  email?: string;
-}
-
 const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://app.localhost:3000";
 
-const defaultSteps = [
-  {
-    id: 1,
-    Description: (
-      <li key={1}>
-        <strong>Start your campaign.</strong> <Link>Create a new campaign</Link>{" "}
-        or use a template.
-      </li>
-    ),
-  },
-  {
-    id: 2,
-    Description: (
-      <li key={2}>
-        <strong>Track your performance.</strong>{" "}
-        <Link>View your campaign metrics</Link> and adjust as needed.
-      </li>
-    ),
-  },
-  {
-    id: 3,
-    Description: (
-      <li key={3}>
-        <strong>Optimize your outreach.</strong> <Link>Use our tools</Link> to
-        reach a wider audience.
-      </li>
-    ),
-  },
-];
-
-const defaultLinks = ["Help Center", "Contact Support", "Upgrade Plan"];
-
-export const WelcomeTemplate = ({
-  steps = defaultSteps,
-  links = defaultLinks,
-  email,
-}: EmailCampaignProps) => {
-  return (
-    <Html>
-      <Head />
-      <Preview>Welcome to Mailer</Preview>
-      <Tailwind
-        config={{ theme: { extend: { colors: { brand: "#123456" } } } }}
-      >
-        <Body className="bg-gray-100 text-gray-800">
-          <Container className="bg-white p-6">
+export const WelcomeTemplate = () => (
+  <Html>
+    <Head>
+      <Font
+        fontFamily="Passion One"
+        fallbackFontFamily={["Georgia", "sans-serif"]}
+        webFont={{
+          url: "https://fonts.cdnfonts.com/s/15566/PassionOne-Regular.woff",
+          format: "woff",
+        }}
+        fontWeight={400}
+        fontStyle="normal"
+      />
+      <Font
+        fontFamily="Roboto"
+        fallbackFontFamily={["Arial", "sans-serif"]}
+        webFont={{
+          url: "https://fonts.cdnfonts.com/s/12165/Roboto-Regular.woff2",
+          format: "woff2",
+        }}
+        fontWeight={400}
+        fontStyle="normal"
+      />
+      <style>
+        {`
+          @media only screen and (max-width: 600px) {
+            .heading {
+              font-size: 22px !important;
+              line-height: 1.2 !important;
+            }
+            .sub-heading {
+              font-size: 16px !important;
+              line-height: 1.2 !important;
+            }
+            .body-text {
+              font-size: 14px !important;
+              line-height: 1.4 !important;
+            }
+            .button-text {
+              font-size: 18px !important;
+              padding: 12px 24px !important;
+              line-height: 1.4 !important;
+            }
+            .container-responsive {
+              padding-left: 16px !important;
+              padding-right: 16px !important;
+            }
+            .pb-12-responsive {
+              padding-bottom: 24px !important;
+            }
+            .notice {
+              font-size: 11px !important;
+              line-height: 1.4 !important;
+          }
+        `}
+      </style>
+    </Head>
+    <Preview>Welcome to Mailer — email built for organizers</Preview>
+    <Tailwind config={{ theme: { extend: { colors: { brand: "#107FE5" } } } }}>
+      <Body className="bg-[#1E90FF]" style={{ margin: 0, padding: 0 }}>
+        <Container className="container-responsive mx-auto -mt-2 flex flex-col items-stretch">
+          <Container>
             <Img
               src={`https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png`}
-              width="50"
+              height="35"
               alt="Mailer"
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 mt-6"
             />
-            <Heading className="text-center">Welcome to Mailer</Heading>
-            <Text className="mb-4 text-left">Howdy {email || "friend"},</Text>
-            <Text className="mb-4 text-left">
-              Join other non-profits who trust Mailer for their email campaigns.
+            <Img
+              src="https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png"
+              className="mt-6 max-h-[300px] w-full max-w-full rounded-t-[24px]  object-cover object-top"
+              alt="Bernie Sanders & AOC"
+            />
+          </Container>
+          <Container className="bg-brand pb-12-responsive container-responsive mt-0 flex w-full flex-col px-8 pb-12">
+            <Text
+              className="heading mt-2 text-3xl font-bold text-white"
+              // style={{ fontFamily: '"Passion One", Georgia' }}
+              style={{ fontFamily: "Georgia" }}
+            >
+              Welcome to Mailer — email built for organizers
             </Text>
-            <Text className="mb-4">Here’s how to get started:</Text>
-            <ul>{steps.map(({ Description }) => Description)}</ul>
-            <Section className="mt-4 text-center">
-              <Button href={baseUrl} className="bg-brand px-4 py-2 text-white">
-                Go to your dashboard
+            <Text
+              className="body-text text-lg text-white"
+              style={{ fontFamily: '"Roboto", Arial' }}
+            >
+              Mailer is an open source tool by With The Ranks, built to make
+              sending beautiful, effective emails simple — especially for
+              organizers with limited time or technical resources.
+            </Text>
+            <Text
+              className="body-text text-xl font-bold text-white"
+              style={{ fontFamily: '"Roboto", Arial' }}
+            >
+              Here’s what to expect:
+            </Text>
+            <Container className="container-responsive mt-6 flex flex-col items-center self-stretch rounded-[40px] border border-solid border-zinc-400 bg-white px-4 py-8 text-center shadow-sm">
+              <Container className="bg-brand flex h-[3px] flex-col self-stretch" />
+              <Text
+                className="text-brand sub-heading mt-2 text-xl font-bold uppercase"
+                // style={{ fontFamily: '"Passion One", Georgia' }}
+                style={{ fontFamily: "Georgia" }}
+              >
+                Designed for Organizers
+              </Text>
+              <Container className="bg-brand mt-2 flex h-[3px] flex-col self-stretch" />
+              <Container className="text-brand text-center">
+                <Text style={{ fontFamily: '"Roboto", Arial' }}>
+                  Mailer makes it easy to send emails that look great and drive
+                  action — without needing a design team or complex tools.
+                </Text>
+
+                <ul className="pl-6 text-left">
+                  <li>
+                    <Text className="ml-2">
+                      Intuitive editor built for organizers — no design
+                      experience required
+                    </Text>
+                  </li>
+                  <li>
+                    <Text className="ml-2">
+                      Custom fields and filters for smart audience targeting
+                    </Text>
+                  </li>
+                  <li>
+                    <Text>
+                      Clear analytics to help you track performance and improve
+                      results
+                    </Text>
+                  </li>
+                </ul>
+                <Text
+                  className="notice mt-6 text-lg italic text-zinc-700"
+                  style={{ fontFamily: '"Roboto", Arial' }}
+                >
+                  Mailer is currently in pre‑alpha. Things may change — and your
+                  feedback helps shape what’s next.
+                </Text>
+              </Container>
+              <Button
+                className="button-text mt-4 w-5/6 items-center justify-center whitespace-nowrap rounded-[100px] bg-red-500 px-6 py-4 text-center text-2xl uppercase text-white"
+                href={baseUrl}
+                type="submit"
+              >
+                Get Started
               </Button>
-            </Section>
-            <Section className="mt-6 text-center">
-              {links.map((link, index) => (
-                <Link key={index} className="mx-2 text-blue-500 underline">
-                  {link}
-                </Link>
-              ))}
-            </Section>
+            </Container>
+            <Container className="container-responsive mb-10 mt-4 self-center text-center text-3xl text-white">
+              <Text
+                className="body-text"
+                style={{ fontFamily: '"Roboto", Arial' }}
+              >
+                Thanks for joining us on this journey.
+              </Text>
+              <Text className="font-bold" style={{ fontFamily: "Georgia" }}>
+                – With The Ranks Team
+              </Text>
+            </Container>
           </Container>
-          <Container className="mt-4 text-center">
-            <Link className="text-sm text-gray-500">Unsubscribe</Link>
-            <Text className="mt-2 text-xs text-gray-400">
-              Mailer, 123 Main Street, Anytown, USA
-            </Text>
-          </Container>
-        </Body>
-      </Tailwind>
-    </Html>
-  );
-};
+        </Container>
+      </Body>
+    </Tailwind>
+  </Html>
+);
 
 export default WelcomeTemplate;

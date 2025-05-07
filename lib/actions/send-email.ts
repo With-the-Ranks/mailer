@@ -52,7 +52,7 @@ export const sendEmail = async ({
       const htmlContent = await parseContent(content, {}, previewText);
       resendEmail.html = htmlContent;
     } else {
-      resendEmail.react = WelcomeTemplate({ email: to }) as React.ReactElement;
+      resendEmail.react = WelcomeTemplate() as React.ReactElement;
     }
 
     const { data, error } = await resend.emails.send({

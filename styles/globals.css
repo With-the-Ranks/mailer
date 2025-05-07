@@ -117,3 +117,19 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   border: none;
   padding: 0;
 }
+
+/* Fix placeholder overlap bug */
+
+.ProseMirror .is-editor-empty:first-child::before {
+  content: unset;
+}
+
+.ProseMirror li.is-empty::before,
+.ProseMirror ul.is-empty::before {
+  content: unset;
+}
+
+/* Fix double select dropdown arrow */
+select {
+  background-image: unset;
+}

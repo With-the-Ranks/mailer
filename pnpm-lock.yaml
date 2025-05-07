@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@maily-to/core':
     specifier: ^0.2.7
-    version: 0.2.8(@tiptap/extension-code-block@2.11.7)(@types/react-dom@18.3.0)(@types/react@18.3.3)(prosemirror-model@1.21.0)(prosemirror-state@1.4.3)(prosemirror-view@1.33.6)(react-dom@18.3.1)(react@18.3.1)(y-protocols@1.0.6)(yjs@13.6.24)
+    version: 0.2.8(@tiptap/extension-code-block@2.11.7)(@types/react-dom@18.3.0)(@types/react@18.3.3)(prosemirror-model@1.25.0)(prosemirror-state@1.4.3)(prosemirror-view@1.39.1)(react-dom@18.3.1)(react@18.3.1)(y-protocols@1.0.6)(yjs@13.6.24)
   '@maily-to/render':
     specifier: ^0.1.3
     version: 0.1.4(react-dom@18.3.1)(react@18.3.1)
@@ -1013,7 +1013,7 @@ packages:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  /@maily-to/core@0.2.8(@tiptap/extension-code-block@2.11.7)(@types/react-dom@18.3.0)(@types/react@18.3.3)(prosemirror-model@1.21.0)(prosemirror-state@1.4.3)(prosemirror-view@1.33.6)(react-dom@18.3.1)(react@18.3.1)(y-protocols@1.0.6)(yjs@13.6.24):
+  /@maily-to/core@0.2.8(@tiptap/extension-code-block@2.11.7)(@types/react-dom@18.3.0)(@types/react@18.3.3)(prosemirror-model@1.25.0)(prosemirror-state@1.4.3)(prosemirror-view@1.39.1)(react-dom@18.3.1)(react@18.3.1)(y-protocols@1.0.6)(yjs@13.6.24):
     resolution: {integrity: sha512-e4rWVGio4JWWpEKf5GNUI6wfXSHejHF5rRIVej9CimsXyazRO6ZJdzS1mMLiIyYxAKFFf2JZQEgT45ZKt6Ar9Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -1055,7 +1055,7 @@ packages:
       tailwindcss: 3.4.17
       tippy.js: 6.3.7
       uuid: 11.1.0
-      y-prosemirror: 1.3.3(prosemirror-model@1.21.0)(prosemirror-state@1.4.3)(prosemirror-view@1.33.6)(y-protocols@1.0.6)(yjs@13.6.24)
+      y-prosemirror: 1.3.3(prosemirror-model@1.25.0)(prosemirror-state@1.4.3)(prosemirror-view@1.39.1)(y-protocols@1.0.6)(yjs@13.6.24)
     transitivePeerDependencies:
       - '@tiptap/extension-code-block'
       - '@types/react'
@@ -4240,7 +4240,7 @@ packages:
       '@vue/shared': 3.4.27
       entities: 4.5.0
       estree-walker: 2.0.2
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
     dev: false
 
   /@vue/compiler-dom@3.4.27:
@@ -4260,8 +4260,8 @@ packages:
       '@vue/shared': 3.4.27
       estree-walker: 2.0.2
       magic-string: 0.30.10
-      postcss: 8.4.38
-      source-map-js: 1.2.0
+      postcss: 8.5.3
+      source-map-js: 1.2.1
     dev: false
 
   /@vue/compiler-ssr@3.4.27:
@@ -5140,7 +5140,7 @@ packages:
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0}
     dependencies:
       mdn-data: 2.0.30
-      source-map-js: 1.2.0
+      source-map-js: 1.2.1
     dev: false
 
   /css-what@6.1.0:
@@ -9461,12 +9461,6 @@ packages:
       prosemirror-state: 1.4.3
     dev: false
 
-  /prosemirror-model@1.21.0:
-    resolution: {integrity: sha512-zLpS1mVCZLA7VTp82P+BfMiYVPcX1/z0Mf3gsjKZtzMWubwn2pN7CceMV0DycjlgE5JeXPR7UF4hJPbBV98oWA==}
-    dependencies:
-      orderedmap: 2.1.1
-    dev: false
-
   /prosemirror-model@1.25.0:
     resolution: {integrity: sha512-/8XUmxWf0pkj2BmtqZHYJipTBMHIdVjuvFzMvEoxrtyGNmfvdhBiRwYt/eFwy2wA9DtBW3RLqvZnjurEkHaFCw==}
     dependencies:
@@ -9523,20 +9517,6 @@ packages:
     resolution: {integrity: sha512-Nhh/+1kZGRINbEHmVu39oynhcap4hWTs/BlU7NnxWj3+l0qi8I1mu67v6mMdEe/ltD8hHvU4FV6PHiCw2VSpMw==}
     dependencies:
       prosemirror-model: 1.25.0
-    dev: false
-
-  /prosemirror-transform@1.9.0:
-    resolution: {integrity: sha512-5UXkr1LIRx3jmpXXNKDhv8OyAOeLTGuXNwdVfg8x27uASna/wQkr9p6fD3eupGOi4PLJfbezxTyi/7fSJypXHg==}
-    dependencies:
-      prosemirror-model: 1.21.0
-    dev: false
-
-  /prosemirror-view@1.33.6:
-    resolution: {integrity: sha512-zRLUNgLIQfd8IfGprsXxWTjdA8xEAFJe8cDNrOptj6Mop9sj+BMeVbJvceyAYCm5G2dOdT2prctH7K9dfnpIMw==}
-    dependencies:
-      prosemirror-model: 1.21.0
-      prosemirror-state: 1.4.3
-      prosemirror-transform: 1.9.0
     dev: false
 
   /prosemirror-view@1.39.1:
@@ -11848,7 +11828,7 @@ packages:
     engines: {node: '>=0.4'}
     dev: false
 
-  /y-prosemirror@1.3.3(prosemirror-model@1.21.0)(prosemirror-state@1.4.3)(prosemirror-view@1.33.6)(y-protocols@1.0.6)(yjs@13.6.24):
+  /y-prosemirror@1.3.3(prosemirror-model@1.25.0)(prosemirror-state@1.4.3)(prosemirror-view@1.39.1)(y-protocols@1.0.6)(yjs@13.6.24):
     resolution: {integrity: sha512-q//ybL7qw1xzo0UCWtn/FTf3/D35rH6bOpgtunKTE7ZTLU5h9+N2FbqSx0bArg++gqc7Ylkmic/ToI0pHnGjiA==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
@@ -11859,9 +11839,9 @@ packages:
       yjs: ^13.5.38
     dependencies:
       lib0: 0.2.104
-      prosemirror-model: 1.21.0
+      prosemirror-model: 1.25.0
       prosemirror-state: 1.4.3
-      prosemirror-view: 1.33.6
+      prosemirror-view: 1.39.1
       y-protocols: 1.0.6(yjs@13.6.24)
       yjs: 13.6.24
     dev: false

@@ -36,7 +36,7 @@ export default function CreateEmailButton({
 
   return (
     <button onClick={handleClick} className="btn" disabled={isFetching}>
-      {isFetching ? "Loading..." : "Create New Email"}
+      {isFetching ? "Loading..." : "Create an email"}
     </button>
   );
 }

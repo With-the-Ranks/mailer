@@ -14,6 +14,7 @@ import {
   validDomainRegex,
 } from "@/lib/domains";
 import prisma from "@/lib/prisma";
+import { seedOrgTemplates } from "@/lib/seedTemplates";
 import { getBlurDataURL } from "@/lib/utils";
 
 import { withEmailAuth, withOrgAuth } from "../auth";
@@ -55,6 +56,9 @@ export const createOrganization = async (formData: FormData) => {
     } catch (error: any) {
       console.log(error);
     }
+
+    await seedOrgTemplates(response.id);
+
     await revalidateTag(
       `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
     );
@@ -281,6 +285,7 @@ export const createEmail = async (
   organizationId: string,
   selectedAudienceList: string | null,
   template: string | null,
+  content?: string,
 ) => {
   const session = await getSession();
   if (!session?.user.id) {
@@ -307,6 +312,7 @@ export const createEmail = async (
         subject: campaignName || "New Campaign",
         audienceListId: selectedAudienceList,
         template,
+        content,
       },
     });
 
