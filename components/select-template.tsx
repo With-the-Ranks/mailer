@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Check, Trash2, X } from "lucide-react";
+import { Check, Trash2, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -35,6 +35,10 @@ export function ScrollableTemplateSelect({
 }: ScrollableTemplateSelectProps) {
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   const selectContentRef = useRef<HTMLDivElement>(null);
+  const templatesWithFallback =
+    templates.length > 0
+      ? templates
+      : [{ id: "default", name: "Blank Template" }];
 
   const handleSelectTemplate = useCallback(
     (value: string) => {
@@ -110,7 +114,7 @@ export function ScrollableTemplateSelect({
           className="max-h-[300px] overflow-y-auto bg-white"
         >
           <SelectGroup>
-            {templates.map((template) => (
+            {templatesWithFallback.map((template) => (
               <div
                 key={template.id}
                 className="relative flex items-center"
@@ -159,12 +163,6 @@ export function ScrollableTemplateSelect({
                 </div>
               </div>
             ))}
-            {templates.length === 0 && (
-              <div className="flex items-center justify-center py-4 text-sm text-gray-500">
-                <AlertCircle className="mr-2 h-4 w-4" />
-                No templates available
-              </div>
-            )}
           </SelectGroup>
         </SelectContent>
       </Select>

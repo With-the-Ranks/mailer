@@ -349,8 +349,22 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           templates={templates.map((t) => ({ id: t.value, name: t.label }))}
           selectedTemplateId={selectedTemplate?.value || null}
           onSelect={async (id) => {
+            if (id === "default") {
+              const blankContent = { type: "doc", content: [{}] };
+              setSelectedTemplate({
+                value: "default",
+                label: "Blank Template",
+              });
+              setContentObj(blankContent);
+              const str = JSON.stringify(blankContent);
+              setData((d) => ({ ...d, template: null, content: str }));
+              setBaseContent(str);
+              return;
+            }
+
             const match = templates.find((t) => t.value === id);
             if (!match) return;
+
             const tpl = await getTemplateById(id);
             setSelectedTemplate(match);
             setContentObj(tpl?.content);

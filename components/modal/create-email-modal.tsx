@@ -51,14 +51,28 @@ export default function CreateEmailModal({
       const opts = list.map((t) => ({ value: t.id, label: t.name }));
       setTemplateOptions(opts);
 
-      if (list.length > 0) {
-        const last = list[list.length - 1];
-        setData((prev) => ({
-          ...prev,
-          template: prev.template || last.id,
-        }));
-        setTemplateContent(JSON.stringify(last.content));
+      if (list.length === 0) {
+        const blank = {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [],
+            },
+          ],
+        };
+        setData((prev) => ({ ...prev, template: "blank" }));
+        setTemplateOptions([{ value: "blank", label: "Blank Template" }]);
+        setTemplateContent(JSON.stringify(blank));
+        return;
       }
+
+      const last = list[list.length - 1];
+      setData((prev) => ({
+        ...prev,
+        template: prev.template || last.id,
+      }));
+      setTemplateContent(JSON.stringify(last.content));
     });
   }, [organizationId]);
 
