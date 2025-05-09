@@ -1,11 +1,43 @@
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-// import { Suspense } from "react";
-import SignInForm from "./form";
-// import LoginButton from "./login-button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export default function LoginPage() {
+import SignInForm from "./form";
+
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
+  const verify =
+    typeof searchParams.verify === "string" ? searchParams.verify : null;
+
+  const alert =
+    verify === "success"
+      ? {
+          icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+          title: "Email verified",
+          description: "You can now log in.",
+        }
+      : verify === "expired"
+        ? {
+            icon: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+            title: "Link expired",
+            description:
+              "Your verification link has expired. Try logging in again.",
+            variant: "destructive",
+          }
+        : verify === "invalid"
+          ? {
+              icon: <XCircle className="h-5 w-5 text-red-500" />,
+              title: "Invalid link",
+              description: "The verification link is invalid.",
+              variant: "destructive",
+            }
+          : null;
+
   return (
     <div className="mx-5 border border-stone-200 py-10 dark:border-stone-700 sm:mx-auto sm:w-full sm:max-w-md sm:rounded-lg sm:shadow-md">
       <Image
@@ -20,8 +52,18 @@ export default function LoginPage() {
       </h1>
       <p className="mt-2 text-center text-sm text-stone-600 dark:text-stone-400">
         Build engaging email campaigns.
-        <br />
       </p>
+
+      {alert && (
+        <div className="mx-auto mt-6 w-11/12 max-w-xs">
+          <Alert variant={"default"}>
+            {alert.icon}
+            <AlertTitle>{alert.title}</AlertTitle>
+            <AlertDescription>{alert.description}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
         <SignInForm />
       </div>
@@ -34,15 +76,6 @@ export default function LoginPage() {
           Sign up
         </Link>
       </div>
-      {/* <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
-        <Suspense
-          fallback={
-            <div className="my-2 h-10 w-full rounded-md border border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-stone-800" />
-          }
-        >
-          <LoginButton />
-        </Suspense>
-      </div> */}
     </div>
   );
 }
