@@ -21,7 +21,7 @@ export const registerUser = async (formData: FormData) => {
 
     const defaultName = email.split("@")[0];
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
@@ -57,6 +57,7 @@ export const registerUser = async (formData: FormData) => {
     return {
       message:
         "Registration successful, please check your inbox to verify your email.",
+      user,
     };
   } catch (e: any) {
     return { error: "Error creating user.", details: e.message };
