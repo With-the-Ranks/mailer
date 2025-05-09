@@ -4,9 +4,12 @@ import { addHours } from "date-fns";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
+import React from "react";
 
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
+
+import VerifyEmail from "./email-templates/verify-email";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
@@ -140,41 +143,16 @@ export const resendVerificationEmail = async (email: string) => {
     process.env.NEXT_PUBLIC_BASE_URL || "http://app.localhost:3000";
   const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
 
+  const content = React.createElement(VerifyEmail, {
+    verificationUrl,
+  });
+
   await sendEmail({
     to: email,
     from: "Mailer",
     subject: "Verify your email address",
-    content: JSON.stringify({
-      type: "doc",
-      content: [
-        {
-          type: "section",
-          attrs: { align: "left" },
-          content: [
-            {
-              type: "paragraph",
-              content: [
-                {
-                  type: "text",
-                  text: "Click the link below to verify your email:",
-                },
-              ],
-            },
-            {
-              type: "paragraph",
-              content: [
-                {
-                  type: "text",
-                  text: verificationUrl,
-                  marks: [{ type: "link", attrs: { href: verificationUrl } }],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    }),
-    previewText: "Verify your email to finish signing up.",
+    react: content,
+    previewText: "Please verify your email to finish signing up.",
   });
 
   return { success: true };
