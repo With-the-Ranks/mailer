@@ -9,17 +9,14 @@ import prisma from "@/lib/prisma";
 
 const domain = process.env.EMAIL_DOMAIN;
 
-let resend: { emails: { send: Function; cancel: Function } };
-try {
-  resend = new Resend(process.env.RESEND_API_KEY!);
-} catch (err) {
-  resend = {
-    emails: {
-      send: async (_: any) => ({ data: null, error: null }),
-      cancel: async (_: any) => ({}),
-    },
-  };
-}
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : {
+      emails: {
+        send: async () => ({ data: null, error: null }),
+        cancel: async () => ({}),
+      },
+    };
 
 const parseContent = async (
   content: string,
@@ -60,12 +57,6 @@ export const sendEmail = async ({
   react,
 }: SendEmailOpts) => {
   try {
-    let resendEmail: any = {
-      from: `${from} <${domain}>`,
-      to: [to],
-      subject: subject,
-    };
-
     const payload: CreateEmailOptions = {
       from: `${from} <${domain}>`,
       to: [to],
@@ -83,12 +74,10 @@ export const sendEmail = async ({
       throw new Error("sendEmail: need content, html, or react");
     }
 
-    const { data, error } = await resend.emails.send({
-      ...resendEmail,
-    });
-
+    const { data, error } = await resend.emails.send(payload);
     if (error) {
-      return { error };
+      const msg = typeof error === "string" ? error : JSON.stringify(error);
+      return { error: msg };
     }
 
     return { data };
