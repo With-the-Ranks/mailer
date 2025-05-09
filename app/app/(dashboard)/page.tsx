@@ -11,15 +11,16 @@ import prisma from "@/lib/prisma";
 
 export default async function Overview() {
   const session = await getSession();
-  if (!session || !session.user) {
+  if (!session || !session.user?.id) {
     redirect("/login");
   }
+  const userId = session.user.id;
 
   const organizations = await prisma.organization.findMany({
     where: {
       users: {
         some: {
-          id: session.user.id,
+          id: userId,
         },
       },
     },
@@ -45,7 +46,7 @@ export default async function Overview() {
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             Organization-Wide Email Analytics
           </h1>
-          <EmailStats userId={session.user.id} />
+          <EmailStats userId={userId} />
         </div>
       )}
       {hasOrganization && (
