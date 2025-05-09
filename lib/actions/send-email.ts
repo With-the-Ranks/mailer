@@ -48,26 +48,42 @@ export const sendEmail = async ({
   html,
   react,
 }: SendEmailOpts) => {
-  const payload: CreateEmailOptions = {
-    from: `${from} <${domain}>`,
-    to: [to],
-    subject: subject || "No Subject",
-    text: previewText ?? "",
-  };
+  try {
+    let resendEmail: any = {
+      from: `${from} <${domain}>`,
+      to: [to],
+      subject: subject,
+    };
 
-  if (html) {
-    payload.html = html;
-  } else if (react) {
-    payload.react = react;
-  } else if (content) {
-    payload.html = await parseContent(content, {}, previewText);
-  } else {
-    throw new Error("sendEmail: need content, html, or react");
+    const payload: CreateEmailOptions = {
+      from: `${from} <${domain}>`,
+      to: [to],
+      subject: subject || "No Subject",
+      text: previewText ?? "",
+    };
+
+    if (html) {
+      payload.html = html;
+    } else if (react) {
+      payload.react = react;
+    } else if (content) {
+      payload.html = await parseContent(content, {}, previewText);
+    } else {
+      throw new Error("sendEmail: need content, html, or react");
+    }
+
+    const { data, error } = await resend.emails.send({
+      ...resendEmail,
+    });
+
+    if (error) {
+      return { error };
+    }
+
+    return { data };
+  } catch (e) {
+    return { error: "Something went wrong" };
   }
-
-  const { data, error } = await resend.emails.send(payload);
-  if (error) throw error;
-  return data;
 };
 
 export const sendBulkEmail = async ({
