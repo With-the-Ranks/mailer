@@ -7,8 +7,19 @@ import { Resend } from "resend";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.EMAIL_DOMAIN;
+
+let resend: { emails: { send: Function; cancel: Function } };
+try {
+  resend = new Resend(process.env.RESEND_API_KEY!);
+} catch (err) {
+  resend = {
+    emails: {
+      send: async (_: any) => ({ data: null, error: null }),
+      cancel: async (_: any) => ({}),
+    },
+  };
+}
 
 const parseContent = async (
   content: string,
