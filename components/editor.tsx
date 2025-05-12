@@ -192,6 +192,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         subject: data.subject!,
         content: data.content!,
         previewText: data.previewText!,
+        organizationId: data.organizationId!,
       });
       toast.success("Test email sent");
     } catch {

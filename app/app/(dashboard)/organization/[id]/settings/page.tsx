@@ -6,26 +6,33 @@ import { updateOrganization } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 
 export default async function OrganizationSettingsIndex({
-  params,
+  params: { id },
 }: {
   params: { id: string };
 }) {
   const data = await prisma.organization.findUnique({
-    where: {
-      id: decodeURIComponent(params.id),
-    },
-    include: {
-      domains: true,
-      activeDomain: true,
+    where: { id: decodeURIComponent(id) },
+    select: {
+      emailApiKey: true,
+      activeDomainId: true,
+      domains: {
+        select: { id: true, domain: true, status: true },
+      },
     },
   });
 
-  const domainOptions =
-    data?.domains.map((d) => ({
-      value: d.id,
-      label: d.domain + (d.status ? ` (${d.status})` : ""),
-    })) ?? [];
+  const domainOptions = (data?.domains ?? []).map((d) => ({
+    value: d.id,
+    label: `${d.domain} — ${d.status}`,
+  }));
 
+  const selectOptions =
+    domainOptions.length > 0
+      ? domainOptions
+      : [
+          { value: "", label: `Default (${process.env.EMAIL_DOMAIN})` },
+          ...domainOptions,
+        ];
   return (
     <div className="flex flex-col space-y-6">
       <div className="flex justify-end gap-2">
@@ -73,26 +80,20 @@ export default async function OrganizationSettingsIndex({
       </div>
       <Form
         title="Active Sending Domain"
-        description={`Select the domain used to send emails. If none selected, defaults to ${process.env.EMAIL_DOMAIN}`}
+        description={`Pick which verified domain Resend should use. Defaults to ${process.env.EMAIL_DOMAIN}`}
         helpText={
           domainOptions.length === 0
-            ? "No verified domains yet. Using default active sending domain."
-            : "Choose a verified domain or leave blank to use the default."
+            ? "No domains on this API key yet."
+            : "Choose a domain (or leave blank for default)."
         }
         inputAttrs={{
           name: "activeDomainId",
           type: "select",
-          defaultValue: data?.activeDomain?.id ?? "",
-          options: [
-            {
-              value: "default",
-              label: `Default (${process.env.EMAIL_DOMAIN})`,
-            },
-            ...domainOptions,
-          ],
+          defaultValue: data?.activeDomainId || "",
+          options: selectOptions,
         }}
         handleSubmit={updateOrganization}
-        disabled={!data?.emailApiKey}
+        disabled={domainOptions.length === 0}
       />
     </div>
   );

@@ -7,9 +7,6 @@ import { getSession } from "@/lib/auth";
 import WelcomeTemplate from "@/lib/email-templates/welcome-template";
 import prisma from "@/lib/prisma";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const domain = process.env.EMAIL_DOMAIN;
-
 const parseContent = async (
   content: string,
   variables: Record<string, string>,
@@ -29,22 +26,24 @@ const parseContent = async (
   }
 };
 
-const getEmailClientForOrg = async (organizationId: string) => {
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    include: {
-      activeDomain: true,
-    },
-  });
+async function getEmailClientForOrg(orgId?: string) {
+  let apiKey = process.env.RESEND_API_KEY!;
+  let domain = process.env.EMAIL_DOMAIN!;
 
-  const apiKey = org?.emailApiKey ?? process.env.RESEND_API_KEY!;
-  const domain = org?.activeDomain?.domain ?? process.env.EMAIL_DOMAIN!;
+  if (orgId) {
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      include: { activeDomain: true },
+    });
+    if (org) {
+      if (org.emailApiKey) apiKey = org.emailApiKey;
+      if (org.activeDomain?.domain)
+        domain = `mailer@${org.activeDomain.domain}`;
+    }
+  }
 
-  return {
-    resend: new Resend(apiKey),
-    domain,
-  };
-};
+  return { resend: new Resend(apiKey), domain };
+}
 
 export const sendEmail = async ({
   to,
@@ -52,16 +51,20 @@ export const sendEmail = async ({
   subject,
   content,
   previewText,
+  organizationId,
 }: {
   to: string;
   from: string;
   subject: string | null;
   content: string | null;
   previewText: string | null;
+  organizationId?: string;
 }) => {
   try {
+    const { resend, domain } = await getEmailClientForOrg(organizationId);
+    const fromHeader = `${from} <${domain}>`;
     let resendEmail: any = {
-      from: `${from} <${domain}>`,
+      from: fromHeader,
       to: [to],
       subject: subject,
     };
@@ -183,5 +186,6 @@ export const sendBulkEmail = async ({
 };
 
 export const unscheduleEmail = async ({ resendId }: { resendId: string }) => {
+  const { resend } = await getEmailClientForOrg();
   await resend.emails.cancel(resendId);
 };
