@@ -117,7 +117,7 @@ export default function CreateOrganizationModal() {
           </div>
         </div>
 
-        <div className="flex flex-col space-y-2">
+        <div className="flex hidden flex-col space-y-2">
           <label
             htmlFor="description"
             className="text-sm font-medium text-stone-500"

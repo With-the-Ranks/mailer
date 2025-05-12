@@ -97,7 +97,7 @@ export default function Nav({ children }: { children: ReactNode }) {
       return [
         {
           name: "Dashboard",
-          href: "/organizations",
+          href: "/",
           isActive: segments[0] === "organizations",
           icon: <LayoutDashboard width={18} />,
         },

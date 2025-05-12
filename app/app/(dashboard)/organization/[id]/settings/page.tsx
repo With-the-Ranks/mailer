@@ -1,5 +1,5 @@
 import Form from "@/components/form";
-import DeleteOrganizationForm from "@/components/form/delete-organization-form";
+// import DeleteOrganizationForm from "@/components/form/delete-organization-form";
 import { updateOrganization } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 
@@ -30,7 +30,7 @@ export default async function OrganizationSettingsIndex({
         handleSubmit={updateOrganization}
       />
 
-      <Form
+      {/* <Form
         title="Description"
         description="The description of your organization."
         helpText="Include SEO-optimized keywords that you want to rank for."
@@ -43,7 +43,7 @@ export default async function OrganizationSettingsIndex({
         handleSubmit={updateOrganization}
       />
 
-      <DeleteOrganizationForm organizationName={data?.name!} />
+      <DeleteOrganizationForm organizationName={data?.name!} /> */}
     </div>
   );
 }

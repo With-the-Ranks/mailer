@@ -15,7 +15,7 @@ export default async function OrganizationSettingsAppearance({
 
   return (
     <div className="flex flex-col space-y-6">
-      <Form
+      {/* <Form
         title="Thumbnail image"
         description="The thumbnail image for your organization. Accepted formats: .png, .jpg, .jpeg"
         helpText="Max file size 50MB. Recommended size 1200x630."
@@ -25,7 +25,7 @@ export default async function OrganizationSettingsAppearance({
           defaultValue: data?.image!,
         }}
         handleSubmit={updateOrganization}
-      />
+      /> */}
       <Form
         title="Logo"
         description="The logo for your organization. Accepted formats: .png, .jpg, .jpeg"
