@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Emails from "@/components/emails";
 import EmailStats from "@/components/EmailStats";
 import Organizations from "@/components/organizations";
-// import OverviewOrganizationCTA from "@/components/overview-organizations-cta";
+import OverviewOrganizationCTA from "@/components/overview-organizations-cta";
 import PlaceholderCard from "@/components/placeholder-card";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -35,7 +35,7 @@ export default async function Overview() {
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             Your Organization
           </h1>
-          {/* <OverviewOrganizationCTA /> */}
+          <OverviewOrganizationCTA />
         </div>
         <Organizations limit={1} />
       </div>
