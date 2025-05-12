@@ -4,6 +4,8 @@ import type { Email, Organization } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { customAlphabet } from "nanoid";
 import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { Resend } from "resend";
 
 import { getSession } from "@/lib/auth";
 import {
@@ -82,7 +84,53 @@ export const updateOrganization = withOrgAuth(
 
     try {
       let response;
+      if (key === "emailApiKey") {
+        const resp = await new Resend(
+          value || process.env.RESEND_API_KEY!,
+        ).domains.list();
+        const raw = (resp as any).data?.data ?? [];
+        const newIds = raw.map((d: any) => d.id);
 
+        await Promise.all(
+          raw.map((d: any) =>
+            prisma.emailDomain.upsert({
+              where: { id: d.id },
+              create: {
+                id: d.id,
+                providerId: d.id,
+                domain: d.name,
+                status: d.status,
+                organizationId: organization.id,
+              },
+              update: { domain: d.name, status: d.status },
+            }),
+          ),
+        );
+        await prisma.emailDomain.deleteMany({
+          where: {
+            organizationId: organization.id,
+            id: { notIn: newIds },
+          },
+        });
+
+        const pick =
+          organization.activeDomainId &&
+          newIds.includes(organization.activeDomainId)
+            ? organization.activeDomainId
+            : newIds[0] ?? null;
+
+        const finalOrg = await prisma.organization.update({
+          where: { id: organization.id },
+          data: {
+            emailApiKey: value || null,
+            activeDomainId: pick,
+          },
+          include: { activeDomain: true },
+        });
+
+        revalidatePath(`/organization/${organization.id}/settings`);
+        return finalOrg;
+      }
       if (key === "customDomain") {
         if (value.includes("vercel.pub")) {
           return {
