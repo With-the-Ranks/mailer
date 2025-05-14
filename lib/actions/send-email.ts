@@ -80,6 +80,10 @@ export const sendEmail = async ({
       return { error: msg };
     }
 
+    if (!data) {
+      return { error: "Unexpected null response from email service" };
+    }
+
     return { data };
   } catch (e) {
     return { error: "Something went wrong" };
