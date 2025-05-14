@@ -7,16 +7,24 @@ import { Resend } from "resend";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-const domain = process.env.EMAIL_DOMAIN;
+async function getEmailClientForOrg(orgId?: string) {
+  let apiKey = process.env.RESEND_API_KEY!;
+  let domain = process.env.EMAIL_DOMAIN!;
 
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : {
-      emails: {
-        send: async () => ({ data: null, error: null }),
-        cancel: async () => ({}),
-      },
-    };
+  if (orgId) {
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      include: { activeDomain: true },
+    });
+    if (org) {
+      if (org.emailApiKey) apiKey = org.emailApiKey;
+      if (org.activeDomain?.domain)
+        domain = `mailer@${org.activeDomain.domain}`;
+    }
+  }
+
+  return { resend: new Resend(apiKey), domain };
+}
 
 const parseContent = async (
   content: string,
@@ -45,6 +53,7 @@ export type SendEmailOpts = {
   previewText: string | null;
   html?: string;
   react?: React.ReactElement;
+  organizationId?: string;
 };
 
 export const sendEmail = async ({
@@ -55,9 +64,12 @@ export const sendEmail = async ({
   previewText,
   html,
   react,
+  organizationId,
 }: SendEmailOpts) => {
+  const { resend, domain } = await getEmailClientForOrg(organizationId);
+  const fromHeader = `${from} <${domain}>`;
   const payload: CreateEmailOptions = {
-    from: `${from} <${domain}>`,
+    from: fromHeader,
     to: [to],
     subject: subject || "No Subject",
     text: previewText ?? "",
@@ -96,6 +108,7 @@ export const sendBulkEmail = async ({
   previewText,
   scheduledTime,
   id,
+  organizationId,
 }: {
   audienceListId: string;
   from: string;
@@ -104,11 +117,15 @@ export const sendBulkEmail = async ({
   previewText: string | null;
   scheduledTime: string | undefined;
   id: string;
+  organizationId: string;
 }) => {
   const session = await getSession();
   if (!session?.user.id) {
     return { error: "Not authenticated" };
   }
+
+  const { resend, domain } = await getEmailClientForOrg(organizationId);
+  const fromHeader = `${from} <${domain}>`;
 
   const audienceList = await prisma.audienceList.findUnique({
     where: { id: audienceListId },
@@ -134,7 +151,7 @@ export const sendBulkEmail = async ({
         : null;
 
       const emailData = {
-        from: `${from} <${domain}>`,
+        from: fromHeader,
         to: [audience.email],
         subject: subject || "No Subject",
         html: htmlContent || "",
@@ -154,6 +171,7 @@ export const sendBulkEmail = async ({
       };
 
       const { data, error } = await resend.emails.send(emailData);
+
       if (error) {
         console.error(
           `Failed to send email to ${audience.email}: ${JSON.stringify(error)}`,
@@ -179,5 +197,6 @@ export const sendBulkEmail = async ({
 };
 
 export const unscheduleEmail = async ({ resendId }: { resendId: string }) => {
+  const { resend } = await getEmailClientForOrg();
   await resend.emails.cancel(resendId);
 };

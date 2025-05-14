@@ -31,6 +31,7 @@ export default function Form({
   helpText,
   inputAttrs,
   handleSubmit,
+  disabled = false,
 }: {
   title: string;
   description: string;
@@ -42,8 +43,10 @@ export default function Form({
     placeholder?: string;
     maxLength?: number;
     pattern?: string;
+    options?: { value: string; label: string }[];
   };
   handleSubmit: any;
+  disabled?: boolean;
 }) {
   const { id } = useParams() as { id?: string };
   const router = useRouter();
@@ -128,6 +131,19 @@ export default function Form({
             required
             className="w-full max-w-xl rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
           />
+        ) : inputAttrs.options ? (
+          <select
+            name={inputAttrs.name}
+            defaultValue={inputAttrs.defaultValue}
+            disabled={disabled}
+            className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:focus:ring-white"
+          >
+            {inputAttrs.options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         ) : (
           <input
             {...inputAttrs}

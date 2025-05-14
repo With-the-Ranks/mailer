@@ -132,8 +132,27 @@ model Organization {
   users         User[]
   emails        Email[]
   audienceLists AudienceList[]
+  emailApiKey    String?       @db.Text  // Optional per-org override
+  activeDomainId String?        @unique
+  activeDomain   EmailDomain?  @relation("ActiveDomain", fields: [activeDomainId], references: [id])
+
+  domains        EmailDomain[] // All domains owned by org
 
   Template Template[]
+}
+
+model EmailDomain {
+  id             String        @id @default(cuid())
+  domain         String        @unique
+  providerId     String
+  status         String?
+  provider       String        @default("resend")
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  organizationId String
+
+  activeFor      Organization? @relation("ActiveDomain")
+
+  createdAt      DateTime      @default(now())
 }
 
 model Template {
