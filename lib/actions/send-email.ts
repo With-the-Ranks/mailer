@@ -1,14 +1,22 @@
 "use server";
 
 import { Maily } from "@maily-to/render";
+import type { CreateEmailOptions } from "resend";
 import { Resend } from "resend";
 
 import { getSession } from "@/lib/auth";
-import WelcomeTemplate from "@/lib/email-templates/welcome-template";
 import prisma from "@/lib/prisma";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.EMAIL_DOMAIN;
+
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : {
+      emails: {
+        send: async () => ({ data: null, error: null }),
+        cancel: async () => ({}),
+      },
+    };
 
 const parseContent = async (
   content: string,
@@ -29,42 +37,53 @@ const parseContent = async (
   }
 };
 
+export type SendEmailOpts = {
+  to: string;
+  from: string;
+  subject: string | null;
+  content?: string | null;
+  previewText: string | null;
+  html?: string;
+  react?: React.ReactElement;
+};
+
 export const sendEmail = async ({
   to,
   from,
   subject,
   content,
   previewText,
-}: {
-  to: string;
-  from: string;
-  subject: string | null;
-  content: string | null;
-  previewText: string | null;
-}) => {
-  try {
-    let resendEmail: any = {
-      from: `${from} <${domain}>`,
-      to: [to],
-      subject: subject,
-    };
-    if (content) {
-      const htmlContent = await parseContent(content, {}, previewText);
-      resendEmail.html = htmlContent;
-    } else {
-      resendEmail.react = WelcomeTemplate() as React.ReactElement;
-    }
+  html,
+  react,
+}: SendEmailOpts) => {
+  const payload: CreateEmailOptions = {
+    from: `${from} <${domain}>`,
+    to: [to],
+    subject: subject || "No Subject",
+    text: previewText ?? "",
+  };
 
-    const { data, error } = await resend.emails.send({
-      ...resendEmail,
-    });
+  if (html) {
+    payload.html = html;
+  } else if (react) {
+    payload.react = react;
+  } else if (content) {
+    payload.html = await parseContent(content, {}, previewText);
+  } else {
+    throw new Error("sendEmail: need content, html, or react");
+  }
+
+  try {
+    const { data, error } = await resend.emails.send(payload);
 
     if (error) {
-      return { error };
+      const msg = typeof error === "string" ? error : JSON.stringify(error);
+      return { error: msg };
     }
 
     return { data };
-  } catch (e) {
+  } catch (err) {
+    console.error("sendEmail thrown error:", err);
     return { error: "Something went wrong" };
   }
 };
