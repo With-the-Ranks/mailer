@@ -81,12 +81,14 @@ export const sendEmail = async ({
     }
 
     if (!data) {
-      return { error: "Unexpected null response from email service" };
+      throw new Error("Something went wrong");
     }
 
     return { data };
   } catch (e) {
-    return { error: "Something went wrong" };
+    const errorMessage =
+      e instanceof Error ? e.message : "Something went wrong";
+    return { error: errorMessage };
   }
 };
 
