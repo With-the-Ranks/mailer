@@ -67,6 +67,14 @@ export default function LoginPage({
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
         <SignInForm />
       </div>
+      <div className="mt-2 text-center text-sm">
+        <Link
+          href="/forgot-password"
+          className="text-stone-400 hover:text-stone-200 hover:underline"
+        >
+          Forgot password?
+        </Link>
+      </div>
       <div className="mt-5 text-center text-sm text-stone-400">
         Don&apos;t have an account?
         <Link

@@ -9,6 +9,7 @@ import React from "react";
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
 
+import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
@@ -153,6 +154,39 @@ export const resendVerificationEmail = async (email: string) => {
     subject: "Verify your email address",
     react: content,
     previewText: "Please verify your email to finish signing up.",
+  });
+
+  return { success: true };
+};
+
+export const sendPasswordResetEmail = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return { success: true };
+  }
+
+  const token = crypto.randomUUID();
+  await prisma.verificationToken.deleteMany({ where: { identifier: email } });
+  await prisma.verificationToken.create({
+    data: {
+      identifier: email,
+      token,
+      expires: addHours(new Date(), 2),
+    },
+  });
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://app.localhost:3000";
+  const resetUrl = `${baseUrl}/forgot-password?token=${token}`;
+
+  const content = React.createElement(ResetPasswordEmail, { resetUrl });
+
+  await sendEmail({
+    to: email,
+    from: "Mailer",
+    subject: "Reset your password",
+    react: content,
+    previewText: "Click here to reset your password (expires in 2 hrs)",
   });
 
   return { success: true };
