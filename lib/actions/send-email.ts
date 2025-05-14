@@ -56,39 +56,35 @@ export const sendEmail = async ({
   html,
   react,
 }: SendEmailOpts) => {
+  const payload: CreateEmailOptions = {
+    from: `${from} <${domain}>`,
+    to: [to],
+    subject: subject || "No Subject",
+    text: previewText ?? "",
+  };
+
+  if (html) {
+    payload.html = html;
+  } else if (react) {
+    payload.react = react;
+  } else if (content) {
+    payload.html = await parseContent(content, {}, previewText);
+  } else {
+    throw new Error("sendEmail: need content, html, or react");
+  }
+
   try {
-    const payload: CreateEmailOptions = {
-      from: `${from} <${domain}>`,
-      to: [to],
-      subject: subject || "No Subject",
-      text: previewText ?? "",
-    };
-
-    if (html) {
-      payload.html = html;
-    } else if (react) {
-      payload.react = react;
-    } else if (content) {
-      payload.html = await parseContent(content, {}, previewText);
-    } else {
-      throw new Error("sendEmail: need content, html, or react");
-    }
-
     const { data, error } = await resend.emails.send(payload);
+
     if (error) {
       const msg = typeof error === "string" ? error : JSON.stringify(error);
       return { error: msg };
     }
 
-    if (!data) {
-      throw new Error("Something went wrong");
-    }
-
     return { data };
-  } catch (e) {
-    const errorMessage =
-      e instanceof Error ? e.message : "Something went wrong";
-    return { error: errorMessage };
+  } catch (err) {
+    console.error("sendEmail thrown error:", err);
+    return { error: "Something went wrong" };
   }
 };
 
