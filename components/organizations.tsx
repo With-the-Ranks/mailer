@@ -20,12 +20,17 @@ export default async function Organizations({
   }
 
   if (!organizations) {
+    const userId = session.user?.id;
+    if (!userId) {
+      redirect("/login");
+    }
+
     organizations = await prisma.organization.findMany({
       where: {
         users: {
           some: {
             id: {
-              in: [session!.user.id as string],
+              in: [userId],
             },
           },
         },

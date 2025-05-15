@@ -8,10 +8,7 @@ import { toast } from "sonner";
 import FormButton from "@/components/form/form-button";
 
 function SignInForm() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -24,7 +21,6 @@ function SignInForm() {
     <form
       action={async (data) => {
         setIsSubmitting(true);
-        // Using signIn from NextAuth for user authentication
         const result = await signIn("credentials", {
           redirect: false,
           email: data.get("email"),
@@ -32,12 +28,37 @@ function SignInForm() {
         });
 
         if (result?.error) {
-          toast.error(`Login Failed: ${result.error}`);
+          if (result.error.toLowerCase().includes("verify")) {
+            toast.error("Please verify your email", {
+              action: {
+                label: "Resend",
+                onClick: async () => {
+                  toast.dismiss();
+
+                  const res = await fetch("/api/resend-verification", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: formData.email }),
+                  }).then((res) => res.json());
+
+                  if (res.success) {
+                    toast.success("Verification email resent");
+                  } else {
+                    toast.error("Unable to resend verification email");
+                  }
+                },
+              },
+            });
+          } else {
+            toast.error(`Login Failed: ${result.error}`);
+          }
+
           setIsSubmitting(false);
-        } else {
-          toast.success("Login Successful");
-          router.push("/");
+          return;
         }
+
+        toast.success("Login Successful");
+        router.push("/");
       }}
     >
       <input

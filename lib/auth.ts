@@ -1,10 +1,16 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcrypt";
+import { addHours } from "date-fns";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
+import React from "react";
 
+import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
+
+import ResetPasswordEmail from "./email-templates/reset-email";
+import VerifyEmail from "./email-templates/verify-email";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
@@ -49,7 +55,10 @@ export const authOptions: NextAuthOptions = {
             throw new Error("No user found with the entered email");
           }
 
-          // Here bcrypt compares the provided password with the hashed password in the database
+          if (!user.emailVerified) {
+            throw new Error("Please verify your email before logging in.");
+          }
+
           const passwordIsValid = await bcrypt.compare(
             password,
             user.password || "",
@@ -59,10 +68,10 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Password is incorrect");
           }
 
-          return user; // Successful authentication, return user object
-        } catch (error) {
+          return user;
+        } catch (error: any) {
           console.error("Login error:", error);
-          return null;
+          throw new Error(error.message || "Login failed");
         }
       },
     }),
@@ -92,6 +101,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
+        token.sub = user.id;
         token.user = user;
       }
       return token;
@@ -107,6 +117,77 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+};
+
+export const resendVerificationEmail = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user || user.emailVerified) {
+    return { error: "User not found or already verified." };
+  }
+
+  const token = crypto.randomUUID();
+
+  await prisma.verificationToken.deleteMany({
+    where: { identifier: email },
+  });
+
+  await prisma.verificationToken.create({
+    data: {
+      identifier: email,
+      token,
+      expires: addHours(new Date(), 2),
+    },
+  });
+
+  const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+  const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
+
+  const content = React.createElement(VerifyEmail, {
+    verificationUrl,
+  });
+
+  await sendEmail({
+    to: email,
+    from: "Mailer",
+    subject: "Verify your email address",
+    react: content,
+    previewText: "Please verify your email to finish signing up.",
+  });
+
+  return { success: true };
+};
+
+export const sendPasswordResetEmail = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return { success: true };
+  }
+
+  const token = crypto.randomUUID();
+  await prisma.verificationToken.deleteMany({ where: { identifier: email } });
+  await prisma.verificationToken.create({
+    data: {
+      identifier: email,
+      token,
+      expires: addHours(new Date(), 2),
+    },
+  });
+
+  const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+  const resetUrl = `${baseUrl}/forgot-password?token=${token}`;
+
+  const content = React.createElement(ResetPasswordEmail, { resetUrl });
+
+  await sendEmail({
+    to: email,
+    from: "Mailer",
+    subject: "Reset your password",
+    react: content,
+    previewText: "Click here to reset your password (expires in 2 hrs)",
+  });
+
+  return { success: true };
 };
 
 export function getSession() {

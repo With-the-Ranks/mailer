@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export const config = {
@@ -14,54 +15,50 @@ export const config = {
   ],
 };
 
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
+
 export default async function middleware(req: NextRequest) {
-  const url = req.nextUrl;
+  const url = req.nextUrl.clone();
+  const { pathname, search } = url;
+  const host = req.headers.get("host")!;
 
-  // Get hostname of request (e.g. demo.vercel.pub, demo.localhost:3000)
-  let hostname = req.headers
-    .get("host")!
-    .replace(".localhost:3000", `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
+  const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
+  const SUFFIX = process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_SUFFIX!;
 
-  // special case for Vercel preview deployment URLs
-  if (
-    hostname.includes("---") &&
-    hostname.endsWith(`.${process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_SUFFIX}`)
-  ) {
-    hostname = `${hostname.split("---")[0]}.${
-      process.env.NEXT_PUBLIC_ROOT_DOMAIN
-    }`;
+  let hostname = host.replace(`.localhost:3000`, `.${ROOT}`);
+  if (hostname.includes("---") && hostname.endsWith(`.${SUFFIX}`)) {
+    hostname = hostname.split("---")[0] + `.${ROOT}`;
   }
 
-  const searchParams = req.nextUrl.searchParams.toString();
-  // Get the pathname of the request (e.g. /, /about, /blog/first-post)
-  const path = `${url.pathname}${
-    searchParams.length > 0 ? `?${searchParams}` : ""
-  }`;
+  const isAppHost = hostname === `app.${ROOT}`;
+  const isRootHost = hostname === ROOT || host === "localhost:3000";
+  const session = await getToken({ req });
 
-  // rewrites for app pages
-  if (hostname == `app.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-    const session = await getToken({ req });
-    if (!session && path !== "/login" && path !== "/register") {
-      return NextResponse.redirect(new URL("/login", req.url));
-    } else if (session && path == "/login") {
-      return NextResponse.redirect(new URL("/", req.url));
+  if (isAppHost) {
+    if (!session && !PUBLIC_PATHS.includes(pathname)) {
+      return NextResponse.redirect(new URL(`/login${search}`, req.url));
     }
-    return NextResponse.rewrite(
-      new URL(`/app${path === "/" ? "" : path}`, req.url),
-    );
-  }
-  // Update this block to rewrite root application to `/login` instead of `/home`
-  if (
-    hostname === "localhost:3000" ||
-    hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN
-  ) {
-    if (path === "/") {
-      const appUrl = req.url.replace(hostname, `app.${hostname}`);
-      return NextResponse.redirect(new URL("/login", appUrl));
-    } else {
-      return NextResponse.rewrite(new URL(`/home${path}`, req.url));
+
+    if (session && pathname === "/login") {
+      return NextResponse.redirect(new URL(`/${search}`, req.url));
     }
+
+    return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
-  // rewrite everything else to `/[domain]/[slug] dynamic route
-  return NextResponse.rewrite(new URL(`/${hostname}${path}`, req.url));
+
+  if (isRootHost) {
+    const appOrigin = new URL(req.url);
+    appOrigin.host = `app.${hostname}`;
+
+    if (pathname === "/" || PUBLIC_PATHS.includes(pathname)) {
+      const target = pathname === "/" ? "/login" : pathname;
+      return NextResponse.redirect(new URL(`${target}${search}`, appOrigin));
+    }
+
+    return NextResponse.rewrite(new URL(`/home${pathname}${search}`, req.url));
+  }
+
+  return NextResponse.rewrite(
+    new URL(`/${hostname}${pathname}${search}`, req.url),
+  );
 }

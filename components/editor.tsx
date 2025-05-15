@@ -158,6 +158,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         previewText: data.previewText,
         scheduledTime: emailScheduleTime,
         id: data.id,
+        organizationId: data.organizationId!,
       });
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
@@ -191,6 +192,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         subject: data.subject!,
         content: data.content!,
         previewText: data.previewText!,
+        organizationId: data.organizationId!,
       });
       toast.success("Test email sent");
     } catch {
