@@ -1,49 +1,64 @@
 import { faker } from "@faker-js/faker";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import prisma from "@/lib/__mocks__/prisma";
 import mockUser from "@/lib/__mocks__/user";
 import { registerUser } from "@/lib/actions/auth";
+import { sendEmail } from "@/lib/actions/send-email";
 
 vi.mock("@/lib/prisma");
+vi.mock("@/lib/actions/send-email", () => ({
+  sendEmail: vi.fn().mockResolvedValue({}),
+}));
 
 const createUserData = () => {
-  const userData = new FormData();
-  userData.append("email", faker.internet.email());
-  userData.append("password", faker.internet.password());
-  return userData;
+  const fd = new FormData();
+  fd.append("email", faker.internet.email());
+  fd.append("password", faker.internet.password());
+  return fd;
 };
+
+beforeEach(() => {
+  prisma.user.findUnique.mockResolvedValue(null);
+  prisma.verificationToken.create.mockResolvedValue({
+    identifier: "",
+    token: "",
+    expires: new Date(),
+  });
+});
 
 describe("Authentication", () => {
   test("registerUser should succeed for new email", async () => {
-    const userData = createUserData();
-    const email = userData.get("email")!.toString();
-    const password = userData.get("password")!.toString();
+    const fd = createUserData();
+    const email = fd.get("email")!.toString();
+    const pwd = fd.get("password")!.toString();
 
-    const mockedUser = mockUser({ email, password });
-    prisma.user.create.mockResolvedValue(mockedUser);
+    prisma.user.create.mockResolvedValue(mockUser({ email, password: pwd }));
 
-    const result = await registerUser(userData);
+    const result = await registerUser(fd);
+
     expect(result.user).toBeDefined();
     expect(result.error).toBeUndefined();
+    expect(result.message).toMatch(/Registration successful/);
 
-    // for simpler type checking - we already know this is not undefined from previous assertion
     if (result.user) {
       expect(result.user.id).toBeDefined();
-      expect(result.user.email).toMatch(email);
+      expect(result.user.email).toBe(email);
     }
+
+    expect(sendEmail).toHaveBeenCalledTimes(1);
   });
 
   test("registerUser should fail for existing email", async () => {
-    const userData = createUserData();
-    await registerUser(userData);
+    const fd = createUserData();
+    const email = fd.get("email")!.toString();
 
-    const email = userData.get("email")?.toString();
-    const mockedUser = mockUser({ email });
-    prisma.user.findUnique.mockResolvedValue(mockedUser);
-    const secondResult = await registerUser(userData);
+    // simulate user already exists
+    prisma.user.findUnique.mockResolvedValue(mockUser({ email }));
 
-    expect(secondResult.user).toBeUndefined();
-    expect(secondResult.error).toBeDefined();
+    const result2 = await registerUser(fd);
+
+    expect(result2.user).toBeUndefined();
+    expect(result2.error).toMatch(/already exists/);
   });
 });
