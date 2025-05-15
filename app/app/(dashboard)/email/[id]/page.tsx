@@ -20,17 +20,21 @@ export default async function EmailDetailPage({
   if (!email || email.userId !== session.user.id) return notFound();
   if (!email.published) redirect(`/email/${email.id}`);
 
-  const [sentCount, openedCount, clickedCount] = await Promise.all([
-    prisma.emailEvent.count({
-      where: { emailId: email.id, eventType: "delivered" },
-    }),
-    prisma.emailEvent.count({
-      where: { emailId: email.id, eventType: "opened" },
-    }),
-    prisma.emailEvent.count({
-      where: { emailId: email.id, eventType: "clicked" },
-    }),
-  ]);
+  const [sentCount, deliveredCount, openedCount, clickedCount] =
+    await Promise.all([
+      prisma.emailEvent.count({
+        where: { emailId: email.id, eventType: "sent" },
+      }),
+      prisma.emailEvent.count({
+        where: { emailId: email.id, eventType: "delivered" },
+      }),
+      prisma.emailEvent.count({
+        where: { emailId: email.id, eventType: "opened" },
+      }),
+      prisma.emailEvent.count({
+        where: { emailId: email.id, eventType: "clicked" },
+      }),
+    ]);
 
   let previewHtml = "<p>No preview available</p>";
   if (email.content) {
@@ -50,9 +54,11 @@ export default async function EmailDetailPage({
     <div className="mx-auto w-full max-w-screen-lg p-6">
       <section className="my-8 space-y-6">
         <h1 className="text-3xl font-bold dark:text-white">{email.title}</h1>
-        <div className="grid grid-cols-3 gap-6">
+
+        <div className="grid grid-cols-4 gap-6">
           {[
             { label: "Sent", value: sentCount },
+            { label: "Delivered", value: deliveredCount },
             { label: "Opens", value: openedCount },
             { label: "Clicks", value: clickedCount },
           ].map(({ label, value }) => (
@@ -69,7 +75,8 @@ export default async function EmailDetailPage({
             </div>
           ))}
         </div>
-        <div className="h-80 w-full">
+
+        <div className="w-full">
           <Chart emailId={email.id} />
         </div>
       </section>
