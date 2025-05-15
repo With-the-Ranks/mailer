@@ -116,7 +116,7 @@ export default function CreateEmailModal({
       } else {
         toast.success("Successfully created email!");
         modal?.hide();
-        router.push(`/email/${email.id}`);
+        router.push(`/email/${email.id}/editor`);
       }
     } catch {
       toast.error("An error occurred while creating the email.");

@@ -110,7 +110,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   // Redirect if email is already published.
   useEffect(() => {
     if (data.published) {
-      router.push(`/email/${data.id}/analytics`);
+      router.push(`/email/${data.id}/`);
     }
   }, [data.published, data.id, router]);
 
@@ -174,7 +174,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const clickPreview = () => {
     if (data.published) {
-      router.push(`/email/${data.id}/analytics`);
+      router.push(`/email/${data.id}/`);
     } else {
       if (!data.title || !data.subject) {
         toast.error("Campaign name and subject are required.");

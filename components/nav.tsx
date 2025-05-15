@@ -6,9 +6,9 @@ import {
   LayoutDashboard,
   Menu,
   Newspaper,
+  PieChart,
   RadioTower,
   Settings,
-  TrendingUp,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,17 +58,17 @@ export default function Nav({ children }: { children: ReactNode }) {
           href: siteId ? `/organization/${siteId}` : "/organizations",
           icon: <ArrowLeft width={18} />,
         },
+        isPublished && {
+          name: "Report",
+          href: `/email/${id}/`,
+          isActive: segments.length === 2,
+          icon: <PieChart width={18} />,
+        },
         !isPublished && {
           name: "Editor",
-          href: `/email/${id}`,
-          isActive: segments.length === 2,
+          href: `/email/${id}/editor`,
+          isActive: segments.includes("editor"),
           icon: <Edit3 width={18} />,
-        },
-        isPublished && {
-          name: "Analytics",
-          href: `/email/${id}/analytics`,
-          isActive: segments.includes("analytics"),
-          icon: <TrendingUp width={18} />,
         },
       ].filter(Boolean);
     } else if (segments[0] === "audience" && id) {

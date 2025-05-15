@@ -1,5 +1,5 @@
 import type { Email, Organization } from "@prisma/client";
-import { BarChart, Edit3 } from "lucide-react";
+import { Edit3, PieChart } from "lucide-react";
 import Link from "next/link";
 
 export default function EmailRow({
@@ -24,7 +24,7 @@ export default function EmailRow({
     <tr className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
         <Link
-          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
+          href={`/email/${data.id}${isPublished ? "/" : "/editor"}`}
           className="block"
         >
           {data.title || "No Subject"}
@@ -32,7 +32,7 @@ export default function EmailRow({
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
         <Link
-          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
+          href={`/email/${data.id}${isPublished ? "/" : "/editor"}`}
           className="block"
         >
           {getStatus()}
@@ -40,7 +40,7 @@ export default function EmailRow({
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
         <Link
-          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
+          href={`/email/${data.id}${isPublished ? "/" : "/editor"}`}
           className="block"
         >
           {lastUpdated}
@@ -50,12 +50,8 @@ export default function EmailRow({
         <div className="flex justify-end gap-2">
           {isPublished ? (
             <>
-              <Link
-                href={`/email/${data.id}/analytics`}
-                className="btn"
-                title="Analytics"
-              >
-                <BarChart size={20} />
+              <Link href={`/email/${data.id}/`} className="btn" title="Report">
+                <PieChart size={20} />
               </Link>
               {/* {organization && (
                 <Link
@@ -82,7 +78,11 @@ export default function EmailRow({
             </>
           ) : (
             <>
-              <Link href={`/email/${data.id}`} className="btn" title="Editor">
+              <Link
+                href={`/email/${data.id}/editor`}
+                className="btn"
+                title="Editor"
+              >
                 <Edit3 size={20} />
               </Link>
               {/* <Link
