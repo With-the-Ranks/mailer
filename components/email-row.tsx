@@ -1,5 +1,5 @@
 import type { Email, Organization } from "@prisma/client";
-import { BarChart, Edit3, Eye, Settings } from "lucide-react";
+import { BarChart, Edit3 } from "lucide-react";
 import Link from "next/link";
 
 export default function EmailRow({
@@ -19,10 +19,6 @@ export default function EmailRow({
     return "Draft";
   };
   const lastUpdated = new Date(data.updatedAt).toLocaleDateString();
-  const organization = data.organization;
-  const url =
-    organization &&
-    `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
 
   return (
     <tr className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -61,7 +57,7 @@ export default function EmailRow({
               >
                 <BarChart size={20} />
               </Link>
-              {organization && (
+              {/* {organization && (
                 <Link
                   href={
                     process.env.NEXT_PUBLIC_VERCEL_ENV
@@ -75,27 +71,27 @@ export default function EmailRow({
                 >
                   <Eye size={20} />
                 </Link>
-              )}
-              <Link
+              )} */}
+              {/* <Link
                 href={`/email/${data.id}/settings`}
                 className="btn"
                 title="Settings"
               >
                 <Settings size={20} />
-              </Link>
+              </Link> */}
             </>
           ) : (
             <>
               <Link href={`/email/${data.id}`} className="btn" title="Editor">
                 <Edit3 size={20} />
               </Link>
-              <Link
+              {/* <Link
                 href={`/email/${data.id}/settings`}
                 className="btn"
                 title="Settings"
               >
                 <Settings size={20} />
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

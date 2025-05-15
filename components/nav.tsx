@@ -70,12 +70,6 @@ export default function Nav({ children }: { children: ReactNode }) {
           isActive: segments.includes("analytics"),
           icon: <TrendingUp width={18} />,
         },
-        {
-          name: "Settings",
-          href: `/email/${id}/settings`,
-          isActive: segments.includes("settings"),
-          icon: <Settings width={18} />,
-        },
       ].filter(Boolean);
     } else if (segments[0] === "audience" && id) {
       return [
