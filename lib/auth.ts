@@ -140,8 +140,7 @@ export const resendVerificationEmail = async (email: string) => {
     },
   });
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_ROOT_DOMAIN || "http://app.localhost:3000";
+  const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
   const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
 
   const content = React.createElement(VerifyEmail, {
@@ -175,8 +174,7 @@ export const sendPasswordResetEmail = async (email: string) => {
     },
   });
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_ROOT_DOMAIN || "http://app.localhost:3000";
+  const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
   const resetUrl = `${baseUrl}/forgot-password?token=${token}`;
 
   const content = React.createElement(ResetPasswordEmail, { resetUrl });

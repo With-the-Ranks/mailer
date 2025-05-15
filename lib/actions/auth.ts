@@ -38,8 +38,7 @@ export const registerUser = async (formData: FormData) => {
       },
     });
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "http://app.localhost:3000";
+    const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
     const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
 
     const content = React.createElement(VerifyEmail, {
