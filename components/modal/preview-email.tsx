@@ -15,8 +15,14 @@ export default function EmailPreview({ html }: PreviewEmailProps) {
 
   const openModal = () => {
     modal.show(
-      <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/50 p-4">
-        <div className="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-lg bg-white p-8 shadow-2xl dark:bg-gray-800">
+      <div
+        className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/50 p-4"
+        onClick={() => modal.hide()}
+      >
+        <div
+          className="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-lg bg-white p-8 shadow-2xl dark:bg-gray-800"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             onClick={() => modal.hide()}
             className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -47,7 +53,7 @@ export default function EmailPreview({ html }: PreviewEmailProps) {
       </div>
 
       {/* Snapshot card */}
-      <div className="mx-auto h-[60vh] max-w-2xl overflow-auto rounded-lg border bg-white p-6 shadow-md dark:bg-gray-800">
+      <div className="mx-auto max-h-96 max-w-xl overflow-auto rounded-lg border bg-white p-6 shadow-md dark:bg-gray-800">
         <div className="prose max-w-none dark:prose-invert">
           <div dangerouslySetInnerHTML={{ __html: html }} />
         </div>

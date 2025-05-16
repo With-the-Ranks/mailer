@@ -6,6 +6,8 @@ import EmailPreview from "@/components/modal/preview-email";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+type Stats = { label: string; value: number };
+
 export default async function EmailDetailPage({
   params: { id },
 }: {
@@ -58,53 +60,84 @@ export default async function EmailDetailPage({
       sentEvents.map((e) => e.emailTo).filter((addr): addr is string => !!addr),
     ),
   );
-  return (
-    <div className="mx-auto w-full max-w-screen-lg p-6">
-      <section className="my-8 space-y-6">
-        <h1 className="text-3xl font-bold dark:text-white">{email.title}</h1>
 
-        <div className="grid grid-cols-4 gap-6">
-          {[
-            { label: "Sent", value: sentCount },
-            { label: "Delivered", value: deliveredCount },
-            { label: "Opens", value: openedCount },
-            { label: "Clicks", value: clickedCount },
-          ].map(({ label, value }) => (
+  const stats: Stats[] = [
+    { label: "Sent", value: sentCount },
+    { label: "Delivered", value: deliveredCount },
+    { label: "Opens", value: openedCount },
+    { label: "Clicks", value: clickedCount },
+  ];
+
+  return (
+    <div className="mx-auto w-full max-w-screen-lg px-4 py-6 sm:px-6 lg:px-8">
+      {/* Header & Stats */}
+      <section className="mb-8 space-y-4">
+        <h1 className="text-2xl font-bold dark:text-white sm:text-3xl">
+          {email.title}
+        </h1>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map(({ label, value }) => (
             <div
               key={label}
-              className="rounded-lg bg-white p-4 shadow dark:bg-gray-800"
+              className="flex flex-col rounded-lg bg-white p-4 shadow dark:bg-gray-800"
             >
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {label}
-              </h3>
-              <p className="mt-1 text-2xl font-semibold dark:text-white">
+              </span>
+              <span className="mt-1 text-2xl font-semibold dark:text-white">
                 {value}
-              </p>
+              </span>
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="w-full">
+      {/* Chart */}
+      <section className="mb-8">
+        <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
           <Chart emailId={email.id} />
         </div>
       </section>
 
-      <section className="my-8 space-y-4">
-        <h2 className="text-xl font-semibold">Sent To</h2>
+      {/* Recipients Table */}
+      <section className="mb-8">
+        <h2 className="mb-4 text-xl font-semibold dark:text-gray-100 sm:text-2xl">
+          Sent To
+        </h2>
         {recipients.length === 0 ? (
-          <p>No recipients recorded.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            No recipients recorded.
+          </p>
         ) : (
-          <ul className="divide-y rounded-lg bg-white shadow dark:bg-gray-800">
-            {recipients.map((addr) => (
-              <li key={addr} className="px-4 py-2 text-sm dark:text-gray-200">
-                {addr}
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto rounded-lg shadow">
+            <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                    Recipient Email
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {recipients.map((addr) => (
+                  <tr
+                    key={addr}
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <td className="break-all px-4 py-2 text-sm dark:text-gray-200">
+                      {addr}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
-      <EmailPreview html={previewHtml} />
+      <section>
+        <EmailPreview html={previewHtml} />
+      </section>
     </div>
   );
 }

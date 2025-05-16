@@ -142,7 +142,7 @@ export default function Nav({ children }: { children: ReactNode }) {
     <>
       <button
         className={`fixed z-20 ${
-          segments[0] === "email" && segments.length === 2 && !showSidebar
+          segments[0] === "email" && segments.includes("editor") && !showSidebar
             ? "left-5 top-5"
             : "right-5 top-7"
         } sm:hidden`}

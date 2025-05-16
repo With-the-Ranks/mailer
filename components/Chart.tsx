@@ -60,7 +60,15 @@ export default function Chart({ emailId }: { emailId: string }) {
   }, [emailId]);
 
   if (noData) {
-    return null;
+    return (
+      <div className="flex h-64 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+        <div className="text-center">
+          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
+            No data to display
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
