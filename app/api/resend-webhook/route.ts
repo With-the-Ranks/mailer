@@ -10,7 +10,6 @@ type ResendEventBody = {
     to?: string[];
     tags?: { intrepidId?: string; userId?: string };
     click?: { link: string };
-    // other fields omitted…
   };
 };
 
@@ -29,13 +28,11 @@ export async function POST(req: NextRequest) {
   const emailTo = data.to?.[0] ?? null;
   const ts = data.timestamp ? new Date(data.timestamp) : new Date();
 
-  // Only process if we have an intrepidId and recipient
   if (!emailId || !emailTo) {
     console.warn("Missing emailId or to-address, skipping");
     return NextResponse.json({ received: false });
   }
 
-  // Map Resend event types to our prisma.emailEvent.eventType
   const eventTypeMap: Record<string, string> = {
     "email.sent": "sent",
     "email.delivered": "delivered",
@@ -48,8 +45,6 @@ export async function POST(req: NextRequest) {
 
   const evt = eventTypeMap[type];
   if (!evt) {
-    // not one of the above – just log and return
-    console.log(`Unhandled webhook type: ${type}`);
     return NextResponse.json({ received: true });
   }
 
@@ -61,12 +56,10 @@ export async function POST(req: NextRequest) {
         emailTo,
         eventType: evt,
         timestamp: ts,
-        // only set link for clicks
         link: type === "email.clicked" ? data.click?.link : null,
       },
     });
   } catch (err: any) {
-    // ignore duplicate errors (same emailId/emailTo/eventType)
     if (err.code === "P2002") {
       console.warn(`Duplicate event skipped: ${emailId}/${emailTo}/${evt}`);
     } else {
