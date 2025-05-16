@@ -178,17 +178,27 @@ export const sendBulkEmail = async ({
         );
       } else {
         const resendId = data?.id;
+
+        try {
+          await prisma.emailEvent.create({
+            data: {
+              emailId: id,
+              userId: session.user.id,
+              emailTo: audience.email,
+              eventType: "sent",
+              timestamp: new Date(),
+            },
+          });
+        } catch (err: any) {
+          if (err.code !== "P2002")
+            console.error("Error logging sent event:", err);
+        }
         await prisma.email.update({
-          where: {
-            id: id,
-          },
-          data: {
-            resendId,
-          },
+          where: { id },
+          data: { resendId },
         });
       }
     }
-
     return { success: true };
   } catch (e) {
     console.error("Error sending bulk email:", e);

@@ -37,7 +37,7 @@ export default async function OrganizationSettingsAppearance({
         }}
         handleSubmit={updateOrganization}
       />
-      <Form
+      {/* <Form
         title="Font"
         description="The font for the heading text your organization."
         helpText="Please select a font."
@@ -47,7 +47,7 @@ export default async function OrganizationSettingsAppearance({
           defaultValue: data?.font!,
         }}
         handleSubmit={updateOrganization}
-      />
+      /> */}
       {/* <Form
         title="404 Page Message"
         description="Message to be displayed on the 404 page."

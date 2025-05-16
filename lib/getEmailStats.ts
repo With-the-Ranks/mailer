@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 
 export async function getEmailStatsByUser(userId: string) {
   const emails = await prisma.email.findMany({
-    where: { userId },
+    where: { userId, published: true },
     select: {
       id: true,
       subject: true,
