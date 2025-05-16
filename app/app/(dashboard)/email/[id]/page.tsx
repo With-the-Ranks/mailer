@@ -48,8 +48,16 @@ export default async function EmailDetailPage({
     }
   }
 
-  const recipients = email.emailsTo || [];
-
+  const sentEvents = await prisma.emailEvent.findMany({
+    where: { emailId: email.id, eventType: "sent" },
+    select: { emailTo: true },
+    orderBy: { timestamp: "asc" },
+  });
+  const recipients = Array.from(
+    new Set(
+      sentEvents.map((e) => e.emailTo).filter((addr): addr is string => !!addr),
+    ),
+  );
   return (
     <div className="mx-auto w-full max-w-screen-lg p-6">
       <section className="my-8 space-y-6">

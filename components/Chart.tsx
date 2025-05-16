@@ -60,7 +60,7 @@ export default function Chart({ emailId }: { emailId: string }) {
   }, [emailId]);
 
   if (noData) {
-    return <div>✨ Data will appear here shortly ✨</div>;
+    return null;
   }
 
   return (
