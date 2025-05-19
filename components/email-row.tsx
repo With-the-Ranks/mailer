@@ -1,100 +1,83 @@
 import type { Email, Organization } from "@prisma/client";
-import { Edit3, PieChart } from "lucide-react";
+import { Clock, Edit3, PieChart, Send } from "lucide-react";
 import Link from "next/link";
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+const fmtTime = (d: Date) =>
+  d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
 export default function EmailRow({
   data,
 }: {
   data: Email & { organization?: Organization | null };
 }) {
-  const isPublished = data.published;
-  const isScheduled = data.published && data.scheduledTime > new Date();
+  const now = new Date();
+  const pub = data.published;
+  const sched = new Date(data.scheduledTime);
+  const isScheduled = pub && sched > now;
 
-  const getStatus = () => {
-    if (isScheduled) {
-      return "Scheduled";
-    } else if (isPublished) {
-      return "Sent";
-    }
-    return "Draft";
-  };
-  const lastUpdated = new Date(data.updatedAt).toLocaleDateString();
+  let dateToShow: Date;
+  if (!pub) dateToShow = new Date(data.updatedAt);
+  else if (isScheduled) dateToShow = sched;
+  else dateToShow = new Date(data.updatedAt);
+
+  const StatusIcon = !pub ? Edit3 : isScheduled ? Clock : Send;
+
+  const timeLabelText = !pub ? "Last edited" : isScheduled ? "Sending" : "Sent";
 
   return (
-    <tr className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
-      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-        <Link
-          href={`/email/${data.id}${isPublished ? "/" : "/editor"}`}
-          className="block"
-        >
+    <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
+      <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+        <Link href={`/email/${data.id}${pub ? "" : "/editor"}`}>
           {data.title || "No Subject"}
         </Link>
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href={`/email/${data.id}${isPublished ? "/" : "/editor"}`}
-          className="block"
-        >
-          {getStatus()}
+
+      <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+        <Link href={`/email/${data.id}${pub ? "" : "/editor"}`}>
+          {isScheduled ? "Scheduled" : pub ? "Sent" : "Draft"}
         </Link>
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href={`/email/${data.id}${isPublished ? "/" : "/editor"}`}
-          className="block"
-        >
-          {lastUpdated}
+
+      <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+        <Link href={`/email/${data.id}${pub ? "" : "/editor"}`}>
+          <div className="flex items-start space-x-2">
+            <StatusIcon size={16} />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs uppercase text-gray-400">
+                {timeLabelText}
+              </span>
+              <span className="text-sm font-semibold">
+                {fmtDate(dateToShow)}
+              </span>
+              <span className="text-xs">{fmtTime(dateToShow)}</span>
+            </div>
+          </div>
         </Link>
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
-        <div className="flex justify-end gap-2">
-          {isPublished ? (
-            <>
-              <Link href={`/email/${data.id}/`} className="btn" title="Report">
-                <PieChart size={20} />
-              </Link>
-              {/* {organization && (
-                <Link
-                  href={
-                    process.env.NEXT_PUBLIC_VERCEL_ENV
-                      ? `https://${url}/${data.slug}`
-                      : `http://${organization.subdomain}.localhost:3000/${data.slug}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn text-sm"
-                  title="Preview"
-                >
-                  <Eye size={20} />
-                </Link>
-              )} */}
-              {/* <Link
-                href={`/email/${data.id}/settings`}
-                className="btn"
-                title="Settings"
-              >
-                <Settings size={20} />
-              </Link> */}
-            </>
-          ) : (
-            <>
-              <Link
-                href={`/email/${data.id}/editor`}
-                className="btn"
-                title="Editor"
-              >
-                <Edit3 size={20} />
-              </Link>
-              {/* <Link
-                href={`/email/${data.id}/settings`}
-                className="btn"
-                title="Settings"
-              >
-                <Settings size={20} />
-              </Link> */}
-            </>
-          )}
-        </div>
+
+      <td className="px-6 py-4 text-center">
+        {pub ? (
+          <Link href={`/email/${data.id}`} className="btn p-2" title="Report">
+            <PieChart size={20} />
+          </Link>
+        ) : (
+          <Link
+            href={`/email/${data.id}/editor`}
+            className="btn p-2"
+            title="Edit Draft"
+          >
+            <Edit3 size={20} />
+          </Link>
+        )}
       </td>
     </tr>
   );
