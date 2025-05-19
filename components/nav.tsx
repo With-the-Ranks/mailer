@@ -3,10 +3,10 @@
 import {
   ArrowLeft,
   Edit3,
+  Info,
   LayoutDashboard,
   Menu,
   Newspaper,
-  PieChart,
   RadioTower,
   Settings,
 } from "lucide-react";
@@ -59,10 +59,10 @@ export default function Nav({ children }: { children: ReactNode }) {
           icon: <ArrowLeft width={18} />,
         },
         isPublished && {
-          name: "Report",
+          name: "Details",
           href: `/email/${id}/`,
           isActive: segments.length === 2,
-          icon: <PieChart width={18} />,
+          icon: <Info width={18} />,
         },
         !isPublished && {
           name: "Editor",
