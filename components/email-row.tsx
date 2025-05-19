@@ -14,7 +14,7 @@ export default function EmailRow({
     if (isScheduled) {
       return "Scheduled";
     } else if (isPublished) {
-      return "Published";
+      return "Sent";
     }
     return "Draft";
   };
