@@ -2,6 +2,7 @@ import { Maily } from "@maily-to/render";
 import { notFound, redirect } from "next/navigation";
 
 import Chart from "@/components/Chart";
+import CancelScheduleModal from "@/components/modal/cancel-schedule-modal";
 import EmailPreview from "@/components/modal/preview-email";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -91,14 +92,11 @@ export default async function EmailDetailPage({
                 {new Date(email.scheduledTime).toLocaleString()}
               </time>
             </span>
-            <form action={`/api/email/${email.id}/unschedule`} method="POST">
-              <button
-                type="submit"
-                className="rounded bg-red-600 px-3 py-1 text-sm font-semibold text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-              >
-                Cancel Schedule
-              </button>
-            </form>
+            <CancelScheduleModal
+              emailId={email.id}
+              scheduledTime={email.scheduledTime.toISOString()}
+              organizationId={email.organizationId || undefined}
+            />
           </div>
         ) : (
           <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -128,22 +126,15 @@ export default async function EmailDetailPage({
                 </div>
               ))}
             </div>
-            {/* Chart */}
-            <section className="mb-8">
-              <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-                <Chart emailId={email.id} />
-              </div>
-            </section>
+            <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+              <Chart emailId={email.id} />
+            </div>
           </section>
           <section className="mb-8">
             <h2 className="mb-4 text-xl font-semibold dark:text-gray-100 sm:text-2xl">
               Sent to
             </h2>
-            {recipients.length === 0 ? (
-              <p className="text-gray-600 dark:text-gray-400">
-                No recipients recorded.
-              </p>
-            ) : (
+            {recipients.length ? (
               <div className="overflow-x-auto rounded-lg shadow">
                 <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   <thead className="bg-gray-50 dark:bg-gray-700">
@@ -167,22 +158,21 @@ export default async function EmailDetailPage({
                   </tbody>
                 </table>
               </div>
+            ) : (
+              <p className="text-gray-600 dark:text-gray-400">
+                No recipients recorded.
+              </p>
             )}
           </section>
         </>
       )}
 
-      {/* Sending Recipients for Scheduled */}
       {!isSent && (
         <section className="mb-8">
           <h2 className="mb-4 text-xl font-semibold dark:text-gray-100 sm:text-2xl">
             Sending to
           </h2>
-          {recipients.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400">
-              No recipients found.
-            </p>
-          ) : (
+          {recipients.length ? (
             <div className="overflow-x-auto rounded-lg shadow">
               <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 <thead className="bg-gray-50 dark:bg-gray-700">
@@ -206,10 +196,14 @@ export default async function EmailDetailPage({
                 </tbody>
               </table>
             </div>
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400">
+              No recipients found.
+            </p>
           )}
         </section>
       )}
-
+      {/* Preview */}
       <section>
         <EmailPreview html={previewHtml} />
       </section>
