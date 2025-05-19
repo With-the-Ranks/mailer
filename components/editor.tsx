@@ -15,6 +15,7 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { mutate } from "swr";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
 import {
@@ -233,6 +234,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         toast.success(`Successfully ${toastLabel} your email.`);
         setData((prev) => ({ ...prev, published: !prev.published }));
       });
+      router.push(`/email/${data.id}/`);
+      mutate(`/api/email/${data.id}`);
     } catch (error) {
       toast.error("Failed to publish email.");
     }
