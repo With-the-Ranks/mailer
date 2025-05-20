@@ -138,17 +138,20 @@ export const sendBulkEmail = async ({
 
   try {
     for (const audience of audienceList.audiences) {
+      const customVars =
+        typeof audience.customFields === "string"
+          ? JSON.parse(audience.customFields)
+          : audience.customFields || {};
+      const vars = {
+        email: audience.email,
+        first_name: audience.firstName,
+        last_name: audience.lastName,
+        ...customVars,
+      };
+
       const htmlContent = content
-        ? await parseContent(
-            content,
-            {
-              email: audience.email,
-              first_name: audience.firstName,
-              last_name: audience.lastName,
-            },
-            previewText,
-          )
-        : null;
+        ? await parseContent(content, vars, previewText)
+        : "";
 
       const emailData = {
         from: fromHeader,
