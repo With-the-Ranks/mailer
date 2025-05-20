@@ -1,12 +1,7 @@
 "use client";
 
 import type { Audience } from "@prisma/client";
-import {
-  MoveHorizontalIcon,
-  PlusIcon,
-  TrashIcon,
-  UploadIcon,
-} from "lucide-react";
+import { MoreVertical, PlusIcon, TrashIcon, UploadIcon } from "lucide-react";
 import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -47,6 +42,7 @@ interface EmailListProps {
 export function EmailList({ audienceListId, listName }: EmailListProps) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [audiences, setAudiences] = useState<Audience[]>([]);
+  const [originalAudiences, setOriginalAudiences] = useState<Audience[]>([]);
   const [customFields, setCustomFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +56,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
         toast.error(response.error);
       } else {
         setAudiences(response.audiences);
+        setOriginalAudiences(response.audiences);
         setCustomFields(response.customFields);
       }
       setIsLoading(false); // Stop loading
@@ -103,12 +100,27 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
     if (isErrorResponse(response)) {
       toast.error(response.error);
     } else {
-      // Update local state by removing the deleted custom field
       setCustomFields((prev) =>
         prev.filter((field) => field !== fieldToDelete),
       );
+      setAudiences((auds) =>
+        auds.map((a) => {
+          const { [fieldToDelete]: _, ...keep } =
+            (a.customFields as Record<string, any>) || {};
+          return { ...a, customFields: keep };
+        }),
+      );
       toast.success(`Custom field "${fieldToDelete}" removed successfully.`);
     }
+  };
+
+  const handleCancelClick = (idx: number) => {
+    setAudiences((auds) => {
+      const copy = [...auds];
+      copy[idx] = originalAudiences[idx];
+      return copy;
+    });
+    setEditIndex(null);
   };
 
   // Function to add new audience directly to the list without refreshing
@@ -430,36 +442,45 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                     </TableCell>
                   ))}
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    {editIndex === index ? (
+                      <div className="flex space-x-2">
                         <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSaveClick(index)}
                         >
-                          <MoveHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
+                          Save
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {editIndex === index ? (
-                          <DropdownMenuItem
-                            onClick={() => handleSaveClick(index)}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleCancelClick(index)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            aria-label="Actions"
                           >
-                            Save
-                          </DropdownMenuItem>
-                        ) : (
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setEditIndex(index)}>
                             Edit
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteEntryClick(audience.id)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteEntryClick(audience.id)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
