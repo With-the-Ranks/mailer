@@ -10,7 +10,6 @@ export default function AudienceCard({
 }) {
   const url = `/audience/${data.id}`;
   const createdAtFormatted = new Date(data.createdAt).toLocaleDateString();
-  const updatedAtFormatted = new Date(data.updatedAt).toLocaleDateString();
   const contactsCount = data._count?.audiences ?? 0; // default to 0 if not provided
 
   return (
@@ -26,12 +25,6 @@ export default function AudienceCard({
             <span>Organization: {data.organization.name}</span>
             <span>Contacts: {contactsCount}</span>
             <span>Created on: {createdAtFormatted}</span>
-            {data.updatedAt &&
-              data.updatedAt.getTime() !== data.createdAt.getTime() && (
-                <span className="sm:ml-4">
-                  Updated on: {updatedAtFormatted}
-                </span>
-              )}
           </div>
         </div>
       </div>

@@ -8,6 +8,11 @@ import { toast } from "sonner";
 
 import CreateAudienceButton from "@/components/create-audience-button";
 import AddAudienceModal from "@/components/modal/add-audience-modal";
+import {
+  AddCustomFieldModal,
+  ConfirmDeleteFieldModal,
+} from "@/components/modal/custom-field-modal";
+import { useModal } from "@/components/modal/provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,10 +30,8 @@ import {
 } from "@/components/ui/table";
 import {
   addAudience,
-  addCustomFieldToAudienceList,
   deleteAudience,
   getAudiences,
-  removeCustomFieldFromAudienceList,
   updateAudience,
 } from "@/lib/actions/audience-list";
 import { isErrorResponse } from "@/lib/utils";
@@ -46,6 +49,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
   const [customFields, setCustomFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modal = useModal();
 
   useEffect(() => {
     // Fetch audiences and custom fields from the server
@@ -65,53 +69,36 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
     fetchAudiences();
   }, [audienceListId]);
 
-  // Handle click for adding a new custom field
-  const handleAddCustomFieldClick = async () => {
+  const handleAddCustomFieldClick = () => {
     if (customFields.length >= 3) {
-      toast.error("You can only add up to 3 custom fields");
-      return;
+      return toast.error("You can only add up to 3 custom fields");
     }
-
-    const newField = prompt("Enter custom field name:");
-    if (!newField) return;
-
-    // Call the server action to add the custom field to the audience list
-    const response = await addCustomFieldToAudienceList(
-      audienceListId,
-      newField,
+    modal?.show(
+      <AddCustomFieldModal
+        audienceListId={audienceListId}
+        onAdded={(field) => {
+          setCustomFields((prev) => [...prev, field]);
+        }}
+      />,
     );
-
-    if (isErrorResponse(response)) {
-      toast.error(response.error);
-    } else {
-      // Update local state with the new custom field
-      setCustomFields((prev) => [...prev, newField]);
-      toast.success(`Custom field "${newField}" added successfully.`);
-    }
   };
 
-  // Handle delete custom field
-  const handleDeleteCustomField = async (fieldToDelete: string) => {
-    const response = await removeCustomFieldFromAudienceList(
-      audienceListId,
-      fieldToDelete,
+  const handleDeleteCustomField = (field: string) => {
+    modal?.show(
+      <ConfirmDeleteFieldModal
+        audienceListId={audienceListId}
+        fieldName={field}
+        onDeleted={(removed) => {
+          setCustomFields((prev) => prev.filter((f) => f !== removed));
+          setAudiences((auds) =>
+            auds.map((a) => {
+              const { [removed]: _, ...keep } = (a.customFields as any) || {};
+              return { ...a, customFields: keep };
+            }),
+          );
+        }}
+      />,
     );
-
-    if (isErrorResponse(response)) {
-      toast.error(response.error);
-    } else {
-      setCustomFields((prev) =>
-        prev.filter((field) => field !== fieldToDelete),
-      );
-      setAudiences((auds) =>
-        auds.map((a) => {
-          const { [fieldToDelete]: _, ...keep } =
-            (a.customFields as Record<string, any>) || {};
-          return { ...a, customFields: keep };
-        }),
-      );
-      toast.success(`Custom field "${fieldToDelete}" removed successfully.`);
-    }
   };
 
   const handleCancelClick = (idx: number) => {
