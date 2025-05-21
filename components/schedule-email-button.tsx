@@ -7,14 +7,12 @@ import type { Moment } from "moment";
 import moment from "moment";
 import Datetime from "react-datetime";
 
-import { Button } from "@/components/ui/button";
-
 import { Label } from "./ui/label";
 
 interface ScheduleEmailProps {
   scheduledTimeValue: Moment;
   isValidTime: (_time: Moment) => boolean;
-  setScheduledTimeValue: (_value: any) => void;
+  setScheduledTimeValue: (_m: Moment) => void;
   isDisabled: boolean;
 }
 
@@ -24,46 +22,48 @@ export default function ScheduleEmailButton({
   setScheduledTimeValue,
   isDisabled,
 }: ScheduleEmailProps) {
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const handleChange = (value: Moment | string | Date) => {
+    const parsed = moment.isMoment(value)
+      ? value
+      : value instanceof Date
+        ? moment(value)
+        : moment(value, "YYYY-MM-DD HH:mm");
 
-  const handleChange = (newTime: Moment | string) => {
-    if (typeof newTime === "string") return;
-    setScheduledTimeValue(moment(newTime.format()));
+    if (parsed.isValid()) {
+      setScheduledTimeValue(parsed);
+    }
   };
+
   return (
-    <Label className="flex items-center font-normal">
-      <span className="w-40 shrink-0 font-normal text-gray-600 after:ml-0.5 after:text-red-400">
-        Schedule Email
-      </span>
+    <Label className="items-left flex-start flex flex-col font-normal">
+      <div className="flex items-center">
+        <span className="w-40 shrink-0 text-gray-600">Schedule Email</span>
 
-      <Button
-        variant="outline"
-        className="flex cursor-pointer items-center gap-2 hover:border-stone-300 hover:bg-transparent"
-      >
-        <CalendarDays className="h-5 w-5 text-gray-500" />
         <Datetime
-          value={scheduledTimeValue > moment() ? scheduledTimeValue : "Now"}
+          value={scheduledTimeValue}
+          className="w-full"
+          dateFormat="YYYY-MM-DD"
+          timeFormat="HH:mm"
           isValidDate={isValidTime}
-          inputProps={{
-            placeholder: "Schedule Email",
-            disabled: isDisabled,
-            readOnly: true,
-            className:
-              "cursor-pointer bg-transparent w-full ring-0 focus:ring-0 shadow-none focus:shadow-none focus:outline-none border-none focus:border-none",
-          }}
           onChange={handleChange}
+          renderInput={(props, openCalendar) => (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) openCalendar();
+              }}
+              className="flex items-center gap-2 rounded border border-gray-300 bg-white px-2 py-1"
+            >
+              <CalendarDays className="h-5 w-5 text-gray-500" />
+              <input
+                {...props}
+                disabled={isDisabled}
+                className="w-full cursor-pointer bg-transparent pl-1 focus:outline-none"
+                placeholder="YYYY-MM-DD HH:mm"
+              />
+            </div>
+          )}
         />
-      </Button>
-
-      <div className="ml-3 space-y-0.5">
-        <div className="text-sm text-gray-500">
-          Timezone:{" "}
-          <span className="font-medium">{scheduledTimeValue.format("Z")}</span>{" "}
-          ({timeZone})
-        </div>
-        <div className="text-xs text-gray-400">
-          {moment(scheduledTimeValue).fromNow()}
-        </div>
       </div>
     </Label>
   );

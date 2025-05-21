@@ -19,11 +19,6 @@ import { mutate } from "swr";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
 import { getAudiences } from "@/lib/actions/audience-list";
-import {
-  sendBulkEmail,
-  sendEmail,
-  unscheduleEmail,
-} from "@/lib/actions/send-email";
 import { isErrorResponse } from "@/lib/utils";
 
 import { EmailPreviewButton } from "./email-preview-button";
@@ -95,9 +90,10 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   useEffect(() => {
     startTransitionSaving(async () => {
-      await updateEmail(data, scheduledDate.toDate());
+      await updateEmail(data, null);
     });
-  }, [scheduledDate, data]);
+  }, [data]);
+
   useEffect(() => {
     if (!selectedAudienceList) return;
     getAudiences(selectedAudienceList).then((res) => {
@@ -118,75 +114,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     });
   }, [selectedAudienceList]);
 
-  const isScheduledForFuture = () => {
-    return scheduledDate > moment();
-  };
-
-  const handleUnscheduleEmail = async () => {
-    try {
-      await unscheduleEmail({ resendId: data.resendId! });
-    } catch (error) {
-      toast.error("Failed to unschedule email");
-    }
-  };
-
-  const handleSendEmail = async () => {
-    try {
-      if (!selectedAudienceList) {
-        toast.error("Please select an audience list.");
-        return;
-      }
-      const content = data.content;
-      const emailScheduleTime = isScheduledForFuture()
-        ? scheduledDate.toISOString()
-        : "";
-      const result = await sendBulkEmail({
-        audienceListId: selectedAudienceList,
-        from,
-        subject: data.subject,
-        content,
-        previewText: data.previewText,
-        scheduledTime: emailScheduleTime,
-        id: data.id,
-        organizationId: data.organizationId!,
-      });
-      if (result.error) {
-        toast.error(`Failed to send email: ${result.error}`);
-      } else {
-        if (!isScheduledForFuture()) {
-          toast.success("Emails sent successfully");
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to send email");
-    }
-  };
-
-  const handleSendTest = async (to: string) => {
-    try {
-      await sendEmail({
-        to,
-        from,
-        subject: data.subject!,
-        content: data.content!,
-        previewText: data.previewText!,
-        organizationId: data.organizationId!,
-      });
-      toast.success("Test email sent");
-    } catch {
-      toast.error("Failed to send test email");
-    }
-  };
-
-  const handleSaveContent = async () => {
-    try {
-      await updateEmail(data, scheduledDate.toDate());
-      toast.success("Content saved successfully");
-    } catch (error) {
-      toast.error("Failed to save content");
-    }
-  };
-
   const getButtonLabel = () => {
     if (!data.published) {
       return "Send";
@@ -195,28 +122,24 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   };
 
-  const handleClickPublish = async () => {
-    const wasPublished = data.published;
+  const handleClickPublish = async (scheduledTime?: string) => {
     try {
-      await handleSaveContent();
-      if (!wasPublished) {
-        await handleSendEmail();
-      } else if (isScheduledForFuture()) {
-        await handleUnscheduleEmail();
-      }
+      await updateEmail(
+        data,
+        scheduledTime ? new Date(scheduledTime) : scheduledDate.toDate(),
+      );
       const formData = new FormData();
-      formData.append("published", String(!wasPublished));
-      await updatePostMetadata(formData, email.id, "published").then(() => {
-        const toastLabel = getButtonLabel();
-        toast.success(`Successfully ${toastLabel} your email.`);
-        setData((prev) => ({ ...prev, published: !prev.published }));
-      });
+      formData.append("published", "true");
+      await updatePostMetadata(formData, email.id, "published");
+      toast.success("Successfully published your email.");
+      setData((prev) => ({ ...prev, published: true }));
       router.push(`/email/${data.id}/`);
       mutate(`/api/email/${data.id}`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to publish email.");
     }
   };
+
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex flex-wrap items-center gap-3">
@@ -233,7 +156,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           isSending={isPendingPublishing}
           getButtonLabel={getButtonLabel}
           onConfirm={handleClickPublish}
-          onSendTest={handleSendTest}
           selectedAudienceList={selectedAudienceList}
           setSelectedAudienceList={setSelectedAudienceList}
           organizationId={data.organizationId!}
@@ -241,6 +163,11 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           isValidTime={(current) => current.isSameOrAfter(new Date(), "day")}
           setScheduledTimeValue={setScheduledDate}
           isScheduleDisabled={data.published && scheduledDate > moment()}
+          subject={data.subject || ""}
+          previewText={data.previewText || ""}
+          from={from}
+          content={data.content || ""}
+          emailId={data.id}
         />
       </div>
       <div className="mb-5 flex flex-col space-y-3 border-b border-stone-200 pb-5 dark:border-stone-700">

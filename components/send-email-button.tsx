@@ -12,8 +12,6 @@ import { SendEmailModal } from "./modal/send-email-modal";
 interface SendEmailButtonProps {
   isSending: boolean;
   getButtonLabel: () => React.ReactNode;
-  onConfirm: () => void;
-  onSendTest: (_email: string) => void;
   selectedAudienceList: string | null;
   setSelectedAudienceList: (_id: string | null) => void;
   organizationId: string;
@@ -21,13 +19,18 @@ interface SendEmailButtonProps {
   isValidTime: (_current: Moment) => boolean;
   setScheduledTimeValue: (_date: Moment) => void;
   isScheduleDisabled: boolean;
+  subject: string;
+  previewText: string;
+  from: string;
+  content: string;
+  emailId: string;
+  onSent?: () => void;
+  onConfirm: (_scheduledTime?: string) => void;
 }
 
 export default function SendEmailButton({
   isSending,
   getButtonLabel,
-  onConfirm,
-  onSendTest,
   selectedAudienceList,
   setSelectedAudienceList,
   organizationId,
@@ -35,6 +38,12 @@ export default function SendEmailButton({
   isValidTime,
   setScheduledTimeValue,
   isScheduleDisabled,
+  subject,
+  previewText,
+  from,
+  content,
+  emailId,
+  onConfirm,
 }: SendEmailButtonProps) {
   const modal = useModal();
   const [isPending, startTransition] = useTransition();
@@ -49,11 +58,17 @@ export default function SendEmailButton({
         isValidTime={isValidTime}
         setScheduledTimeValue={setScheduledTimeValue}
         isScheduleDisabled={isScheduleDisabled}
-        onConfirm={() => {
-          startTransition(onConfirm);
+        subject={subject}
+        previewText={previewText}
+        from={from}
+        content={content}
+        emailId={emailId}
+        onConfirm={(scheduledTime) => {
+          startTransition(() => {
+            onConfirm(scheduledTime);
+          });
           modal.hide();
         }}
-        onSendTest={onSendTest}
       />,
     );
   };
