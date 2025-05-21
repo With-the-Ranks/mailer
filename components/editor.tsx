@@ -25,12 +25,9 @@ import {
   unscheduleEmail,
 } from "@/lib/actions/send-email";
 import { isErrorResponse } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 
-import { AudienceListDropdown } from "./audience-list-dropdown";
 import { EmailPreviewButton } from "./email-preview-button";
-import { PreviewModal } from "./modal/preview-modal";
-import ScheduleEmailButton from "./schedule-email-button";
+import SendEmailButton from "./send-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -47,7 +44,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const router = useRouter();
 
   const [isPendingSaving, startTransitionSaving] = useTransition();
-  const [isPendingPublishing, startTransitionPublishing] = useTransition();
+  const [isPendingPublishing, _startTransitionPublishing] = useTransition();
   const [scheduledDate, setScheduledDate] = useState<Moment>(
     moment(email.scheduledTime) || null,
   );
@@ -88,7 +85,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
   >(email.audienceListId || null);
-  const [showPreview, setShowPreview] = useState(false);
 
   // Redirect if email is already published.
   useEffect(() => {
@@ -96,10 +92,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       router.push(`/email/${data.id}/`);
     }
   }, [data.published, data.id, router]);
-
-  function isValidTime(current: Moment) {
-    return current.isSameOrAfter(new Date(), "day");
-  }
 
   useEffect(() => {
     startTransitionSaving(async () => {
@@ -170,18 +162,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   };
 
-  const clickPreview = () => {
-    if (data.published) {
-      router.push(`/email/${data.id}/`);
-    } else {
-      if (!data.title || !data.subject) {
-        toast.error("Campaign name and subject are required.");
-        return;
-      }
-      setShowPreview(true);
-    }
-  };
-
   const handleSendTest = async (to: string) => {
     try {
       await sendEmail({
@@ -249,20 +229,19 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           previewText={data.previewText || ""}
           fromName={from || ""}
         />
-        <button
-          onClick={() => clickPreview()}
-          disabled={isPendingPublishing}
-          className={cn(
-            "btn text-sm",
-            isPendingPublishing && "cursor-not-allowed opacity-50",
-          )}
-        >
-          {isPendingPublishing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            getButtonLabel()
-          )}
-        </button>
+        <SendEmailButton
+          isSending={isPendingPublishing}
+          getButtonLabel={getButtonLabel}
+          onConfirm={handleClickPublish}
+          onSendTest={handleSendTest}
+          selectedAudienceList={selectedAudienceList}
+          setSelectedAudienceList={setSelectedAudienceList}
+          organizationId={data.organizationId!}
+          scheduledTimeValue={scheduledDate}
+          isValidTime={(current) => current.isSameOrAfter(new Date(), "day")}
+          setScheduledTimeValue={setScheduledDate}
+          isScheduleDisabled={data.published && scheduledDate > moment()}
+        />
       </div>
       <div className="mb-5 flex flex-col space-y-3 border-b border-stone-200 pb-5 dark:border-stone-700">
         <input
@@ -334,17 +313,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </div>
         </Label>
       )}
-      <AudienceListDropdown
-        selectedAudienceList={selectedAudienceList}
-        setSelectedAudienceList={setSelectedAudienceList}
-        organizationId={data.organizationId ?? ""}
-      />
-      <ScheduleEmailButton
-        scheduledTimeValue={scheduledDate}
-        isValidTime={isValidTime}
-        setScheduledTimeValue={setScheduledDate}
-        isDisabled={isScheduledForFuture() && data.published}
-      />
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -394,18 +362,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           />
         )}
       </div>
-      {showPreview && (
-        <PreviewModal
-          content={JSON.stringify(contentObj)}
-          previewText={data.previewText ?? undefined}
-          onCancel={() => setShowPreview(false)}
-          onConfirm={() => {
-            setShowPreview(false);
-            startTransitionPublishing(() => handleClickPublish());
-          }}
-          onSendTest={handleSendTest}
-        />
-      )}
     </div>
   );
 }
