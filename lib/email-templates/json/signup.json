@@ -1,0 +1,444 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "section",
+      "attrs": {
+        "align": "center",
+        "marginTop": 0,
+        "showIfKey": null,
+        "marginLeft": 0,
+        "paddingTop": 0,
+        "borderColor": "#e2e2e2",
+        "borderWidth": 0,
+        "marginRight": 0,
+        "paddingLeft": 8,
+        "borderRadius": 6,
+        "marginBottom": 0,
+        "paddingRight": 8,
+        "paddingBottom": 8,
+        "backgroundColor": "#ffffff"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "showIfKey": null,
+            "textAlign": "left"
+          }
+        },
+        {
+          "type": "logo",
+          "attrs": {
+            "alt": null,
+            "src": "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png",
+            "size": "sm",
+            "title": null,
+            "alignment": "center",
+            "showIfKey": null,
+            "isSrcVariable": false,
+            "maily-component": "logo"
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "alt": null,
+            "src": "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png",
+            "title": null,
+            "width": "80%",
+            "height": "auto",
+            "alignment": "center",
+            "showIfKey": null,
+            "aspectRatio": 1.904761904761905,
+            "borderRadius": 24,
+            "externalLink": null,
+            "isSrcVariable": false,
+            "lockAspectRatio": true,
+            "isExternalLinkVariable": false
+          }
+        },
+        {
+          "type": "columns",
+          "attrs": {
+            "gap": 8,
+            "showIfKey": null
+          },
+          "content": [
+            {
+              "type": "column",
+              "attrs": {
+                "width": "100",
+                "columnId": "1cc7d67b-8d3c-420b-bd75-d08ceeeb90a7",
+                "verticalAlign": "top"
+              },
+              "content": [
+                {
+                  "type": "section",
+                  "attrs": {
+                    "align": "center",
+                    "marginTop": 0,
+                    "showIfKey": null,
+                    "marginLeft": 0,
+                    "paddingTop": 0,
+                    "borderColor": "#e2e2e2",
+                    "borderWidth": 0,
+                    "marginRight": 0,
+                    "paddingLeft": 8,
+                    "borderRadius": 6,
+                    "marginBottom": 0,
+                    "paddingRight": 8,
+                    "paddingBottom": 8,
+                    "backgroundColor": "#ffffff"
+                  },
+                  "content": [
+                    {
+                      "type": "section",
+                      "attrs": {
+                        "align": "left",
+                        "marginTop": 0,
+                        "showIfKey": null,
+                        "marginLeft": 0,
+                        "paddingTop": 0,
+                        "borderColor": "",
+                        "borderWidth": 0,
+                        "marginRight": 0,
+                        "paddingLeft": 16,
+                        "borderRadius": 0,
+                        "marginBottom": 0,
+                        "paddingRight": 16,
+                        "paddingBottom": 16,
+                        "backgroundColor": ""
+                      },
+                      "content": [
+                        {
+                          "type": "heading",
+                          "attrs": {
+                            "level": 1,
+                            "showIfKey": null,
+                            "textAlign": "left"
+                          },
+                          "content": [
+                            {
+                              "text": "Sign up to Mailer: email built for organizers",
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#252753"
+                                  }
+                                },
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "paragraph",
+                          "attrs": {
+                            "showIfKey": null,
+                            "textAlign": "left"
+                          },
+                          "content": [
+                            {
+                              "text": "Hey friend, Mailer is an open source tool by With The Ranks, made to help you send beautiful, effective emails without needing a design team or complex tools.",
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#252753"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "hardBreak",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#252753"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "hardBreak",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#252753"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "text": "Here’s what to expect:",
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#252753"
+                                  }
+                                },
+                                {
+                                  "type": "bold"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "section",
+                          "attrs": {
+                            "align": "left",
+                            "marginTop": 0,
+                            "showIfKey": null,
+                            "marginLeft": 0,
+                            "paddingTop": 0,
+                            "borderColor": "#252753",
+                            "borderWidth": 2,
+                            "marginRight": 0,
+                            "paddingLeft": 16,
+                            "borderRadius": 20,
+                            "marginBottom": 0,
+                            "paddingRight": 16,
+                            "paddingBottom": 16,
+                            "backgroundColor": "#ffffff"
+                          },
+                          "content": [
+                            {
+                              "type": "horizontalRule"
+                            },
+                            {
+                              "type": "spacer",
+                              "attrs": {
+                                "height": 8,
+                                "showIfKey": null
+                              }
+                            },
+                            {
+                              "type": "horizontalRule"
+                            },
+                            {
+                              "type": "heading",
+                              "attrs": {
+                                "level": 3,
+                                "showIfKey": null,
+                                "textAlign": "center"
+                              },
+                              "content": [
+                                {
+                                  "text": "A SIMPLE MAILER TOOL WITH",
+                                  "type": "text",
+                                  "marks": [
+                                    {
+                                      "type": "textStyle",
+                                      "attrs": {
+                                        "color": "#000000"
+                                      }
+                                    },
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "spacer",
+                              "attrs": {
+                                "height": 8,
+                                "showIfKey": null
+                              }
+                            },
+                            {
+                              "type": "horizontalRule"
+                            },
+                            {
+                              "type": "paragraph",
+                              "attrs": {
+                                "showIfKey": null,
+                                "textAlign": "left"
+                              },
+                              "content": [
+                                {
+                                  "text": "• Intuitive editor built for organizers — no design experience required",
+                                  "type": "text",
+                                  "marks": [
+                                    {
+                                      "type": "textStyle",
+                                      "attrs": {
+                                        "color": "#000000"
+                                      }
+                                    },
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "paragraph",
+                              "attrs": {
+                                "showIfKey": null,
+                                "textAlign": "left"
+                              },
+                              "content": [
+                                {
+                                  "text": "• Custom fields and filters for smart audience targeting",
+                                  "type": "text",
+                                  "marks": [
+                                    {
+                                      "type": "textStyle",
+                                      "attrs": {
+                                        "color": "#000000"
+                                      }
+                                    },
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "paragraph",
+                              "attrs": {
+                                "showIfKey": null,
+                                "textAlign": "left"
+                              },
+                              "content": [
+                                {
+                                  "text": "• Clear analytics to help you track performance and improve results",
+                                  "type": "text",
+                                  "marks": [
+                                    {
+                                      "type": "textStyle",
+                                      "attrs": {
+                                        "color": "#000000"
+                                      }
+                                    },
+                                    {
+                                      "type": "bold"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "paragraph",
+                              "attrs": {
+                                "showIfKey": null,
+                                "textAlign": "center"
+                              },
+                              "content": [
+                                {
+                                  "text": "Mailer is currently in pre-alpha. Things may change — and your feedback helps shape what’s next.",
+                                  "type": "text",
+                                  "marks": [
+                                    {
+                                      "type": "textStyle",
+                                      "attrs": {
+                                        "color": "#000000"
+                                      }
+                                    },
+                                    {
+                                      "type": "italic"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "button",
+                              "attrs": {
+                                "url": "https://app.withtheranks.coop/register",
+                                "text": "Sign up to Mailer",
+                                "variant": "filled",
+                                "alignment": "center",
+                                "showIfKey": null,
+                                "textColor": "#ffffff",
+                                "paddingTop": 10,
+                                "buttonColor": "#3611C9",
+                                "paddingLeft": 32,
+                                "borderRadius": "round",
+                                "paddingRight": 32,
+                                "isUrlVariable": false,
+                                "paddingBottom": 10,
+                                "isTextVariable": false
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "spacer",
+                      "attrs": {
+                        "height": 8,
+                        "showIfKey": null
+                      }
+                    },
+                    {
+                      "type": "paragraph",
+                      "attrs": {
+                        "showIfKey": null,
+                        "textAlign": null
+                      },
+                      "content": [
+                        {
+                          "text": "Thanks for joining us on this journey!",
+                          "type": "text",
+                          "marks": [
+                            {
+                              "type": "textStyle",
+                              "attrs": {
+                                "color": "#000000"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "attrs": {
+                        "showIfKey": null,
+                        "textAlign": null
+                      },
+                      "content": [
+                        {
+                          "text": "- With The Ranks Team",
+                          "type": "text",
+                          "marks": [
+                            {
+                              "type": "textStyle",
+                              "attrs": {
+                                "color": "#252753"
+                              }
+                            },
+                            {
+                              "type": "italic"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
