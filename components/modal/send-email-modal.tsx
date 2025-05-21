@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
 import React, { useState } from "react";
@@ -45,6 +46,7 @@ export function SendEmailModal({
   const modal = useModal();
   const [testEmail, setTestEmail] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [mode, setMode] = useState<"now" | "schedule">("now");
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [localScheduledDate, setLocalScheduledDate] =
@@ -72,10 +74,13 @@ export function SendEmailModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     const when =
       mode === "now"
         ? moment().toISOString()
         : localScheduledDate.toISOString();
+
     try {
       const result = await sendBulkEmail({
         audienceListId: selectedAudienceList!,
@@ -98,6 +103,8 @@ export function SendEmailModal({
       }
     } catch {
       toast.error("Failed to send email");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -152,7 +159,7 @@ export function SendEmailModal({
             scheduledTimeValue={localScheduledDate}
             isValidTime={isValidTime}
             setScheduledTimeValue={setLocalScheduledDate}
-            isDisabled={isScheduleDisabled}
+            isDisabled={isSubmitting || isScheduleDisabled}
           />
           <p className="mt-2 text-sm text-gray-500">
             Timezone:{" "}
@@ -164,8 +171,17 @@ export function SendEmailModal({
         </div>
       )}
 
-      <button type="submit" className="btn w-full">
-        {mode === "now" ? "Send Now" : "Schedule Email"}
+      <button type="submit" className="btn w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <div className="flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Sending...
+          </div>
+        ) : mode === "now" ? (
+          "Send Now"
+        ) : (
+          "Schedule Email"
+        )}
       </button>
     </form>
   );
