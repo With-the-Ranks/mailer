@@ -135,33 +135,38 @@ export const removeCustomFieldFromAudienceList = async (
     return { error: "Not authenticated" };
   }
 
+  const audienceList = await prisma.audienceList.findUnique({
+    where: { id: audienceListId },
+  });
+
+  if (!audienceList) {
+    return { error: "Audience list not found" };
+  }
+
+  const existingFields = Array.isArray(audienceList.customFields)
+    ? (audienceList.customFields as string[])
+    : [];
+
+  // Filter out the field to remove
+  const updatedFields = existingFields.filter(
+    (field) => field !== fieldToRemove,
+  );
+
   try {
-    const audienceList = await prisma.audienceList.findUnique({
-      where: { id: audienceListId },
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`
+          UPDATE "Audience"
+          SET "customFields" = "customFields" - ${fieldToRemove}
+          WHERE "audienceListId" = ${audienceListId}
+        `;
+
+      return tx.audienceList.update({
+        where: { id: audienceListId },
+        data: { customFields: updatedFields },
+      });
     });
 
-    if (!audienceList) {
-      return { error: "Audience list not found" };
-    }
-
-    const existingFields = Array.isArray(audienceList.customFields)
-      ? (audienceList.customFields as string[])
-      : [];
-
-    // Filter out the field to remove
-    const updatedFields = existingFields.filter(
-      (field) => field !== fieldToRemove,
-    );
-
-    // Update the AudienceList with the remaining custom fields
-    const updatedAudienceList = await prisma.audienceList.update({
-      where: { id: audienceListId },
-      data: {
-        customFields: updatedFields,
-      },
-    });
-
-    return updatedAudienceList;
+    return updated;
   } catch (error) {
     return { error: "Unable to remove custom field." };
   }
