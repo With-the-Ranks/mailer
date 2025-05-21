@@ -19,7 +19,6 @@ export default function CreateAudienceModal({
   const modal = useModal();
   const [data, setData] = useState({
     name: "",
-    description: "",
     organizationId,
   });
   const [isPending, setIsPending] = useState(false);
@@ -29,7 +28,6 @@ export default function CreateAudienceModal({
     setIsPending(true);
     const formData = new FormData();
     formData.append("name", data.name);
-    formData.append("description", data.description);
     formData.append("organizationId", data.organizationId);
 
     const newList = await createAudienceList(formData);
@@ -71,24 +69,6 @@ export default function CreateAudienceModal({
             onChange={(e) => setData({ ...data, name: e.target.value })}
             maxLength={32}
             required
-            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600 placeholder:text-stone-400 focus:border-black focus:outline-none focus:ring-black dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
-          />
-        </div>
-
-        <div className="flex flex-col space-y-2">
-          <label
-            htmlFor="description"
-            className="text-sm font-medium text-stone-500"
-          >
-            Description
-          </label>
-          <textarea
-            name="description"
-            placeholder="Description for the new audience list."
-            value={data.description}
-            onChange={(e) => setData({ ...data, description: e.target.value })}
-            maxLength={140}
-            rows={3}
             className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600 placeholder:text-stone-400 focus:border-black focus:outline-none focus:ring-black dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
           />
         </div>

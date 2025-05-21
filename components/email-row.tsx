@@ -1,105 +1,115 @@
+"use client";
+
 import type { Email, Organization } from "@prisma/client";
-import { BarChart, Edit3, Eye, Settings } from "lucide-react";
+import { Clock, Edit3, Info, Send } from "lucide-react";
 import Link from "next/link";
+import React from "react";
+
+import CancelScheduleModal from "@/components/modal/cancel-schedule-modal";
+import { Button } from "@/components/ui/button";
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+const fmtTime = (d: Date) =>
+  d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
 export default function EmailRow({
   data,
 }: {
   data: Email & { organization?: Organization | null };
 }) {
-  const isPublished = data.published;
-  const isScheduled = data.published && data.scheduledTime > new Date();
+  const now = new Date();
+  const published = data.published;
+  const scheduled = published && new Date(data.scheduledTime) > now;
 
-  const getStatus = () => {
-    if (isScheduled) {
-      return "Scheduled";
-    } else if (isPublished) {
-      return "Published";
-    }
-    return "Draft";
-  };
-  const lastUpdated = new Date(data.updatedAt).toLocaleDateString();
-  const organization = data.organization;
-  const url =
-    organization &&
-    `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+  const timestamp = !published
+    ? new Date(data.updatedAt)
+    : scheduled
+      ? new Date(data.scheduledTime)
+      : new Date(data.updatedAt);
+
+  const StatusIcon = !published ? Edit3 : scheduled ? Clock : Send;
+  const statusText = scheduled ? "Scheduled" : published ? "Sent" : "Draft";
+  const timeLabel = !published
+    ? "Last edited"
+    : scheduled
+      ? "Scheduled"
+      : "Sent";
 
   return (
-    <tr className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
-      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-        <Link
-          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
-          className="block"
-        >
-          {data.title || "No Subject"}
-        </Link>
-      </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
-          className="block"
-        >
-          {getStatus()}
-        </Link>
-      </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href={`/email/${data.id}${isPublished ? "/analytics" : ""}`}
-          className="block"
-        >
-          {lastUpdated}
-        </Link>
-      </td>
-      <td className="whitespace-nowrap px-6 py-4 text-center text-sm">
-        <div className="flex justify-end gap-2">
-          {isPublished ? (
+    <>
+      <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
+        <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+          <Link href={`/email/${data.id}${published ? "" : "/editor"}`}>
+            {data.title || "No Subject"}
+          </Link>
+        </td>
+
+        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+          <Link href={`/email/${data.id}${published ? "" : "/editor"}`}>
+            {statusText}
+          </Link>
+        </td>
+
+        <td className="px-6 py-4">
+          <Link
+            href={`/email/${data.id}${published ? "" : "/editor"}`}
+            className="flex items-center space-x-2"
+          >
+            <StatusIcon size={16} />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs uppercase text-gray-400 dark:text-gray-500">
+                {timeLabel}
+              </span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {fmtDate(timestamp)}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {fmtTime(timestamp)}
+              </span>
+            </div>
+          </Link>
+        </td>
+
+        <td className="space-x-2 px-6 py-4 text-right">
+          {scheduled && (
             <>
-              <Link
-                href={`/email/${data.id}/analytics`}
-                className="btn"
-                title="Analytics"
-              >
-                <BarChart size={20} />
+              <Link href={`/email/${data.id}`}>
+                <Button variant="ghost" size="icon" title="Email details">
+                  <Info size={20} />
+                </Button>
               </Link>
-              {organization && (
-                <Link
-                  href={
-                    process.env.NEXT_PUBLIC_VERCEL_ENV
-                      ? `https://${url}/${data.slug}`
-                      : `http://${organization.subdomain}.localhost:3000/${data.slug}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn text-sm"
-                  title="Preview"
-                >
-                  <Eye size={20} />
-                </Link>
-              )}
-              <Link
-                href={`/email/${data.id}/settings`}
-                className="btn"
-                title="Settings"
-              >
-                <Settings size={20} />
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href={`/email/${data.id}`} className="btn" title="Editor">
-                <Edit3 size={20} />
-              </Link>
-              <Link
-                href={`/email/${data.id}/settings`}
-                className="btn"
-                title="Settings"
-              >
-                <Settings size={20} />
-              </Link>
+              <CancelScheduleModal
+                emailId={data.id}
+                scheduledTime={data.scheduledTime.toISOString()}
+              />
             </>
           )}
-        </div>
-      </td>
-    </tr>
+
+          {published && !scheduled && (
+            <Link href={`/email/${data.id}`}>
+              <Button variant="ghost" size="icon" title="Email details">
+                <Info size={20} />
+              </Button>
+            </Link>
+          )}
+
+          {!published && (
+            <Link href={`/email/${data.id}/editor`}>
+              <Button variant="ghost" size="icon" title="Edit draft">
+                <Edit3 size={20} />
+              </Button>
+            </Link>
+          )}
+        </td>
+      </tr>
+    </>
   );
 }

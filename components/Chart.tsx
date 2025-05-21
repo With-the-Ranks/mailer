@@ -14,20 +14,20 @@ import {
 
 interface EmailEvent {
   id: string;
-  emailId: string;
   eventType: string;
   timestamp: string;
 }
 
 interface AggregatedData {
   date: string;
+  delivered: number;
   opened: number;
   clicked: number;
 }
 
 export default function Chart({ emailId }: { emailId: string }) {
   const [data, setData] = useState<AggregatedData[]>([]);
-  const [noData, setNoData] = useState<boolean>(true);
+  const [noData, setNoData] = useState(true);
 
   useEffect(() => {
     fetch(`/api/email-events?emailId=${emailId}`)
@@ -35,15 +35,18 @@ export default function Chart({ emailId }: { emailId: string }) {
       .then((events: EmailEvent[]) => {
         const grouped: Record<string, AggregatedData> = {};
 
-        events.forEach((event) => {
-          const date = new Date(event.timestamp).toLocaleDateString();
+        events.forEach(({ eventType, timestamp }) => {
+          const date = new Date(timestamp).toLocaleDateString();
           if (!grouped[date]) {
-            grouped[date] = { date, opened: 0, clicked: 0 };
+            grouped[date] = { date, delivered: 0, opened: 0, clicked: 0 };
           }
-          if (event.eventType === "opened") {
+          if (eventType === "delivered") {
+            grouped[date].delivered++;
+            setNoData(false);
+          } else if (eventType === "opened") {
             grouped[date].opened++;
             setNoData(false);
-          } else if (event.eventType === "clicked") {
+          } else if (eventType === "clicked") {
             grouped[date].clicked++;
             setNoData(false);
           }
@@ -57,11 +60,20 @@ export default function Chart({ emailId }: { emailId: string }) {
   }, [emailId]);
 
   if (noData) {
-    return <div>✨ Data will appear here shortly ✨</div>;
+    return (
+      <div className="flex h-64 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+        <div className="text-center">
+          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
+            No data to display
+          </p>
+        </div>
+      </div>
+    );
   }
+
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={data} width={500} height={300}>
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
         <YAxis allowDecimals={false} />
@@ -69,17 +81,27 @@ export default function Chart({ emailId }: { emailId: string }) {
         <Legend />
         <Line
           type="monotone"
+          dataKey="delivered"
+          name="Delivered"
+          stroke="#252753"
+          strokeWidth={2}
+          dot
+        />
+        <Line
+          type="monotone"
           dataKey="opened"
+          name="Opened"
           stroke="#8884d8"
           strokeWidth={2}
-          dot={true}
+          dot
         />
         <Line
           type="monotone"
           dataKey="clicked"
+          name="Clicked"
           stroke="#82ca9d"
           strokeWidth={2}
-          dot={true}
+          dot
         />
       </LineChart>
     </ResponsiveContainer>

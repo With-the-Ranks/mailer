@@ -36,19 +36,12 @@ export default async function Overview() {
           <h1 className="font-cal text-3xl font-bold dark:text-white">
             Your Organization
           </h1>
-          <OverviewOrganizationCTA />
+          {!hasOrganization && <OverviewOrganizationCTA />}
         </div>
         <Organizations limit={1} />
       </div>
 
-      {hasOrganization && (
-        <div className="flex flex-col space-y-6">
-          <h1 className="font-cal text-3xl font-bold dark:text-white">
-            Organization-Wide Email Analytics
-          </h1>
-          <EmailStats userId={userId} />
-        </div>
-      )}
+      {hasOrganization && <EmailStats userId={userId} />}
       {hasOrganization && (
         <div className="flex flex-col space-y-6">
           <h1 className="font-cal text-3xl font-bold dark:text-white">

@@ -9,14 +9,16 @@ import {
   VariableExtension,
 } from "@maily-to/core/extensions";
 import type { Email } from "@prisma/client";
-import { ExternalLink, Loader2, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { mutate } from "swr";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
+import { getAudiences } from "@/lib/actions/audience-list";
 import {
   sendBulkEmail,
   sendEmail,
@@ -27,6 +29,7 @@ import {
   getTemplateById,
   getTemplates,
 } from "@/lib/actions/template";
+import { isErrorResponse } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
@@ -59,6 +62,13 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const [templates, setTemplates] = useState<Option[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Option | null>(null);
+  const [editorVars, setEditorVars] = useState<
+    { name: string; required: boolean }[]
+  >([
+    { name: "first_name", required: false },
+    { name: "last_name", required: false },
+    { name: "email", required: false },
+  ]);
 
   useEffect(() => {
     getTemplates(email.organizationId!).then((list) => {
@@ -110,7 +120,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   // Redirect if email is already published.
   useEffect(() => {
     if (data.published) {
-      router.push(`/email/${data.id}/analytics`);
+      router.push(`/email/${data.id}/`);
     }
   }, [data.published, data.id, router]);
 
@@ -118,15 +128,30 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     return current.isSameOrAfter(new Date(), "day");
   }
 
-  const url = process.env.NEXT_PUBLIC_VERCEL_ENV
-    ? `https://${data.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/${data.slug}`
-    : `http://${data.organization?.subdomain}.localhost:3000/${data.slug}`;
-
   useEffect(() => {
     startTransitionSaving(async () => {
       await updateEmail(data, scheduledDate.toDate());
     });
   }, [scheduledDate, data]);
+  useEffect(() => {
+    if (!selectedAudienceList) return;
+    getAudiences(selectedAudienceList).then((res) => {
+      if (isErrorResponse(res)) {
+        toast.error(res.error);
+      } else {
+        const customs = res.customFields.map((f) => ({
+          name: f,
+          required: false,
+        }));
+        setEditorVars([
+          { name: "first_name", required: false },
+          { name: "last_name", required: false },
+          { name: "email", required: false },
+          ...customs,
+        ]);
+      }
+    });
+  }, [selectedAudienceList]);
 
   const isScheduledForFuture = () => {
     return scheduledDate > moment();
@@ -174,7 +199,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const clickPreview = () => {
     if (data.published) {
-      router.push(`/email/${data.id}/analytics`);
+      router.push(`/email/${data.id}/`);
     } else {
       if (!data.title || !data.subject) {
         toast.error("Campaign name and subject are required.");
@@ -233,6 +258,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         toast.success(`Successfully ${toastLabel} your email.`);
         setData((prev) => ({ ...prev, published: !prev.published }));
       });
+      router.push(`/email/${data.id}/`);
+      mutate(`/api/email/${data.id}`);
     } catch (error) {
       toast.error("Failed to publish email.");
     }
@@ -240,16 +267,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex flex-wrap items-center gap-3">
-        {data.published && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-1 text-sm text-stone-400 hover:text-stone-500"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        )}
         <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-sm text-stone-400 dark:bg-stone-800 dark:text-stone-500">
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
@@ -448,23 +465,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             extensions={[
               VariableExtension.configure({
                 suggestion: getVariableSuggestions("@"),
-                variables: [
-                  {
-                    name: "first_name",
-                    required: false,
-                  },
-                  {
-                    name: "last_name",
-                    required: false,
-                  },
-                  {
-                    name: "email",
-                    required: false,
-                  },
-                ],
+                variables: editorVars,
               }),
             ]}
-            key={selectedTemplate?.value || "editor"}
+            key={`${selectedTemplate?.value || "editor"}|${editorVars
+              .map((v) => v.name)
+              .join(",")}`}
             onCreate={() => {
               setHydrated(true);
             }}
