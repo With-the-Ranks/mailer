@@ -102,11 +102,11 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
   };
 
   const handleCancelClick = (idx: number) => {
-    setAudiences((auds) => {
-      const copy = [...auds];
-      copy[idx] = originalAudiences[idx];
-      return copy;
-    });
+    setAudiences((prev) =>
+      prev.map((aud, i) =>
+        i === idx ? structuredClone(originalAudiences[idx]) : aud,
+      ),
+    );
     setEditIndex(null);
   };
 
