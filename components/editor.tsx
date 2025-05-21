@@ -28,6 +28,7 @@ import { isErrorResponse } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
+import { EmailPreviewButton } from "./email-preview-button";
 import { PreviewModal } from "./modal/preview-modal";
 import ScheduleEmailButton from "./schedule-email-button";
 import { Input } from "./ui/input";
@@ -208,7 +209,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
 
   const getButtonLabel = () => {
     if (!data.published) {
-      return "Preview & Send";
+      return "Send";
     } else {
       return "Analytics";
     }
@@ -242,6 +243,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-sm text-stone-400 dark:bg-stone-800 dark:text-stone-500">
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
+        <EmailPreviewButton
+          editor={contentObj}
+          subject={data.subject || ""}
+          previewText={data.previewText || ""}
+          fromName={from || ""}
+        />
         <button
           onClick={() => clickPreview()}
           disabled={isPendingPublishing}
