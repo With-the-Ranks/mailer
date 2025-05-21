@@ -24,23 +24,14 @@ import {
   sendEmail,
   unscheduleEmail,
 } from "@/lib/actions/send-email";
-import {
-  deleteTemplate,
-  getTemplateById,
-  getTemplates,
-} from "@/lib/actions/template";
 import { isErrorResponse } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "./audience-list-dropdown";
 import { PreviewModal } from "./modal/preview-modal";
-import SaveTemplateButton from "./save-template-button";
 import ScheduleEmailButton from "./schedule-email-button";
-import { ScrollableTemplateSelect } from "./select-template";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-
-type Option = { value: string; label: string };
 
 type EmailWithSite = Email & {
   organization: {
@@ -60,8 +51,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     moment(email.scheduledTime) || null,
   );
 
-  const [templates, setTemplates] = useState<Option[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<Option | null>(null);
   const [editorVars, setEditorVars] = useState<
     { name: string; required: boolean }[]
   >([
@@ -69,17 +58,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     { name: "last_name", required: false },
     { name: "email", required: false },
   ]);
-
-  useEffect(() => {
-    getTemplates(email.organizationId!).then((list) => {
-      const opts = list.map((t) => ({ value: t.id, label: t.name }));
-      setTemplates(opts);
-      if (email.template) {
-        const match = opts.find((o) => o.value === email.template);
-        if (match) setSelectedTemplate(match);
-      }
-    });
-  }, [email.organizationId, email.template]);
 
   const defaultJson = useMemo(() => {
     return email.content
@@ -91,21 +69,15 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   }, [email.content]);
 
   const [contentObj, setContentObj] = useState<any>(defaultJson);
-  const [baseContent, setBaseContent] = useState(() =>
-    JSON.stringify(defaultJson),
-  );
 
   const [data, setData] = useState({
     ...email,
     content: JSON.stringify(defaultJson),
   } as EmailWithSite & { content: string });
 
-  const [hasEdited, setHasEdited] = useState(false);
-
   useEffect(() => {
     setContentObj(defaultJson);
     const str = JSON.stringify(defaultJson);
-    setBaseContent(str);
     setData((d) => ({ ...d, content: str }));
   }, [defaultJson]);
 
@@ -360,76 +332,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         setSelectedAudienceList={setSelectedAudienceList}
         organizationId={data.organizationId ?? ""}
       />
-      <Label className="flex items-center font-normal">
-        <span className="w-40 shrink-0 font-normal text-gray-600">
-          Template
-        </span>
-        <ScrollableTemplateSelect
-          templates={templates.map((t) => ({ id: t.value, name: t.label }))}
-          selectedTemplateId={selectedTemplate?.value || null}
-          onSelect={async (id) => {
-            if (id === "default") {
-              const blankContent = { type: "doc", content: [{}] };
-              setSelectedTemplate({
-                value: "default",
-                label: "Blank Template",
-              });
-              setContentObj(blankContent);
-              const str = JSON.stringify(blankContent);
-              setData((d) => ({ ...d, template: null, content: str }));
-              setBaseContent(str);
-              return;
-            }
-
-            const match = templates.find((t) => t.value === id);
-            if (!match) return;
-
-            const tpl = await getTemplateById(id);
-            setSelectedTemplate(match);
-            setContentObj(tpl?.content);
-            const str = JSON.stringify(tpl?.content || {});
-            setData((d) => ({ ...d, template: id, content: str }));
-            setBaseContent(str);
-          }}
-          onDelete={async (id) => {
-            await deleteTemplate(id);
-            const remaining = templates.filter((t) => t.value !== id);
-            setTemplates(remaining);
-            if (remaining.length > 0) {
-              const next = remaining[0];
-              const tpl = await getTemplateById(next.value);
-              setSelectedTemplate(next);
-              setContentObj(tpl?.content);
-              const str = JSON.stringify(tpl?.content || {});
-              setData((d) => ({ ...d, template: next.value, content: str }));
-              setBaseContent(str);
-            } else {
-              setSelectedTemplate(null);
-              setContentObj({});
-              setData((d) => ({ ...d, template: null, content: "" }));
-              setBaseContent("");
-            }
-          }}
-        />
-        {email.organizationId && (
-          <SaveTemplateButton
-            contentJson={contentObj}
-            organizationId={email.organizationId}
-            disabled={!hasEdited}
-            onCreate={({ id, name }) => {
-              setTemplates((t) => [...t, { value: id, label: name }]);
-              setSelectedTemplate({ value: id, label: name });
-              const jsonStr = JSON.stringify(contentObj);
-              setData((d) => ({
-                ...d,
-                template: id,
-                content: jsonStr,
-              }));
-              setBaseContent(jsonStr);
-            }}
-          />
-        )}
-      </Label>
       <ScheduleEmailButton
         scheduledTimeValue={scheduledDate}
         isValidTime={isValidTime}
@@ -468,9 +370,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 variables: editorVars,
               }),
             ]}
-            key={`${selectedTemplate?.value || "editor"}|${editorVars
-              .map((v) => v.name)
-              .join(",")}`}
+            key={`${"editor"}|${editorVars.map((v) => v.name).join(",")}`}
             onCreate={() => {
               setHydrated(true);
             }}
@@ -483,7 +383,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 ...d,
                 content: updatedStr,
               }));
-              setHasEdited(updatedStr !== baseContent);
             }}
           />
         )}
