@@ -1,5 +1,6 @@
 "use client";
 
+import confetti from "canvas-confetti";
 import { Loader2 } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
@@ -95,6 +96,14 @@ export function SendEmailModal({
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
       } else {
+        confetti({
+          particleCount: 200,
+          spread: 120,
+          startVelocity: 45,
+          scalar: 1.2,
+          ticks: 100,
+          origin: { y: 0.6 },
+        });
         toast.success(
           mode === "now" ? "Emails sent successfully" : "Email scheduled",
         );
@@ -142,7 +151,7 @@ export function SendEmailModal({
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`px-4 py-1 text-sm font-medium ${
+            className={`px-4 py-1 text-sm font-medium transition ${
               mode === m
                 ? "bg-primary text-white"
                 : "bg-white text-gray-600 hover:bg-gray-50"
@@ -171,16 +180,20 @@ export function SendEmailModal({
         </div>
       )}
 
-      <button type="submit" className="btn w-full" disabled={isSubmitting}>
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="btn mt-4 w-full rounded-2xl py-2 text-center text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus:outline-none disabled:opacity-50"
+      >
         {isSubmitting ? (
           <div className="flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             Sending...
           </div>
         ) : mode === "now" ? (
-          "Send Now"
+          "🚀 Send Now"
         ) : (
-          "Schedule Email"
+          "📅 Schedule Email"
         )}
       </button>
     </form>
