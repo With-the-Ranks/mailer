@@ -19,28 +19,12 @@ import { mutate } from "swr";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
 import { getAudiences } from "@/lib/actions/audience-list";
-import {
-  sendBulkEmail,
-  sendEmail,
-  unscheduleEmail,
-} from "@/lib/actions/send-email";
-import {
-  deleteTemplate,
-  getTemplateById,
-  getTemplates,
-} from "@/lib/actions/template";
 import { isErrorResponse } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 
-import { AudienceListDropdown } from "./audience-list-dropdown";
-import { PreviewModal } from "./modal/preview-modal";
-import SaveTemplateButton from "./save-template-button";
-import ScheduleEmailButton from "./schedule-email-button";
-import { ScrollableTemplateSelect } from "./select-template";
+import { EmailPreviewButton } from "./email-preview-button";
+import SendEmailButton from "./send-email-button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-
-type Option = { value: string; label: string };
 
 type EmailWithSite = Email & {
   organization: {
@@ -55,13 +39,11 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const router = useRouter();
 
   const [isPendingSaving, startTransitionSaving] = useTransition();
-  const [isPendingPublishing, startTransitionPublishing] = useTransition();
+  const [isPendingPublishing, _startTransitionPublishing] = useTransition();
   const [scheduledDate, setScheduledDate] = useState<Moment>(
     moment(email.scheduledTime) || null,
   );
 
-  const [templates, setTemplates] = useState<Option[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<Option | null>(null);
   const [editorVars, setEditorVars] = useState<
     { name: string; required: boolean }[]
   >([
@@ -69,17 +51,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     { name: "last_name", required: false },
     { name: "email", required: false },
   ]);
-
-  useEffect(() => {
-    getTemplates(email.organizationId!).then((list) => {
-      const opts = list.map((t) => ({ value: t.id, label: t.name }));
-      setTemplates(opts);
-      if (email.template) {
-        const match = opts.find((o) => o.value === email.template);
-        if (match) setSelectedTemplate(match);
-      }
-    });
-  }, [email.organizationId, email.template]);
 
   const defaultJson = useMemo(() => {
     return email.content
@@ -91,21 +62,15 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   }, [email.content]);
 
   const [contentObj, setContentObj] = useState<any>(defaultJson);
-  const [baseContent, setBaseContent] = useState(() =>
-    JSON.stringify(defaultJson),
-  );
 
   const [data, setData] = useState({
     ...email,
     content: JSON.stringify(defaultJson),
   } as EmailWithSite & { content: string });
 
-  const [hasEdited, setHasEdited] = useState(false);
-
   useEffect(() => {
     setContentObj(defaultJson);
     const str = JSON.stringify(defaultJson);
-    setBaseContent(str);
     setData((d) => ({ ...d, content: str }));
   }, [defaultJson]);
 
@@ -115,7 +80,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [selectedAudienceList, setSelectedAudienceList] = useState<
     string | null
   >(email.audienceListId || null);
-  const [showPreview, setShowPreview] = useState(false);
 
   // Redirect if email is already published.
   useEffect(() => {
@@ -124,15 +88,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     }
   }, [data.published, data.id, router]);
 
-  function isValidTime(current: Moment) {
-    return current.isSameOrAfter(new Date(), "day");
-  }
-
   useEffect(() => {
     startTransitionSaving(async () => {
-      await updateEmail(data, scheduledDate.toDate());
+      await updateEmail(data, null);
     });
-  }, [scheduledDate, data]);
+  }, [data]);
+
   useEffect(() => {
     if (!selectedAudienceList) return;
     getAudiences(selectedAudienceList).then((res) => {
@@ -153,137 +114,61 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     });
   }, [selectedAudienceList]);
 
-  const isScheduledForFuture = () => {
-    return scheduledDate > moment();
-  };
-
-  const handleUnscheduleEmail = async () => {
-    try {
-      await unscheduleEmail({ resendId: data.resendId! });
-    } catch (error) {
-      toast.error("Failed to unschedule email");
-    }
-  };
-
-  const handleSendEmail = async () => {
-    try {
-      if (!selectedAudienceList) {
-        toast.error("Please select an audience list.");
-        return;
-      }
-      const content = data.content;
-      const emailScheduleTime = isScheduledForFuture()
-        ? scheduledDate.toISOString()
-        : "";
-      const result = await sendBulkEmail({
-        audienceListId: selectedAudienceList,
-        from,
-        subject: data.subject,
-        content,
-        previewText: data.previewText,
-        scheduledTime: emailScheduleTime,
-        id: data.id,
-        organizationId: data.organizationId!,
-      });
-      if (result.error) {
-        toast.error(`Failed to send email: ${result.error}`);
-      } else {
-        if (!isScheduledForFuture()) {
-          toast.success("Emails sent successfully");
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to send email");
-    }
-  };
-
-  const clickPreview = () => {
-    if (data.published) {
-      router.push(`/email/${data.id}/`);
-    } else {
-      if (!data.title || !data.subject) {
-        toast.error("Campaign name and subject are required.");
-        return;
-      }
-      setShowPreview(true);
-    }
-  };
-
-  const handleSendTest = async (to: string) => {
-    try {
-      await sendEmail({
-        to,
-        from,
-        subject: data.subject!,
-        content: data.content!,
-        previewText: data.previewText!,
-        organizationId: data.organizationId!,
-      });
-      toast.success("Test email sent");
-    } catch {
-      toast.error("Failed to send test email");
-    }
-  };
-
-  const handleSaveContent = async () => {
-    try {
-      await updateEmail(data, scheduledDate.toDate());
-      toast.success("Content saved successfully");
-    } catch (error) {
-      toast.error("Failed to save content");
-    }
-  };
-
   const getButtonLabel = () => {
     if (!data.published) {
-      return "Preview & Send";
+      return "Send";
     } else {
       return "Analytics";
     }
   };
 
-  const handleClickPublish = async () => {
-    const wasPublished = data.published;
+  const handleClickPublish = async (scheduledTime?: string) => {
     try {
-      await handleSaveContent();
-      if (!wasPublished) {
-        await handleSendEmail();
-      } else if (isScheduledForFuture()) {
-        await handleUnscheduleEmail();
-      }
+      await updateEmail(
+        data,
+        scheduledTime ? new Date(scheduledTime) : scheduledDate.toDate(),
+      );
       const formData = new FormData();
-      formData.append("published", String(!wasPublished));
-      await updatePostMetadata(formData, email.id, "published").then(() => {
-        const toastLabel = getButtonLabel();
-        toast.success(`Successfully ${toastLabel} your email.`);
-        setData((prev) => ({ ...prev, published: !prev.published }));
-      });
+      formData.append("published", "true");
+      await updatePostMetadata(formData, email.id, "published");
+      toast.success("Successfully published your email.");
+      setData((prev) => ({ ...prev, published: true }));
       router.push(`/email/${data.id}/`);
       mutate(`/api/email/${data.id}`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to publish email.");
     }
   };
+
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
       <div className="absolute right-5 top-5 mb-5 flex flex-wrap items-center gap-3">
         <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-sm text-stone-400 dark:bg-stone-800 dark:text-stone-500">
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
-        <button
-          onClick={() => clickPreview()}
-          disabled={isPendingPublishing}
-          className={cn(
-            "btn text-sm",
-            isPendingPublishing && "cursor-not-allowed opacity-50",
-          )}
-        >
-          {isPendingPublishing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            getButtonLabel()
-          )}
-        </button>
+        <EmailPreviewButton
+          editor={contentObj}
+          subject={data.subject || ""}
+          previewText={data.previewText || ""}
+          fromName={from || ""}
+        />
+        <SendEmailButton
+          isSending={isPendingPublishing}
+          getButtonLabel={getButtonLabel}
+          onConfirm={handleClickPublish}
+          selectedAudienceList={selectedAudienceList}
+          setSelectedAudienceList={setSelectedAudienceList}
+          organizationId={data.organizationId!}
+          scheduledTimeValue={scheduledDate}
+          isValidTime={(current) => current.isSameOrAfter(new Date(), "day")}
+          setScheduledTimeValue={setScheduledDate}
+          isScheduleDisabled={data.published && scheduledDate > moment()}
+          subject={data.subject || ""}
+          previewText={data.previewText || ""}
+          from={from}
+          content={data.content || ""}
+          emailId={data.id}
+        />
       </div>
       <div className="mb-5 flex flex-col space-y-3 border-b border-stone-200 pb-5 dark:border-stone-700">
         <input
@@ -355,87 +240,6 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </div>
         </Label>
       )}
-      <AudienceListDropdown
-        selectedAudienceList={selectedAudienceList}
-        setSelectedAudienceList={setSelectedAudienceList}
-        organizationId={data.organizationId ?? ""}
-      />
-      <Label className="flex items-center font-normal">
-        <span className="w-40 shrink-0 font-normal text-gray-600">
-          Template
-        </span>
-        <ScrollableTemplateSelect
-          templates={templates.map((t) => ({ id: t.value, name: t.label }))}
-          selectedTemplateId={selectedTemplate?.value || null}
-          onSelect={async (id) => {
-            if (id === "default") {
-              const blankContent = { type: "doc", content: [{}] };
-              setSelectedTemplate({
-                value: "default",
-                label: "Blank Template",
-              });
-              setContentObj(blankContent);
-              const str = JSON.stringify(blankContent);
-              setData((d) => ({ ...d, template: null, content: str }));
-              setBaseContent(str);
-              return;
-            }
-
-            const match = templates.find((t) => t.value === id);
-            if (!match) return;
-
-            const tpl = await getTemplateById(id);
-            setSelectedTemplate(match);
-            setContentObj(tpl?.content);
-            const str = JSON.stringify(tpl?.content || {});
-            setData((d) => ({ ...d, template: id, content: str }));
-            setBaseContent(str);
-          }}
-          onDelete={async (id) => {
-            await deleteTemplate(id);
-            const remaining = templates.filter((t) => t.value !== id);
-            setTemplates(remaining);
-            if (remaining.length > 0) {
-              const next = remaining[0];
-              const tpl = await getTemplateById(next.value);
-              setSelectedTemplate(next);
-              setContentObj(tpl?.content);
-              const str = JSON.stringify(tpl?.content || {});
-              setData((d) => ({ ...d, template: next.value, content: str }));
-              setBaseContent(str);
-            } else {
-              setSelectedTemplate(null);
-              setContentObj({});
-              setData((d) => ({ ...d, template: null, content: "" }));
-              setBaseContent("");
-            }
-          }}
-        />
-        {email.organizationId && (
-          <SaveTemplateButton
-            contentJson={contentObj}
-            organizationId={email.organizationId}
-            disabled={!hasEdited}
-            onCreate={({ id, name }) => {
-              setTemplates((t) => [...t, { value: id, label: name }]);
-              setSelectedTemplate({ value: id, label: name });
-              const jsonStr = JSON.stringify(contentObj);
-              setData((d) => ({
-                ...d,
-                template: id,
-                content: jsonStr,
-              }));
-              setBaseContent(jsonStr);
-            }}
-          />
-        )}
-      </Label>
-      <ScheduleEmailButton
-        scheduledTimeValue={scheduledDate}
-        isValidTime={isValidTime}
-        setScheduledTimeValue={setScheduledDate}
-        isDisabled={isScheduledForFuture() && data.published}
-      />
       <div className="relative my-6">
         <Input
           className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -468,9 +272,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 variables: editorVars,
               }),
             ]}
-            key={`${selectedTemplate?.value || "editor"}|${editorVars
-              .map((v) => v.name)
-              .join(",")}`}
+            key={`${"editor"}|${editorVars.map((v) => v.name).join(",")}`}
             onCreate={() => {
               setHydrated(true);
             }}
@@ -483,23 +285,10 @@ export default function Editor({ email }: { email: EmailWithSite }) {
                 ...d,
                 content: updatedStr,
               }));
-              setHasEdited(updatedStr !== baseContent);
             }}
           />
         )}
       </div>
-      {showPreview && (
-        <PreviewModal
-          content={JSON.stringify(contentObj)}
-          previewText={data.previewText ?? undefined}
-          onCancel={() => setShowPreview(false)}
-          onConfirm={() => {
-            setShowPreview(false);
-            startTransitionPublishing(() => handleClickPublish());
-          }}
-          onSendTest={handleSendTest}
-        />
-      )}
     </div>
   );
 }

@@ -1,29 +1,24 @@
 "use client";
 
+import { CreditCard, FileText, Loader2, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 
-import LoadingDots from "@/components/icons/loading-dots";
 import { createEmail } from "@/lib/actions";
-import { getTemplates } from "@/lib/actions/template";
+import blankJson from "@/lib/email-templates/json/blank.json";
+import donationJson from "@/lib/email-templates/json/donation.json";
+import signupJson from "@/lib/email-templates/json/signup.json";
 import { cn } from "@/lib/utils";
 
 import { AudienceListDropdown } from "../audience-list-dropdown";
-import { ScrollableTemplateSelect } from "../select-template";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import { useModal } from "./provider";
-
-interface Option {
-  value: string;
-  label: string;
-}
 
 interface TemplateRecord {
   id: string;
   name: string;
-  content: any; // Json
+  content: any;
 }
 
 export default function CreateEmailModal({
@@ -34,58 +29,28 @@ export default function CreateEmailModal({
   const router = useRouter();
   const modal = useModal();
 
-  const [templatesList, setTemplatesList] = useState<TemplateRecord[]>([]);
-  const [templateOptions, setTemplateOptions] = useState<Option[]>([]);
+  const predefinedTemplates: TemplateRecord[] = [
+    { id: "signup", name: "Signup", content: signupJson },
+    { id: "donation", name: "Donation", content: donationJson },
+    { id: "blank", name: "Blank", content: blankJson },
+  ];
+
   const [data, setData] = useState({
-    campaignName: "New Email Campaign",
+    campaignName: "",
     selectedAudienceList: null as string | null,
-    template: "",
+    template: "signup",
   });
-  const [templateContent, setTemplateContent] = useState<string>("");
+  const [templateContent, setTemplateContent] = useState<string>(
+    JSON.stringify(predefinedTemplates[0].content),
+  );
   const [isPending, setIsPending] = useState(false);
 
-  useEffect(() => {
-    getTemplates(organizationId).then((list) => {
-      setTemplatesList(list as TemplateRecord[]);
-
-      const opts = list.map((t) => ({ value: t.id, label: t.name }));
-      setTemplateOptions(opts);
-
-      if (list.length === 0) {
-        const blank = {
-          type: "doc",
-          content: [
-            {
-              type: "paragraph",
-              content: [],
-            },
-          ],
-        };
-        setData((prev) => ({ ...prev, template: "blank" }));
-        setTemplateOptions([{ value: "blank", label: "Blank Template" }]);
-        setTemplateContent(JSON.stringify(blank));
-        return;
-      }
-
-      const last = list[list.length - 1];
-      setData((prev) => ({
-        ...prev,
-        template: prev.template || last.id,
-      }));
-      setTemplateContent(JSON.stringify(last.content));
-    });
-  }, [organizationId]);
-
-  useEffect(() => {
-    if (!data.template) {
-      setTemplateContent("");
-      return;
-    }
-    const tpl = templatesList.find((t) => t.id === data.template);
-    if (tpl) {
-      setTemplateContent(JSON.stringify(tpl.content));
-    }
-  }, [data.template, templatesList]);
+  React.useEffect(() => {
+    const tpl =
+      predefinedTemplates.find((t) => t.id === data.template) ||
+      predefinedTemplates[0];
+    setTemplateContent(JSON.stringify(tpl.content));
+  }, [data.template]);
 
   const handleCreateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,50 +131,50 @@ export default function CreateEmailModal({
         />
 
         {/* Template Picker */}
-        <Label className="flex items-center font-normal">
-          <span className="w-40 shrink-0 text-gray-600">Template</span>
-          <div className="grow">
-            <ScrollableTemplateSelect
-              templates={templateOptions.map((t) => ({
-                id: t.value,
-                name: t.label,
-              }))}
-              selectedTemplateId={data.template}
-              onSelect={(id) => setData((prev) => ({ ...prev, template: id }))}
-              onDelete={(deletedId) => {
-                // remove from both lists
-                const remainingList = templatesList.filter(
-                  (t) => t.id !== deletedId,
-                );
-                const remainingOpts = templateOptions.filter(
-                  (o) => o.value !== deletedId,
-                );
-                setTemplatesList(remainingList);
-                setTemplateOptions(remainingOpts);
-                // pick a new default
-                const fallback = remainingList[0]?.id || "";
-                setData((prev) => ({ ...prev, template: fallback }));
-              }}
-            />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-stone-500 dark:text-stone-400">
+            Template
+          </label>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {predefinedTemplates.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                onClick={() => setData({ ...data, template: tpl.id })}
+                className={cn(
+                  "flex h-24 flex-col items-center justify-center rounded-md border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600",
+                  data.template === tpl.id &&
+                    "border-2 border-black dark:border-white",
+                )}
+              >
+                {tpl.id === "signup" && (
+                  <FileText className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
+                )}
+                {tpl.id === "donation" && (
+                  <CreditCard className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
+                )}
+                {tpl.id === "blank" && (
+                  <PlusCircle className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
+                )}
+                <span className="text-sm font-medium">{tpl.name}</span>
+              </button>
+            ))}
           </div>
-        </Label>
+        </div>
       </div>
 
       {/* Submit */}
       <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
         <button
-          type="button"
-          onClick={modal?.hide}
-          className="btn-outline btn-sm btn"
-        >
-          Cancel
-        </button>
-        <button
           type="submit"
           className={cn("btn", isPending && "cursor-not-allowed opacity-50")}
           disabled={isPending}
         >
-          {isPending ? <LoadingDots color="#FFFCF7" /> : "Create Email"}
+          {isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Create Email"
+          )}
         </button>
       </div>
     </form>
