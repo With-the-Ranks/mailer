@@ -3,12 +3,12 @@
 import {
   ArrowLeft,
   Edit3,
+  Info,
   LayoutDashboard,
   Menu,
   Newspaper,
   RadioTower,
   Settings,
-  TrendingUp,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,23 +58,17 @@ export default function Nav({ children }: { children: ReactNode }) {
           href: siteId ? `/organization/${siteId}` : "/organizations",
           icon: <ArrowLeft width={18} />,
         },
+        isPublished && {
+          name: "Details",
+          href: `/email/${id}/`,
+          isActive: segments.length === 2,
+          icon: <Info width={18} />,
+        },
         !isPublished && {
           name: "Editor",
-          href: `/email/${id}`,
-          isActive: segments.length === 2,
+          href: `/email/${id}/editor`,
+          isActive: segments.includes("editor"),
           icon: <Edit3 width={18} />,
-        },
-        isPublished && {
-          name: "Analytics",
-          href: `/email/${id}/analytics`,
-          isActive: segments.includes("analytics"),
-          icon: <TrendingUp width={18} />,
-        },
-        {
-          name: "Settings",
-          href: `/email/${id}/settings`,
-          isActive: segments.includes("settings"),
-          icon: <Settings width={18} />,
         },
       ].filter(Boolean);
     } else if (segments[0] === "audience" && id) {
@@ -97,7 +91,7 @@ export default function Nav({ children }: { children: ReactNode }) {
       return [
         {
           name: "Dashboard",
-          href: "/organizations",
+          href: "/",
           isActive: segments[0] === "organizations",
           icon: <LayoutDashboard width={18} />,
         },
@@ -148,7 +142,7 @@ export default function Nav({ children }: { children: ReactNode }) {
     <>
       <button
         className={`fixed z-20 ${
-          segments[0] === "email" && segments.length === 2 && !showSidebar
+          segments[0] === "email" && segments.includes("editor") && !showSidebar
             ? "left-5 top-5"
             : "right-5 top-7"
         } sm:hidden`}

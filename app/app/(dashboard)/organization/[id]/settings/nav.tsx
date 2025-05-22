@@ -15,11 +15,11 @@ export default function SiteSettingsNav() {
       href: `/organization/${id}/settings`,
       segment: null,
     },
-    {
-      name: "Domains",
-      href: `/organization/${id}/settings/domains`,
-      segment: "domains",
-    },
+    // {
+    //   name: "Domains",
+    //   href: `/organization/${id}/settings/domains`,
+    //   segment: "domains",
+    // },
     {
       name: "Appearance",
       href: `/organization/${id}/settings/appearance`,

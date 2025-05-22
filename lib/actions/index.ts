@@ -4,6 +4,8 @@ import type { Email, Organization } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { customAlphabet } from "nanoid";
 import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { Resend } from "resend";
 
 import { getSession } from "@/lib/auth";
 import {
@@ -82,7 +84,53 @@ export const updateOrganization = withOrgAuth(
 
     try {
       let response;
+      if (key === "emailApiKey") {
+        const resp = await new Resend(
+          value || process.env.RESEND_API_KEY!,
+        ).domains.list();
+        const raw = (resp as any).data?.data ?? [];
+        const newIds = raw.map((d: any) => d.id);
 
+        await Promise.all(
+          raw.map((d: any) =>
+            prisma.emailDomain.upsert({
+              where: { id: d.id },
+              create: {
+                id: d.id,
+                providerId: d.id,
+                domain: d.name,
+                status: d.status,
+                organizationId: organization.id,
+              },
+              update: { domain: d.name, status: d.status },
+            }),
+          ),
+        );
+        await prisma.emailDomain.deleteMany({
+          where: {
+            organizationId: organization.id,
+            id: { notIn: newIds },
+          },
+        });
+
+        const pick =
+          organization.activeDomainId &&
+          newIds.includes(organization.activeDomainId)
+            ? organization.activeDomainId
+            : newIds[0] ?? null;
+
+        const finalOrg = await prisma.organization.update({
+          where: { id: organization.id },
+          data: {
+            emailApiKey: value || null,
+            activeDomainId: pick,
+          },
+          include: { activeDomain: true },
+        });
+
+        revalidatePath(`/organization/${organization.id}/settings`);
+        return finalOrg;
+      }
       if (key === "customDomain") {
         if (value.includes("vercel.pub")) {
           return {
@@ -323,42 +371,36 @@ export const createEmail = async (
 };
 
 // creating a separate function for this because we're not using FormData
-export const updateEmail = async (data: Email, scheduledTime: Date | null) => {
+export const updateEmail = async (data: Email, scheduledTime?: Date | null) => {
   const session = await getSession();
   if (!session?.user.id) {
-    return {
-      error: "Not authenticated",
-    };
+    return { error: "Not authenticated" };
   }
+
   const email = await prisma.email.findUnique({
-    where: {
-      id: data.id,
-    },
-    include: {
-      organization: true,
-    },
+    where: { id: data.id },
+    include: { organization: true },
   });
   if (!email || email.userId !== session.user.id) {
-    return {
-      error: "Email not found",
-    };
+    return { error: "Email not found" };
   }
+
+  const updateData: any = {
+    title: data.title,
+    description: data.description,
+    content: data.content,
+    previewText: data.previewText,
+    subject: data.subject,
+  };
+
+  if (scheduledTime !== undefined) {
+    updateData.scheduledTime = scheduledTime;
+  }
+
   try {
-    const scheduledDateTime = scheduledTime ? scheduledTime : new Date();
     const response = await prisma.email.update({
-      where: {
-        id: data.id,
-      },
-      data: {
-        title: data.title,
-        description: data.description,
-        content: data.content,
-        emailsTo: data.emailsTo,
-        previewText: data.previewText,
-        subject: data.subject,
-        template: data.template,
-        scheduledTime: scheduledDateTime,
-      },
+      where: { id: data.id },
+      data: updateData,
     });
 
     await revalidateTag(
@@ -367,17 +409,14 @@ export const updateEmail = async (data: Email, scheduledTime: Date | null) => {
     await revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
     );
-
-    // if the site has a custom domain, we need to revalidate those tags too
-    email.organization?.customDomain &&
-      (await revalidateTag(`${email.organization?.customDomain}-emails`),
-      await revalidateTag(`${email.organization?.customDomain}-${email.slug}`));
+    if (email.organization?.customDomain) {
+      await revalidateTag(`${email.organization.customDomain}-emails`);
+      await revalidateTag(`${email.organization.customDomain}-${email.slug}`);
+    }
 
     return response;
-  } catch (error: any) {
-    return {
-      error: error.message,
-    };
+  } catch (err: any) {
+    return { error: err.message };
   }
 };
 

@@ -1,19 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
-import { sendEmail } from "@/lib/actions/send-email";
 
 function RegisterForm() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -34,34 +29,10 @@ function RegisterForm() {
           return;
         }
 
-        toast.success("Registration Successful");
-
-        try {
-          await sendEmail({
-            to: formData.email,
-            from: "Mailer",
-            subject: "Welcome to Mailer app!",
-            content: null,
-            previewText: null,
-          });
-          toast.success("Welcome email sent");
-        } catch (error) {
-          toast.error("Failed to send welcome email");
-        }
-
-        const signInResult = await signIn("credentials", {
-          redirect: false,
-          email: formData.email,
-          password: formData.password,
-        });
-
-        if (signInResult?.error) {
-          toast.error(`Login Failed: ${signInResult.error}`);
-          router.push("/login");
-        } else {
-          toast.success("Login Successful");
-          router.push("/");
-        }
+        toast.success(
+          "Registration successful. Please check your email to verify.",
+        );
+        router.push("/login");
       }}
     >
       <input

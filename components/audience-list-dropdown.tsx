@@ -20,12 +20,14 @@ interface AudienceListDropdownProps {
   // eslint-disable-next-line no-unused-vars
   setSelectedAudienceList: (value: string | null) => void;
   organizationId: string;
+  disabled?: boolean;
 }
 
 export function AudienceListDropdown({
   selectedAudienceList,
   setSelectedAudienceList,
   organizationId,
+  disabled = false,
 }: AudienceListDropdownProps) {
   const [audienceLists, setAudienceLists] = useState<
     {
@@ -52,6 +54,7 @@ export function AudienceListDropdown({
         <Select
           value={selectedAudienceList || ""}
           onValueChange={(value) => setSelectedAudienceList(value)}
+          disabled={disabled}
         >
           <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400">
             <SelectValue placeholder="Select an audience list…" />
@@ -60,7 +63,7 @@ export function AudienceListDropdown({
             position="popper"
             side="bottom"
             align="start"
-            className="max-h-[300px] overflow-y-auto bg-white"
+            className="z-[10000001] max-h-[300px] overflow-y-auto bg-white"
           >
             <SelectGroup>
               {audienceLists.length > 0 ? (

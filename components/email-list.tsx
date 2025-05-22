@@ -1,18 +1,18 @@
 "use client";
 
 import type { Audience } from "@prisma/client";
-import {
-  MoveHorizontalIcon,
-  PlusIcon,
-  TrashIcon,
-  UploadIcon,
-} from "lucide-react";
+import { MoreVertical, PlusIcon, TrashIcon, UploadIcon } from "lucide-react";
 import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import CreateAudienceButton from "@/components/create-audience-button";
 import AddAudienceModal from "@/components/modal/add-audience-modal";
+import {
+  AddCustomFieldModal,
+  ConfirmDeleteFieldModal,
+} from "@/components/modal/custom-field-modal";
+import { useModal } from "@/components/modal/provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,10 +30,8 @@ import {
 } from "@/components/ui/table";
 import {
   addAudience,
-  addCustomFieldToAudienceList,
   deleteAudience,
   getAudiences,
-  removeCustomFieldFromAudienceList,
   updateAudience,
 } from "@/lib/actions/audience-list";
 import { isErrorResponse } from "@/lib/utils";
@@ -47,9 +45,11 @@ interface EmailListProps {
 export function EmailList({ audienceListId, listName }: EmailListProps) {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [audiences, setAudiences] = useState<Audience[]>([]);
+  const [originalAudiences, setOriginalAudiences] = useState<Audience[]>([]);
   const [customFields, setCustomFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modal = useModal();
 
   useEffect(() => {
     // Fetch audiences and custom fields from the server
@@ -60,6 +60,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
         toast.error(response.error);
       } else {
         setAudiences(response.audiences);
+        setOriginalAudiences(response.audiences);
         setCustomFields(response.customFields);
       }
       setIsLoading(false); // Stop loading
@@ -68,47 +69,45 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
     fetchAudiences();
   }, [audienceListId]);
 
-  // Handle click for adding a new custom field
-  const handleAddCustomFieldClick = async () => {
+  const handleAddCustomFieldClick = () => {
     if (customFields.length >= 3) {
-      toast.error("You can only add up to 3 custom fields");
-      return;
+      return toast.error("You can only add up to 3 custom fields");
     }
-
-    const newField = prompt("Enter custom field name:");
-    if (!newField) return;
-
-    // Call the server action to add the custom field to the audience list
-    const response = await addCustomFieldToAudienceList(
-      audienceListId,
-      newField,
+    modal?.show(
+      <AddCustomFieldModal
+        audienceListId={audienceListId}
+        onAdded={(field) => {
+          setCustomFields((prev) => [...prev, field]);
+        }}
+      />,
     );
-
-    if (isErrorResponse(response)) {
-      toast.error(response.error);
-    } else {
-      // Update local state with the new custom field
-      setCustomFields((prev) => [...prev, newField]);
-      toast.success(`Custom field "${newField}" added successfully.`);
-    }
   };
 
-  // Handle delete custom field
-  const handleDeleteCustomField = async (fieldToDelete: string) => {
-    const response = await removeCustomFieldFromAudienceList(
-      audienceListId,
-      fieldToDelete,
+  const handleDeleteCustomField = (field: string) => {
+    modal?.show(
+      <ConfirmDeleteFieldModal
+        audienceListId={audienceListId}
+        fieldName={field}
+        onDeleted={(removed) => {
+          setCustomFields((prev) => prev.filter((f) => f !== removed));
+          setAudiences((auds) =>
+            auds.map((a) => {
+              const { [removed]: _, ...keep } = (a.customFields as any) || {};
+              return { ...a, customFields: keep };
+            }),
+          );
+        }}
+      />,
     );
+  };
 
-    if (isErrorResponse(response)) {
-      toast.error(response.error);
-    } else {
-      // Update local state by removing the deleted custom field
-      setCustomFields((prev) =>
-        prev.filter((field) => field !== fieldToDelete),
-      );
-      toast.success(`Custom field "${fieldToDelete}" removed successfully.`);
-    }
+  const handleCancelClick = (idx: number) => {
+    setAudiences((prev) =>
+      prev.map((aud, i) =>
+        i === idx ? structuredClone(originalAudiences[idx]) : aud,
+      ),
+    );
+    setEditIndex(null);
   };
 
   // Function to add new audience directly to the list without refreshing
@@ -430,36 +429,45 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                     </TableCell>
                   ))}
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    {editIndex === index ? (
+                      <div className="flex space-x-2">
                         <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSaveClick(index)}
                         >
-                          <MoveHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
+                          Save
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {editIndex === index ? (
-                          <DropdownMenuItem
-                            onClick={() => handleSaveClick(index)}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleCancelClick(index)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            aria-label="Actions"
                           >
-                            Save
-                          </DropdownMenuItem>
-                        ) : (
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setEditIndex(index)}>
                             Edit
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteEntryClick(audience.id)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteEntryClick(audience.id)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

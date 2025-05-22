@@ -14,6 +14,7 @@ const getMockUserDefaults = () => {
     image: null,
     createdAt: dateNow,
     updatedAt: dateNow,
+    organizationId: null,
   };
 };
 
