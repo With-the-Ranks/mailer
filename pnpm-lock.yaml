@@ -190,6 +190,9 @@ devDependencies:
   '@types/bcrypt':
     specifier: ^5.0.2
     version: 5.0.2
+  '@types/canvas-confetti':
+    specifier: ^1.9.0
+    version: 1.9.0
   '@types/js-cookie':
     specifier: ^3.0.6
     version: 3.0.6
@@ -3849,6 +3852,10 @@ packages:
     resolution: {integrity: sha512-6atioO8Y75fNcbmj0G7UjI9lXN2pQ/IGJ2FWT4a/btd0Lk9lQalHLKhkgKVZ3r+spnmWUKfbMi1GEe9wyHQfNQ==}
     dependencies:
       '@types/node': 20.12.13
+    dev: true
+
+  /@types/canvas-confetti@1.9.0:
+    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
     dev: true
 
   /@types/d3-array@3.2.1:
