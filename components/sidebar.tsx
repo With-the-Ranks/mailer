@@ -1,0 +1,304 @@
+"use client";
+
+import {
+  ArrowLeft,
+  ChevronRight,
+  Edit3,
+  Filter,
+  Info,
+  LayoutDashboard,
+  List,
+  Newspaper,
+  Palette,
+  RadioTower,
+  Settings,
+  SlidersHorizontal,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  useParams,
+  usePathname,
+  useSelectedLayoutSegments,
+} from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarRail,
+  SidebarSeparator,
+} from "@/components/ui/sidebar";
+import { getOrganizationFromUserId } from "@/lib/actions";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export default function Nav({ children }: { children: React.ReactNode }) {
+  const segments = useSelectedLayoutSegments();
+  const { id } = useParams() as { id?: string };
+  const pathname = usePathname();
+
+  const [siteId, setSiteId] = useState<string | null>(null);
+  const [organizationFound, setOrganizationFound] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const { data: emailData } = useSWR(
+    id && pathname.includes("/email") ? `/api/email/${id}` : null,
+    fetcher,
+  );
+
+  useEffect(() => {
+    getOrganizationFromUserId().then((orgId) => {
+      setSiteId(orgId ?? null);
+      setOrganizationFound(!!orgId);
+      setLoading(false);
+    });
+  }, [id, pathname]);
+
+  // Build the nav structure
+  const navItems = useMemo(() => {
+    if (loading) return [];
+
+    // Email context
+    if (segments[0] === "email" && id) {
+      const isPublished = emailData?.published;
+      return [
+        {
+          name: "Back to All Emails",
+          href: siteId ? `/organization/${siteId}` : "/organizations",
+          icon: ArrowLeft,
+        },
+        isPublished && {
+          name: "Details",
+          href: `/email/${id}/`,
+          isActive: segments.length === 2,
+          icon: Info,
+        },
+        !isPublished && {
+          name: "Editor",
+          href: `/email/${id}/editor`,
+          isActive: segments.includes("editor"),
+          icon: Edit3,
+        },
+      ].filter(Boolean);
+    }
+
+    // Audience context
+    if (segments[0] === "audience" && id) {
+      return [
+        {
+          name: "Back to Audience Lists",
+          href: siteId ? `/organization/${siteId}/audience` : "/organizations",
+          icon: ArrowLeft,
+        },
+        {
+          name: "Audience",
+          href: `/audience/${id}`,
+          isActive: segments.length === 2,
+          icon: RadioTower,
+        },
+      ];
+    }
+
+    // Main org nav
+    if (organizationFound) {
+      return [
+        {
+          name: "Dashboard",
+          href: "/",
+          isActive: segments[0] === "organizations",
+          icon: LayoutDashboard,
+        },
+        {
+          name: "Audience",
+          icon: RadioTower,
+          isActive: segments.includes("audience"),
+          submenu: [
+            {
+              name: "Lists",
+              href: `/organization/${siteId}/audience`,
+              isActive:
+                pathname === `/organization/${siteId}/audience` ||
+                pathname === `/organization/${siteId}/audience/lists`,
+              icon: List,
+            },
+            {
+              name: "Segments",
+              href: `/organization/${siteId}/audience/segments`,
+              isActive: pathname.includes("/audience/segments"),
+              icon: Filter,
+            },
+          ],
+        },
+        {
+          name: "Emails",
+          href: `/organization/${siteId}`,
+          isActive: segments.length === 2,
+          icon: Newspaper,
+        },
+        {
+          name: "Settings",
+          icon: Settings,
+          isActive: segments.includes("settings"),
+          submenu: [
+            {
+              name: "General",
+              href: `/organization/${siteId}/settings`,
+              isActive:
+                pathname === `/organization/${siteId}/settings` ||
+                pathname === `/organization/${siteId}/settings/general`,
+              icon: SlidersHorizontal,
+            },
+            {
+              name: "Appearance",
+              href: `/organization/${siteId}/settings/appearance`,
+              isActive: pathname.includes("/settings/appearance"),
+              icon: Palette,
+            },
+          ],
+        },
+      ];
+    }
+
+    // Fallback nav
+    return [
+      {
+        name: "Overview",
+        href: "/",
+        isActive: segments.length === 0,
+        icon: LayoutDashboard,
+      },
+      {
+        name: "Settings",
+        icon: Settings,
+        isActive: segments[0] === "settings",
+        submenu: [
+          {
+            name: "General",
+            href: "/settings",
+            isActive:
+              pathname === "/settings" || pathname === "/settings/general",
+            icon: SlidersHorizontal,
+          },
+          {
+            name: "Appearance",
+            href: "/settings/appearance",
+            isActive: pathname.includes("/settings/appearance"),
+            icon: Palette,
+          },
+        ],
+      },
+    ];
+  }, [segments, id, siteId, organizationFound, loading, emailData, pathname]);
+
+  return (
+    <Sidebar
+      collapsible="icon"
+      className="h-full border-r bg-sidebar text-sidebar-foreground"
+    >
+      <SidebarHeader>
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <Image
+            src="/logo.png"
+            width={24}
+            height={24}
+            alt="Logo"
+            className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
+          />
+          <span className="font-bold">Mailer</span>
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) =>
+                item.submenu ? (
+                  <Collapsible
+                    key={item.name}
+                    asChild
+                    defaultOpen={true}
+                    className="group/collapsible"
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          tooltip={item.name}
+                          isActive={item.isActive}
+                          className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                        >
+                          <item.icon className="mr-2" size={18} />
+                          <span>{item.name}</span>
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.submenu.map((sub: any) => (
+                            <SidebarMenuSubItem key={sub.name}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={sub.isActive}
+                                className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                              >
+                                <Link
+                                  href={sub.href}
+                                  className="flex items-center"
+                                >
+                                  <sub.icon className="mr-2" size={16} />
+                                  <span>{sub.name}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                ) : (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.isActive}
+                      tooltip={item.name}
+                      className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                    >
+                      <Link href={item.href} className="flex items-center">
+                        <item.icon className="mr-2" size={18} />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ),
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarSeparator />
+        {children}
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
