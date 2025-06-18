@@ -17,7 +17,18 @@ export default async function middleware(req: NextRequest) {
     process.env.VERCEL_ENV === "preview" || host.endsWith(".vercel.app");
 
   if (isVercelPreview) {
-    return NextResponse.next();
+    const session = await getToken({ req });
+
+    if (!session && !PUBLIC_PATHS.includes(pathname)) {
+      return NextResponse.redirect(new URL(`/login${search}`, req.url));
+    }
+
+    if (session && pathname === "/login") {
+      return NextResponse.redirect(new URL(`/${search}`, req.url));
+    }
+
+    // Rewrite all requests to /app
+    return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
   const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
