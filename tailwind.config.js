@@ -15,6 +15,7 @@ module.exports = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        popover: "hsl(var(--popover))",
         primary: "#252753",
         accent: "#8c9dff",
         tremor: {
@@ -182,9 +183,27 @@ module.exports = {
             transform: "translateX(-2px) rotate(-1.2deg)",
           },
         },
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
       },
       animation: {
         wiggle: "wiggle 0.8s both",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },

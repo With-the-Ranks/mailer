@@ -56,3 +56,65 @@ export interface DomainVerificationResponse {
     reason: string;
   }[];
 }
+export interface Audience {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  note?: string;
+  tags?: string;
+  defaultAddressCompany?: string;
+  defaultAddressAddress1?: string;
+  defaultAddressAddress2?: string;
+  defaultAddressCity?: string;
+  defaultAddressProvinceCode?: string;
+  defaultAddressCountryCode?: string;
+  defaultAddressZip?: string;
+  defaultAddressPhone?: string;
+  customFields?: Record<string, any>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Contact {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  note?: string;
+  tags?: string;
+  defaultAddressCompany?: string;
+  defaultAddressAddress1?: string;
+  defaultAddressAddress2?: string;
+  defaultAddressCity?: string;
+  defaultAddressProvinceCode?: string;
+  defaultAddressCountryCode?: string;
+  defaultAddressZip?: string;
+  defaultAddressPhone?: string;
+  customFields?: Record<string, any>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ImportProgress {
+  total: number;
+  processed: number;
+  successful: number;
+  failed: number;
+  errors: ImportError[];
+}
+
+export interface ImportError {
+  row: number;
+  field: string;
+  value: string;
+  error: string;
+}
+
+export interface FieldMapping {
+  csvColumn: string;
+  contactField: string;
+  required: boolean;
+}
