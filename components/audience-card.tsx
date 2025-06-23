@@ -1,5 +1,13 @@
+"use client";
+
 import type { AudienceList, Organization } from "@prisma/client";
+import { Info, Pencil } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { updateAudienceListName } from "@/lib/actions/audience-list";
 
 export default function AudienceCard({
   data,
@@ -10,24 +18,137 @@ export default function AudienceCard({
 }) {
   const url = `/audience/${data.id}`;
   const createdAtFormatted = new Date(data.createdAt).toLocaleDateString();
-  const contactsCount = data._count?.audiences ?? 0; // default to 0 if not provided
+  const contactsCount = data._count?.audiences ?? 0;
+
+  // Inline edit state
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(data.name);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    const result = await updateAudienceListName(data.id, name);
+    setLoading(false);
+    if (
+      result &&
+      typeof result === "object" &&
+      "error" in result &&
+      result.error
+    ) {
+      setError(result.error);
+    } else {
+      setEditing(false);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    }
+  };
 
   return (
-    <Link href={url} className="block">
-      <div className="relative rounded-lg border border-stone-200 pb-4 shadow-md transition-all hover:shadow-xl dark:border-stone-700 dark:hover:border-white">
-        <div className="border-t border-stone-200 p-4 dark:border-stone-700">
-          <h3 className="my-0 truncate font-cal text-xl font-bold tracking-wide dark:text-white">
-            {data.name}
-          </h3>
+    <div className="relative mt-8 w-full max-w-4xl rounded-lg border border-stone-200 bg-white p-8 shadow-md dark:border-stone-700 dark:bg-black">
+      <div className="mb-4 flex items-center justify-between">
+        {editing ? (
+          <form onSubmit={handleSave} className="flex w-full items-center">
+            <input
+              className="flex-1 rounded border px-2 py-1 font-cal text-xl font-bold tracking-wide dark:text-white"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+              maxLength={32}
+              autoFocus
+            />
+            <Button type="submit" className="ml-2" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="ml-2"
+              onClick={() => {
+                setEditing(false);
+                setName(data.name);
+                setError(null);
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+          </form>
+        ) : (
+          <>
+            <h3 className="my-0 truncate font-cal text-2xl font-bold tracking-wide dark:text-white">
+              {name}
+            </h3>
+            <button
+              className="ml-2 text-stone-500 hover:text-blue-600"
+              onClick={() => setEditing(true)}
+              title="Edit list name"
+            >
+              <Pencil />
+            </button>
+          </>
+        )}
+      </div>
+      {error && <div className="mb-2 text-xs text-red-500">{error}</div>}
+      {success && (
+        <div className="mb-2 text-xs text-green-600">Name updated!</div>
+      )}
+
+      <div className="mb-4 grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-sm text-stone-500">Organization</div>
+          <div className="font-medium">{data.organization.name}</div>
         </div>
-        <div className="border-t border-stone-200 p-4 pt-2 text-xs text-stone-400 dark:border-stone-700 dark:text-stone-500">
-          <div className="flex flex-col gap-1 sm:justify-between">
-            <span>Organization: {data.organization.name}</span>
-            <span>Contacts: {contactsCount}</span>
-            <span>Created on: {createdAtFormatted}</span>
-          </div>
+        <div>
+          <div className="text-sm text-stone-500">Created on</div>
+          <div className="font-medium">{createdAtFormatted}</div>
+        </div>
+        <div>
+          <div className="text-sm text-stone-500">Contacts</div>
+          <div className="font-medium">{contactsCount}</div>
         </div>
       </div>
-    </Link>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link href={url}>
+          <Button size="sm">
+            {contactsCount === 0 ? "Add First Contact" : "Add Contact"}
+          </Button>
+        </Link>
+        <Link href={url}>
+          <Button variant="outline" size="sm">
+            Manage Custom Fields
+          </Button>
+        </Link>
+        <Link href={url}>
+          <Button variant="outline" size="sm">
+            Import Entries
+          </Button>
+        </Link>
+        <Link href={url}>
+          <Button variant="outline" size="sm">
+            Manage Contacts
+          </Button>
+        </Link>
+        <Link href={`${url}/segments`}>
+          <Button variant="outline" size="sm">
+            Manage Segments
+          </Button>
+        </Link>
+      </div>
+
+      <Alert className="mt-6">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Tip</AlertTitle>
+        <AlertDescription>
+          You can import contacts, add custom fields, or segment your audience
+          for better targeting.
+        </AlertDescription>
+      </Alert>
+    </div>
   );
 }
