@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, TagIcon, UserPlusIcon, XIcon } from "lucide-react";
+import { PlusIcon, TagIcon, XIcon } from "lucide-react";
 import * as React from "react";
 
 import type { CustomFieldDefinition } from "@/components/custom-fields-manager";
@@ -24,7 +24,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import type { Contact } from "@/lib/types";
@@ -32,13 +31,21 @@ import type { Contact } from "@/lib/types";
 interface AddContactSheetProps {
   onAddContact: (contact: Contact) => void;
   customFields?: CustomFieldDefinition[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function AddContactSheet({
   onAddContact,
   customFields = [],
+  open: controlledOpen,
+  onOpenChange,
 }: AddContactSheetProps) {
-  const [open, setOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = React.useState(false);
+
+  // Prefer controlled mode if open prop is present
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [formData, setFormData] = React.useState<Partial<Contact>>({
     email: "",
     firstName: "",
@@ -141,12 +148,6 @@ export function AddContactSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button>
-          <UserPlusIcon className="mr-2 h-4 w-4" />
-          Add Contact
-        </Button>
-      </SheetTrigger>
       <SheetContent className="w-[600px] overflow-y-auto sm:max-w-[600px]">
         <SheetHeader>
           <SheetTitle>Add New Contact</SheetTitle>

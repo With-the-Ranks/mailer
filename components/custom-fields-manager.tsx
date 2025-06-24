@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, SettingsIcon, TrashIcon, XIcon } from "lucide-react";
+import { PlusIcon, TrashIcon, XIcon } from "lucide-react";
 import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,15 +36,23 @@ export interface CustomFieldDefinition {
 }
 
 interface CustomFieldsManagerProps {
-  fields: CustomFieldDefinition[];
-  onFieldsChange: (fields: CustomFieldDefinition[]) => void;
+  customFields: CustomFieldDefinition[];
+  onCustomFieldsChange: (fields: CustomFieldDefinition[]) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function CustomFieldsManager({
-  fields,
-  onFieldsChange,
+  customFields = [],
+  onCustomFieldsChange,
+  open: controlledOpen,
+  onOpenChange,
 }: CustomFieldsManagerProps) {
-  const [open, setOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = React.useState(false);
+
+  // Prefer controlled mode if open prop is present
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [editingField, setEditingField] =
     React.useState<CustomFieldDefinition | null>(null);
   const [formData, setFormData] = React.useState<
@@ -78,13 +85,13 @@ export function CustomFieldsManager({
     };
 
     if (editingField) {
-      onFieldsChange(
-        fields.map((field) =>
+      onCustomFieldsChange(
+        customFields.map((field) =>
           field.id === editingField.id ? fieldData : field,
         ),
       );
     } else {
-      onFieldsChange([...fields, fieldData]);
+      onCustomFieldsChange([...customFields, fieldData]);
     }
 
     resetForm();
@@ -114,7 +121,9 @@ export function CustomFieldsManager({
         "Are you sure you want to delete this custom field? This will remove it from all contacts.",
       )
     ) {
-      onFieldsChange(fields.filter((field) => field.id !== fieldId));
+      onCustomFieldsChange(
+        customFields.filter((field) => field.id !== fieldId),
+      );
     }
   };
 
@@ -137,12 +146,6 @@ export function CustomFieldsManager({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <SettingsIcon className="mr-2 h-4 w-4" />
-          Manage Custom Fields
-        </Button>
-      </DialogTrigger>
       <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Custom Fields Manager</DialogTitle>
@@ -156,13 +159,13 @@ export function CustomFieldsManager({
           {/* Existing Fields */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Existing Custom Fields</h3>
-            {fields.length === 0 ? (
+            {customFields.length === 0 ? (
               <p className="text-muted-foreground">
                 No custom fields defined yet.
               </p>
             ) : (
               <div className="space-y-2">
-                {fields.map((field) => (
+                {customFields.map((field) => (
                   <div
                     key={field.id}
                     className="flex items-center justify-between rounded-lg border p-3"

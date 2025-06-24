@@ -1,5 +1,6 @@
 "use client";
 
+import type { ColumnFiltersState, Table } from "@tanstack/react-table";
 import { FilterIcon, SearchIcon, XIcon } from "lucide-react";
 import * as React from "react";
 
@@ -7,426 +8,281 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { Contact } from "@/lib/types";
-
 interface TableFiltersProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   contacts: Contact[];
-  onFilterChange: (filters: FilterState) => void;
+  activeFilters: Record<string, any>;
+  onFiltersChange: (filters: Record<string, any>) => void;
+  table: Table<Contact>;
 }
 
-export interface FilterState {
-  tags: string[];
-  countries: string[];
-  organizations: string[];
-  voterStatus: string[];
-  precincts: string[];
-  dateRange: string;
-}
+const BASE_FILTER_FIELDS = [
+  { key: "tags", label: "Tags" },
+  { key: "defaultAddressCompany", label: "Organizations" },
+  { key: "defaultAddressCountryCode", label: "Country" },
+  { key: "defaultAddressProvinceCode", label: "Precinct" },
+  { key: "defaultAddressZip", label: "Zip Code" },
+];
 
 export function TableFilters({
   searchValue,
   onSearchChange,
   contacts,
-  onFilterChange,
+  activeFilters,
+  onFiltersChange,
+  table,
 }: TableFiltersProps) {
-  const [filters, setFilters] = React.useState<FilterState>({
-    tags: [],
-    countries: [],
-    organizations: [],
-    voterStatus: [],
-    precincts: [],
-    dateRange: "all",
-  });
-
-  // Extract unique values for filter options
-  const uniqueTags = React.useMemo(() => {
-    const tags = new Set<string>();
-    contacts.forEach((contact) => {
-      if (contact.tags) {
-        contact.tags.split(",").forEach((tag) => tags.add(tag.trim()));
+  // Dynamically get options for each base field
+  const baseFieldOptions = React.useMemo(() => {
+    const map: Record<string, { label: string; values: string[] }> = {};
+    for (const { key, label } of BASE_FILTER_FIELDS) {
+      const values = new Set<string>();
+      contacts.forEach((contact) => {
+        const value = contact[key as keyof Contact] as string | undefined;
+        if (value) {
+          if (key === "tags") {
+            value.split(",").forEach((tag) => values.add(tag.trim()));
+          } else {
+            values.add(value);
+          }
+        }
+      });
+      const arr = Array.from(values).filter(Boolean).sort();
+      if (arr.length > 1) {
+        map[key] = { label, values: arr };
       }
-    });
-    return Array.from(tags).sort();
+    }
+    return map;
   }, [contacts]);
 
-  const uniqueCountries = React.useMemo(() => {
-    const countries = new Set<string>();
+  // Get custom field options with >1 value
+  const customFieldOptions = React.useMemo(() => {
+    const map: Record<string, string[]> = {};
     contacts.forEach((contact) => {
-      if (contact.defaultAddressCountryCode) {
-        countries.add(contact.defaultAddressCountryCode);
+      if (contact.customFields) {
+        Object.entries(contact.customFields).forEach(([k, v]) => {
+          if (!map[k]) map[k] = [];
+          if (typeof v === "string" && v.trim() && !map[k].includes(v.trim())) {
+            map[k].push(v.trim());
+          }
+        });
       }
     });
-    return Array.from(countries).sort();
-  }, [contacts]);
-
-  const uniqueOrganizations = React.useMemo(() => {
-    const organizations = new Set<string>();
-    contacts.forEach((contact) => {
-      if (contact.defaultAddressCompany) {
-        organizations.add(contact.defaultAddressCompany);
-      }
+    Object.keys(map).forEach((k) => {
+      if (map[k].length < 2) delete map[k];
     });
-    return Array.from(organizations).sort();
+    return map;
   }, [contacts]);
 
-  const uniqueVoterStatus = React.useMemo(() => {
-    const statuses = new Set<string>();
-    contacts.forEach((contact) => {
-      if (contact.customFields?.voterStatus) {
-        statuses.add(contact.customFields.voterStatus);
-      }
+  React.useEffect(() => {
+    const filters:
+      | ((old: ColumnFiltersState) => ColumnFiltersState)
+      | { id: string; value: any }[] = [];
+    table.setGlobalFilter(searchValue || "");
+
+    Object.keys(activeFilters).forEach((key) => {
+      if (
+        !activeFilters[key] ||
+        (Array.isArray(activeFilters[key]) && activeFilters[key].length === 0)
+      )
+        return;
+      filters.push({ id: key, value: activeFilters[key] });
     });
-    return Array.from(statuses).sort();
-  }, [contacts]);
 
-  const uniquePrecincts = React.useMemo(() => {
-    const precincts = new Set<string>();
-    contacts.forEach((contact) => {
-      if (contact.customFields?.precinct) {
-        precincts.add(contact.customFields.precinct);
-      }
-    });
-    return Array.from(precincts).sort();
-  }, [contacts]);
+    table.setColumnFilters(filters);
+  }, [searchValue, activeFilters, table]);
 
-  const updateFilter = (key: keyof FilterState, value: any) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
+  // Handlers
+  const handleFilterToggle = (field: string, value: string) => {
+    const prev = activeFilters[field] || [];
+    const next = prev.includes(value)
+      ? prev.filter((v: string) => v !== value)
+      : [...prev, value];
+    onFiltersChange({ ...activeFilters, [field]: next });
   };
 
-  const toggleArrayFilter = (key: keyof FilterState, value: string) => {
-    const currentArray = filters[key] as string[];
-    const newArray = currentArray.includes(value)
-      ? currentArray.filter((item) => item !== value)
-      : [...currentArray, value];
-    updateFilter(key, newArray);
-  };
-
-  const clearAllFilters = () => {
-    const clearedFilters: FilterState = {
-      tags: [],
-      countries: [],
-      organizations: [],
-      voterStatus: [],
-      precincts: [],
-      dateRange: "all",
-    };
-    setFilters(clearedFilters);
-    onFilterChange(clearedFilters);
-  };
-
-  const hasActiveFilters = Object.values(filters).some((filter) =>
-    Array.isArray(filter) ? filter.length > 0 : filter !== "all",
-  );
+  const clearAllFilters = React.useCallback(() => {
+    const reset: Record<string, any> = {};
+    Object.keys(baseFieldOptions).forEach((f) => (reset[f] = []));
+    Object.keys(customFieldOptions).forEach((f) => (reset[f] = []));
+    onSearchChange("");
+    onFiltersChange(reset);
+  }, [baseFieldOptions, customFieldOptions, onFiltersChange, onSearchChange]);
 
   const activeFilterCount =
-    filters.tags.length +
-    filters.countries.length +
-    filters.organizations.length +
-    filters.voterStatus.length +
-    filters.precincts.length +
-    (filters.dateRange !== "all" ? 1 : 0);
+    (searchValue ? 1 : 0) +
+    Object.keys(baseFieldOptions).reduce(
+      (acc, key) => acc + (activeFilters[key]?.length || 0),
+      0,
+    ) +
+    Object.keys(customFieldOptions).reduce(
+      (acc, key) => acc + (activeFilters[key]?.length || 0),
+      0,
+    );
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-4">
-        <div className="relative max-w-sm flex-1">
-          <SearchIcon className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
-          <Input
-            placeholder="Search contacts..."
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm">
-              <FilterIcon className="mr-2 h-4 w-4" />
-              Advanced Filters
-              {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80" align="start">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filter Contacts</h4>
-                {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-                    <XIcon className="mr-1 h-4 w-4" />
-                    Clear
-                  </Button>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Tags Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Tags</Label>
-                <div className="max-h-32 space-y-1 overflow-y-auto">
-                  {uniqueTags.map((tag) => (
-                    <div key={tag} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`tag-${tag}`}
-                        checked={filters.tags.includes(tag)}
-                        onCheckedChange={() => toggleArrayFilter("tags", tag)}
-                      />
-                      <Label htmlFor={`tag-${tag}`} className="text-sm">
-                        {tag}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Voter Status Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Voter Status</Label>
-                <div className="space-y-1">
-                  {uniqueVoterStatus.map((status) => (
-                    <div key={status} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`status-${status}`}
-                        checked={filters.voterStatus.includes(status)}
-                        onCheckedChange={() =>
-                          toggleArrayFilter("voterStatus", status)
-                        }
-                      />
-                      <Label htmlFor={`status-${status}`} className="text-sm">
-                        {status}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Precincts Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Precincts</Label>
-                <div className="max-h-32 space-y-1 overflow-y-auto">
-                  {uniquePrecincts.map((precinct) => (
-                    <div key={precinct} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`precinct-${precinct}`}
-                        checked={filters.precincts.includes(precinct)}
-                        onCheckedChange={() =>
-                          toggleArrayFilter("precincts", precinct)
-                        }
-                      />
-                      <Label
-                        htmlFor={`precinct-${precinct}`}
-                        className="text-sm"
-                      >
-                        {precinct}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Countries Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Countries</Label>
-                <div className="space-y-1">
-                  {uniqueCountries.map((country) => (
-                    <div key={country} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`country-${country}`}
-                        checked={filters.countries.includes(country)}
-                        onCheckedChange={() =>
-                          toggleArrayFilter("countries", country)
-                        }
-                      />
-                      <Label htmlFor={`country-${country}`} className="text-sm">
-                        {country}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Organizations Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Organizations</Label>
-                <div className="max-h-32 space-y-1 overflow-y-auto">
-                  {uniqueOrganizations.map((org) => (
-                    <div key={org} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`org-${org}`}
-                        checked={filters.organizations.includes(org)}
-                        onCheckedChange={() =>
-                          toggleArrayFilter("organizations", org)
-                        }
-                      />
-                      <Label
-                        htmlFor={`org-${org}`}
-                        className="truncate text-sm"
-                      >
-                        {org}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Date Range Filter */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Date Added</Label>
-                <Select
-                  value={filters.dateRange}
-                  onValueChange={(value) => updateFilter("dateRange", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="quarter">This Quarter</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+    <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <SearchIcon className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <Input
+          placeholder="Search contacts..."
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
-      {/* Active Filters Display */}
-      {hasActiveFilters && (
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Dynamically generated base field filters */}
+        {Object.entries(baseFieldOptions).map(([field, { label, values }]) => (
+          <Popover key={field}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8">
+                <FilterIcon className="mr-2 h-4 w-4" />
+                {label}
+                {activeFilters[field]?.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 h-5 w-5 rounded-full p-0 text-xs"
+                  >
+                    {activeFilters[field].length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="start">
+              <div className="space-y-2">
+                <h4 className="font-medium">Filter by {label}</h4>
+                <ScrollArea className="h-48">
+                  <div className="space-y-2">
+                    {values.map((v) => (
+                      <div key={v} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${field}-${v}`}
+                          checked={activeFilters[field]?.includes(v)}
+                          onCheckedChange={() => handleFilterToggle(field, v)}
+                        />
+                        <label htmlFor={`${field}-${v}`} className="text-sm">
+                          {v}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </PopoverContent>
+          </Popover>
+        ))}
+
+        {/* Custom fields filters */}
+        {Object.entries(customFieldOptions).map(([field, values]) => (
+          <Popover key={field}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8">
+                <FilterIcon className="mr-2 h-4 w-4" />
+                {field}
+                {activeFilters[field]?.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 h-5 w-5 rounded-full p-0 text-xs"
+                  >
+                    {activeFilters[field].length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="start">
+              <div className="space-y-2">
+                <h4 className="font-medium">Filter by {field}</h4>
+                <ScrollArea className="h-48">
+                  <div className="space-y-2">
+                    {values.map((v) => (
+                      <div key={v} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${field}-${v}`}
+                          checked={activeFilters[field]?.includes(v)}
+                          onCheckedChange={() => handleFilterToggle(field, v)}
+                        />
+                        <label htmlFor={`${field}-${v}`} className="text-sm">
+                          {v}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </PopoverContent>
+          </Popover>
+        ))}
+
+        {/* Clear Filters */}
+        {activeFilterCount > 0 && (
+          <>
+            <Separator orientation="vertical" className="h-6" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="h-8"
+            >
+              <XIcon className="mr-2 h-4 w-4" />
+              Clear ({activeFilterCount})
+            </Button>
+          </>
+        )}
+      </div>
+
+      {/* Active Filter Tags */}
+      {activeFilterCount > 0 && (
         <div className="flex flex-wrap gap-2">
-          {filters.tags.map((tag) => (
-            <Badge
-              key={`tag-${tag}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              Tag: {tag}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => toggleArrayFilter("tags", tag)}
-              >
-                <XIcon className="h-3 w-3" />
-              </Button>
+          {searchValue && (
+            <Badge variant="secondary" className="gap-1">
+              Search: {searchValue}
+              <XIcon
+                className="h-3 w-3 cursor-pointer"
+                onClick={() => onSearchChange("")}
+              />
             </Badge>
-          ))}
-          {filters.voterStatus.map((status) => (
-            <Badge
-              key={`status-${status}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              Status: {status}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => toggleArrayFilter("voterStatus", status)}
+          )}
+          {Object.entries(baseFieldOptions).map(([field, { label }]) =>
+            (activeFilters[field] || []).map((v: string) => (
+              <Badge
+                key={`${field}-${v}`}
+                variant="secondary"
+                className="gap-1"
               >
-                <XIcon className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-          {filters.precincts.map((precinct) => (
-            <Badge
-              key={`precinct-${precinct}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              Precinct: {precinct}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => toggleArrayFilter("precincts", precinct)}
+                {label}: {v}
+                <XIcon
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => handleFilterToggle(field, v)}
+                />
+              </Badge>
+            )),
+          )}
+          {Object.entries(customFieldOptions).map(([field]) =>
+            (activeFilters[field] || []).map((v: string) => (
+              <Badge
+                key={`${field}-${v}`}
+                variant="secondary"
+                className="gap-1"
               >
-                <XIcon className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-          {filters.countries.map((country) => (
-            <Badge
-              key={`country-${country}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              Country: {country}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => toggleArrayFilter("countries", country)}
-              >
-                <XIcon className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-          {filters.organizations.map((org) => (
-            <Badge
-              key={`org-${org}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              Org: {org}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => toggleArrayFilter("organizations", org)}
-              >
-                <XIcon className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-          {filters.dateRange !== "all" && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Date: {filters.dateRange}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => updateFilter("dateRange", "all")}
-              >
-                <XIcon className="h-3 w-3" />
-              </Button>
-            </Badge>
+                {field}: {v}
+                <XIcon
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => handleFilterToggle(field, v)}
+                />
+              </Badge>
+            )),
           )}
         </div>
       )}

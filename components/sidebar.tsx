@@ -13,6 +13,7 @@ import {
   RadioTower,
   Settings,
   SlidersHorizontal,
+  UploadIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -103,15 +104,61 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     if (segments[0] === "audience" && id) {
       return [
         {
-          name: "Back to Audience Lists",
+          name: "Back to Dashboard",
           href: siteId ? `/organization/${siteId}/audience` : "/organizations",
           icon: ArrowLeft,
         },
         {
           name: "Audience",
-          href: `/audience/${id}`,
-          isActive: segments.length === 2,
           icon: RadioTower,
+          isActive: segments.length === 2,
+          submenu: [
+            {
+              name: "Contacts",
+              href: `/audience/${id}`,
+              isActive: segments.length === 2,
+              icon: List,
+            },
+            {
+              name: "Add Contact",
+              href: `/audience/${id}?action=add-contact`,
+              isActive:
+                typeof window !== "undefined"
+                  ? new URLSearchParams(window.location.search).get(
+                      "action",
+                    ) === "add-contact"
+                  : false,
+              icon: Edit3, // or UserPlusIcon if you imported it
+            },
+            {
+              name: "Import Contacts",
+              href: `/audience/${id}?action=import`,
+              isActive:
+                typeof window !== "undefined"
+                  ? new URLSearchParams(window.location.search).get(
+                      "action",
+                    ) === "import"
+                  : false,
+              icon: UploadIcon,
+            },
+            {
+              name: "Custom Fields",
+              href: `/audience/${id}?action=custom-fields`,
+              isActive:
+                typeof window !== "undefined"
+                  ? new URLSearchParams(window.location.search).get(
+                      "action",
+                    ) === "custom-fields"
+                  : false,
+              icon: Settings,
+            },
+            {
+              name: "Segments",
+              href: `/audience/${id}/segments`,
+              isActive: segments.includes("segments"),
+              icon: Filter,
+            },
+          ],
         },
       ];
     }

@@ -96,6 +96,7 @@ export interface Contact {
   customFields?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;
+  audienceListId: string;
 }
 
 export interface ImportProgress {

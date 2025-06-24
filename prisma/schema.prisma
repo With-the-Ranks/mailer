@@ -137,7 +137,7 @@ model Organization {
   activeDomain   EmailDomain?  @relation("ActiveDomain", fields: [activeDomainId], references: [id])
 
   domains        EmailDomain[] // All domains owned by org
-
+  customFieldDefinitions CustomFieldDefinition[]
   Template Template[]
 }
 
@@ -191,14 +191,57 @@ model AudienceList {
 }
 
 model Audience {
-  id             String        @id @default(cuid())
-  email          String
-  firstName      String
-  lastName       String
-  customFields   Json?
-  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
-  audienceListId String
-  updatedAt      DateTime      @updatedAt
+  id                         String        @id @default(cuid())
+  email                      String
+  firstName                  String
+  lastName                   String
+  phone                      String?
+  note                       String?       @db.Text
+  tags                       String?       @db.Text
+  
+  // Address fields
+  defaultAddressCompany      String?
+  defaultAddressAddress1     String?
+  defaultAddressAddress2     String?
+  defaultAddressCity         String?
+  defaultAddressProvinceCode String?
+  defaultAddressCountryCode  String?
+  defaultAddressZip          String?
+  defaultAddressPhone        String?
+  
+  // Custom fields as JSON for flexibility
+  customFields               Json?
+  
+  // Metadata
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+  
+  // Relations
+  audienceList               AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+  audienceListId             String
 
   @@unique([audienceListId, email])
+  @@index([audienceListId])
+  @@index([email])
+  @@index([firstName, lastName])
+}
+
+model CustomFieldDefinition {
+  id             String        @id @default(cuid())
+  name           String        // Field name (e.g., "voterStatus")
+  label          String        // Display label (e.g., "Voter Status")
+  type           String        // "text", "number", "date", "select", "textarea"
+  options        String[]      // For select fields
+  required       Boolean       @default(false)
+  description    String?       @db.Text
+  
+  // Relations
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
 }

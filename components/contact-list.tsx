@@ -17,23 +17,40 @@ import {
   ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
+  Settings2Icon,
   TrashIcon,
+  UploadIcon,
+  UserPlusIcon,
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
+import { toast } from "sonner";
 
-import { mockContacts } from "@/lib/mock-data";
 import type { Contact } from "@/lib/types";
 
 import { AddContactSheet } from "./contact-table/add-contact-sheet";
 import { ColumnVisibility } from "./contact-table/column-visibility";
 import { ResizableTable } from "./contact-table/resizable-table";
 import { createColumns } from "./contact-table/table-columns";
-import { type FilterState, TableFilters } from "./contact-table/table-filters";
+import { TableFilters } from "./contact-table/table-filters";
 import {
   type CustomFieldDefinition,
   CustomFieldsManager,
 } from "./custom-fields-manager";
 import { CsvImportDialog } from "./import/csv-import-dialog";
+import { CreateSegmentDialog } from "./segments/create-segment-dialog";
+import { SegmentsList } from "./segments/segments-list";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import {
   Select,
@@ -42,14 +59,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface ContactListProps {
   listId: string;
   listName: string;
-  initialContacts?: any[]; // Your Prisma audience data
+  initialContacts?: any[];
 }
 
-// Helper function to convert Prisma audience data to Contact format
 function convertAudienceToContact(audience: any): Contact {
   return {
     id: audience.id,
@@ -74,7 +91,18 @@ function convertAudienceToContact(audience: any): Contact {
     updatedAt: audience.updatedAt
       ? new Date(audience.updatedAt).toISOString().split("T")[0]
       : undefined,
+    audienceListId: audience.audienceListId,
   };
+}
+
+// Helper function to safely parse JSON responses
+async function parseResponse(response: Response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(text || "Unknown error occurred");
+  }
 }
 
 export function ContactList({
@@ -82,66 +110,10 @@ export function ContactList({
   listName,
   initialContacts,
 }: ContactListProps) {
-  // Convert initial data or use mock data
-  const [contacts, setContacts] = React.useState<Contact[]>(() => {
-    if (initialContacts && initialContacts.length > 0) {
-      return initialContacts.map(convertAudienceToContact);
-    }
-    return mockContacts;
-  });
-
+  const [contacts, setContacts] = React.useState<Contact[]>([]);
   const [customFields, setCustomFields] = React.useState<
     CustomFieldDefinition[]
-  >([
-    {
-      id: "1",
-      name: "voterStatus",
-      label: "Voter Status",
-      type: "select",
-      options: [
-        "Registered",
-        "Newly Registered",
-        "Unregistered",
-        "Moved",
-        "Inactive",
-      ],
-      required: false,
-      description: "Current voter registration status",
-    },
-    {
-      id: "2",
-      name: "precinct",
-      label: "Precinct",
-      type: "text",
-      required: false,
-      description: "Voting precinct identifier",
-    },
-    {
-      id: "3",
-      name: "priority",
-      label: "Priority",
-      type: "select",
-      options: ["High", "Medium", "Low"],
-      required: false,
-      description: "Contact priority level",
-    },
-    {
-      id: "4",
-      name: "volunteerHours",
-      label: "Volunteer Hours",
-      type: "number",
-      required: false,
-      description: "Total volunteer hours contributed",
-    },
-    {
-      id: "5",
-      name: "profession",
-      label: "Profession",
-      type: "text",
-      required: false,
-      description: "Contact's profession or job title",
-    },
-  ]);
+  >([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({
@@ -162,371 +134,562 @@ export function ContactList({
     pageSize: 10,
   });
   const [searchValue, setSearchValue] = React.useState("");
-  const [activeFilters, setActiveFilters] = React.useState<FilterState>({
-    tags: [],
-    countries: [],
-    organizations: [],
-    voterStatus: [],
-    precincts: [],
-    dateRange: "all",
-  });
+  const [activeFilters, setActiveFilters] = React.useState<Record<string, any>>(
+    {},
+  );
 
-  const handleDeleteContact = async (id: string) => {
-    if (confirm("Are you sure you want to delete this contact?")) {
-      try {
-        // TODO: Add API call to delete from database
-        // await fetch(`/api/contacts/${id}`, { method: 'DELETE' })
-        setContacts((prev) => prev.filter((c) => c.id !== id));
-      } catch (error) {
-        console.error("Failed to delete contact:", error);
-        alert("Failed to delete contact. Please try again.");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [contactToDelete, setContactToDelete] = React.useState<string | null>(
+    null,
+  );
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = React.useState(false);
+  const [isInitialized, setIsInitialized] = React.useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const action = searchParams.get("action");
+
+  const handleActionChange = (key: string, open: boolean) => {
+    // Add or remove action param
+    const params = new URLSearchParams(searchParams);
+    if (open) {
+      params.set("action", key);
+    } else {
+      params.delete("action");
+    }
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  // Initialize contacts from props
+  React.useEffect(() => {
+    if (initialContacts && initialContacts.length > 0 && !isInitialized) {
+      setContacts(initialContacts.map(convertAudienceToContact));
+      setIsInitialized(true);
+    } else if (!initialContacts || initialContacts.length === 0) {
+      loadContacts();
+    }
+  }, [initialContacts, isInitialized, listId]);
+
+  // Load custom fields
+  React.useEffect(() => {
+    loadCustomFields();
+  }, []);
+
+  const loadCustomFields = async () => {
+    try {
+      const response = await fetch("/api/custom-fields");
+      if (response.ok) {
+        const fields = await parseResponse(response);
+        setCustomFields(fields);
       }
+    } catch (error) {
+      console.error("Failed to load custom fields:", error);
+      toast.error("Failed to load custom fields");
+    }
+  };
+
+  const loadContacts = async () => {
+    try {
+      const response = await fetch(`/api/contacts?audienceListId=${listId}`);
+      if (response.ok) {
+        const data = await parseResponse(response);
+        setContacts(data.map(convertAudienceToContact));
+      } else {
+        const error = await parseResponse(response);
+        toast.error(error.error || "Failed to load contacts");
+      }
+    } catch (error) {
+      console.error("Failed to load contacts:", error);
+      toast.error("Failed to load contacts");
+    }
+  };
+
+  const handleAddContact = React.useCallback(
+    async (contactData: Omit<Contact, "id">) => {
+      try {
+        const response = await fetch("/api/contacts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...contactData,
+            audienceListId: listId,
+          }),
+        });
+
+        if (response.ok) {
+          const newContact = await parseResponse(response);
+          setContacts((prev) => [
+            convertAudienceToContact(newContact),
+            ...prev,
+          ]);
+          toast.success("Contact added successfully");
+        } else {
+          const error = await parseResponse(response);
+          if (error.details) {
+            const fieldErrors = error.details
+              .map((d: any) => `${d.field}: ${d.message}`)
+              .join(", ");
+            toast.error(`Validation error: ${fieldErrors}`);
+          } else {
+            toast.error(error.error || "Failed to add contact");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to add contact:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to add contact",
+        );
+      }
+    },
+    [listId],
+  );
+
+  const handleEditContact = React.useCallback(
+    async (id: string, contactData: Partial<Contact>) => {
+      const currentContact = contacts.find((c) => c.id === id);
+      const payload = {
+        ...contactData,
+        audienceListId:
+          (contactData as any).audienceListId ||
+          currentContact?.audienceListId ||
+          listId,
+      };
+      try {
+        const response = await fetch(`/api/contacts/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          const updatedContact = await parseResponse(response);
+          setContacts((prev) =>
+            prev.map((contact) =>
+              contact.id === id
+                ? convertAudienceToContact(updatedContact)
+                : contact,
+            ),
+          );
+          toast.success("Contact updated successfully");
+        } else {
+          const error = await parseResponse(response);
+          if (error.details) {
+            const fieldErrors = error.details
+              .map((d: any) => `${d.field}: ${d.message}`)
+              .join(", ");
+            toast.error(`Validation error: ${fieldErrors}`);
+          } else {
+            toast.error(error.error || "Failed to update contact");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to update contact:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update contact",
+        );
+      }
+    },
+    [contacts, listId],
+  );
+
+  const handleDeleteContact = React.useCallback(async (id: string) => {
+    setContactToDelete(id);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const confirmDeleteContact = async () => {
+    if (!contactToDelete) return;
+
+    try {
+      const response = await fetch(`/api/contacts/${contactToDelete}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setContacts((prev) =>
+          prev.filter((contact) => contact.id !== contactToDelete),
+        );
+        toast.success("Contact deleted successfully");
+      } else {
+        const error = await parseResponse(response);
+        toast.error(error.error || "Failed to delete contact");
+      }
+    } catch (error) {
+      console.error("Failed to delete contact:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete contact",
+      );
+    } finally {
+      setDeleteDialogOpen(false);
+      setContactToDelete(null);
     }
   };
 
   const handleBulkDelete = async () => {
-    const selectedIds = Object.keys(rowSelection).filter(
-      (key) => rowSelection[key as keyof typeof rowSelection],
-    );
-    if (
-      selectedIds.length > 0 &&
-      confirm(`Delete ${selectedIds.length} selected contacts?`)
-    ) {
-      try {
-        // TODO: Add API call for bulk delete
-        // await fetch('/api/contacts/bulk-delete', {
-        //   method: 'POST',
-        //   body: JSON.stringify({ ids: selectedIds })
-        // })
-        setContacts((prev) => prev.filter((c) => !selectedIds.includes(c.id)));
-        setRowSelection({});
-      } catch (error) {
-        console.error("Failed to delete contacts:", error);
-        alert("Failed to delete contacts. Please try again.");
-      }
-    }
+    setBulkDeleteDialogOpen(true);
   };
-
-  const handleUpdateContact = async (updatedContact: Contact) => {
-    try {
-      // TODO: Add API call to update in database
-      // await fetch(`/api/contacts/${updatedContact.id}`, {
-      //   method: 'PUT',
-      //   body: JSON.stringify(updatedContact)
-      // })
-      setContacts((prev) =>
-        prev.map((contact) =>
-          contact.id === updatedContact.id ? updatedContact : contact,
-        ),
-      );
-    } catch (error) {
-      console.error("Failed to update contact:", error);
-      alert("Failed to update contact. Please try again.");
-    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleUpdateContact = (contact: Contact) => {
+    handleEditContact(contact.id, contact);
   };
-
-  const handleAddContact = async (newContact: Contact) => {
-    try {
-      // TODO: Add API call to save to database
-      // const response = await fetch('/api/contacts', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ ...newContact, audienceListId: listId })
-      // })
-      // const savedContact = await response.json()
-      setContacts((prev) => [...prev, newContact]);
-    } catch (error) {
-      console.error("Failed to add contact:", error);
-      alert("Failed to add contact. Please try again.");
-    }
-  };
-
-  const handleImportComplete = async (importedContacts: Contact[]) => {
-    try {
-      // TODO: Add API call for bulk import
-      // await fetch('/api/contacts/bulk-import', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ contacts: importedContacts, audienceListId: listId })
-      // })
-      setContacts((prev) => [...prev, ...importedContacts]);
-    } catch (error) {
-      console.error("Failed to import contacts:", error);
-      alert("Failed to import contacts. Please try again.");
-    }
-  };
-
-  // Filter contacts based on search and active filters
-  const filteredContacts = React.useMemo(() => {
-    let filtered = contacts;
-
-    // Apply search filter
-    if (searchValue) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.firstName.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.lastName.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.defaultAddressCompany
-            ?.toLowerCase()
-            .includes(searchValue.toLowerCase()),
-      );
-    }
-
-    // Apply advanced filters
-    if (activeFilters.tags.length > 0) {
-      filtered = filtered.filter((contact) =>
-        contact.tags
-          ?.split(",")
-          .some((tag) => activeFilters.tags.includes(tag.trim())),
-      );
-    }
-
-    if (activeFilters.countries.length > 0) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.defaultAddressCountryCode &&
-          activeFilters.countries.includes(contact.defaultAddressCountryCode),
-      );
-    }
-
-    if (activeFilters.organizations.length > 0) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.defaultAddressCompany &&
-          activeFilters.organizations.includes(contact.defaultAddressCompany),
-      );
-    }
-
-    if (activeFilters.voterStatus.length > 0) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.customFields?.voterStatus &&
-          activeFilters.voterStatus.includes(contact.customFields.voterStatus),
-      );
-    }
-
-    if (activeFilters.precincts.length > 0) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.customFields?.precinct &&
-          activeFilters.precincts.includes(contact.customFields.precinct),
-      );
-    }
-
-    // Apply date range filter
-    if (activeFilters.dateRange !== "all") {
-      const now = new Date();
-      const filterDate = new Date();
-
-      switch (activeFilters.dateRange) {
-        case "today":
-          filterDate.setHours(0, 0, 0, 0);
-          break;
-        case "week":
-          filterDate.setDate(now.getDate() - 7);
-          break;
-        case "month":
-          filterDate.setMonth(now.getMonth() - 1);
-          break;
-        case "quarter":
-          filterDate.setMonth(now.getMonth() - 3);
-          break;
-        case "year":
-          filterDate.setFullYear(now.getFullYear() - 1);
-          break;
-      }
-
-      filtered = filtered.filter((contact) => {
-        if (!contact.createdAt) return false;
-        const createdDate = new Date(contact.createdAt);
-        return createdDate >= filterDate;
-      });
-    }
-
-    return filtered;
-  }, [contacts, searchValue, activeFilters]);
-
   const columns = React.useMemo(
     () =>
-      createColumns(
-        customFields,
-        async (_id: string, _data: Partial<Contact>) => {},
-        handleDeleteContact,
-        {
-          onUpdateContact: handleUpdateContact,
-          onDeleteContact: handleDeleteContact,
-        },
-      ),
-    [customFields, handleDeleteContact, handleUpdateContact],
+      createColumns({
+        onUpdateContact: handleUpdateContact,
+        onDeleteContact: handleDeleteContact,
+      }),
+    [handleUpdateContact, handleDeleteContact],
   );
-
   const table = useReactTable({
-    data: filteredContacts,
+    data: contacts,
     columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      pagination,
+    },
   });
 
+  const confirmBulkDelete = async () => {
+    const selectedIds = table
+      .getSelectedRowModel()
+      .rows.map((row) => row.original.id);
+
+    if (selectedIds.length === 0) {
+      toast.error("No contacts selected");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/contacts/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      if (response.ok) {
+        const result = await parseResponse(response);
+        setContacts((prev) =>
+          prev.filter((contact) => !selectedIds.includes(contact.id)),
+        );
+        setRowSelection({});
+        toast.success(`${result.deletedCount} contacts deleted successfully`);
+      } else {
+        const error = await parseResponse(response);
+        toast.error(error.error || "Failed to delete contacts");
+      }
+    } catch (error) {
+      console.error("Failed to bulk delete contacts:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete contacts",
+      );
+    } finally {
+      setBulkDeleteDialogOpen(false);
+    }
+  };
+
+  const handleImportContacts = React.useCallback(
+    async (importedContacts: Contact[]) => {
+      try {
+        const response = await fetch("/api/contacts/bulk-import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contacts: importedContacts,
+            audienceListId: listId,
+            skipDuplicates: true,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await parseResponse(response);
+          await loadContacts();
+          toast.success(
+            `Import completed: ${result.results.successful} added, ${result.results.skipped} skipped, ${result.results.failed} failed`,
+          );
+        } else {
+          const error = await parseResponse(response);
+          toast.error(error.error || "Failed to import contacts");
+        }
+      } catch (error) {
+        console.error("Failed to import contacts:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to import contacts",
+        );
+      }
+    },
+    [listId],
+  );
+
+  const selectedRowCount = Object.keys(rowSelection).filter(
+    (key) => (rowSelection as any)[key],
+  ).length;
+  const filteredContacts = table
+    .getFilteredRowModel()
+    .rows.map((row) => row.original);
+  const hasActiveFilters =
+    !!searchValue ||
+    Object.values(activeFilters).some((v) =>
+      Array.isArray(v) ? v.length > 0 : !!v,
+    );
+
   return (
-    <div className="flex h-full w-full flex-col space-y-4 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>
-          <p className="text-muted-foreground">
-            Manage your contact list for organizing, campaigns, and outreach •{" "}
-            {filteredContacts.length} contacts
-          </p>
+    <div className="flex h-full w-full flex-col space-y-4 p-4">
+      <Tabs defaultValue="contacts" className="w-full">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>
+            <p className="text-muted-foreground">
+              Manage your contact list for organizing, campaigns, and outreach •{" "}
+              {contacts.length} contacts
+            </p>
+          </div>
+          <TabsList>
+            <TabsTrigger value="contacts">Contacts</TabsTrigger>
+            <TabsTrigger value="segments">Segments</TabsTrigger>
+          </TabsList>
         </div>
-        <div className="flex items-center space-x-2">
-          <CustomFieldsManager
-            fields={customFields}
-            onFieldsChange={setCustomFields}
+
+        <TabsContent value="contacts" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Link href="?action=custom-fields" scroll={false}>
+                <Button variant="outline" size="sm">
+                  <Settings2Icon className="mr-2 h-4 w-4" />
+                  Custom Fields
+                </Button>
+              </Link>
+              <Link href="?action=import" scroll={false}>
+                <Button variant="outline" size="sm">
+                  <UploadIcon className="mr-2 h-4 w-4" />
+                  Import Contacts
+                </Button>
+              </Link>
+              <Link href="?action=add-contact" scroll={false}>
+                <Button variant="default" size="sm">
+                  <UserPlusIcon className="mr-2 h-4 w-4" />
+                  Add Contact
+                </Button>
+              </Link>
+            </div>
+            <CustomFieldsManager
+              open={action === "custom-fields"}
+              onOpenChange={(open) => handleActionChange("custom-fields", open)}
+              customFields={customFields}
+              onCustomFieldsChange={setCustomFields}
+            />
+            <CsvImportDialog
+              audienceListId={listId}
+              onImportComplete={handleImportContacts}
+              open={action === "import"}
+              onOpenChange={(open) => handleActionChange("import", open)}
+            />
+            <AddContactSheet
+              open={action === "add-contact"}
+              onOpenChange={(open) => handleActionChange("add-contact", open)}
+              customFields={customFields}
+              onAddContact={handleAddContact}
+            />
+            {hasActiveFilters && (
+              <CreateSegmentDialog
+                listId={listId}
+                filteredContacts={filteredContacts}
+                activeFilters={activeFilters}
+                searchValue={searchValue}
+              />
+            )}
+          </div>
+
+          <TableFilters
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            contacts={contacts}
+            activeFilters={activeFilters}
+            onFiltersChange={setActiveFilters}
+            table={table}
           />
-          <CsvImportDialog onImportComplete={handleImportComplete} />
-          <AddContactSheet
-            onAddContact={handleAddContact}
-            customFields={customFields}
-          />
-        </div>
-      </div>
 
-      {/* Filters */}
-      <TableFilters
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        contacts={contacts}
-        onFilterChange={setActiveFilters}
-      />
-
-      {/* Actions Bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {Object.keys(rowSelection).length > 0 && (
-            <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
-              <TrashIcon className="mr-2 h-4 w-4" />
-              Delete ({Object.keys(rowSelection).length})
-            </Button>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <ColumnVisibility table={table} />
-        </div>
-      </div>
-
-      {/* Resizable Table */}
-      <ResizableTable table={table} data={filteredContacts} columns={columns} />
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {Object.keys(rowSelection).length} of {filteredContacts.length}{" "}
-          contact(s) selected.
-        </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={`${pagination.pageSize}`}
-              onValueChange={(value) => {
-                setPagination((prev) => ({ ...prev, pageSize: Number(value) }));
-              }}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={pagination.pageSize} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <ColumnVisibility table={table} />
+              {selectedRowCount > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                >
+                  <TrashIcon className="mr-2 h-4 w-4" />
+                  Delete ({selectedRowCount})
+                </Button>
+              )}
+            </div>
+            <div className="text-muted-foreground text-sm">
+              {selectedRowCount > 0 &&
+                `${selectedRowCount} of ${contacts.length} row(s) selected`}
+            </div>
           </div>
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {pagination.pageIndex + 1} of{" "}
-            {Math.ceil(filteredContacts.length / pagination.pageSize)}
+
+          <div className="rounded-md border">
+            <ResizableTable table={table} data={contacts} columns={columns} />
           </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() =>
-                setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-              }
-              disabled={pagination.pageIndex === 0}
-            >
-              <span className="sr-only">Go to first page</span>
-              <ChevronsLeftIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  pageIndex: prev.pageIndex - 1,
-                }))
-              }
-              disabled={pagination.pageIndex === 0}
-            >
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  pageIndex: prev.pageIndex + 1,
-                }))
-              }
-              disabled={
-                pagination.pageIndex >=
-                Math.ceil(filteredContacts.length / pagination.pageSize) - 1
-              }
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRightIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  pageIndex:
-                    Math.ceil(filteredContacts.length / pagination.pageSize) -
-                    1,
-                }))
-              }
-              disabled={
-                pagination.pageIndex >=
-                Math.ceil(filteredContacts.length / pagination.pageSize) - 1
-              }
-            >
-              <span className="sr-only">Go to last page</span>
-              <ChevronsRightIcon className="h-4 w-4" />
-            </Button>
+
+          <div className="flex items-center justify-between space-x-2 py-4">
+            <div className="text-muted-foreground flex-1 text-sm">
+              {selectedRowCount} of {contacts.length} contact(s) selected.
+            </div>
+            <div className="flex items-center space-x-6 lg:space-x-8">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium">Rows per page</p>
+                <Select
+                  value={`${pagination.pageSize}`}
+                  onValueChange={(value) => {
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageSize: Number(value),
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={pagination.pageSize} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 20, 30, 40, 50].map((pageSize) => (
+                      <SelectItem key={pageSize} value={`${pageSize}`}>
+                        {pageSize}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                Page {pagination.pageIndex + 1} of{" "}
+                {Math.ceil(contacts.length / pagination.pageSize)}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() =>
+                    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+                  }
+                  disabled={pagination.pageIndex === 0}
+                >
+                  <span className="sr-only">Go to first page</span>
+                  <ChevronsLeftIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageIndex: prev.pageIndex - 1,
+                    }))
+                  }
+                  disabled={pagination.pageIndex === 0}
+                >
+                  <span className="sr-only">Go to previous page</span>
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageIndex: prev.pageIndex + 1,
+                    }))
+                  }
+                  disabled={
+                    pagination.pageIndex >=
+                    Math.ceil(contacts.length / pagination.pageSize) - 1
+                  }
+                >
+                  <span className="sr-only">Go to next page</span>
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageIndex:
+                        Math.ceil(contacts.length / pagination.pageSize) - 1,
+                    }))
+                  }
+                  disabled={
+                    pagination.pageIndex >=
+                    Math.ceil(contacts.length / pagination.pageSize) - 1
+                  }
+                >
+                  <span className="sr-only">Go to last page</span>
+                  <ChevronsRightIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="segments">
+          <SegmentsList listId={listId} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Delete Confirmation Dialogs */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this contact? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteContact}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Selected Contacts</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedRowCount} selected
+              contact(s)? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete {selectedRowCount} Contact(s)
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -114,11 +114,11 @@ export function EditContactSheet({
             Update contact information. Fields marked with * are required.
           </SheetDescription>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 py-6">
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           {/* Basic Information */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-lg font-medium">Basic Information</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name *</Label>
                 <Input
@@ -175,7 +175,7 @@ export function EditContactSheet({
           <Separator />
 
           {/* Address Information */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-lg font-medium">Address Information</h3>
             <div className="space-y-2">
               <Label htmlFor="company">Organization</Label>
@@ -216,7 +216,7 @@ export function EditContactSheet({
                 }
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Input
@@ -244,7 +244,7 @@ export function EditContactSheet({
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="province">State/Province Code</Label>
                 <Input
@@ -292,7 +292,7 @@ export function EditContactSheet({
           <Separator />
 
           {/* Tags Management */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-lg font-medium">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {formData.tags &&
@@ -334,7 +334,7 @@ export function EditContactSheet({
           <Separator />
 
           {/* Custom Fields Management */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-lg font-medium">Custom Fields</h3>
             <div className="space-y-2">
               {formData.customFields &&
@@ -378,7 +378,7 @@ export function EditContactSheet({
           <Separator />
 
           {/* Note */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="text-lg font-medium">Additional Information</h3>
             <div className="space-y-2">
               <Label htmlFor="note">Note</Label>

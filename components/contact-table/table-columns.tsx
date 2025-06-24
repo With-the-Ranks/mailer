@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Contact } from "@/lib/types";
 
-import type { CustomFieldDefinition } from "../custom-fields-manager";
 import { ContactActions } from "./contact-actions";
 
 interface CreateColumnsProps {
@@ -16,15 +15,35 @@ interface CreateColumnsProps {
   onDeleteContact: (id: string) => void;
 }
 
-export function createColumns(
-  customFields: CustomFieldDefinition[],
-  handleEditContact: (
-    id: string,
-    contactData: Partial<Contact>,
-  ) => Promise<void>,
-  handleDeleteContact: (id: string) => Promise<void>,
-  { onUpdateContact, onDeleteContact }: CreateColumnsProps,
-): ColumnDef<Contact>[] {
+// Reusable filter for multi-select string fields (e.g., tags, org, country, etc.)
+function multiSelectFilter(row: any, columnId: string, filterValue: string[]) {
+  if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+  const raw = row.getValue(columnId);
+  if (!raw) return false;
+
+  // Tags field: split by comma, trim, match any selected
+  if (columnId === "tags") {
+    const tags = (raw as string).split(",").map((t) => t.trim());
+    return filterValue.some((val) => tags.includes(val));
+  }
+  // All other string fields
+  return filterValue.includes(raw);
+}
+
+// Reusable filter for customFields (keyed object, multi-value)
+function customFieldsFilter(row: any, columnId: string, filterValue: string[]) {
+  if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+  const customFields = row.getValue(columnId) as Record<string, any>;
+  if (!customFields) return false;
+
+  // At least one filter key-value pair matches (key: value)
+  return filterValue.some((val) => Object.values(customFields).includes(val));
+}
+
+export function createColumns({
+  onUpdateContact,
+  onDeleteContact,
+}: CreateColumnsProps): ColumnDef<Contact>[] {
   return [
     {
       id: "select",
@@ -117,6 +136,7 @@ export function createColumns(
       accessorKey: "defaultAddressCompany",
       header: "Organization",
       cell: ({ row }) => row.getValue("defaultAddressCompany") || "—",
+      filterFn: multiSelectFilter,
       size: 200,
     },
     {
@@ -138,6 +158,7 @@ export function createColumns(
           "—"
         );
       },
+      filterFn: multiSelectFilter,
       size: 100,
     },
     {
@@ -164,6 +185,7 @@ export function createColumns(
           </div>
         );
       },
+      filterFn: multiSelectFilter,
       size: 200,
     },
     {
@@ -191,12 +213,14 @@ export function createColumns(
           "—"
         );
       },
+      filterFn: multiSelectFilter,
       size: 120,
     },
     {
       accessorKey: "defaultAddressZip",
       header: "Zip Code",
       cell: ({ row }) => row.getValue("defaultAddressZip") || "—",
+      filterFn: multiSelectFilter,
       size: 100,
     },
     {
@@ -246,6 +270,7 @@ export function createColumns(
           </div>
         );
       },
+      filterFn: customFieldsFilter,
       size: 250,
     },
     {

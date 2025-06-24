@@ -1,7 +1,15 @@
 "use client";
 
 import type { AudienceList, Organization } from "@prisma/client";
-import { Info, Pencil } from "lucide-react";
+import {
+  Filter,
+  Info,
+  Pencil,
+  RowsIcon,
+  Settings2Icon,
+  UploadIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -80,9 +88,15 @@ export default function AudienceCard({
           </form>
         ) : (
           <>
-            <h3 className="my-0 truncate font-cal text-2xl font-bold tracking-wide dark:text-white">
-              {name}
-            </h3>
+            <Link
+              href={url}
+              className="group flex-1"
+              title="Go to contact list"
+            >
+              <h3 className="my-0 truncate font-cal text-2xl font-bold tracking-wide group-hover:underline dark:text-white">
+                {name}
+              </h3>
+            </Link>
             <button
               className="ml-2 text-stone-500 hover:text-blue-600"
               onClick={() => setEditing(true)}
@@ -114,28 +128,33 @@ export default function AudienceCard({
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link href={url}>
+        <Link href={`${url}?action=add-contact`} scroll={false}>
           <Button size="sm">
+            <UserPlusIcon className="mr-2 h-4 w-4" />
             {contactsCount === 0 ? "Add First Contact" : "Add Contact"}
           </Button>
         </Link>
-        <Link href={url}>
+        <Link href={`${url}?action=custom-fields`} scroll={false}>
           <Button variant="outline" size="sm">
-            Manage Custom Fields
+            <Settings2Icon className="mr-2 h-4 w-4" />
+            Custom Fields
+          </Button>
+        </Link>
+        <Link href={`${url}?action=import`} scroll={false}>
+          <Button variant="outline" size="sm">
+            <UploadIcon className="mr-2 h-4 w-4" />
+            Import Contacts
           </Button>
         </Link>
         <Link href={url}>
           <Button variant="outline" size="sm">
-            Import Entries
-          </Button>
-        </Link>
-        <Link href={url}>
-          <Button variant="outline" size="sm">
+            <RowsIcon className="mr-2 h-4 w-4" />
             Manage Contacts
           </Button>
         </Link>
         <Link href={`${url}/segments`}>
           <Button variant="outline" size="sm">
+            <Filter className="mr-2 h-4 w-4" />
             Manage Segments
           </Button>
         </Link>
