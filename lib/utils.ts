@@ -68,3 +68,110 @@ export function isSafari() {
   if (typeof window === "undefined") return false;
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
+
+export function buildAudienceWhere(
+  audienceListId: string,
+  filterCriteria: Record<string, any>,
+) {
+  const where: any = { audienceListId };
+
+  // Handle searchValue (searches across firstName, lastName, email, company, etc.)
+  if (filterCriteria?.searchValue && filterCriteria.searchValue.trim() !== "") {
+    const search = filterCriteria.searchValue.trim();
+    where.OR = [
+      { firstName: { contains: search, mode: "insensitive" } },
+      { lastName: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+      { phone: { contains: search, mode: "insensitive" } },
+      { note: { contains: search, mode: "insensitive" } },
+      { tags: { contains: search, mode: "insensitive" } },
+      { defaultAddressCompany: { contains: search, mode: "insensitive" } },
+      { defaultAddressAddress1: { contains: search, mode: "insensitive" } },
+      { defaultAddressAddress2: { contains: search, mode: "insensitive" } },
+      { defaultAddressCity: { contains: search, mode: "insensitive" } },
+      { defaultAddressProvinceCode: { contains: search, mode: "insensitive" } },
+      { defaultAddressCountryCode: { contains: search, mode: "insensitive" } },
+      { defaultAddressZip: { contains: search, mode: "insensitive" } },
+      { defaultAddressPhone: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  // Handle array fields (e.g. tags, countries, companies, etc.)
+  // For each, if the filter is present and is a non-empty array, add an "in" or "contains" filter.
+  if (
+    filterCriteria?.tags &&
+    Array.isArray(filterCriteria.tags) &&
+    filterCriteria.tags.length > 0
+  ) {
+    // If tags are stored as comma-separated string, use contains for any match
+    where.AND = (where.AND || []).concat(
+      filterCriteria.tags.map((tag: string) => ({
+        tags: { contains: tag },
+      })),
+    );
+  }
+
+  if (
+    filterCriteria?.defaultAddressCountryCode &&
+    Array.isArray(filterCriteria.defaultAddressCountryCode) &&
+    filterCriteria.defaultAddressCountryCode.length > 0
+  ) {
+    where.defaultAddressCountryCode = {
+      in: filterCriteria.defaultAddressCountryCode,
+    };
+  }
+
+  if (
+    filterCriteria?.defaultAddressProvinceCode &&
+    Array.isArray(filterCriteria.defaultAddressProvinceCode) &&
+    filterCriteria.defaultAddressProvinceCode.length > 0
+  ) {
+    where.defaultAddressProvinceCode = {
+      in: filterCriteria.defaultAddressProvinceCode,
+    };
+  }
+
+  if (
+    filterCriteria?.defaultAddressCompany &&
+    Array.isArray(filterCriteria.defaultAddressCompany) &&
+    filterCriteria.defaultAddressCompany.length > 0
+  ) {
+    where.defaultAddressCompany = {
+      in: filterCriteria.defaultAddressCompany,
+    };
+  }
+
+  if (
+    filterCriteria?.defaultAddressCity &&
+    Array.isArray(filterCriteria.defaultAddressCity) &&
+    filterCriteria.defaultAddressCity.length > 0
+  ) {
+    where.defaultAddressCity = {
+      in: filterCriteria.defaultAddressCity,
+    };
+  }
+
+  if (
+    filterCriteria?.defaultAddressZip &&
+    Array.isArray(filterCriteria.defaultAddressZip) &&
+    filterCriteria.defaultAddressZip.length > 0
+  ) {
+    where.defaultAddressZip = {
+      in: filterCriteria.defaultAddressZip,
+    };
+  }
+
+  if (
+    filterCriteria?.defaultAddressPhone &&
+    Array.isArray(filterCriteria.defaultAddressPhone) &&
+    filterCriteria.defaultAddressPhone.length > 0
+  ) {
+    where.defaultAddressPhone = {
+      in: filterCriteria.defaultAddressPhone,
+    };
+  }
+
+  // Add more fields as needed, following the same pattern
+
+  return where;
+}

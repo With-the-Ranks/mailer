@@ -46,7 +46,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { getOrganizationFromUserId } from "@/lib/actions";
+import { getOrgAndAudienceList } from "@/lib/actions";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -56,8 +56,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const [siteId, setSiteId] = useState<string | null>(null);
+  const [audienceListId, setAudienceListId] = useState<string | null>(null);
   const [organizationFound, setOrganizationFound] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   const { data: emailData } = useSWR(
     id && pathname.includes("/email") ? `/api/email/${id}` : null,
@@ -65,14 +66,14 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    getOrganizationFromUserId().then((orgId) => {
-      setSiteId(orgId ?? null);
-      setOrganizationFound(!!orgId);
+    getOrgAndAudienceList().then((data) => {
+      setSiteId(data?.orgId ?? null);
+      setAudienceListId(data?.audienceListId ?? null);
+      setOrganizationFound(!!data?.orgId);
       setLoading(false);
     });
   }, [id, pathname]);
 
-  // Build the nav structure
   const navItems = useMemo(() => {
     if (loading) return [];
 
@@ -100,8 +101,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       ].filter(Boolean);
     }
 
-    // Audience context
-    if (segments[0] === "audience" && id) {
+    // Audience or Segments context
+    if (
+      segments[0] === "audience" ||
+      segments[0] === "segments" ||
+      pathname.includes("/segments")
+    ) {
       return [
         {
           name: "Back to Dashboard",
@@ -111,28 +116,28 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments.length === 2,
+          isActive: segments[0] === "audience",
           submenu: [
             {
               name: "Contacts",
-              href: `/audience/${id}`,
-              isActive: segments.length === 2,
+              href: `/audience/${audienceListId}`,
+              isActive: segments[0] === "audience" && segments.length === 2,
               icon: List,
             },
             {
               name: "Add Contact",
-              href: `/audience/${id}?action=add-contact`,
+              href: `/audience/${audienceListId}?action=add-contact`,
               isActive:
                 typeof window !== "undefined"
                   ? new URLSearchParams(window.location.search).get(
                       "action",
                     ) === "add-contact"
                   : false,
-              icon: Edit3, // or UserPlusIcon if you imported it
+              icon: Edit3,
             },
             {
               name: "Import Contacts",
-              href: `/audience/${id}?action=import`,
+              href: `/audience/${audienceListId}?action=import`,
               isActive:
                 typeof window !== "undefined"
                   ? new URLSearchParams(window.location.search).get(
@@ -143,7 +148,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             },
             {
               name: "Custom Fields",
-              href: `/audience/${id}?action=custom-fields`,
+              href: `/audience/${audienceListId}?action=custom-fields`,
               isActive:
                 typeof window !== "undefined"
                   ? new URLSearchParams(window.location.search).get(
@@ -154,7 +159,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             },
             {
               name: "Segments",
-              href: `/audience/${id}/segments`,
+              href: `/organization/${siteId}/segments`,
               isActive: segments.includes("segments"),
               icon: Filter,
             },
@@ -187,8 +192,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             },
             {
               name: "Segments",
-              href: `/organization/${siteId}/audience/segments`,
-              isActive: pathname.includes("/audience/segments"),
+              href: `/organization/${siteId}/segments`,
+              isActive:
+                pathname === `/organization/${siteId}/segments` ||
+                pathname.startsWith(`/organization/${siteId}/segments/`),
               icon: Filter,
             },
           ],
@@ -252,7 +259,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         ],
       },
     ];
-  }, [segments, id, siteId, organizationFound, loading, emailData, pathname]);
+  }, [
+    segments,
+    id,
+    siteId,
+    audienceListId,
+    organizationFound,
+    loading,
+    emailData,
+    pathname,
+  ]);
 
   return (
     <Sidebar

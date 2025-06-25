@@ -1,26 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { buildAudienceWhere } from "@/lib/utils";
 import { segmentSchema } from "@/lib/validations";
-
-// Mock session and prisma for demo
-const getSession = async () => ({ user: { organizationId: "org-1" } });
-const prisma = {
-  audienceList: {
-    findFirst: async (query: any) => ({
-      id: query.where.id,
-      organizationId: "org-1",
-    }),
-  },
-  segment: {
-    findMany: async (query: any) => [],
-    create: async (data: any) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      ...data.data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }),
-  },
-};
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,35 +13,66 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const organizationId = searchParams.get("organizationId");
     const audienceListId = searchParams.get("audienceListId");
 
-    if (!audienceListId) {
+    if (!organizationId && !audienceListId) {
       return NextResponse.json(
-        { error: "audienceListId is required" },
+        { error: "organizationId or audienceListId is required" },
         { status: 400 },
       );
     }
 
-    const audienceList = await prisma.audienceList.findFirst({
-      where: {
-        id: audienceListId,
-        organizationId: session.user.organizationId,
-      },
-    });
+    let where: any = {
+      organizationId: session.user.organizationId,
+    };
 
-    if (!audienceList) {
-      return NextResponse.json(
-        { error: "Audience list not found" },
-        { status: 404 },
-      );
+    if (audienceListId) {
+      const audienceList = await prisma.audienceList.findUnique({
+        where: { id: audienceListId },
+      });
+      if (
+        !audienceList ||
+        audienceList.organizationId !== session.user.organizationId
+      ) {
+        return NextResponse.json(
+          { error: "Audience list not found" },
+          { status: 404 },
+        );
+      }
+      where.audienceListId = audienceListId;
+    } else if (organizationId) {
+      if (organizationId !== session.user.organizationId) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     const segments = await prisma.segment.findMany({
-      where: { audienceListId },
+      where,
       orderBy: { createdAt: "desc" },
+      include: {
+        audienceList: { select: { id: true, name: true } },
+      },
     });
 
-    return NextResponse.json(segments);
+    // Dynamically count contacts for each segment
+    const segmentsWithCounts = await Promise.all(
+      segments.map(async (segment) => {
+        const filterCriteria =
+          segment.filterCriteria &&
+          typeof segment.filterCriteria === "object" &&
+          !Array.isArray(segment.filterCriteria)
+            ? (segment.filterCriteria as Record<string, any>)
+            : {};
+
+        const count = await prisma.audience.count({
+          where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+        });
+        return { ...segment, contactCount: count };
+      }),
+    );
+
+    return NextResponse.json(segmentsWithCounts);
   } catch (error) {
     console.error("Error fetching segments:", error);
     return NextResponse.json(
@@ -94,26 +108,51 @@ export async function POST(request: NextRequest) {
 
     const validatedData = result.data;
 
-    // Verify the audience list belongs to the user's organization
-    const audienceList = await prisma.audienceList.findFirst({
-      where: {
-        id: validatedData.audienceListId,
-        organizationId: session.user.organizationId,
-      },
+    if (!validatedData.audienceListId) {
+      return NextResponse.json(
+        { error: "audienceListId is required" },
+        { status: 400 },
+      );
+    }
+
+    const audienceList = await prisma.audienceList.findUnique({
+      where: { id: validatedData.audienceListId },
     });
 
-    if (!audienceList) {
+    if (
+      !audienceList ||
+      audienceList.organizationId !== session.user.organizationId
+    ) {
       return NextResponse.json(
         { error: "Audience list not found" },
         { status: 404 },
       );
     }
 
-    const segment = await prisma.segment.create({
-      data: validatedData,
+    // Calculate contactCount at creation (optional, for analytics)
+    const contactCount = await prisma.audience.count({
+      where: buildAudienceWhere(
+        validatedData.audienceListId,
+        validatedData.filterCriteria,
+      ),
     });
 
-    return NextResponse.json(segment, { status: 201 });
+    const segment = await prisma.segment.create({
+      data: {
+        name: validatedData.name,
+        description: validatedData.description,
+        audienceListId: validatedData.audienceListId,
+        filterCriteria: validatedData.filterCriteria,
+        organizationId: session.user.organizationId,
+        contactCount, // store at creation, but always recalculate in GET
+      },
+      include: {
+        audienceList: { select: { id: true, name: true } },
+      },
+    });
+
+    // Return with dynamic count for consistency
+    return NextResponse.json({ ...segment, contactCount }, { status: 201 });
   } catch (error) {
     console.error("Error creating segment:", error);
 

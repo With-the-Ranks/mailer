@@ -2,13 +2,13 @@
 
 import {
   CopyIcon,
-  EditIcon,
   FilterIcon,
   MoreHorizontalIcon,
   PlusIcon,
   TrashIcon,
   UsersIcon,
 } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -51,9 +51,10 @@ interface Segment {
     id: string;
     name: string;
   };
+  organizationId: string;
 }
 
-export function SegmentsList({ listId }: { listId: string }) {
+export function SegmentsList({ orgId }: { orgId: string }) {
   const [segments, setSegments] = React.useState<Segment[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -63,11 +64,12 @@ export function SegmentsList({ listId }: { listId: string }) {
 
   React.useEffect(() => {
     loadSegments();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
 
   const loadSegments = async () => {
     try {
-      const response = await fetch("/api/segments");
+      const response = await fetch(`/api/segments?organizationId=${orgId}`);
       if (response.ok) {
         const data = await response.json();
         setSegments(data);
@@ -122,6 +124,7 @@ export function SegmentsList({ listId }: { listId: string }) {
           description: segment.description,
           audienceListId: segment.audienceList.id,
           filterCriteria: segment.filterCriteria,
+          organizationId: orgId,
         }),
       });
 
@@ -217,103 +220,118 @@ export function SegmentsList({ listId }: { listId: string }) {
           const filterSummary = getFilterSummary(segment.filterCriteria);
 
           return (
-            <Card
+            <Link
+              href={`/segments/${segment.id}/`}
+              prefetch={false}
+              className="block h-full"
               key={segment.id}
-              className="transition-shadow hover:shadow-md"
+              tabIndex={-1}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 space-y-1">
-                    <CardTitle className="text-lg">{segment.name}</CardTitle>
-                    <CardDescription className="text-sm">
-                      {segment.audienceList.name}
-                    </CardDescription>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <EditIcon className="mr-2 h-4 w-4" />
-                        Edit Segment
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDuplicateSegment(segment)}
-                      >
-                        <CopyIcon className="mr-2 h-4 w-4" />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDeleteSegment(segment.id)}
-                      >
-                        <TrashIcon className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {segment.description && (
-                  <p className="text-muted-foreground text-sm">
-                    {segment.description}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <UsersIcon className="text-muted-foreground h-4 w-4" />
-                  <span className="text-sm font-medium">
-                    {segment.contactCount} contacts
-                  </span>
-                </div>
-
-                {filterSummary.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <FilterIcon className="text-muted-foreground h-4 w-4" />
-                      <span className="text-sm font-medium">
-                        Applied Filters
-                      </span>
+              <Card className="transition-shadow hover:shadow-md">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 space-y-1">
+                      <CardTitle className="text-lg">{segment.name}</CardTitle>
+                      <CardDescription className="text-sm">
+                        {segment.audienceList.name}
+                      </CardDescription>
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {filterSummary.slice(0, 2).map((filter, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs"
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
                         >
-                          {filter.length > 25
-                            ? `${filter.substring(0, 25)}...`
-                            : filter}
-                        </Badge>
-                      ))}
-                      {filterSummary.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{filterSummary.length - 2} more
-                        </Badge>
-                      )}
-                    </div>
+                          <MoreHorizontalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/segments/${segment.id}/`}
+                            prefetch={false}
+                          >
+                            <UsersIcon className="mr-2 h-4 w-4" />
+                            View Contacts
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDuplicateSegment(segment)}
+                        >
+                          <CopyIcon className="mr-2 h-4 w-4" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteSegment(segment.id)}
+                        >
+                          <TrashIcon className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                )}
+                </CardHeader>
 
-                <div className="text-muted-foreground flex items-center justify-between text-xs">
-                  <span>
-                    Created {new Date(segment.createdAt).toLocaleDateString()}
-                  </span>
-                  {segment.updatedAt !== segment.createdAt && (
-                    <span>
-                      Updated {new Date(segment.updatedAt).toLocaleDateString()}
-                    </span>
+                <CardContent className="space-y-4">
+                  {segment.description && (
+                    <p className="text-muted-foreground text-sm">
+                      {segment.description}
+                    </p>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+
+                  <div className="flex items-center gap-2">
+                    <UsersIcon className="text-muted-foreground h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {segment.contactCount} contacts
+                    </span>
+                  </div>
+
+                  {filterSummary.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <FilterIcon className="text-muted-foreground h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          Applied Filters
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {filterSummary.slice(0, 2).map((filter, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {filter.length > 25
+                              ? `${filter.substring(0, 25)}...`
+                              : filter}
+                          </Badge>
+                        ))}
+                        {filterSummary.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{filterSummary.length - 2} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-muted-foreground flex items-center justify-between text-xs">
+                    <span>
+                      Created {new Date(segment.createdAt).toLocaleDateString()}
+                    </span>
+                    {segment.updatedAt !== segment.createdAt && (
+                      <span>
+                        Updated{" "}
+                        {new Date(segment.updatedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>

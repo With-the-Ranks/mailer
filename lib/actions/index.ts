@@ -570,3 +570,31 @@ export const fetchAudienceLists = async (organizationId: string) => {
     throw new Error("Failed to fetch audience lists");
   }
 };
+
+export const getOrgAndAudienceList = async () => {
+  const session = await getSession();
+  if (!session?.user.id) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      organizationId: true,
+      organization: {
+        select: {
+          audienceLists: {
+            select: { id: true, name: true },
+            orderBy: { createdAt: "asc" },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+
+  if (!user?.organizationId || !user.organization) return null;
+
+  const orgId = user.organizationId;
+  const audienceListId = user.organization.audienceLists[0]?.id ?? null;
+
+  return { orgId, audienceListId };
+};

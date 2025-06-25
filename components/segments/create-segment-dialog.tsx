@@ -23,9 +23,10 @@ import type { Contact } from "@/lib/types";
 
 interface CreateSegmentDialogProps {
   listId: string;
-  filteredContacts: Contact[];
-  activeFilters: Record<string, any>;
-  searchValue: string;
+  filteredContacts?: Contact[];
+  selectedContacts?: Contact[];
+  activeFilters?: Record<string, any>;
+  searchValue?: string;
   onSegmentCreated?: () => void;
 }
 
@@ -47,8 +48,9 @@ const FILTER_LABELS: Record<string, string> = {
 export function CreateSegmentDialog({
   listId,
   filteredContacts,
-  activeFilters,
-  searchValue,
+  selectedContacts,
+  activeFilters = {},
+  searchValue = "",
   onSegmentCreated,
 }: CreateSegmentDialogProps) {
   const [open, setOpen] = React.useState(false);
@@ -56,6 +58,15 @@ export function CreateSegmentDialog({
   const [description, setDescription] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
+  // Determine which contacts and criteria to use
+  const isStatic = !!selectedContacts && selectedContacts.length > 0;
+  const contactsToUse = isStatic
+    ? selectedContacts
+    : filteredContacts
+      ? filteredContacts
+      : [];
+
+  // For static segments, we store contactIds; for dynamic, we store filterCriteria
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -67,19 +78,27 @@ export function CreateSegmentDialog({
     setIsLoading(true);
 
     try {
+      const payload: any = {
+        name: name.trim(),
+        description: description.trim() || null,
+        audienceListId: listId,
+      };
+
+      if (isStatic) {
+        payload.contactIds = selectedContacts!.map((c) => c.id);
+        payload.filterCriteria = {}; // or null
+      } else {
+        payload.filterCriteria = {
+          searchValue,
+          ...activeFilters,
+        };
+        // Optionally, you could also send contactIds for preview, but not needed for dynamic
+      }
+
       const response = await fetch("/api/segments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || null,
-          audienceListId: listId,
-          filterCriteria: {
-            searchValue,
-            ...activeFilters,
-          },
-          contactIds: filteredContacts.map((c) => c.id),
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -133,7 +152,9 @@ export function CreateSegmentDialog({
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon className="mr-2 h-4 w-4" />
-          Create Segment ({filteredContacts.length})
+          {isStatic
+            ? `Create Segment from Selection (${contactsToUse.length})`
+            : `Create Segment (${contactsToUse.length})`}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
@@ -141,8 +162,9 @@ export function CreateSegmentDialog({
           <DialogHeader>
             <DialogTitle>Create Segment</DialogTitle>
             <DialogDescription>
-              Create a segment from the current filtered results (
-              {filteredContacts.length} contacts)
+              {isStatic
+                ? `Create a segment from ${contactsToUse.length} selected contacts`
+                : `Create a segment from the current filtered results (${contactsToUse.length} contacts)`}
             </DialogDescription>
           </DialogHeader>
 
@@ -155,6 +177,7 @@ export function CreateSegmentDialog({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter segment name..."
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -166,10 +189,11 @@ export function CreateSegmentDialog({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe this segment..."
                 rows={3}
+                disabled={isLoading}
               />
             </div>
 
-            {filterSummary.length > 0 && (
+            {!isStatic && filterSummary.length > 0 && (
               <>
                 <Separator />
                 <div className="space-y-2">
@@ -191,6 +215,7 @@ export function CreateSegmentDialog({
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              disabled={isLoading}
             >
               Cancel
             </Button>

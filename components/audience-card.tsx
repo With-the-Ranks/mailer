@@ -152,7 +152,7 @@ export default function AudienceCard({
             Manage Contacts
           </Button>
         </Link>
-        <Link href={`${url}/segments`}>
+        <Link href={`/organization/${data.organization.id}/segments`}>
           <Button variant="outline" size="sm">
             <Filter className="mr-2 h-4 w-4" />
             Manage Segments

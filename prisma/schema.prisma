@@ -139,6 +139,8 @@ model Organization {
   domains        EmailDomain[] // All domains owned by org
   customFieldDefinitions CustomFieldDefinition[]
   Template Template[]
+
+  Segment Segment[]
 }
 
 model EmailDomain {
@@ -188,6 +190,8 @@ model AudienceList {
   audiences      Audience[]
   emails         Email[]       @relation
   customFields   Json? 
+
+  Segment Segment[]
 }
 
 model Audience {
@@ -244,4 +248,21 @@ model CustomFieldDefinition {
 
   @@unique([organizationId, name])
   @@index([organizationId])
+}
+
+model Segment {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  contactCount   Int           @default(0)
+  filterCriteria Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+  audienceListId String
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
 }

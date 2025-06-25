@@ -1,27 +1,55 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// Mock database - replace with your actual database
-const segments: any[] = [];
+import { getSession } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { buildAudienceWhere } from "@/lib/utils";
 
+// Zod schema for updating a segment
 const updateSegmentSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   filterCriteria: z.record(z.any()).optional(),
 });
+
+function safeFilterCriteria(filterCriteria: unknown): Record<string, any> {
+  return filterCriteria &&
+    typeof filterCriteria === "object" &&
+    !Array.isArray(filterCriteria)
+    ? (filterCriteria as Record<string, any>)
+    : {};
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
   try {
-    const segment = segments.find((s) => s.id === params.id);
+    const session = await getSession();
+    if (!session?.user?.organizationId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!segment) {
+    const segment = await prisma.segment.findUnique({
+      where: { id: params.id },
+      include: {
+        audienceList: { select: { id: true, name: true } },
+      },
+    });
+
+    if (!segment || segment.organizationId !== session.user.organizationId) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
     }
 
-    return NextResponse.json(segment);
+    // Dynamic contact count
+    const contactCount = await prisma.audience.count({
+      where: buildAudienceWhere(
+        segment.audienceListId,
+        safeFilterCriteria(segment.filterCriteria),
+      ),
+    });
+
+    return NextResponse.json({ ...segment, contactCount });
   } catch (error) {
     console.error("Failed to get segment:", error);
     return NextResponse.json(
@@ -36,24 +64,44 @@ export async function PUT(
   { params }: { params: { id: string } },
 ) {
   try {
+    const session = await getSession();
+    if (!session?.user?.organizationId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const validatedData = updateSegmentSchema.parse(body);
 
-    const segmentIndex = segments.findIndex((s) => s.id === params.id);
+    // Check segment exists and belongs to org
+    const segment = await prisma.segment.findUnique({
+      where: { id: params.id },
+    });
 
-    if (segmentIndex === -1) {
+    if (!segment || segment.organizationId !== session.user.organizationId) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
     }
 
-    const updatedSegment = {
-      ...segments[segmentIndex],
-      ...validatedData,
-      updatedAt: new Date().toISOString(),
-    };
+    // Update segment
+    const updatedSegment = await prisma.segment.update({
+      where: { id: params.id },
+      data: {
+        ...validatedData,
+        updatedAt: new Date(),
+      },
+      include: {
+        audienceList: { select: { id: true, name: true } },
+      },
+    });
 
-    segments[segmentIndex] = updatedSegment;
+    // Dynamic contact count
+    const contactCount = await prisma.audience.count({
+      where: buildAudienceWhere(
+        updatedSegment.audienceListId,
+        safeFilterCriteria(updatedSegment.filterCriteria),
+      ),
+    });
 
-    return NextResponse.json(updatedSegment);
+    return NextResponse.json({ ...updatedSegment, contactCount });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -81,13 +129,23 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ) {
   try {
-    const segmentIndex = segments.findIndex((s) => s.id === params.id);
+    const session = await getSession();
+    if (!session?.user?.organizationId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (segmentIndex === -1) {
+    // Check segment exists and belongs to org
+    const segment = await prisma.segment.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!segment || segment.organizationId !== session.user.organizationId) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
     }
 
-    segments.splice(segmentIndex, 1);
+    await prisma.segment.delete({
+      where: { id: params.id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -29,6 +29,7 @@ import { toast } from "sonner";
 
 import type { Contact } from "@/lib/types";
 
+import { ContactTable } from "./contact-table";
 import { AddContactSheet } from "./contact-table/add-contact-sheet";
 import { ColumnVisibility } from "./contact-table/column-visibility";
 import { ResizableTable } from "./contact-table/resizable-table";
@@ -40,7 +41,6 @@ import {
 } from "./custom-fields-manager";
 import { CsvImportDialog } from "./import/csv-import-dialog";
 import { CreateSegmentDialog } from "./segments/create-segment-dialog";
-import { SegmentsList } from "./segments/segments-list";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +59,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface ContactListProps {
   listId: string;
@@ -443,208 +442,102 @@ export function ContactList({
     );
 
   return (
-    <div className="flex h-full w-full flex-col space-y-4 p-4">
-      <Tabs defaultValue="contacts" className="w-full">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>
-            <p className="text-muted-foreground">
-              Manage your contact list for organizing, campaigns, and outreach •{" "}
-              {contacts.length} contacts
-            </p>
-          </div>
-          <TabsList>
-            <TabsTrigger value="contacts">Contacts</TabsTrigger>
-            <TabsTrigger value="segments">Segments</TabsTrigger>
-          </TabsList>
+    <div className="flex h-full max-w-screen-2xl flex-col space-y-4 p-4">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>
+          <p className="text-muted-foreground">
+            Manage your contact list for organizing, campaigns, and outreach •{" "}
+            {contacts.length} contacts
+          </p>
         </div>
+      </div>
 
-        <TabsContent value="contacts" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Link href="?action=custom-fields" scroll={false}>
-                <Button variant="outline" size="sm">
-                  <Settings2Icon className="mr-2 h-4 w-4" />
-                  Custom Fields
-                </Button>
-              </Link>
-              <Link href="?action=import" scroll={false}>
-                <Button variant="outline" size="sm">
-                  <UploadIcon className="mr-2 h-4 w-4" />
-                  Import Contacts
-                </Button>
-              </Link>
-              <Link href="?action=add-contact" scroll={false}>
-                <Button variant="default" size="sm">
-                  <UserPlusIcon className="mr-2 h-4 w-4" />
-                  Add Contact
-                </Button>
-              </Link>
-            </div>
-            <CustomFieldsManager
-              open={action === "custom-fields"}
-              onOpenChange={(open) => handleActionChange("custom-fields", open)}
-              customFields={customFields}
-              onCustomFieldsChange={setCustomFields}
-            />
-            <CsvImportDialog
-              audienceListId={listId}
-              onImportComplete={handleImportContacts}
-              open={action === "import"}
-              onOpenChange={(open) => handleActionChange("import", open)}
-            />
-            <AddContactSheet
-              open={action === "add-contact"}
-              onOpenChange={(open) => handleActionChange("add-contact", open)}
-              customFields={customFields}
-              onAddContact={handleAddContact}
-            />
-            {hasActiveFilters && (
-              <CreateSegmentDialog
-                listId={listId}
-                filteredContacts={filteredContacts}
-                activeFilters={activeFilters}
-                searchValue={searchValue}
-              />
-            )}
-          </div>
-
-          <TableFilters
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            contacts={contacts}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Link href="?action=custom-fields" scroll={false}>
+            <Button variant="outline" size="sm">
+              <Settings2Icon className="mr-2 h-4 w-4" />
+              Custom Fields
+            </Button>
+          </Link>
+          <Link href="?action=import" scroll={false}>
+            <Button variant="outline" size="sm">
+              <UploadIcon className="mr-2 h-4 w-4" />
+              Import Contacts
+            </Button>
+          </Link>
+          <Link href="?action=add-contact" scroll={false}>
+            <Button variant="default" size="sm">
+              <UserPlusIcon className="mr-2 h-4 w-4" />
+              Add Contact
+            </Button>
+          </Link>
+        </div>
+        <CustomFieldsManager
+          open={action === "custom-fields"}
+          onOpenChange={(open) => handleActionChange("custom-fields", open)}
+          customFields={customFields}
+          onCustomFieldsChange={setCustomFields}
+        />
+        <CsvImportDialog
+          audienceListId={listId}
+          onImportComplete={handleImportContacts}
+          open={action === "import"}
+          onOpenChange={(open) => handleActionChange("import", open)}
+        />
+        <AddContactSheet
+          open={action === "add-contact"}
+          onOpenChange={(open) => handleActionChange("add-contact", open)}
+          customFields={customFields}
+          onAddContact={handleAddContact}
+        />
+        {hasActiveFilters && (
+          <CreateSegmentDialog
+            listId={listId}
+            filteredContacts={filteredContacts}
             activeFilters={activeFilters}
-            onFiltersChange={setActiveFilters}
-            table={table}
+            searchValue={searchValue}
+            onSegmentCreated={() => {
+              // Optionally reload your segments list here
+            }}
           />
+        )}
+      </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <ColumnVisibility table={table} />
-              {selectedRowCount > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleBulkDelete}
-                >
-                  <TrashIcon className="mr-2 h-4 w-4" />
-                  Delete ({selectedRowCount})
-                </Button>
-              )}
-            </div>
-            <div className="text-muted-foreground text-sm">
-              {selectedRowCount > 0 &&
-                `${selectedRowCount} of ${contacts.length} row(s) selected`}
-            </div>
-          </div>
+      <TableFilters
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        contacts={contacts}
+        activeFilters={activeFilters}
+        onFiltersChange={setActiveFilters}
+        table={table}
+      />
 
-          <div className="rounded-md border">
-            <ResizableTable table={table} data={contacts} columns={columns} />
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <ColumnVisibility table={table} />
+          {selectedRowCount > 0 && (
+            <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+              <TrashIcon className="mr-2 h-4 w-4" />
+              Delete ({selectedRowCount})
+            </Button>
+          )}
+        </div>
+        <div className="text-muted-foreground text-sm">
+          {selectedRowCount > 0 &&
+            `${selectedRowCount} of ${contacts.length} row(s) selected`}
+        </div>
+      </div>
 
-          <div className="flex items-center justify-between space-x-2 py-4">
-            <div className="text-muted-foreground flex-1 text-sm">
-              {selectedRowCount} of {contacts.length} contact(s) selected.
-            </div>
-            <div className="flex items-center space-x-6 lg:space-x-8">
-              <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium">Rows per page</p>
-                <Select
-                  value={`${pagination.pageSize}`}
-                  onValueChange={(value) => {
-                    setPagination((prev) => ({
-                      ...prev,
-                      pageSize: Number(value),
-                    }));
-                  }}
-                >
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue placeholder={pagination.pageSize} />
-                  </SelectTrigger>
-                  <SelectContent side="top">
-                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                      <SelectItem key={pageSize} value={`${pageSize}`}>
-                        {pageSize}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                Page {pagination.pageIndex + 1} of{" "}
-                {Math.ceil(contacts.length / pagination.pageSize)}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-                  }
-                  disabled={pagination.pageIndex === 0}
-                >
-                  <span className="sr-only">Go to first page</span>
-                  <ChevronsLeftIcon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 p-0"
-                  onClick={() =>
-                    setPagination((prev) => ({
-                      ...prev,
-                      pageIndex: prev.pageIndex - 1,
-                    }))
-                  }
-                  disabled={pagination.pageIndex === 0}
-                >
-                  <span className="sr-only">Go to previous page</span>
-                  <ChevronLeftIcon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 p-0"
-                  onClick={() =>
-                    setPagination((prev) => ({
-                      ...prev,
-                      pageIndex: prev.pageIndex + 1,
-                    }))
-                  }
-                  disabled={
-                    pagination.pageIndex >=
-                    Math.ceil(contacts.length / pagination.pageSize) - 1
-                  }
-                >
-                  <span className="sr-only">Go to next page</span>
-                  <ChevronRightIcon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() =>
-                    setPagination((prev) => ({
-                      ...prev,
-                      pageIndex:
-                        Math.ceil(contacts.length / pagination.pageSize) - 1,
-                    }))
-                  }
-                  disabled={
-                    pagination.pageIndex >=
-                    Math.ceil(contacts.length / pagination.pageSize) - 1
-                  }
-                >
-                  <span className="sr-only">Go to last page</span>
-                  <ChevronsRightIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="segments">
-          <SegmentsList listId={listId} />
-        </TabsContent>
-      </Tabs>
-
+      <ContactTable
+        table={table}
+        columns={columns}
+        contacts={contacts}
+        pagination={pagination}
+        setPagination={setPagination}
+        selectedRowCount={selectedRowCount}
+      />
       {/* Delete Confirmation Dialogs */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
