@@ -13,10 +13,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
   Settings2Icon,
   TrashIcon,
   UploadIcon,
@@ -32,7 +28,6 @@ import type { Contact } from "@/lib/types";
 import { ContactTable } from "./contact-table";
 import { AddContactSheet } from "./contact-table/add-contact-sheet";
 import { ColumnVisibility } from "./contact-table/column-visibility";
-import { ResizableTable } from "./contact-table/resizable-table";
 import { createColumns } from "./contact-table/table-columns";
 import { TableFilters } from "./contact-table/table-filters";
 import {
@@ -52,13 +47,6 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 
 interface ContactListProps {
   listId: string;
@@ -200,7 +188,6 @@ export function ContactList({
       toast.error("Failed to load contacts");
     }
   };
-
   const handleAddContact = React.useCallback(
     async (contactData: Omit<Contact, "id">) => {
       try {
@@ -329,17 +316,50 @@ export function ContactList({
   const handleUpdateContact = (contact: Contact) => {
     handleEditContact(contact.id, contact);
   };
-  const columns = React.useMemo(
-    () =>
-      createColumns({
-        onUpdateContact: handleUpdateContact,
-        onDeleteContact: handleDeleteContact,
-      }),
-    [handleUpdateContact, handleDeleteContact],
-  );
+  const customFieldKeys = React.useMemo(() => {
+    const keys = new Set<string>();
+    contacts.forEach((contact) => {
+      if (contact.customFields) {
+        Object.keys(contact.customFields).forEach((key) => keys.add(key));
+      }
+    });
+    return Array.from(keys);
+  }, [contacts]);
+  const columns = React.useMemo(() => {
+    const realColumns = createColumns({
+      onUpdateContact: handleUpdateContact,
+      onDeleteContact: handleDeleteContact,
+    });
+
+    const hiddenCustomFieldColumns = customFieldKeys.map((key) => ({
+      id: key,
+      header: key,
+      accessorFn: (row: Contact) => row.customFields?.[key] ?? "",
+      cell: ({ getValue }: any) => getValue() || "—",
+      size: 120,
+      enableHiding: true,
+      enableSorting: false,
+    }));
+
+    return [...realColumns, ...hiddenCustomFieldColumns];
+  }, [handleUpdateContact, handleDeleteContact, customFieldKeys]);
+
+  // Create filter functions for each custom field key
+  const filterFns = React.useMemo(() => {
+    const obj: Record<string, any> = {};
+    customFieldKeys.forEach((key) => {
+      obj[key] = (row: any, columnId: string, filterValue: string[]) => {
+        if (!filterValue || filterValue.length === 0) return true;
+        const value = row.original.customFields?.[key];
+        return filterValue.includes(value);
+      };
+    });
+    return obj;
+  }, [customFieldKeys]);
   const table = useReactTable({
     data: contacts,
     columns,
+    filterFns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

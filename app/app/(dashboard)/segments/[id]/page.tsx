@@ -75,6 +75,7 @@ export default function SegmentContactsPage() {
       createColumns({
         onUpdateContact: () => {},
         onDeleteContact: () => {},
+        viewOnly: true,
       }),
     [],
   );

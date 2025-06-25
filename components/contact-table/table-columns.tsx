@@ -11,8 +11,9 @@ import type { Contact } from "@/lib/types";
 import { ContactActions } from "./contact-actions";
 
 interface CreateColumnsProps {
-  onUpdateContact: (contact: Contact) => void;
-  onDeleteContact: (id: string) => void;
+  onUpdateContact?: (contact: Contact) => void;
+  onDeleteContact?: (id: string) => void;
+  viewOnly?: boolean;
 }
 
 // Reusable filter for multi-select string fields (e.g., tags, org, country, etc.)
@@ -21,31 +22,29 @@ function multiSelectFilter(row: any, columnId: string, filterValue: string[]) {
   const raw = row.getValue(columnId);
   if (!raw) return false;
 
-  // Tags field: split by comma, trim, match any selected
   if (columnId === "tags") {
     const tags = (raw as string).split(",").map((t) => t.trim());
     return filterValue.some((val) => tags.includes(val));
   }
-  // All other string fields
   return filterValue.includes(raw);
 }
 
-// Reusable filter for customFields (keyed object, multi-value)
 function customFieldsFilter(row: any, columnId: string, filterValue: string[]) {
   if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
   const customFields = row.getValue(columnId) as Record<string, any>;
   if (!customFields) return false;
-
-  // At least one filter key-value pair matches (key: value)
   return filterValue.some((val) => Object.values(customFields).includes(val));
 }
 
 export function createColumns({
   onUpdateContact,
   onDeleteContact,
+  viewOnly = false,
 }: CreateColumnsProps): ColumnDef<Contact>[] {
-  return [
-    {
+  const columns: ColumnDef<Contact>[] = [];
+
+  if (!viewOnly) {
+    columns.push({
       id: "select",
       header: ({ table }) => (
         <Checkbox
@@ -68,22 +67,27 @@ export function createColumns({
       enableHiding: false,
       enableResizing: false,
       size: 50,
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <ContactActions
-          contact={row.original}
-          onUpdateContact={onUpdateContact}
-          onDeleteContact={onDeleteContact}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      enableResizing: false,
-      size: 120,
-    },
+    });
+  }
+
+  columns.push({
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => (
+      <ContactActions
+        contact={row.original}
+        onUpdateContact={onUpdateContact}
+        onDeleteContact={onDeleteContact}
+        viewOnly={viewOnly}
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    enableResizing: false,
+    size: 120,
+  });
+
+  columns.push(
     {
       accessorKey: "email",
       header: ({ column }) => (
@@ -245,35 +249,6 @@ export function createColumns({
       size: 200,
     },
     {
-      accessorKey: "customFields",
-      header: "Custom Fields",
-      cell: ({ row }) => {
-        const customFields = row.getValue("customFields") as Record<
-          string,
-          any
-        >;
-        if (!customFields || Object.keys(customFields).length === 0) return "—";
-        return (
-          <div className="flex flex-wrap gap-1">
-            {Object.entries(customFields)
-              .slice(0, 2)
-              .map(([key, value]) => (
-                <Badge key={key} variant="outline" className="text-xs">
-                  {key}: {value}
-                </Badge>
-              ))}
-            {Object.keys(customFields).length > 2 && (
-              <Badge variant="outline" className="text-xs">
-                +{Object.keys(customFields).length - 2}
-              </Badge>
-            )}
-          </div>
-        );
-      },
-      filterFn: customFieldsFilter,
-      size: 250,
-    },
-    {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => {
@@ -291,5 +266,7 @@ export function createColumns({
       },
       size: 100,
     },
-  ];
+  );
+
+  return columns;
 }

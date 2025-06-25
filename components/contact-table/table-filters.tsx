@@ -128,7 +128,6 @@ export function TableFilters({
       (acc, key) => acc + (activeFilters[key]?.length || 0),
       0,
     );
-
   return (
     <div className="space-y-4">
       {/* Search Bar */}

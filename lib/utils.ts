@@ -75,7 +75,20 @@ export function buildAudienceWhere(
 ) {
   const where: any = { audienceListId };
 
-  // Handle searchValue (searches across firstName, lastName, email, company, etc.)
+  // List of built-in fields
+  const BUILT_IN_KEYS = new Set([
+    "searchValue",
+    "tags",
+    "defaultAddressCountryCode",
+    "defaultAddressProvinceCode",
+    "defaultAddressCompany",
+    "defaultAddressCity",
+    "defaultAddressZip",
+    "defaultAddressPhone",
+    // Add more as needed
+  ]);
+
+  // Search (multi-field)
   if (filterCriteria?.searchValue && filterCriteria.searchValue.trim() !== "") {
     const search = filterCriteria.searchValue.trim();
     where.OR = [
@@ -96,14 +109,12 @@ export function buildAudienceWhere(
     ];
   }
 
-  // Handle array fields (e.g. tags, countries, companies, etc.)
-  // For each, if the filter is present and is a non-empty array, add an "in" or "contains" filter.
+  // Built-in array filters (tags: contains; others: in)
   if (
     filterCriteria?.tags &&
     Array.isArray(filterCriteria.tags) &&
     filterCriteria.tags.length > 0
   ) {
-    // If tags are stored as comma-separated string, use contains for any match
     where.AND = (where.AND || []).concat(
       filterCriteria.tags.map((tag: string) => ({
         tags: { contains: tag },
@@ -111,67 +122,38 @@ export function buildAudienceWhere(
     );
   }
 
-  if (
-    filterCriteria?.defaultAddressCountryCode &&
-    Array.isArray(filterCriteria.defaultAddressCountryCode) &&
-    filterCriteria.defaultAddressCountryCode.length > 0
-  ) {
-    where.defaultAddressCountryCode = {
-      in: filterCriteria.defaultAddressCountryCode,
-    };
-  }
+  [
+    "defaultAddressCountryCode",
+    "defaultAddressProvinceCode",
+    "defaultAddressCompany",
+    "defaultAddressCity",
+    "defaultAddressZip",
+    "defaultAddressPhone",
+  ].forEach((key) => {
+    if (
+      filterCriteria?.[key] &&
+      Array.isArray(filterCriteria[key]) &&
+      filterCriteria[key].length > 0
+    ) {
+      where[key] = { in: filterCriteria[key] };
+    }
+  });
 
-  if (
-    filterCriteria?.defaultAddressProvinceCode &&
-    Array.isArray(filterCriteria.defaultAddressProvinceCode) &&
-    filterCriteria.defaultAddressProvinceCode.length > 0
-  ) {
-    where.defaultAddressProvinceCode = {
-      in: filterCriteria.defaultAddressProvinceCode,
-    };
-  }
+  // Dynamic custom field filters (handles any non-built-in keys)
+  Object.entries(filterCriteria).forEach(([key, value]) => {
+    if (BUILT_IN_KEYS.has(key)) return;
+    if (!Array.isArray(value) || value.length === 0) return;
 
-  if (
-    filterCriteria?.defaultAddressCompany &&
-    Array.isArray(filterCriteria.defaultAddressCompany) &&
-    filterCriteria.defaultAddressCompany.length > 0
-  ) {
-    where.defaultAddressCompany = {
-      in: filterCriteria.defaultAddressCompany,
-    };
-  }
+    // OR filter: customFields.key == value for any value
+    const orFilters = value.map((v) => ({
+      customFields: {
+        path: [key],
+        equals: v,
+      },
+    }));
 
-  if (
-    filterCriteria?.defaultAddressCity &&
-    Array.isArray(filterCriteria.defaultAddressCity) &&
-    filterCriteria.defaultAddressCity.length > 0
-  ) {
-    where.defaultAddressCity = {
-      in: filterCriteria.defaultAddressCity,
-    };
-  }
-
-  if (
-    filterCriteria?.defaultAddressZip &&
-    Array.isArray(filterCriteria.defaultAddressZip) &&
-    filterCriteria.defaultAddressZip.length > 0
-  ) {
-    where.defaultAddressZip = {
-      in: filterCriteria.defaultAddressZip,
-    };
-  }
-
-  if (
-    filterCriteria?.defaultAddressPhone &&
-    Array.isArray(filterCriteria.defaultAddressPhone) &&
-    filterCriteria.defaultAddressPhone.length > 0
-  ) {
-    where.defaultAddressPhone = {
-      in: filterCriteria.defaultAddressPhone,
-    };
-  }
-
-  // Add more fields as needed, following the same pattern
+    where.AND = (where.AND || []).concat([{ OR: orFilters }]);
+  });
 
   return where;
 }

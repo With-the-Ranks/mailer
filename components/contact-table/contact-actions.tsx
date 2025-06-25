@@ -18,19 +18,23 @@ import { ViewContactSheet } from "./view-contact-sheet";
 
 interface ContactActionsProps {
   contact: Contact;
-  onUpdateContact: (contact: Contact) => void;
-  onDeleteContact: (id: string) => void;
+  onUpdateContact?: (contact: Contact) => void;
+  onDeleteContact?: (id: string) => void;
+  viewOnly?: boolean;
 }
 
 export function ContactActions({
   contact,
   onUpdateContact,
   onDeleteContact,
+  viewOnly = false,
 }: ContactActionsProps) {
   return (
     <div className="flex items-center gap-1">
       <ViewContactSheet contact={contact} />
-      <EditContactSheet contact={contact} onUpdateContact={onUpdateContact} />
+      {!viewOnly && onUpdateContact && (
+        <EditContactSheet contact={contact} onUpdateContact={onUpdateContact} />
+      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -50,13 +54,17 @@ export function ContactActions({
           >
             Copy phone
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => onDeleteContact(contact.id)}
-            className="text-red-600"
-          >
-            Delete contact
-          </DropdownMenuItem>
+          {!viewOnly && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onDeleteContact?.(contact.id)}
+                className="text-red-600"
+              >
+                Delete contact
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
