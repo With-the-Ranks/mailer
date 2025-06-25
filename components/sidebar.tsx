@@ -82,7 +82,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       const isPublished = emailData?.published;
       return [
         {
-          name: "Back to All Emails",
+          name: "Back to Dashboard",
           href: siteId ? `/organization/${siteId}` : "/organizations",
           icon: ArrowLeft,
         },

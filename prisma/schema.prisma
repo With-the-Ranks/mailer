@@ -91,9 +91,11 @@ model Email {
   scheduledTime  DateTime      @default(now())
   resendId       String?       @db.Text
 
-  audienceListId String        
-  audienceList   AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+  audienceListId String?       
+  audienceList   AudienceList? @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
 
+  segmentId      String?
+  segment        Segment?      @relation(fields: [segmentId], references: [id], onDelete: Cascade)
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   organizationId String?
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -265,4 +267,6 @@ model Segment {
 
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String?
+
+  Email Email[]
 }

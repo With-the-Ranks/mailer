@@ -337,18 +337,12 @@ export const getOrganizationFromAudienceId = async (audienceId: string) => {
 export const createEmail = async (
   campaignName: string | null,
   organizationId: string,
-  selectedAudienceList: string | null,
   template: string | null,
   content?: string,
 ) => {
   const session = await getSession();
   if (!session?.user.id) {
     return { error: "Not authenticated" };
-  }
-
-  // Ensure audienceListId is not null
-  if (!selectedAudienceList) {
-    return { error: "Invalid audience list." };
   }
 
   // Validate campaignName
@@ -364,7 +358,6 @@ export const createEmail = async (
         userId: session.user.id,
         title: campaignName || "New Campaign",
         subject: campaignName || "New Campaign",
-        audienceListId: selectedAudienceList,
         template,
         content,
       },
