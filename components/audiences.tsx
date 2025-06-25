@@ -37,7 +37,7 @@ export default async function Audiences({
   });
 
   return audienceLists.length > 0 ? (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="justify-left flex">
       {audienceLists.map((audienceList) => (
         <AudienceCard key={audienceList.id} data={audienceList} />
       ))}

@@ -68,3 +68,92 @@ export function isSafari() {
   if (typeof window === "undefined") return false;
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
+
+export function buildAudienceWhere(
+  audienceListId: string,
+  filterCriteria: Record<string, any>,
+) {
+  const where: any = { audienceListId };
+
+  // List of built-in fields
+  const BUILT_IN_KEYS = new Set([
+    "searchValue",
+    "tags",
+    "defaultAddressCountryCode",
+    "defaultAddressProvinceCode",
+    "defaultAddressCompany",
+    "defaultAddressCity",
+    "defaultAddressZip",
+    "defaultAddressPhone",
+    // Add more as needed
+  ]);
+
+  // Search (multi-field)
+  if (filterCriteria?.searchValue && filterCriteria.searchValue.trim() !== "") {
+    const search = filterCriteria.searchValue.trim();
+    where.OR = [
+      { firstName: { contains: search, mode: "insensitive" } },
+      { lastName: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+      { phone: { contains: search, mode: "insensitive" } },
+      { note: { contains: search, mode: "insensitive" } },
+      { tags: { contains: search, mode: "insensitive" } },
+      { defaultAddressCompany: { contains: search, mode: "insensitive" } },
+      { defaultAddressAddress1: { contains: search, mode: "insensitive" } },
+      { defaultAddressAddress2: { contains: search, mode: "insensitive" } },
+      { defaultAddressCity: { contains: search, mode: "insensitive" } },
+      { defaultAddressProvinceCode: { contains: search, mode: "insensitive" } },
+      { defaultAddressCountryCode: { contains: search, mode: "insensitive" } },
+      { defaultAddressZip: { contains: search, mode: "insensitive" } },
+      { defaultAddressPhone: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  // Built-in array filters (tags: contains; others: in)
+  if (
+    filterCriteria?.tags &&
+    Array.isArray(filterCriteria.tags) &&
+    filterCriteria.tags.length > 0
+  ) {
+    where.AND = (where.AND || []).concat(
+      filterCriteria.tags.map((tag: string) => ({
+        tags: { contains: tag },
+      })),
+    );
+  }
+
+  [
+    "defaultAddressCountryCode",
+    "defaultAddressProvinceCode",
+    "defaultAddressCompany",
+    "defaultAddressCity",
+    "defaultAddressZip",
+    "defaultAddressPhone",
+  ].forEach((key) => {
+    if (
+      filterCriteria?.[key] &&
+      Array.isArray(filterCriteria[key]) &&
+      filterCriteria[key].length > 0
+    ) {
+      where[key] = { in: filterCriteria[key] };
+    }
+  });
+
+  // Dynamic custom field filters (handles any non-built-in keys)
+  Object.entries(filterCriteria).forEach(([key, value]) => {
+    if (BUILT_IN_KEYS.has(key)) return;
+    if (!Array.isArray(value) || value.length === 0) return;
+
+    // OR filter: customFields.key == value for any value
+    const orFilters = value.map((v) => ({
+      customFields: {
+        path: [key],
+        equals: v,
+      },
+    }));
+
+    where.AND = (where.AND || []).concat([{ OR: orFilters }]);
+  });
+
+  return where;
+}

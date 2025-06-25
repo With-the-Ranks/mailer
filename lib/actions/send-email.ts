@@ -7,6 +7,8 @@ import { Resend } from "resend";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+import { buildAudienceWhere } from "../utils";
+
 async function getEmailClientForOrg(orgId?: string) {
   let apiKey = process.env.RESEND_API_KEY!;
   let domain = process.env.EMAIL_DOMAIN!;
@@ -109,8 +111,9 @@ export const sendBulkEmail = async ({
   scheduledTime,
   id,
   organizationId,
+  segmentId,
 }: {
-  audienceListId: string;
+  audienceListId?: string | null;
   from: string;
   subject: string | null;
   content: string | null;
@@ -118,26 +121,44 @@ export const sendBulkEmail = async ({
   scheduledTime: string | undefined;
   id: string;
   organizationId: string;
+  segmentId?: string | null;
 }) => {
   const session = await getSession();
-  if (!session?.user.id) {
-    return { error: "Not authenticated" };
-  }
+  if (!session?.user.id) return { error: "Not authenticated" };
 
   const { resend, domain } = await getEmailClientForOrg(organizationId);
   const fromHeader = `${from} <${domain}>`;
 
-  const audienceList = await prisma.audienceList.findUnique({
-    where: { id: audienceListId },
-    include: { audiences: true },
-  });
-
-  if (!audienceList) {
-    return { error: "Audience list not found" };
+  let recipients: any[] = [];
+  if (segmentId) {
+    const segment = await prisma.segment.findUnique({
+      where: { id: segmentId },
+    });
+    if (!segment) return { error: "Segment not found" };
+    const filterCriteria =
+      segment.filterCriteria &&
+      typeof segment.filterCriteria === "object" &&
+      !Array.isArray(segment.filterCriteria)
+        ? (segment.filterCriteria as Record<string, any>)
+        : {};
+    recipients = await prisma.audience.findMany({
+      where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+    });
+  } else if (audienceListId) {
+    const audienceList = await prisma.audienceList.findUnique({
+      where: { id: audienceListId },
+      include: { audiences: true },
+    });
+    if (!audienceList) return { error: "Audience list not found" };
+    recipients = audienceList.audiences;
+  } else {
+    return { error: "Must provide either segmentId or audienceListId" };
   }
 
+  if (recipients.length === 0) return { error: "No recipients found" };
+
   try {
-    for (const audience of audienceList.audiences) {
+    for (const audience of recipients) {
       const customVars =
         typeof audience.customFields === "string"
           ? JSON.parse(audience.customFields)
@@ -148,7 +169,6 @@ export const sendBulkEmail = async ({
         last_name: audience.lastName,
         ...customVars,
       };
-
       const htmlContent = content
         ? await parseContent(content, vars, previewText)
         : "";
@@ -161,45 +181,46 @@ export const sendBulkEmail = async ({
         text: "",
         scheduledAt: scheduledTime,
         tags: [
-          {
-            name: "intrepidId",
-            value: id,
-          },
-          {
-            name: "userId",
-            value: session.user.id,
-          },
+          { name: "intrepidId", value: id },
+          { name: "userId", value: session.user.id },
         ],
         react: "",
       };
-
       const { data, error } = await resend.emails.send(emailData);
 
+      let eventType = "sent";
+      let errorMessage = null;
+      let resendId = data?.id ?? null;
+
       if (error) {
+        eventType = "failed";
+        errorMessage =
+          typeof error === "string" ? error : JSON.stringify(error);
+        resendId = null; // Failed, so no resendId
         console.error(
-          `Failed to send email to ${audience.email}: ${JSON.stringify(error)}`,
+          `Failed to send email to ${audience.email}: ${errorMessage}`,
         );
       } else {
-        const resendId = data?.id;
-
-        try {
-          await prisma.emailEvent.create({
-            data: {
-              emailId: id,
-              userId: session.user.id,
-              emailTo: audience.email,
-              eventType: "sent",
-              timestamp: new Date(),
-            },
-          });
-        } catch (err: any) {
-          if (err.code !== "P2002")
-            console.error("Error logging sent event:", err);
-        }
+        // Still update email with resendId if you want (optional)
         await prisma.email.update({
           where: { id },
           data: { resendId },
         });
+      }
+
+      try {
+        await prisma.emailEvent.create({
+          data: {
+            emailId: id,
+            userId: session.user.id,
+            emailTo: audience.email,
+            eventType,
+            timestamp: new Date(),
+          },
+        });
+      } catch (err: any) {
+        if (err.code !== "P2002")
+          console.error("Error logging email event:", err);
       }
     }
     return { success: true };

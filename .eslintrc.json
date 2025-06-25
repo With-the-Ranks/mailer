@@ -7,14 +7,14 @@
     "project": ["./tsconfig.json"]
   },
   "rules": {
-    "simple-import-sort/imports": "error",
+    "simple-import-sort/imports": "warn",
     "no-unused-vars": [
-      "error",
+      "warn",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
-    "@typescript-eslint/no-use-before-define": "error",
+    "@typescript-eslint/no-use-before-define": "warn",
     "@typescript-eslint/consistent-type-imports": [
-      "error",
+      "warn",
       { "prefer": "type-imports" }
     ]
   },

@@ -1,0 +1,20 @@
+export const CONTACT_FIELDS = [
+  { key: "firstName", label: "First Name", required: true },
+  { key: "lastName", label: "Last Name", required: true },
+  { key: "email", label: "Email", required: true },
+  { key: "phone", label: "Phone", required: false },
+  { key: "note", label: "Note", required: false },
+  { key: "tags", label: "Tags", required: false },
+  { key: "defaultAddressCompany", label: "Company", required: false },
+  { key: "defaultAddressAddress1", label: "Address Line 1", required: false },
+  { key: "defaultAddressAddress2", label: "Address Line 2", required: false },
+  { key: "defaultAddressCity", label: "City", required: false },
+  {
+    key: "defaultAddressProvinceCode",
+    label: "State/Province",
+    required: false,
+  },
+  { key: "defaultAddressCountryCode", label: "Country Code", required: false },
+  { key: "defaultAddressZip", label: "ZIP/Postal Code", required: false },
+  { key: "defaultAddressPhone", label: "Address Phone", required: false },
+];

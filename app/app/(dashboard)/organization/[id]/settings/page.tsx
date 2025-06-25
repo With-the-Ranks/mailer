@@ -13,6 +13,7 @@ export default async function OrganizationSettingsIndex({
   const data = await prisma.organization.findUnique({
     where: { id: decodeURIComponent(id) },
     select: {
+      name: true,
       emailApiKey: true,
       activeDomainId: true,
       domains: {
@@ -35,6 +36,19 @@ export default async function OrganizationSettingsIndex({
         ];
   return (
     <div className="flex flex-col space-y-6">
+      <Form
+        title="Organization's Name"
+        description="The name of your organization."
+        helpText="Please use 32 characters maximum."
+        inputAttrs={{
+          name: "name",
+          type: "text",
+          defaultValue: data?.name!,
+          placeholder: "My Campaign Organization",
+          maxLength: 32,
+        }}
+        handleSubmit={updateOrganization}
+      />
       <div className="flex justify-end gap-2">
         <Link href="https://resend.com/api-keys" target="_blank">
           <Button variant="outline" size="sm">

@@ -12,15 +12,36 @@ import prisma from "@/lib/prisma";
 // }
 
 // Create an audience list
-export const createAudienceList = async (formData: FormData) => {
-  const session = await getSession();
-  if (!session?.user.id) {
-    return { error: "Not authenticated" };
+export const createAudienceList = async (
+  formData: FormData,
+  userId?: string,
+  organizationIdOverride?: string,
+) => {
+  let organizationId = organizationIdOverride;
+
+  if (!organizationId) {
+    let uid = userId;
+    if (!uid) {
+      const session = await getSession();
+      if (!session?.user.id) {
+        return { error: "Not authenticated" };
+      }
+      uid = session.user.id;
+    }
+    // Fetch user's org if not provided
+    const user = await prisma.user.findUnique({
+      where: { id: uid },
+      select: { organizationId: true },
+    });
+    organizationId = user?.organizationId || undefined;
   }
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
-  const organizationId = formData.get("organizationId") as string;
+
+  if (!organizationId) {
+    return { error: "No organization found for user." };
+  }
 
   try {
     const newList = await prisma.audienceList.create({
@@ -232,5 +253,25 @@ export const getAudiences = async (audienceListId: string) => {
     };
   } catch (error: any) {
     return { error: "Unable to fetch audiences." };
+  }
+};
+
+export const updateAudienceListName = async (
+  audienceListId: string,
+  newName: string,
+) => {
+  const session = await getSession();
+  if (!session?.user) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    const updated = await prisma.audienceList.update({
+      where: { id: audienceListId },
+      data: { name: newName },
+    });
+    return updated;
+  } catch (error: any) {
+    return { error: error.message };
   }
 };

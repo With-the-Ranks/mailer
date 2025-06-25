@@ -4,6 +4,8 @@ import { hash } from "bcrypt";
 import { addHours } from "date-fns";
 import React from "react";
 
+import { createOrganization } from "@/lib/actions";
+import { createAudienceList } from "@/lib/actions/audience-list";
 import { sendEmail } from "@/lib/actions/send-email";
 import VerifyEmail from "@/lib/email-templates/verify-email";
 import prisma from "@/lib/prisma";
@@ -28,6 +30,30 @@ export const registerUser = async (formData: FormData) => {
         name: defaultName,
       },
     });
+
+    // --- Create default org & audience list using actions ---
+    try {
+      // 1. Create organization
+      const orgFormData = new FormData();
+      orgFormData.set("name", `${defaultName}'s Organization`);
+      orgFormData.set("description", "");
+      orgFormData.set("subdomain", defaultName.replace(/[\W_]+/g, "-"));
+
+      const orgResult = await createOrganization(orgFormData, user.id);
+
+      // 2. Create default audience list if org was created
+
+      if (orgResult && !("error" in orgResult) && orgResult.id) {
+        const audienceFormData = new FormData();
+        audienceFormData.set("name", "Master List");
+        audienceFormData.set("description", "");
+        await createAudienceList(audienceFormData, user.id, orgResult.id);
+      }
+    } catch (orgErr) {
+      // Log the error for debugging/alerting
+      console.error("Failed to create default org/audience:", orgErr);
+    }
+    // -------------------------------------------------------
 
     const token = crypto.randomUUID();
     await prisma.verificationToken.create({
