@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { SegmentsHeader } from "@/components/segments/segments-header";
 import { SegmentsList } from "@/components/segments/segments-list";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getFirstAudienceListId } from "@/lib/actions/audience-list";
 
 interface PageProps {
   params: { id: string };
@@ -32,15 +33,15 @@ function SegmentsLoadingSkeleton() {
   );
 }
 
-export default function OrganizationSegmentsPage({ params }: PageProps) {
+export default async function OrganizationSegmentsPage({ params }: PageProps) {
   const orgId = params.id;
-
+  const audienceListId = await getFirstAudienceListId(orgId);
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <SegmentsHeader orgId={orgId} />
       <div className="space-y-4">
         <Suspense fallback={<SegmentsLoadingSkeleton />}>
-          <SegmentsList orgId={orgId} />
+          <SegmentsList orgId={orgId} audienceListId={audienceListId} />
         </Suspense>
       </div>
     </div>

@@ -275,3 +275,12 @@ export const updateAudienceListName = async (
     return { error: error.message };
   }
 };
+
+export const getFirstAudienceListId = async (organizationId: string) => {
+  const list = await prisma.audienceList.findFirst({
+    where: { organizationId },
+    select: { id: true },
+    orderBy: { createdAt: "asc" },
+  });
+  return list?.id;
+};

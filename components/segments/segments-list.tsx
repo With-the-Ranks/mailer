@@ -54,7 +54,13 @@ interface Segment {
   organizationId: string;
 }
 
-export function SegmentsList({ orgId }: { orgId: string }) {
+export function SegmentsList({
+  orgId,
+  audienceListId,
+}: {
+  orgId: string;
+  audienceListId?: string;
+}) {
   const [segments, setSegments] = React.useState<Segment[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -193,7 +199,6 @@ export function SegmentsList({ orgId }: { orgId: string }) {
       </div>
     );
   }
-  let audienceListId = segments[0].audienceList.id;
   if (segments.length === 0) {
     return (
       <Card>
@@ -204,8 +209,13 @@ export function SegmentsList({ orgId }: { orgId: string }) {
             Create segments by filtering your contacts in audience lists and
             clicking &quot;Create Segment&quot;
           </p>
-          <Button>
-            <Link href={`/audience/${audienceListId}`}>
+          <Button asChild>
+            <Link
+              href={
+                audienceListId ? `/audience/${audienceListId}` : "/audience"
+              }
+            >
+              {" "}
               <PlusIcon className="mr-2 h-4 w-4" />
               Create Your First Segment
             </Link>
