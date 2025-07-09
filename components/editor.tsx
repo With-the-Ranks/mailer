@@ -18,8 +18,6 @@ import { toast } from "sonner";
 import { mutate } from "swr";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
-import { getAudiences } from "@/lib/actions/audience-list";
-import { isErrorResponse } from "@/lib/utils";
 
 import { EmailPreviewButton } from "./email-preview-button";
 import SendEmailButton from "./send-email-button";
@@ -95,24 +93,12 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   }, [data]);
 
   useEffect(() => {
-    if (!selectedAudienceList) return;
-    getAudiences(selectedAudienceList).then((res) => {
-      if (isErrorResponse(res)) {
-        toast.error(res.error);
-      } else {
-        const customs = res.customFields.map((f) => ({
-          name: f,
-          required: false,
-        }));
-        setEditorVars([
-          { name: "first_name", required: false },
-          { name: "last_name", required: false },
-          { name: "email", required: false },
-          ...customs,
-        ]);
-      }
-    });
-  }, [selectedAudienceList]);
+    setEditorVars([
+      { name: "first_name", required: false },
+      { name: "last_name", required: false },
+      { name: "email", required: false },
+    ]);
+  }, []);
 
   const getButtonLabel = () => {
     if (!data.published) {

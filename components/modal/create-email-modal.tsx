@@ -11,7 +11,6 @@ import donationJson from "@/lib/email-templates/json/donation.json";
 import signupJson from "@/lib/email-templates/json/signup.json";
 import { cn } from "@/lib/utils";
 
-import { AudienceListDropdown } from "../audience-list-dropdown";
 import { Input } from "../ui/input";
 import { useModal } from "./provider";
 
@@ -37,7 +36,6 @@ export default function CreateEmailModal({
 
   const [data, setData] = useState({
     campaignName: "",
-    selectedAudienceList: null as string | null,
     template: "signup",
   });
   const [templateContent, setTemplateContent] = useState<string>(
@@ -56,12 +54,6 @@ export default function CreateEmailModal({
     e.preventDefault();
     setIsPending(true);
 
-    if (!data.selectedAudienceList) {
-      toast.error("Please select an audience list.");
-      setIsPending(false);
-      return;
-    }
-
     if (!templateContent) {
       toast.error("Template content not loaded yet.");
       setIsPending(false);
@@ -72,7 +64,6 @@ export default function CreateEmailModal({
       const email = await createEmail(
         data.campaignName,
         organizationId,
-        data.selectedAudienceList,
         data.template,
         templateContent,
       );
@@ -120,15 +111,6 @@ export default function CreateEmailModal({
             required
           />
         </div>
-
-        {/* Audience List */}
-        <AudienceListDropdown
-          selectedAudienceList={data.selectedAudienceList}
-          setSelectedAudienceList={(val) =>
-            setData({ ...data, selectedAudienceList: val })
-          }
-          organizationId={organizationId}
-        />
 
         {/* Template Picker */}
         <div className="space-y-2">

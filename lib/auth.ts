@@ -113,6 +113,8 @@ export const authOptions: NextAuthOptions = {
         id: token.sub,
         // @ts-expect-error
         username: token?.user?.username || token?.user?.gh_username,
+        // @ts-expect-error
+        organizationId: token?.user?.organizationId,
       };
       return session;
     },
@@ -198,6 +200,7 @@ export function getSession() {
       username: string;
       email: string;
       image: string;
+      organizationId: string;
     };
   } | null>;
 }

@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
 
-import Nav from "@/components/nav";
 import Profile from "@/components/profile";
+import Nav from "@/components/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div>
+    <SidebarProvider>
       <Nav>
         <Profile />
       </Nav>
-      <div className="min-h-screen dark:bg-black sm:pl-60">{children}</div>
-    </div>
+      <div className="min-h-screen w-full pt-5 dark:bg-black">
+        <SidebarTrigger className="fixed left-4 top-4 z-50 md:hidden" />
+        {children}
+      </div>
+    </SidebarProvider>
   );
 }
