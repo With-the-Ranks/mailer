@@ -2,8 +2,8 @@
   "private": true,
   "engines": {
     "npm": "please-use-pnpm",
-    "pnpm": "8.x",
-    "node": "20.x"
+    "pnpm": ">=8",
+    "node": ">=20"
   },
   "scripts": {
     "dev": "prisma generate && next dev",
