@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
-  const baseUrl = process.env.NEXTAUTH_URL || req.nextUrl.origin;
+  const baseUrl = `https://${process.env.VERCEL_URL}`;
 
   if (!token) {
     return NextResponse.redirect(`${baseUrl}/login?verify=invalid`);

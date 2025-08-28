@@ -14,6 +14,13 @@ import VerifyEmail from "./email-templates/verify-email";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
 
+// Function to detect if we're on a Vercel preview deployment
+function isVercelPreviewDeployment(host?: string) {
+  if (process.env.VERCEL_ENV === "preview") return true;
+  if (host && host.endsWith(".vercel.app")) return true;
+  return false;
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GitHubProvider({
@@ -91,9 +98,12 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         // When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
-        domain: VERCEL_DEPLOYMENT
-          ? `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
-          : undefined,
+        domain:
+          VERCEL_DEPLOYMENT &&
+          !isVercelPreviewDeployment() &&
+          process.env.NEXT_PUBLIC_ROOT_DOMAIN
+            ? `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+            : undefined,
         secure: VERCEL_DEPLOYMENT,
       },
     },
@@ -115,6 +125,9 @@ export const authOptions: NextAuthOptions = {
         username: token?.user?.username || token?.user?.gh_username,
       };
       return session;
+    },
+    redirect: async ({ baseUrl }) => {
+      return `${baseUrl}/`;
     },
   },
 };
