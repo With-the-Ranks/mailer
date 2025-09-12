@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sendBulkEmail, sendEmail } from "@/lib/actions/send-email";
 
+import { SegmentDropdown } from "../segment-dropdown";
 import { useModal } from "./provider";
 
 interface SendEmailModalProps {
@@ -48,6 +49,8 @@ export function SendEmailModal({
   const [testEmail, setTestEmail] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
+
   const [mode, setMode] = useState<"now" | "schedule">("now");
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [localScheduledDate, setLocalScheduledDate] =
@@ -84,7 +87,7 @@ export function SendEmailModal({
 
     try {
       const result = await sendBulkEmail({
-        audienceListId: selectedAudienceList!,
+        segmentId: selectedSegment,
         from,
         subject,
         content,
@@ -145,6 +148,12 @@ export function SendEmailModal({
         </div>
       </div>
 
+      <SegmentDropdown
+        organizationId={organizationId}
+        value={selectedSegment}
+        onChange={setSelectedSegment}
+        className="mb-4"
+      />
       <div className="mb-4 flex w-max overflow-hidden rounded-full border">
         {(["now", "schedule"] as const).map((m) => (
           <button

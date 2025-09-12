@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { EmailList } from "@/components/email-list";
+import { ContactList } from "@/components/contact-list";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -33,10 +33,10 @@ export default async function AudiencePage({
   }
 
   return (
-    <EmailList
-      audienceList={data.audiences}
+    <ContactList
+      listId={data.id}
       listName={data.name}
-      audienceListId={data.id}
+      initialContacts={data.audiences}
     />
   );
 }

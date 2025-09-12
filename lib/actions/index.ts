@@ -16,7 +16,7 @@ import {
   validDomainRegex,
 } from "@/lib/domains";
 import prisma from "@/lib/prisma";
-import { seedOrgTemplates } from "@/lib/seedTemplates";
+// import { seedOrgTemplates } from "@/lib/seedTemplates";
 import { getBlurDataURL } from "@/lib/utils";
 
 import { withEmailAuth, withOrgAuth } from "../auth";
@@ -26,30 +26,36 @@ const nanoid = customAlphabet(
   7,
 ); // 7-character random string
 
-export const createOrganization = async (formData: FormData) => {
-  const session = await getSession();
-  if (!session?.user.id) {
-    return {
-      error: "Not authenticated",
-    };
+export const createOrganization = async (
+  formData: FormData,
+  userId?: string,
+) => {
+  let uid = userId;
+  if (!uid) {
+    const session = await getSession();
+    if (!session?.user.id) {
+      return {
+        error: "Not authenticated",
+      };
+    }
+    uid = session.user.id;
   }
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
-  const subdomain = formData.get("subdomain") as string;
+  // const subdomain = formData.get("subdomain") as string;
 
   try {
     const response = await prisma.organization.create({
       data: {
         name,
         description,
-        subdomain,
       },
     });
 
     try {
       await prisma.user.update({
         where: {
-          id: session.user.id,
+          id: uid,
         },
         data: {
           organizationId: response.id,
@@ -59,11 +65,11 @@ export const createOrganization = async (formData: FormData) => {
       console.log(error);
     }
 
-    await seedOrgTemplates(response.id);
+    //await seedOrgTemplates(response.id);
 
-    await revalidateTag(
-      `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-    );
+    // await revalidateTag(
+    //   `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
+    // );
     return response;
   } catch (error: any) {
     if (error.code === "P2002") {
@@ -331,18 +337,12 @@ export const getOrganizationFromAudienceId = async (audienceId: string) => {
 export const createEmail = async (
   campaignName: string | null,
   organizationId: string,
-  selectedAudienceList: string | null,
   template: string | null,
   content?: string,
 ) => {
   const session = await getSession();
   if (!session?.user.id) {
     return { error: "Not authenticated" };
-  }
-
-  // Ensure audienceListId is not null
-  if (!selectedAudienceList) {
-    return { error: "Invalid audience list." };
   }
 
   // Validate campaignName
@@ -358,7 +358,6 @@ export const createEmail = async (
         userId: session.user.id,
         title: campaignName || "New Campaign",
         subject: campaignName || "New Campaign",
-        audienceListId: selectedAudienceList,
         template,
         content,
       },
@@ -563,4 +562,32 @@ export const fetchAudienceLists = async (organizationId: string) => {
     console.error("Error fetching audience lists:", error);
     throw new Error("Failed to fetch audience lists");
   }
+};
+
+export const getOrgAndAudienceList = async () => {
+  const session = await getSession();
+  if (!session?.user.id) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      organizationId: true,
+      organization: {
+        select: {
+          audienceLists: {
+            select: { id: true, name: true },
+            orderBy: { createdAt: "asc" },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+
+  if (!user?.organizationId || !user.organization) return null;
+
+  const orgId = user.organizationId;
+  const audienceListId = user.organization.audienceLists[0]?.id ?? null;
+
+  return { orgId, audienceListId };
 };
