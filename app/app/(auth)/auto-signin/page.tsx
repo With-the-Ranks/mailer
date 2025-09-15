@@ -3,10 +3,10 @@
 import { CheckCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function AutoSignInPage() {
+function AutoSignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -74,5 +74,29 @@ export default function AutoSignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AutoSignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+          <div className="mx-auto max-w-md space-y-6 rounded-lg bg-white p-6 shadow-lg">
+            <div className="flex items-center justify-center">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Email Verified!
+              </h1>
+              <p className="mt-2 text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <AutoSignInContent />
+    </Suspense>
   );
 }
