@@ -33,10 +33,8 @@ export default function CreateSignupFormButton({
 
       if (response.ok) {
         const data = await response.json();
-        router.refresh();
-        router.push(
-          `/organization/${organizationId}/signup-forms/${data.id}/edit`,
-        );
+        // Use window.location for a full page refresh to ensure data is updated
+        window.location.href = `/organization/${organizationId}/signup-forms/${data.id}/edit`;
       }
     } catch (error) {
       console.error("Error creating signup form:", error);

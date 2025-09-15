@@ -2,6 +2,7 @@
 
 import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface SignupFormRowProps {
 
 export default function SignupFormRow({ data }: SignupFormRowProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this signup form?")) {
@@ -27,7 +29,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
           method: "DELETE",
         });
         if (response.ok) {
-          window.location.reload();
+          router.refresh();
         }
       } catch (error) {
         console.error("Error deleting signup form:", error);

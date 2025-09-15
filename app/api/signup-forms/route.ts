@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         name,
         slug,
         organizationId,
-        isActive: true,
+        isActive: false,
         audienceListId: masterAudienceList?.id,
         fields: {
           create: [

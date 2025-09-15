@@ -347,9 +347,8 @@ export default function SignupFormEditor({
         throw new Error(errorData.error || "Failed to update fields");
       }
 
-      // Revalidate the page to show updated data
-      router.refresh();
-      router.push(`/organization/${organizationId}/signup-forms`);
+      // Use window.location for a full page refresh to ensure data is updated
+      window.location.href = `/organization/${organizationId}/signup-forms`;
     } catch (error) {
       console.error("Error saving signup form:", error);
       alert(
@@ -477,7 +476,9 @@ export default function SignupFormEditor({
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => router.back()}
+                  onClick={() => {
+                    window.history.back();
+                  }}
                   className="w-full"
                 >
                   Cancel
