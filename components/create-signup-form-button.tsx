@@ -33,6 +33,7 @@ export default function CreateSignupFormButton({
 
       if (response.ok) {
         const data = await response.json();
+        router.refresh();
         router.push(
           `/organization/${organizationId}/signup-forms/${data.id}/edit`,
         );
