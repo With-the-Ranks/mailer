@@ -26,6 +26,10 @@ export async function GET(req: NextRequest) {
     data: { emailVerified: new Date() },
   });
 
+  if (!user.email) {
+    return NextResponse.redirect(`${baseUrl}/login?verify=invalid`);
+  }
+
   // Create a temporary auto-signin token
   const autoSigninToken = crypto.randomUUID();
   await prisma.verificationToken.create({
