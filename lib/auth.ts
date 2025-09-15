@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { addHours } from "date-fns";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
