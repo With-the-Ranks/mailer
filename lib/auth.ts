@@ -66,6 +66,24 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Please verify your email before logging in.");
           }
 
+          // Check if this is an auto-signin token
+          const autoSigninToken = await prisma.verificationToken.findFirst({
+            where: {
+              identifier: email,
+              token: password,
+              expires: { gt: new Date() },
+            },
+          });
+
+          if (autoSigninToken) {
+            // Clean up the auto-signin token
+            await prisma.verificationToken.deleteMany({
+              where: { token: password },
+            });
+            return user;
+          }
+
+          // Normal password verification
           const passwordIsValid = await bcrypt.compare(
             password,
             user.password || "",

@@ -21,14 +21,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/login?verify=expired`);
   }
 
-  await prisma.user.update({
+  const user = await prisma.user.update({
     where: { email: record.identifier },
     data: { emailVerified: new Date() },
+  });
+
+  // Create a temporary auto-signin token
+  const autoSigninToken = crypto.randomUUID();
+  await prisma.verificationToken.create({
+    data: {
+      identifier: user.email,
+      token: autoSigninToken,
+      expires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+    },
   });
 
   await prisma.verificationToken.deleteMany({
     where: { token },
   });
 
-  return NextResponse.redirect(`${baseUrl}/login?verify=success`);
+  // Redirect to auto-signin page with token
+  return NextResponse.redirect(
+    `${baseUrl}/auto-signin?email=${encodeURIComponent(user.email)}&verified=true&token=${autoSigninToken}`,
+  );
 }
