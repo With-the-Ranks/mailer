@@ -7,7 +7,9 @@
   },
   "scripts": {
     "dev": "prisma generate && next dev",
-    "build": "prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "if [[ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]]; then npm run build:preview; else npm run build:production; fi",
+    "build:preview": "prisma generate && prisma db push --force-reset && next build",
+    "build:production": "prisma generate && prisma db push --accept-data-loss && next build",
     "format:write": "prettier --write \"**/*.{css,js,json,jsx,ts,tsx}\"",
     "format": "prettier \"**/*.{css,js,json,jsx,ts,tsx}\"",
     "start": "next start",
