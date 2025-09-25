@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
               label: "Email Address",
               type: "email",
               required: true,
+              placeholder: "Enter your email address",
               order: 0,
             },
             {
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
               label: "First Name",
               type: "firstName",
               required: true,
+              placeholder: "Enter your first name",
               order: 1,
             },
             {
@@ -71,6 +73,7 @@ export async function POST(request: NextRequest) {
               label: "Last Name",
               type: "lastName",
               required: true,
+              placeholder: "Enter your last name",
               order: 2,
             },
           ],

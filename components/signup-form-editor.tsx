@@ -184,7 +184,9 @@ function SortableField({
               const fieldType = FIELD_TYPES.find((ft) => ft.value === value);
               onUpdate(index, {
                 type: value,
+                name: value, // Update field name to match the type
                 label: fieldType?.label || field.label,
+                placeholder: `Enter your ${(fieldType?.label || field.label).toLowerCase()}`,
                 required: fieldType?.required || false,
               });
             }}
@@ -215,15 +217,7 @@ function SortableField({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <Label>Field Name</Label>
-          <Input
-            value={field.name}
-            onChange={(e) => onUpdate(index, { name: e.target.value })}
-            placeholder="field_name"
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-4">
         <div>
           <Label>Placeholder</Label>
           <Input

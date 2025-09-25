@@ -73,10 +73,10 @@ function convertAudienceToContact(audience: any): Contact {
     defaultAddressPhone: audience.defaultAddressPhone,
     customFields: audience.customFields || {},
     createdAt: audience.createdAt
-      ? new Date(audience.createdAt).toISOString().split("T")[0]
+      ? new Date(audience.createdAt).toISOString()
       : undefined,
     updatedAt: audience.updatedAt
-      ? new Date(audience.updatedAt).toISOString().split("T")[0]
+      ? new Date(audience.updatedAt).toISOString()
       : undefined,
     audienceListId: audience.audienceListId,
   };
@@ -146,7 +146,9 @@ export function ContactList({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "createdAt", desc: true }, // Sort by creation date, latest first
+  ]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,

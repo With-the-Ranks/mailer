@@ -79,7 +79,10 @@ export async function POST(
           email: audienceData.email,
         },
       },
-      update: audienceData,
+      update: {
+        ...audienceData,
+        updatedAt: new Date(), // Explicitly update timestamp
+      },
       create: {
         ...audienceData,
         audienceListId: signupForm.audienceListId!,
