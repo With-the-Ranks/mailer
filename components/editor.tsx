@@ -70,6 +70,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   const [data, setData] = useState({
     ...email,
     content: JSON.stringify(defaultJson),
+    from: email.from || "With The Ranks",
   } as EmailWithSite & { content: string });
 
   useEffect(() => {
@@ -118,9 +119,19 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   }, [data.published, data.id, router]);
 
   useEffect(() => {
-    startTransitionSaving(async () => {
-      await updateEmail(data, null);
-    });
+    if (
+      data.id &&
+      (data.title ||
+        data.subject ||
+        data.content ||
+        data.previewText ||
+        data.from ||
+        data.replyTo)
+    ) {
+      startTransitionSaving(async () => {
+        await updateEmail(data, null);
+      });
+    }
   }, [data]);
 
   // Fetch signup forms for the current organization
@@ -244,7 +255,10 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </span>
           <Input
             className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-            onChange={(e) => setFrom(e.target.value)}
+            onChange={(e) => {
+              setFrom(e.target.value);
+              setData({ ...data, from: e.target.value });
+            }}
             placeholder="With The Ranks"
             type="text"
             value={from}
