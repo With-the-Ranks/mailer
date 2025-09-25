@@ -1,9 +1,16 @@
 "use client";
 
-import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +43,25 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
       } finally {
         setIsDeleting(false);
       }
+    }
+  };
+
+  const handleCopyUrl = async () => {
+    const baseUrl = window.location.origin;
+    const signupUrl = `${baseUrl}/signup-forms/${data.slug}`;
+
+    try {
+      await navigator.clipboard.writeText(signupUrl);
+      toast.success("Signup URL copied to clipboard!");
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = signupUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      toast.success("Signup URL copied to clipboard!");
     }
   };
 
@@ -90,6 +116,14 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
             <Link href={`/signup-forms/${data.slug}`} target="_blank">
               <ExternalLink className="h-4 w-4" />
             </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyUrl}
+            title="Copy signup URL"
+          >
+            <Copy className="h-4 w-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
