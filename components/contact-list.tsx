@@ -102,15 +102,46 @@ export function ContactList({
     CustomFieldDefinition[]
   >([]);
   const [rowSelection, setRowSelection] = React.useState({});
+  // Load column visibility from localStorage
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({
-      defaultAddressAddress2: false,
-      defaultAddressPhone: false,
-      defaultAddressProvinceCode: false,
-      defaultAddressZip: false,
-      note: false,
-      createdAt: false,
-      updatedAt: false,
+    React.useState<VisibilityState>(() => {
+      if (typeof window !== "undefined") {
+        // Temporarily clear localStorage to test new defaults
+        localStorage.removeItem(`contact-table-visibility-${listId}`);
+
+        const saved = localStorage.getItem(
+          `contact-table-visibility-${listId}`,
+        );
+        if (saved) {
+          try {
+            return JSON.parse(saved);
+          } catch {
+            // If parsing fails, use default visibility
+          }
+        }
+      }
+      // Default visibility - show all columns
+      return {
+        select: true,
+        actions: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        defaultAddressCompany: true,
+        defaultAddressCity: true,
+        defaultAddressCountryCode: true,
+        defaultAddressAddress1: true,
+        defaultAddressAddress2: true,
+        defaultAddressProvinceCode: true,
+        defaultAddressZip: true,
+        defaultAddressPhone: true,
+        tags: true,
+        note: true,
+        customFields: true,
+        createdAt: true,
+        updatedAt: true,
+      };
     });
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -378,6 +409,16 @@ export function ContactList({
     },
   });
 
+  // Save column visibility to localStorage whenever it changes
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        `contact-table-visibility-${listId}`,
+        JSON.stringify(columnVisibility),
+      );
+    }
+  }, [columnVisibility, listId]);
+
   const confirmBulkDelete = async () => {
     const selectedIds = table
       .getSelectedRowModel()
@@ -536,7 +577,7 @@ export function ContactList({
 
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <ColumnVisibility table={table} />
+          <ColumnVisibility table={table} customFields={customFieldKeys} />
           {selectedRowCount > 0 && (
             <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
               <TrashIcon className="mr-2 h-4 w-4" />
