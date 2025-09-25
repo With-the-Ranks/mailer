@@ -8,9 +8,11 @@ export default async function PublicSignupFormPage({
 }: {
   params: { slug: string };
 }) {
+  const decodedSlug = decodeURIComponent(params.slug);
+
   const signupForm = await prisma.signupForm.findFirst({
     where: {
-      slug: decodeURIComponent(params.slug),
+      slug: decodedSlug,
       isActive: true,
     },
     include: {

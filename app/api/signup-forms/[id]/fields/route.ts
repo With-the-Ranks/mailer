@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -50,6 +51,9 @@ export async function POST(
         signupFormId: params.id,
       },
     });
+
+    // Revalidate the public signup form page
+    await revalidatePath(`/signup-forms/${signupForm.slug}`);
 
     return NextResponse.json(field);
   } catch (error) {
@@ -168,6 +172,9 @@ export async function PUT(
 
       return [...updatedFields, ...createdFields];
     });
+
+    // Revalidate the public signup form page
+    await revalidatePath(`/signup-forms/${signupForm.slug}`);
 
     return NextResponse.json(result);
   } catch (error) {

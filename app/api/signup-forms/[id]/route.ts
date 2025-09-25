@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -146,6 +147,14 @@ export async function PUT(
         },
       },
     });
+
+    // Revalidate the public signup form page
+    await revalidatePath(`/signup-forms/${updatedSignupForm.slug}`);
+
+    // Also revalidate with the old slug if it changed
+    if (signupForm.slug !== updatedSignupForm.slug) {
+      await revalidatePath(`/signup-forms/${signupForm.slug}`);
+    }
 
     return NextResponse.json(updatedSignupForm);
   } catch (error) {
