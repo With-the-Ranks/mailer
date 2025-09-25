@@ -16,7 +16,14 @@ import {
 } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, Save, Settings, Trash2 } from "lucide-react";
+import {
+  ExternalLink,
+  GripVertical,
+  Plus,
+  Save,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -92,11 +99,13 @@ function SortableField({
   index,
   onUpdate,
   onRemove,
+  allFields,
 }: {
   field: SignupFormField;
   index: number;
   onUpdate: (index: number, updates: Partial<SignupFormField>) => void;
   onRemove: (index: number) => void;
+  allFields: SignupFormField[];
 }) {
   const {
     attributes,
@@ -113,6 +122,15 @@ function SortableField({
   };
 
   const fieldType = FIELD_TYPES.find((ft) => ft.value === field.type);
+
+  // Get available field types (excluding already used types, except for the current field)
+  const usedTypes = allFields
+    .filter((_, i) => i !== index) // Exclude current field from used types
+    .map((f) => f.type);
+
+  const availableTypes = FIELD_TYPES.filter(
+    (type) => !usedTypes.includes(type.value),
+  );
 
   return (
     <div
@@ -134,7 +152,17 @@ function SortableField({
           </span>
           {field.required && <Badge variant="secondary">Required</Badge>}
         </div>
-        <Button variant="ghost" size="sm" onClick={() => onRemove(index)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onRemove(index)}
+          disabled={field.type === "email"}
+          title={
+            field.type === "email"
+              ? "Email field cannot be removed"
+              : "Remove field"
+          }
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -160,18 +188,30 @@ function SortableField({
                 required: fieldType?.required || false,
               });
             }}
+            disabled={field.type === "email"}
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {FIELD_TYPES.map((type) => (
+              {availableTypes.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {field.type === "email" && (
+            <p className="mt-1 text-xs text-gray-500">
+              Email field type cannot be changed
+            </p>
+          )}
+          {availableTypes.length === 1 &&
+            availableTypes[0].value === field.type && (
+              <p className="mt-1 text-xs text-gray-500">
+                All other field types are already used
+              </p>
+            )}
         </div>
       </div>
 
@@ -199,8 +239,16 @@ function SortableField({
           id={`required-${index}`}
           checked={field.required}
           onCheckedChange={(checked) => onUpdate(index, { required: checked })}
+          disabled={field.type === "email"}
         />
-        <Label htmlFor={`required-${index}`}>Required field</Label>
+        <Label htmlFor={`required-${index}`}>
+          Required field
+          {field.type === "email" && (
+            <span className="ml-1 text-xs text-gray-500">
+              (always required)
+            </span>
+          )}
+        </Label>
       </div>
     </div>
   );
@@ -229,7 +277,34 @@ export default function SignupFormEditor({
     isActive: signupForm.isActive,
     audienceListId: masterAudienceList?.id || "",
   });
-  const [fields, setFields] = useState<SignupFormField[]>(signupForm.fields);
+  // Ensure there's always an email field
+  const ensureEmailField = (currentFields: SignupFormField[]) => {
+    const hasEmailField = currentFields.some((field) => field.type === "email");
+    if (!hasEmailField) {
+      const emailField: SignupFormField = {
+        id: "email-field",
+        name: "email",
+        label: "Email Address",
+        type: "email",
+        required: true,
+        placeholder: "Enter your email address",
+        options: [],
+        order: 0,
+      };
+      return [
+        emailField,
+        ...currentFields.map((field, index) => ({
+          ...field,
+          order: index + 1,
+        })),
+      ];
+    }
+    return currentFields;
+  };
+
+  const [fields, setFields] = useState<SignupFormField[]>(
+    ensureEmailField(signupForm.fields),
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -239,13 +314,24 @@ export default function SignupFormEditor({
   );
 
   const addField = () => {
+    // Find the first available field type that's not already used
+    const usedTypes = fields.map((f) => f.type);
+    const availableType = FIELD_TYPES.find(
+      (type) => !usedTypes.includes(type.value),
+    );
+
+    if (!availableType) {
+      alert("All field types are already used in this form.");
+      return;
+    }
+
     const newField: SignupFormField = {
       id: `field_${Date.now()}`,
-      name: `field_${Date.now()}`,
-      label: "New Field",
-      type: "text",
-      required: false,
-      placeholder: "",
+      name: availableType.value,
+      label: availableType.label,
+      type: availableType.value,
+      required: availableType.required || false,
+      placeholder: `Enter your ${availableType.label.toLowerCase()}`,
       options: [],
       order: fields.length,
     };
@@ -253,11 +339,36 @@ export default function SignupFormEditor({
   };
 
   const removeField = (index: number) => {
+    const fieldToRemove = fields[index];
+
+    // Prevent removing email fields
+    if (fieldToRemove.type === "email") {
+      alert("Email field cannot be removed as it's required for signup forms.");
+      return;
+    }
+
     setFields(fields.filter((_, i) => i !== index));
   };
 
   const updateField = (index: number, updates: Partial<SignupFormField>) => {
     const newFields = [...fields];
+    const currentField = newFields[index];
+
+    // Prevent changing email field type
+    if (
+      currentField.type === "email" &&
+      updates.type &&
+      updates.type !== "email"
+    ) {
+      alert("Email field type cannot be changed.");
+      return;
+    }
+
+    // Ensure email fields are always required
+    if (updates.type === "email" || currentField.type === "email") {
+      updates.required = true;
+    }
+
     newFields[index] = { ...newFields[index], ...updates };
     setFields(newFields);
   };
@@ -367,7 +478,16 @@ export default function SignupFormEditor({
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Form Fields</span>
-              <Button onClick={addField} size="sm">
+              <Button
+                onClick={addField}
+                size="sm"
+                disabled={fields.length >= FIELD_TYPES.length}
+                title={
+                  fields.length >= FIELD_TYPES.length
+                    ? "All field types are already used"
+                    : "Add new field"
+                }
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Field
               </Button>
@@ -393,6 +513,7 @@ export default function SignupFormEditor({
                       index={index}
                       onUpdate={updateField}
                       onRemove={removeField}
+                      allFields={fields}
                     />
                   ))}
                 </div>
@@ -457,6 +578,31 @@ export default function SignupFormEditor({
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Signup forms automatically use the master audience list
+                </p>
+              </div>
+
+              <div>
+                <Label>Public Form Link</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={`${window.location.origin}/signup-forms/${formData.slug}`}
+                    readOnly
+                    className="bg-gray-50 text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const url = `${window.location.origin}/signup-forms/${formData.slug}`;
+                      window.open(url, "_blank");
+                    }}
+                    title="Open signup form in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Share this link to collect signups
                 </p>
               </div>
             </CardContent>
