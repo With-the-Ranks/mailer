@@ -18,6 +18,9 @@ import { toast } from "sonner";
 import { mutate } from "swr";
 
 import { updateEmail, updatePostMetadata } from "@/lib/actions";
+import { createDefaultBlocks } from "@/lib/maily-blocks/default-blocks";
+import * as signupBlocks from "@/lib/maily-blocks/signup-block";
+import type { SignupForm } from "@/lib/maily-blocks/types";
 
 import { EmailPreviewButton } from "./email-preview-button";
 import SendEmailButton from "./send-email-button";
@@ -50,6 +53,9 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     { name: "email", required: false },
   ]);
 
+  const [signupForms, setSignupForms] = useState<SignupForm[]>([]);
+  const [signupFormsLoading, setSignupFormsLoading] = useState(true);
+
   const defaultJson = useMemo(() => {
     return email.content
       ? JSON.parse(email.content)
@@ -79,6 +85,31 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     string | null
   >(email.audienceListId || null);
 
+  // Create comprehensive blocks array with Maily blocks plus signup form blocks
+  const blocks = useMemo(() => {
+    const signupFormBlocks = signupBlocks.createSignupFormBlocks(signupForms);
+    const defaultBlocks = createDefaultBlocks(email.organization || undefined);
+
+    // Create comprehensive blocks array that includes both default Maily blocks and signup forms
+    const finalBlocks = [
+      {
+        title: "Blocks",
+        commands: defaultBlocks,
+      },
+      // Only add Signup Forms group if there are signup forms
+      ...(signupFormBlocks.length > 0
+        ? [
+            {
+              title: "Signup Forms",
+              commands: signupFormBlocks,
+            },
+          ]
+        : []),
+    ];
+
+    return finalBlocks;
+  }, [signupForms, signupFormsLoading, email.organization]);
+
   // Redirect if email is already published.
   useEffect(() => {
     if (data.published) {
@@ -91,6 +122,32 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       await updateEmail(data, null);
     });
   }, [data]);
+
+  // Fetch signup forms for the current organization
+  useEffect(() => {
+    const fetchSignupForms = async () => {
+      if (!email.organizationId) {
+        setSignupFormsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/signup-forms?organizationId=${email.organizationId}`,
+        );
+        if (response.ok) {
+          const forms = await response.json();
+          setSignupForms(forms);
+        }
+      } catch (error) {
+        console.error("Failed to fetch signup forms:", error);
+      } finally {
+        setSignupFormsLoading(false);
+      }
+    };
+
+    fetchSignupForms();
+  }, [email.organizationId]);
 
   useEffect(() => {
     setEditorVars([
@@ -252,13 +309,14 @@ export default function Editor({ email }: { email: EmailWithSite }) {
               autofocus: false,
             }}
             contentJson={contentObj}
+            blocks={blocks as any}
             extensions={[
               VariableExtension.configure({
                 suggestion: getVariableSuggestions("@"),
                 variables: editorVars,
               }),
             ]}
-            key={`${"editor"}|${editorVars.map((v) => v.name).join(",")}`}
+            key={`${"editor"}|${editorVars.map((v) => v.name).join(",")}|${signupForms.length}`}
             onCreate={() => {
               setHydrated(true);
             }}
