@@ -123,7 +123,7 @@ export const updateOrganization = withOrgAuth(
           organization.activeDomainId &&
           newIds.includes(organization.activeDomainId)
             ? organization.activeDomainId
-            : newIds[0] ?? null;
+            : (newIds[0] ?? null);
 
         const finalOrg = await prisma.organization.update({
           where: { id: organization.id },
@@ -390,9 +390,11 @@ export const updateEmail = async (data: Email, scheduledTime?: Date | null) => {
     content: data.content,
     previewText: data.previewText,
     subject: data.subject,
+    from: data.from,
+    replyTo: data.replyTo,
   };
 
-  if (scheduledTime !== undefined) {
+  if (scheduledTime !== undefined && scheduledTime !== null) {
     updateData.scheduledTime = scheduledTime;
   }
 

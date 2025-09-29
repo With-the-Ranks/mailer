@@ -141,6 +141,7 @@ model Organization {
   domains        EmailDomain[] // All domains owned by org
   customFieldDefinitions CustomFieldDefinition[]
   Template Template[]
+  signupForms    SignupForm[]
 
   Segment Segment[]
 }
@@ -192,6 +193,7 @@ model AudienceList {
   audiences      Audience[]
   emails         Email[]       @relation
   customFields   Json? 
+  signupForms    SignupForm[]
 
   Segment Segment[]
 }
@@ -225,6 +227,7 @@ model Audience {
   // Relations
   audienceList               AudienceList  @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
   audienceListId             String
+  signupSubmissions          SignupSubmission[]
 
   @@unique([audienceListId, email])
   @@index([audienceListId])
@@ -269,4 +272,64 @@ model Segment {
   organizationId String?
 
   Email Email[]
+}
+
+model SignupForm {
+  id             String        @id @default(cuid())
+  name           String
+  slug           String
+  description    String?       @db.Text
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  
+  // Relations
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  audienceList   AudienceList? @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
+  audienceListId String?
+  
+  fields         SignupFormField[]
+  submissions    SignupSubmission[]
+  
+  @@unique([slug, organizationId])
+  @@index([organizationId])
+}
+
+model SignupFormField {
+  id             String        @id @default(cuid())
+  name           String        // Field name (e.g., "email", "zipCode")
+  label          String        // Display label (e.g., "Email Address")
+  type           String        // "text", "email", "tel", "textarea", "select", "radio", "checkbox"
+  required       Boolean       @default(false)
+  placeholder    String?
+  options        String[]      // For select, radio, checkbox fields
+  order          Int           @default(0)
+  validation     Json?         // Custom validation rules
+  
+  // Relations
+  signupForm     SignupForm    @relation(fields: [signupFormId], references: [id], onDelete: Cascade)
+  signupFormId   String
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  
+  @@index([signupFormId])
+}
+
+model SignupSubmission {
+  id             String        @id @default(cuid())
+  formData       Json          // Store all form field values as JSON
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime      @default(now())
+  
+  // Relations
+  signupForm     SignupForm    @relation(fields: [signupFormId], references: [id], onDelete: Cascade)
+  signupFormId   String
+  audience       Audience?     @relation(fields: [audienceId], references: [id], onDelete: Cascade)
+  audienceId     String?
+  
+  @@index([signupFormId])
+  @@index([audienceId])
 }

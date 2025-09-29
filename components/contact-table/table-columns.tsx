@@ -163,7 +163,7 @@ export function createColumns({
         );
       },
       filterFn: multiSelectFilter,
-      size: 100,
+      size: 180,
     },
     {
       accessorKey: "tags",
@@ -225,7 +225,7 @@ export function createColumns({
       header: "Zip Code",
       cell: ({ row }) => row.getValue("defaultAddressZip") || "—",
       filterFn: multiSelectFilter,
-      size: 100,
+      size: 180,
     },
     {
       accessorKey: "defaultAddressPhone",
@@ -250,21 +250,51 @@ export function createColumns({
     },
     {
       accessorKey: "createdAt",
-      header: "Created",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Created
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => {
         const date = row.getValue("createdAt") as string;
-        return date ? new Date(date).toLocaleDateString() : "—";
+        return date
+          ? new Date(date).toLocaleDateString() +
+              " " +
+              new Date(date).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+          : "—";
       },
-      size: 100,
+      size: 180,
     },
     {
       accessorKey: "updatedAt",
-      header: "Updated",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Updated
+          <ArrowUpDownIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => {
         const date = row.getValue("updatedAt") as string;
-        return date ? new Date(date).toLocaleDateString() : "—";
+        return date
+          ? new Date(date).toLocaleDateString() +
+              " " +
+              new Date(date).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+          : "—";
       },
-      size: 100,
+      size: 180,
     },
   );
 

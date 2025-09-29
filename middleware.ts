@@ -5,7 +5,12 @@ export const config = {
   matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
 };
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/auto-signin",
+];
 
 export default async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
