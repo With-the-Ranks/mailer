@@ -1,6 +1,6 @@
 "use server";
 
-import { hash } from "bcrypt";
+import { hash } from "bcryptjs";
 import { addHours } from "date-fns";
 import React from "react";
 
@@ -64,7 +64,9 @@ export const registerUser = async (formData: FormData) => {
       },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://app.localhost:3000";
     const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
 
     const content = React.createElement(VerifyEmail, {

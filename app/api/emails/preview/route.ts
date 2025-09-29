@@ -1,4 +1,4 @@
-import { render } from "@maily-to/render";
+import { Maily } from "@maily-to/render";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -15,10 +15,11 @@ export async function POST(request: NextRequest) {
     const jsonContent =
       typeof content === "string" ? JSON.parse(content) : content;
 
-    const html = await render(jsonContent, {
-      preview: previewText,
-      pretty: true,
-    });
+    const maily = new Maily(jsonContent);
+    if (previewText) {
+      maily.setPreviewText(previewText);
+    }
+    const html = await maily.render();
 
     return NextResponse.json({ html });
   } catch (err: any) {
