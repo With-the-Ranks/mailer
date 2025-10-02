@@ -159,16 +159,11 @@ export function buildAudienceWhere(
 }
 
 export function getBaseAppUrl() {
-  const fallback = "http://app.localhost:3000";
+  if (process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+    return `https://app.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+  }
 
-  const url =
-    process.env.NEXTAUTH_URL?.trim() ||
-    process.env.APP_BASE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
-    fallback;
-
-  return url.replace(/\/$/, "");
+  return "http://app.localhost:3000";
 }
 
 export function getUnsubscribeUrl({
