@@ -10,6 +10,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/auto-signin",
+  "/unsubscribe",
 ];
 
 export default async function middleware(req: NextRequest) {

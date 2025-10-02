@@ -205,6 +205,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           subject={data.subject || ""}
           previewText={data.previewText || ""}
           fromName={from || ""}
+          audienceListId={data.audienceListId}
+          organizationId={data.organizationId}
         />
         <SendEmailButton
           isSending={isPendingPublishing}

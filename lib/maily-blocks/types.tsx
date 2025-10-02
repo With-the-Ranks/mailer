@@ -1,12 +1,17 @@
 import type { ReactElement } from "react";
 
+export type BlockCommandArgs = {
+  editor: any;
+  range: any;
+};
+
 export interface BlockItem {
   title: string;
   description?: string;
   searchTerms: string[];
   icon?: ReactElement;
   preview?: string;
-  command?: ({ editor, range }: { editor: any; range: any }) => void;
+  command?: (args: BlockCommandArgs) => void;
   render?: (editor: any) => ReactElement | null;
   id?: string;
   commands?: BlockItem[];

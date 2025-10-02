@@ -7,7 +7,7 @@ import { Resend } from "resend";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-import { buildAudienceWhere } from "../utils";
+import { buildAudienceWhere, getUnsubscribeUrl } from "../utils";
 
 async function getEmailClientForOrg(orgId?: string) {
   let apiKey = process.env.RESEND_API_KEY!;
@@ -40,7 +40,15 @@ const parseContent = async (
     if (previewText) {
       maily.setPreviewText(previewText);
     }
-    return await maily.render();
+    let html = await maily.render();
+
+    // Replace variable placeholders in href attributes (Maily doesn't do this automatically)
+    for (const [key, value] of Object.entries(variables)) {
+      const placeholder = `{{${key}}}`;
+      html = html.replaceAll(placeholder, value);
+    }
+
+    return html;
   } catch (error) {
     console.error("Error parsing content:", error);
     throw new Error("Failed to parse email content");
@@ -56,6 +64,7 @@ export type SendEmailOpts = {
   html?: string;
   react?: React.ReactElement;
   organizationId?: string;
+  audienceListId?: string | null;
 };
 
 export const sendEmail = async ({
@@ -67,6 +76,7 @@ export const sendEmail = async ({
   html,
   react,
   organizationId,
+  audienceListId,
 }: SendEmailOpts) => {
   const { resend, domain } = await getEmailClientForOrg(organizationId);
   const fromHeader = `${from} <${domain}>`;
@@ -82,7 +92,18 @@ export const sendEmail = async ({
   } else if (react) {
     payload.react = react;
   } else if (content) {
-    payload.html = await parseContent(content, {}, previewText);
+    const unsubUrl = getUnsubscribeUrl({
+      email: to,
+      listId: audienceListId || undefined,
+      organizationId,
+    });
+    payload.html = await parseContent(
+      content,
+      {
+        unsubscribe_url: unsubUrl,
+      },
+      previewText,
+    );
   } else {
     throw new Error("sendEmail: need content, html, or react");
   }
@@ -141,13 +162,27 @@ export const sendBulkEmail = async ({
       !Array.isArray(segment.filterCriteria)
         ? (segment.filterCriteria as Record<string, any>)
         : {};
+    const whereClause = buildAudienceWhere(
+      segment.audienceListId,
+      filterCriteria,
+    );
+    // Add filter to exclude unsubscribed contacts
     recipients = await prisma.audience.findMany({
-      where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+      where: {
+        ...whereClause,
+        isUnsubscribed: false,
+      },
     });
   } else if (audienceListId) {
     const audienceList = await prisma.audienceList.findUnique({
       where: { id: audienceListId },
-      include: { audiences: true },
+      include: {
+        audiences: {
+          where: {
+            isUnsubscribed: false,
+          },
+        },
+      },
     });
     if (!audienceList) return { error: "Audience list not found" };
     recipients = audienceList.audiences;
@@ -168,6 +203,11 @@ export const sendBulkEmail = async ({
         first_name: audience.firstName,
         last_name: audience.lastName,
         ...customVars,
+        unsubscribe_url: getUnsubscribeUrl({
+          email: audience.email,
+          listId: audience.audienceListId,
+          organizationId,
+        }),
       };
       const htmlContent = content
         ? await parseContent(content, vars, previewText)

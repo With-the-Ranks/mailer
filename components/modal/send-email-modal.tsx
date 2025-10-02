@@ -31,6 +31,7 @@ interface SendEmailModalProps {
   from: string;
   content: string;
   emailId: string;
+  audienceListId?: string | null;
 }
 
 export function SendEmailModal({
@@ -45,6 +46,7 @@ export function SendEmailModal({
   from,
   content,
   emailId,
+  audienceListId: audienceListIdProp,
 }: SendEmailModalProps) {
   const modal = useModal();
   const [testEmail, setTestEmail] = useState("");
@@ -69,6 +71,7 @@ export function SendEmailModal({
         content,
         previewText,
         organizationId,
+        audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
       toast.success("Test email sent");
     } catch {

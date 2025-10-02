@@ -19,10 +19,19 @@ type EmailPreviewButtonProps = {
   subject: string;
   previewText: string;
   editor: any;
+  audienceListId?: string | null;
+  organizationId?: string | null;
 };
 
 export function EmailPreviewButton(props: EmailPreviewButtonProps) {
-  const { subject, previewText, editor, fromName } = props;
+  const {
+    subject,
+    previewText,
+    editor,
+    fromName,
+    audienceListId,
+    organizationId,
+  } = props;
 
   const [open, setOpen] = useState(false);
   const [html, setHtml] = useState("");
@@ -50,6 +59,8 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
         body: JSON.stringify({
           content: json,
           previewText,
+          audienceListId,
+          organizationId,
         }),
       });
 
