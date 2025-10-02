@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
 const DEFAULT_REASONS = [
   "I receive too many emails",
@@ -32,7 +32,7 @@ type SubmitState =
   | { status: "success"; message: string }
   | { status: "error"; message: string };
 
-export default function UnsubscribePage() {
+function UnsubscribePageContent() {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email");
   const listParam = searchParams.get("list");
@@ -597,5 +597,24 @@ function ManualEntryForm({
         )}
       </button>
     </div>
+  );
+}
+
+export default function UnsubscribePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-10">
+          <div className="mx-auto w-full max-w-2xl">
+            <div className="flex flex-col items-center gap-4 py-10 text-center">
+              <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+              <p className="text-sm text-slate-600">Loading...</p>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <UnsubscribePageContent />
+    </Suspense>
   );
 }
