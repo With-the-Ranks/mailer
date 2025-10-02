@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getOrganizationData, getPostData } from "@/lib/fetchers";
 import prisma from "@/lib/prisma";
-import { toDateString } from "@/lib/utils";
+import { getUnsubscribeUrl, toDateString } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -70,6 +70,7 @@ export async function generateStaticParams() {
 async function parseEmailContent(
   content: string | null,
   previewText: string | null,
+  unsubscribeOpts: { listId?: string | null; organizationId?: string | null },
 ) {
   if (!content) {
     return "";
@@ -87,6 +88,12 @@ async function parseEmailContent(
   if (previewText) {
     maily.setPreviewText(previewText);
   }
+  maily.setVariableValues({
+    unsubscribe_url: getUnsubscribeUrl({
+      listId: unsubscribeOpts.listId || undefined,
+      organizationId: unsubscribeOpts.organizationId || undefined,
+    }),
+  });
   return await maily.render();
 }
 
@@ -103,7 +110,10 @@ export default async function OrganizationPostPage({
     notFound();
   }
 
-  const emailContent = await parseEmailContent(data.content, data.previewText);
+  const emailContent = await parseEmailContent(data.content, data.previewText, {
+    listId: data.audienceListId ?? undefined,
+    organizationId: data.organizationId ?? undefined,
+  });
 
   return (
     <>
