@@ -159,11 +159,10 @@ export function buildAudienceWhere(
 }
 
 export function getBaseAppUrl() {
-  if (process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
-    return `https://app.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
-  }
-
-  return "http://app.localhost:3000";
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://app.localhost:3000";
+  return baseUrl;
 }
 
 export function getUnsubscribeUrl({
