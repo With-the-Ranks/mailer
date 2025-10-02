@@ -307,13 +307,6 @@ function UnsubscribePageContent() {
         <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-xl backdrop-blur">
           {renderContent()}
         </section>
-
-        {hasLoaded && (
-          <footer className="mt-8 text-center text-xs text-slate-500">
-            Prefer to manage your preferences? Reply directly to any email you
-            receive from us.
-          </footer>
-        )}
       </div>
     </main>
   );
