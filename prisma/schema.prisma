@@ -219,6 +219,11 @@ model Audience {
   
   // Custom fields as JSON for flexibility
   customFields               Json?
+
+  // Unsubscribe metadata
+  isUnsubscribed             Boolean       @default(false)
+  unsubscribedAt             DateTime?
+  unsubscribeReason          String?       @db.Text
   
   // Metadata
   createdAt                  DateTime      @default(now())
@@ -233,6 +238,7 @@ model Audience {
   @@index([audienceListId])
   @@index([email])
   @@index([firstName, lastName])
+  @@index([isUnsubscribed])
 }
 
 model CustomFieldDefinition {
