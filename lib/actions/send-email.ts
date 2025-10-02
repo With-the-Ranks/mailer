@@ -162,13 +162,27 @@ export const sendBulkEmail = async ({
       !Array.isArray(segment.filterCriteria)
         ? (segment.filterCriteria as Record<string, any>)
         : {};
+    const whereClause = buildAudienceWhere(
+      segment.audienceListId,
+      filterCriteria,
+    );
+    // Add filter to exclude unsubscribed contacts
     recipients = await prisma.audience.findMany({
-      where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+      where: {
+        ...whereClause,
+        isUnsubscribed: false,
+      },
     });
   } else if (audienceListId) {
     const audienceList = await prisma.audienceList.findUnique({
       where: { id: audienceListId },
-      include: { audiences: true },
+      include: {
+        audiences: {
+          where: {
+            isUnsubscribed: false,
+          },
+        },
+      },
     });
     if (!audienceList) return { error: "Audience list not found" };
     recipients = audienceList.audiences;
