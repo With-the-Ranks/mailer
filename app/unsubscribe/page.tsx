@@ -123,6 +123,16 @@ function UnsubscribePageContent() {
         return;
       }
 
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        setSubmitState({
+          status: "error",
+          message: "Please enter a valid email address.",
+        });
+        return;
+      }
+
       setSubmitState({ status: "submitting" });
 
       try {

@@ -20,14 +20,20 @@ export async function GET(request: NextRequest) {
 
   if (!email) {
     return NextResponse.json(
-      { error: "Email parameter is required" },
+      {
+        error:
+          "Unable to process unsubscribe request - missing required information (email).",
+      },
       { status: 400 },
     );
   }
 
   if (!listId && !organizationId) {
     return NextResponse.json(
-      { error: "Must include list or organization to look up subscription" },
+      {
+        error:
+          "Unable to process unsubscribe request - missing required information (list or organization).",
+      },
       { status: 400 },
     );
   }
@@ -77,12 +83,21 @@ export async function POST(request: NextRequest) {
     const { email, listId, organizationId, reason, customReason } = body;
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json(
+        {
+          error:
+            "Unable to process unsubscribe request - email address is required.",
+        },
+        { status: 400 },
+      );
     }
 
     if (!listId && !organizationId) {
       return NextResponse.json(
-        { error: "Must include listId or organizationId" },
+        {
+          error:
+            "Unable to process unsubscribe request - missing subscription information.",
+        },
         { status: 400 },
       );
     }
