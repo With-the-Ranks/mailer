@@ -4,6 +4,7 @@ import speakeasy from "speakeasy";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { TOTP_TIME_WINDOW } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       secret: user.twoFactorSecret,
       encoding: "base32",
       token: token,
-      window: 2, // Allow 2 time steps before/after for clock drift
+      window: TOTP_TIME_WINDOW,
     });
 
     if (!verified) {

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
+import { TOTP_CODE_LENGTH } from "@/lib/utils";
 
 function SignInForm() {
   const [formData, setFormData] = useState({
@@ -126,16 +127,17 @@ function SignInForm() {
               type="text"
               value={formData.twoFactorToken}
               onChange={handleChange}
-              placeholder="Enter 6-digit code"
+              placeholder={`Enter ${TOTP_CODE_LENGTH}-digit code`}
               className="w-full rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
-              maxLength={6}
-              pattern="[0-9]{6}"
+              maxLength={TOTP_CODE_LENGTH}
+              pattern={`[0-9]{${TOTP_CODE_LENGTH}}`}
               required
               autoFocus
               autoComplete="one-time-code"
             />
             <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
-              Enter the 6-digit code from your authenticator app
+              Enter the {TOTP_CODE_LENGTH}-digit code from your authenticator
+              app
             </p>
           </div>
           <div className="mt-4">

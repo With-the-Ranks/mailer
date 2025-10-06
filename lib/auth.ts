@@ -5,9 +5,11 @@ import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import React from "react";
+import speakeasy from "speakeasy";
 
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
+import { TOTP_TIME_WINDOW } from "@/lib/utils";
 
 import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
@@ -101,12 +103,11 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Verify 2FA token
-            const speakeasy = require("speakeasy");
             const verified = speakeasy.totp.verify({
               secret: user.twoFactorSecret,
               encoding: "base32",
               token: twoFactorToken,
-              window: 2,
+              window: TOTP_TIME_WINDOW,
             });
 
             if (!verified) {

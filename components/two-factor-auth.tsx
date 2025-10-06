@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TOTP_CODE_LENGTH } from "@/lib/utils";
 
 export default function TwoFactorAuth() {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -75,8 +76,8 @@ export default function TwoFactorAuth() {
   };
 
   const handleVerifyAndEnable = async () => {
-    if (!verificationCode || verificationCode.length !== 6) {
-      toast.error("Please enter a valid 6-digit code");
+    if (!verificationCode || verificationCode.length !== TOTP_CODE_LENGTH) {
+      toast.error(`Please enter a valid ${TOTP_CODE_LENGTH}-digit code`);
       return;
     }
 
@@ -228,14 +229,15 @@ export default function TwoFactorAuth() {
               <Label htmlFor="code">Verification Code</Label>
               <Input
                 id="code"
-                placeholder="Enter 6-digit code"
+                placeholder={`Enter ${TOTP_CODE_LENGTH}-digit code`}
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
-                maxLength={6}
-                pattern="[0-9]{6}"
+                maxLength={TOTP_CODE_LENGTH}
+                pattern={`[0-9]{${TOTP_CODE_LENGTH}}`}
               />
               <p className="text-xs text-stone-500 dark:text-stone-400">
-                Enter the 6-digit code from your authenticator app to verify
+                Enter the {TOTP_CODE_LENGTH}-digit code from your authenticator
+                app to verify
               </p>
             </div>
           </div>
