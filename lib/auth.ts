@@ -45,13 +45,14 @@ export const authOptions: NextAuthOptions = {
           placeholder: "you@example.com",
         },
         password: { label: "Password", type: "password" },
+        twoFactorToken: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials || !credentials.email || !credentials.password) {
           return null;
         }
 
-        const { email, password } = credentials;
+        const { email, password, twoFactorToken } = credentials;
 
         try {
           const user = await prisma.user.findUnique({
@@ -91,6 +92,26 @@ export const authOptions: NextAuthOptions = {
 
           if (!passwordIsValid) {
             throw new Error("Password is incorrect");
+          }
+
+          // Check if 2FA is enabled
+          if (user.twoFactorEnabled && user.twoFactorSecret) {
+            if (!twoFactorToken) {
+              throw new Error("2FA_REQUIRED");
+            }
+
+            // Verify 2FA token
+            const speakeasy = require("speakeasy");
+            const verified = speakeasy.totp.verify({
+              secret: user.twoFactorSecret,
+              encoding: "base32",
+              token: twoFactorToken,
+              window: 2,
+            });
+
+            if (!verified) {
+              throw new Error("Invalid 2FA token");
+            }
           }
 
           return user;
