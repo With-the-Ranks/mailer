@@ -3,8 +3,8 @@
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url       = env("DATABASE_URL") // uses connection pooling
+  directUrl = env("DATABASE_URL_UNPOOLED") // uses a direct connection
 }
 
 generator client {
@@ -28,6 +28,8 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   emails         Email[]
   organizationId String?
+  twoFactorEnabled Boolean      @default(false)
+  twoFactorSecret  String?
 }
 
 model Account {

@@ -1,6 +1,10 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// Authentication constants
+export const TOTP_CODE_LENGTH = 6;
+export const TOTP_TIME_WINDOW = 2;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

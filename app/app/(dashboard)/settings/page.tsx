@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import Form from "@/components/form";
+import TwoFactorAuth from "@/components/two-factor-auth";
 import { editUser } from "@/lib/actions";
 import { getSession } from "@/lib/auth";
 
@@ -40,6 +41,7 @@ export default async function SettingsPage() {
           }}
           handleSubmit={editUser}
         />
+        <TwoFactorAuth />
       </div>
     </div>
   );
