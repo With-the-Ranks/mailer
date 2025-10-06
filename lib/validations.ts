@@ -17,6 +17,9 @@ export const contactSchema = z.object({
   defaultAddressPhone: z.string().optional().nullable(),
   customFields: z.record(z.any()).optional().default({}),
   audienceListId: z.string().min(1, "Audience list ID is required"),
+  isUnsubscribed: z.boolean().optional(),
+  unsubscribedAt: z.string().optional().nullable(),
+  unsubscribeReason: z.string().optional().nullable(),
 });
 
 export const updateContactSchema = contactSchema

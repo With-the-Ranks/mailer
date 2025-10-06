@@ -6,8 +6,7 @@ import {
   Heading1,
   Heading2,
   Heading3,
-  Image,
-  ImageIcon,
+  Image as LucideImage,
   Link,
   List,
   ListOrdered,
@@ -22,6 +21,7 @@ import {
 } from "lucide-react";
 
 import type { BlockItem } from "./types";
+import { createUnsubscribeBlock } from "./unsubscribe-block";
 
 // Default Maily blocks
 export const createDefaultBlocks = (organization?: {
@@ -139,7 +139,7 @@ export const createDefaultBlocks = (organization?: {
   },
   {
     title: "Image",
-    icon: <Image className="h-4 w-4" />,
+    icon: <LucideImage className="h-4 w-4" />,
     description: "Add an image to your email.",
     searchTerms: ["image", "picture", "photo"],
     command: ({ editor, range }: { editor: any; range: any }) => {
@@ -153,7 +153,7 @@ export const createDefaultBlocks = (organization?: {
           type: "image",
           attrs: {
             src: defaultImage,
-            alt: "Organization Image",
+            alt: "Organization image",
           },
         })
         .run();
@@ -183,7 +183,7 @@ export const createDefaultBlocks = (organization?: {
   },
   {
     title: "Inline Image",
-    icon: <Image className="h-4 w-4" />,
+    icon: <LucideImage className="h-4 w-4" />,
     description: "Add a small inline image.",
     searchTerms: ["inline", "image", "small"],
     command: ({ editor, range }: { editor: any; range: any }) => {
@@ -197,7 +197,7 @@ export const createDefaultBlocks = (organization?: {
           type: "inlineImage",
           attrs: {
             src: defaultImage,
-            alt: "Organization Image",
+            alt: "Organization image",
           },
         })
         .run();
@@ -428,6 +428,7 @@ export const createDefaultBlocks = (organization?: {
         .run();
     },
   },
+  createUnsubscribeBlock(),
 ];
 
 // Backward compatibility - export the default blocks without organization data

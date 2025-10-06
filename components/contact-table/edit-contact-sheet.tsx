@@ -379,6 +379,43 @@ export function EditContactSheet({
 
           {/* Note */}
           <div className="space-y-2">
+            <h3 className="text-lg font-medium">Subscription Status</h3>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isUnsubscribed"
+                checked={formData.isUnsubscribed || false}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    isUnsubscribed: e.target.checked,
+                    unsubscribedAt: e.target.checked
+                      ? new Date().toISOString()
+                      : undefined,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <Label htmlFor="isUnsubscribed" className="cursor-pointer">
+                Mark as unsubscribed
+              </Label>
+            </div>
+            {formData.isUnsubscribed && formData.unsubscribedAt && (
+              <p className="text-xs text-gray-500">
+                Unsubscribed on:{" "}
+                {new Date(formData.unsubscribedAt).toLocaleDateString()}
+              </p>
+            )}
+            {formData.isUnsubscribed && formData.unsubscribeReason && (
+              <p className="text-xs text-gray-500">
+                Reason: {formData.unsubscribeReason}
+              </p>
+            )}
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
             <h3 className="text-lg font-medium">Additional Information</h3>
             <div className="space-y-2">
               <Label htmlFor="note">Note</Label>

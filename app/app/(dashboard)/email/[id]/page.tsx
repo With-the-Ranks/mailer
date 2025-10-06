@@ -6,6 +6,7 @@ import CancelScheduleModal from "@/components/modal/cancel-schedule-modal";
 import EmailPreview from "@/components/modal/preview-email";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getUnsubscribeUrl } from "@/lib/utils";
 
 type Stats = { label: string; value: number };
 
@@ -36,7 +37,21 @@ export default async function EmailDetailPage({
       const json = JSON.parse(email.content);
       const maily = new Maily(json);
       if (email.previewText) maily.setPreviewText(email.previewText);
+      const variables = {
+        unsubscribe_url: getUnsubscribeUrl({
+          email: session.user.email,
+          listId: email.audienceListId,
+          organizationId: email.organizationId || undefined,
+        }),
+      };
+      maily.setVariableValues(variables);
       previewHtml = await maily.render();
+
+      // Replace variable placeholders in href attributes
+      for (const [key, value] of Object.entries(variables)) {
+        const placeholder = `{{${key}}}`;
+        previewHtml = previewHtml.replaceAll(placeholder, value);
+      }
     } catch {
       previewHtml = "<p>Invalid email content</p>";
     }

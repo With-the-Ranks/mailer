@@ -204,6 +204,52 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
               </>
             )}
 
+          {/* Subscription Status */}
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Subscription Status</h3>
+            <div>
+              <Label className="text-muted-foreground text-sm font-medium">
+                Status
+              </Label>
+              <div className="mt-2">
+                {contact.isUnsubscribed ? (
+                  <Badge
+                    variant="outline"
+                    className="border-red-200 bg-red-50 text-red-700"
+                  >
+                    Unsubscribed
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="border-green-200 bg-green-50 text-green-700"
+                  >
+                    Subscribed
+                  </Badge>
+                )}
+              </div>
+            </div>
+            {contact.isUnsubscribed && contact.unsubscribedAt && (
+              <div>
+                <Label className="text-muted-foreground text-sm font-medium">
+                  Unsubscribed On
+                </Label>
+                <p className="text-sm">
+                  {new Date(contact.unsubscribedAt).toLocaleDateString()}
+                </p>
+              </div>
+            )}
+            {contact.isUnsubscribed && contact.unsubscribeReason && (
+              <div>
+                <Label className="text-muted-foreground text-sm font-medium">
+                  Reason
+                </Label>
+                <p className="text-sm">{contact.unsubscribeReason}</p>
+              </div>
+            )}
+          </div>
+
           {/* Metadata */}
           <Separator />
           <div className="space-y-4">
