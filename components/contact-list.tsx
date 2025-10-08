@@ -106,9 +106,6 @@ export function ContactList({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => {
       if (typeof window !== "undefined") {
-        // Temporarily clear localStorage to test new defaults
-        localStorage.removeItem(`contact-table-visibility-${listId}`);
-
         const saved = localStorage.getItem(
           `contact-table-visibility-${listId}`,
         );
