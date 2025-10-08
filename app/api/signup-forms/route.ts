@@ -32,6 +32,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if slug already exists for this organization
+    const existingForm = await prisma.signupForm.findFirst({
+      where: {
+        organizationId,
+        slug,
+      },
+    });
+
+    if (existingForm) {
+      return NextResponse.json(
+        {
+          error:
+            "A signup form with this slug already exists for this organization",
+        },
+        { status: 400 },
+      );
+    }
+
     // Create signup form with default fields
     // Find the master audience list for this organization
     const masterAudienceList = await prisma.audienceList.findFirst({
