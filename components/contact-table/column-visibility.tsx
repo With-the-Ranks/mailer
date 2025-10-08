@@ -14,9 +14,10 @@ import type { Contact } from "@/lib/types";
 
 interface ColumnVisibilityProps {
   table: Table<Contact>;
+  customFields?: string[];
 }
 
-const columnGroups = {
+const getColumnGroups = (customFields: string[]) => ({
   Essential: ["select", "actions", "email", "firstName", "lastName"],
   "Contact Info": [
     "phone",
@@ -31,12 +32,18 @@ const columnGroups = {
     "defaultAddressZip",
     "defaultAddressPhone",
   ],
-  "Organizing Data": ["tags", "customFields"],
+  "Organizing Data": ["tags"],
+  "Custom Fields": customFields,
   Additional: ["note"],
   Metadata: ["createdAt", "updatedAt"],
-};
+});
 
-export function ColumnVisibility({ table }: ColumnVisibilityProps) {
+export function ColumnVisibility({
+  table,
+  customFields = [],
+}: ColumnVisibilityProps) {
+  const columnGroups = getColumnGroups(customFields);
+
   const getColumnDisplayName = (columnId: string) => {
     const displayNames: Record<string, string> = {
       select: "Select",

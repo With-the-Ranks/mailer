@@ -11,6 +11,7 @@ import ScheduleEmailButton from "@/components/schedule-email-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getOrgAndAudienceList } from "@/lib/actions";
 import { sendBulkEmail, sendEmail } from "@/lib/actions/send-email";
 
 import { SegmentDropdown } from "../segment-dropdown";
@@ -86,8 +87,16 @@ export function SendEmailModal({
         : localScheduledDate.toISOString();
 
     try {
+      // If no segment is selected, get the default audience list for "All contacts"
+      let audienceListId = selectedAudienceList;
+      if (!selectedSegment) {
+        const orgAndAudience = await getOrgAndAudienceList();
+        audienceListId = orgAndAudience?.audienceListId || null;
+      }
+
       const result = await sendBulkEmail({
         segmentId: selectedSegment,
+        audienceListId: audienceListId,
         from,
         subject,
         content,

@@ -5,7 +5,9 @@ import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
-  const baseUrl = process.env.NEXTAUTH_URL || req.nextUrl.origin;
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://app.localhost:3000";
 
   if (!token) {
     return NextResponse.redirect(`${baseUrl}/login?verify=invalid`);
@@ -19,14 +21,42 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/login?verify=expired`);
   }
 
-  await prisma.user.update({
+  const user = await prisma.user.update({
     where: { email: record.identifier },
     data: { emailVerified: new Date() },
+  });
+
+  if (!user.email) {
+    return NextResponse.redirect(`${baseUrl}/login?verify=invalid`);
+  }
+
+  // Create a temporary auto-signin token
+  const autoSigninToken = crypto.randomUUID();
+  await prisma.verificationToken.create({
+    data: {
+      identifier: user.email,
+      token: autoSigninToken,
+      expires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+    },
   });
 
   await prisma.verificationToken.deleteMany({
     where: { token },
   });
 
-  return NextResponse.redirect(`${baseUrl}/login?verify=success`);
+  // Create response with HttpOnly cookie containing the token
+  const response = NextResponse.redirect(
+    `${baseUrl}/auto-signin?email=${encodeURIComponent(user.email)}&verified=true`,
+  );
+
+  // Set auto-signin token in HttpOnly cookie
+  response.cookies.set("auto-signin-token", autoSigninToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 5 * 60, // 5 minutes
+    path: "/",
+  });
+
+  return response;
 }

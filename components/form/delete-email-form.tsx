@@ -31,19 +31,21 @@ export default function DeleteEmailForm({ emailName }: { emailName: string }) {
   const router = useRouter();
   return (
     <form
-      action={async (data: FormData) =>
-        window.confirm("Are you sure you want to delete your email?") &&
-        deleteEmail(data, id, "delete").then((res) => {
-          if (res.error) {
-            toast.error(res.error);
-          } else {
-            va.track("Deleted Email");
-            router.refresh();
-            router.push(`/organization/${res.organizationId}`);
-            toast.success(`Successfully deleted email!`);
-          }
-        })
-      }
+      action={async (data: FormData) => {
+        if (!window.confirm("Are you sure you want to delete your email?")) {
+          return;
+        }
+
+        const res = await deleteEmail(data, id, "delete");
+        if (res.error) {
+          toast.error(res.error);
+        } else {
+          va.track("Deleted Email");
+          router.refresh();
+          router.push(`/organization/${res.organizationId}`);
+          toast.success(`Successfully deleted email!`);
+        }
+      }}
       className="rounded-lg border border-red-600 bg-white dark:bg-black"
     >
       <div className="relative flex flex-col space-y-4 p-5 sm:p-10">
