@@ -25,7 +25,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -255,6 +255,7 @@ export default function SignupFormEditor({
 }: SignupFormEditorProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [origin, setOrigin] = useState("");
 
   // Find the master audience list (first one or create default)
   const masterAudienceList =
@@ -271,6 +272,13 @@ export default function SignupFormEditor({
     isActive: signupForm.isActive,
     audienceListId: masterAudienceList?.id || "",
   });
+
+  // Get window.location.origin safely on client side only
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
   // Ensure there's always an email field
   const ensureEmailField = (currentFields: SignupFormField[]) => {
     const hasEmailField = currentFields.some((field) => field.type === "email");
@@ -452,8 +460,9 @@ export default function SignupFormEditor({
         throw new Error(errorData.error || "Failed to update fields");
       }
 
-      // Use window.location for a full page refresh to ensure data is updated
-      window.location.href = `/organization/${organizationId}/signup-forms`;
+      // Navigate using router and refresh to ensure data is updated
+      router.push(`/organization/${organizationId}/signup-forms`);
+      router.refresh();
     } catch (error) {
       console.error("Error saving signup form:", error);
       alert(
@@ -579,7 +588,11 @@ export default function SignupFormEditor({
                 <Label>Public Form Link</Label>
                 <div className="flex items-center gap-2">
                   <Input
-                    value={`${window.location.origin}/signup-forms/${formData.slug}`}
+                    value={
+                      origin
+                        ? `${origin}/signup-forms/${formData.slug}`
+                        : "Loading..."
+                    }
                     readOnly
                     className="bg-gray-50 text-sm"
                   />
@@ -587,9 +600,12 @@ export default function SignupFormEditor({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const url = `${window.location.origin}/signup-forms/${formData.slug}`;
-                      window.open(url, "_blank");
+                      if (origin) {
+                        const url = `${origin}/signup-forms/${formData.slug}`;
+                        window.open(url, "_blank");
+                      }
                     }}
+                    disabled={!origin}
                     title="Open signup form in new tab"
                   >
                     <ExternalLink className="h-4 w-4" />
