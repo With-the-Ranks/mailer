@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export const config = {
   matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
@@ -34,8 +35,17 @@ export default async function middleware(req: NextRequest) {
 
   const isAppHost = hostname === `app.${ROOT}`;
   const isRootHost = hostname === ROOT || host === "localhost:3000";
+  const session = await getToken({ req });
 
   if (isAppHost) {
+    if (!session && !PUBLIC_PATHS.includes(pathname)) {
+      return NextResponse.redirect(new URL(`/login${search}`, req.url));
+    }
+
+    if (session && pathname === "/login") {
+      return NextResponse.redirect(new URL(`/${search}`, req.url));
+    }
+
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
