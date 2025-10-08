@@ -1,4 +1,4 @@
-import type { SignupForm } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
@@ -6,6 +6,18 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 import SignupFormRow from "./signup-form-row";
+
+type SignupFormWithRelations = Prisma.SignupFormGetPayload<{
+  include: {
+    organization: true;
+    audienceList: true;
+    _count: {
+      select: {
+        submissions: true;
+      };
+    };
+  };
+}>;
 
 export default async function SignupForms({
   organizationId,
@@ -19,24 +31,25 @@ export default async function SignupForms({
     redirect("/login");
   }
 
-  const signupForms: SignupForm[] = await prisma.signupForm.findMany({
-    where: {
-      organizationId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      organization: true,
-      audienceList: true,
-      _count: {
-        select: {
-          submissions: true,
+  const signupForms: SignupFormWithRelations[] =
+    await prisma.signupForm.findMany({
+      where: {
+        organizationId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        organization: true,
+        audienceList: true,
+        _count: {
+          select: {
+            submissions: true,
+          },
         },
       },
-    },
-    ...(limit ? { take: limit } : {}),
-  });
+      ...(limit ? { take: limit } : {}),
+    });
 
   if (signupForms.length === 0) {
     return (
