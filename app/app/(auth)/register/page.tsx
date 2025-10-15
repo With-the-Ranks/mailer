@@ -3,7 +3,15 @@ import Link from "next/link";
 
 import RegisterForm from "./form";
 
-export default function RegisterPage() {
+export default function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
+  const callbackUrl =
+    typeof searchParams.callbackUrl === "string"
+      ? searchParams.callbackUrl
+      : null;
   return (
     <div className="mx-5 border border-stone-200 py-10 dark:border-stone-700 sm:mx-auto sm:w-full sm:max-w-md sm:rounded-lg sm:shadow-md">
       <Image
@@ -20,7 +28,7 @@ export default function RegisterPage() {
         Create your account and start sending beautiful emails.
       </p>
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
-        <RegisterForm />
+        <RegisterForm callbackUrl={callbackUrl} />
       </div>
       <div className="mt-5 text-center text-sm text-stone-400">
         Already have an account?{" "}

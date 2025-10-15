@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ function SignInForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -58,7 +60,7 @@ function SignInForm() {
         }
 
         toast.success("Login Successful");
-        router.push("/");
+        router.push(callbackUrl || "/");
       }}
     >
       <input

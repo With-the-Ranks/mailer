@@ -20,14 +20,23 @@ export default async function AudienceList({
 
   const orgId = decodeURIComponent(params.id);
 
+  // Check if user is a member of this organization
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: session.user.id as string,
+        organizationId: orgId,
+      },
+    },
+  });
+
+  if (!member) {
+    notFound();
+  }
+
   const organization = await prisma.organization.findUnique({
     where: {
       id: orgId,
-      users: {
-        some: {
-          id: session.user.id as string,
-        },
-      },
     },
     include: {
       audienceLists: true,

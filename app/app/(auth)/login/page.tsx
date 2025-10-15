@@ -13,6 +13,10 @@ export default function LoginPage({
 }) {
   const verify =
     typeof searchParams.verify === "string" ? searchParams.verify : null;
+  const callbackUrl =
+    typeof searchParams.callbackUrl === "string"
+      ? searchParams.callbackUrl
+      : null;
 
   const alert =
     verify === "success"
@@ -78,7 +82,7 @@ export default function LoginPage({
       <div className="mt-5 text-center text-sm text-stone-400">
         Don&apos;t have an account?
         <Link
-          href="/register"
+          href={`/register${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
           className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200"
         >
           Sign up
