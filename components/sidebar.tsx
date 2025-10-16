@@ -26,6 +26,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
+import OrganizationSwitcher from "@/components/organization-switcher";
 import {
   Collapsible,
   CollapsibleContent,
@@ -60,6 +61,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const [audienceListId, setAudienceListId] = useState<string | null>(null);
   const [organizationFound, setOrganizationFound] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [userOrgs, setUserOrgs] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const { data: emailData } = useSWR(
     id && pathname.includes("/email") ? `/api/email/${id}` : null,
@@ -71,6 +74,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       setSiteId(data?.orgId ?? null);
       setAudienceListId(data?.audienceListId ?? null);
       setOrganizationFound(!!data?.orgId);
+      setUserOrgs(data?.userOrgs || []);
+      setUserRole(data?.userRole ?? null);
       setLoading(false);
     });
   }, [id, pathname]);
@@ -213,27 +218,32 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           isActive: segments.length === 2,
           icon: Newspaper,
         },
-        {
-          name: "Settings",
-          icon: Settings,
-          isActive: segments.includes("settings"),
-          submenu: [
-            {
-              name: "General",
-              href: `/organization/${siteId}/settings`,
-              isActive:
-                pathname === `/organization/${siteId}/settings` ||
-                pathname === `/organization/${siteId}/settings/general`,
-              icon: SlidersHorizontal,
-            },
-            {
-              name: "Appearance",
-              href: `/organization/${siteId}/settings/appearance`,
-              isActive: pathname.includes("/settings/appearance"),
-              icon: Palette,
-            },
-          ],
-        },
+        // Only show Settings for ADMIN users
+        ...(userRole === "ADMIN"
+          ? [
+              {
+                name: "Settings",
+                icon: Settings,
+                isActive: segments.includes("settings"),
+                submenu: [
+                  {
+                    name: "General",
+                    href: `/organization/${siteId}/settings`,
+                    isActive:
+                      pathname === `/organization/${siteId}/settings` ||
+                      pathname === `/organization/${siteId}/settings/general`,
+                    icon: SlidersHorizontal,
+                  },
+                  {
+                    name: "Appearance",
+                    href: `/organization/${siteId}/settings/appearance`,
+                    isActive: pathname.includes("/settings/appearance"),
+                    icon: Palette,
+                  },
+                ],
+              },
+            ]
+          : []),
       ];
     }
 
@@ -275,6 +285,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     loading,
     emailData,
     pathname,
+    userRole,
   ]);
 
   return (
@@ -296,6 +307,14 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           />
           <span className="font-bold">Mailer</span>
         </Link>
+        {userOrgs.length > 0 && (
+          <div className="px-2 py-2">
+            <OrganizationSwitcher
+              organizations={userOrgs}
+              currentOrgId={siteId || undefined}
+            />
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

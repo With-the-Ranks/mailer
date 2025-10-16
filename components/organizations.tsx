@@ -25,21 +25,15 @@ export default async function Organizations({
       redirect("/login");
     }
 
-    organizations = await prisma.organization.findMany({
-      where: {
-        users: {
-          some: {
-            id: {
-              in: [userId],
-            },
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
+    // Fetch organizations via OrganizationMember junction table
+    const memberships: any = await (prisma as any).organizationMember.findMany({
+      where: { userId },
+      include: { organization: true },
+      orderBy: { createdAt: "asc" },
       ...(limit ? { take: limit } : {}),
     });
+
+    organizations = memberships.map((m: any) => m.organization);
   }
 
   return organizations!.length > 0 ? (

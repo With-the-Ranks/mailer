@@ -15,16 +15,25 @@ export default async function SignupFormsPage({
     redirect("/login");
   }
 
+  const organizationId = decodeURIComponent(params.id);
+
+  // Check if user is a member of this organization
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: session.user.id as string,
+        organizationId: organizationId,
+      },
+    },
+  });
+
+  if (!member) {
+    notFound();
+  }
+
   const data = await prisma.organization.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
-      users: {
-        some: {
-          id: {
-            in: [session.user.id as string],
-          },
-        },
-      },
+      id: organizationId,
     },
   });
 

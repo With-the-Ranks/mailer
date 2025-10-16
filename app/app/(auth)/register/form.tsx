@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
 
-function RegisterForm() {
+function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -32,7 +32,11 @@ function RegisterForm() {
         toast.success(
           "Registration successful. Please check your email to verify.",
         );
-        router.push("/login");
+        router.push(
+          callbackUrl
+            ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+            : "/login",
+        );
       }}
     >
       <input

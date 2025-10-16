@@ -60,6 +60,7 @@
     "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "date-fns": "^2.30.0",
     "eslint-plugin-simple-import-sort": "^12.1.0",
     "focus-trap-react": "^10.2.3",

@@ -20,10 +20,9 @@ export default async function Emails({
   }
 
   const emails: Email[] = await prisma.email.findMany({
-    where: {
-      userId: session!.user.id as string,
-      ...(organizationId ? { organizationId } : {}),
-    },
+    where: organizationId
+      ? { organizationId } // Show all emails in the organization
+      : { userId: session!.user.id as string }, // Fallback to user emails if no org specified
     orderBy: {
       createdAt: "desc",
     },
