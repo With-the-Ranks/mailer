@@ -97,7 +97,9 @@ export async function createInvitation(
 
     // Send email invitation if email is provided
     if (email) {
-      const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXTAUTH_URL || "http://app.localhost:3000";
       const inviteUrl = `${baseUrl}/accept-invite?token=${token}`;
 
       const emailContent = React.createElement(InvitationEmail, {

@@ -74,7 +74,7 @@ export default function InviteMemberModal({
         organizationId,
         null,
         role,
-        parseInt(linkDays),
+        linkDays === "0" ? undefined : parseInt(linkDays),
       );
 
       if (result.error) {
