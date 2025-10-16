@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, Link2, Loader2, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ export default function InviteMemberModal({
   onOpenChange,
   organizationId,
 }: InviteMemberModalProps) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"ADMIN" | "MANAGER">("MANAGER");
   const [linkDays, setLinkDays] = useState("7");
@@ -58,6 +60,7 @@ export default function InviteMemberModal({
       } else if (result.success) {
         toast.success(`Invitation sent to ${email}`);
         setEmail("");
+        router.refresh();
         onOpenChange(false);
       }
     } catch (error) {
@@ -84,6 +87,7 @@ export default function InviteMemberModal({
           process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         const link = `${baseUrl}/accept-invite?token=${result.invitation.token}`;
         setInviteLink(link);
+        router.refresh();
         toast.success("Invite link generated");
       }
     } catch (error) {
