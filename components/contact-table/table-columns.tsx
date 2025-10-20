@@ -166,6 +166,37 @@ export function createColumns({
       size: 180,
     },
     {
+      accessorKey: "isUnsubscribed",
+      header: "Status",
+      cell: ({ row }) => {
+        const isUnsubscribed = row.getValue("isUnsubscribed") as boolean;
+        return isUnsubscribed ? (
+          <Badge
+            variant="outline"
+            className="border-red-200 bg-red-50 text-red-700"
+          >
+            Unsubscribed
+          </Badge>
+        ) : (
+          <Badge
+            variant="outline"
+            className="border-green-200 bg-green-50 text-green-700"
+          >
+            Subscribed
+          </Badge>
+        );
+      },
+      filterFn: (row, columnId, filterValue: string[]) => {
+        if (!Array.isArray(filterValue) || filterValue.length === 0)
+          return true;
+        const isUnsubscribed = row.getValue(columnId) as boolean;
+        return filterValue.includes(
+          isUnsubscribed ? "unsubscribed" : "subscribed",
+        );
+      },
+      size: 120,
+    },
+    {
       accessorKey: "tags",
       header: "Tags",
       cell: ({ row }) => {
