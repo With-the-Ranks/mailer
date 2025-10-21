@@ -168,18 +168,19 @@ export function SendEmailModal({
       />
       <div className="mb-4 flex w-max overflow-hidden rounded-full border">
         {(["now", "schedule"] as const).map((m) => (
-          <button
+          <Button
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`px-4 py-1 text-sm font-medium transition ${
-              mode === m
-                ? "bg-primary text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
+            variant={mode === m ? "default" : "ghost"}
+            className={`rounded-none px-4 py-1 text-sm font-medium ${
+              mode === m ? "" : "hover:bg-gray-50"
             }`}
+            aria-label={m === "now" ? "Send Now" : "Schedule"}
+            aria-pressed={mode === m}
           >
             {m === "now" ? "Send Now" : "Schedule"}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -201,22 +202,29 @@ export function SendEmailModal({
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="btn mt-4 w-full rounded-2xl py-2 text-center text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus:outline-none disabled:opacity-50"
+        className="mt-4 w-full"
+        aria-label={
+          isSubmitting
+            ? "Sending"
+            : mode === "now"
+              ? "Send Now"
+              : "Schedule Email"
+        }
       >
         {isSubmitting ? (
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             Sending...
-          </div>
+          </>
         ) : mode === "now" ? (
           "🚀 Send Now"
         ) : (
           "📅 Schedule Email"
         )}
-      </button>
+      </Button>
     </form>
   );
 }
