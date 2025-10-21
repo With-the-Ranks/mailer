@@ -1,13 +1,13 @@
 "use client";
 
 import va from "@vercel/analytics";
+import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
-import LoadingDots from "@/components/icons/loading-dots";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 import DomainConfiguration from "./domain-configuration";
 import DomainStatus from "./domain-status";
@@ -16,12 +16,20 @@ import Uploader from "./uploader";
 function FormButton() {
   const { pending } = useFormStatus();
   return (
-    <button
-      className={cn("btn", pending && "cursor-not-allowed opacity-50")}
+    <Button
+      type="submit"
       disabled={pending}
+      aria-label={pending ? "Saving changes" : "Save changes"}
     >
-      {pending ? <LoadingDots color="#FFFCF7" /> : <span>Save Changes</span>}
-    </button>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          Saving...
+        </>
+      ) : (
+        "Save Changes"
+      )}
+    </Button>
   );
 }
 
