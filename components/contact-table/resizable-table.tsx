@@ -23,13 +23,6 @@ export function ResizableTable<T>({
   data,
   columns,
 }: ResizableTableProps<T>) {
-  const [columnSizing] = React.useState<Record<string, number>>({});
-
-  // Update the table's column sizing state
-  React.useEffect(() => {
-    table.setColumnSizing(columnSizing);
-  }, [columnSizing, table]);
-
   return (
     <div className="overflow-auto rounded-md border">
       <Table style={{ width: table.getCenterTotalSize() }}>
