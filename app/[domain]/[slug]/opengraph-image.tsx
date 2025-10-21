@@ -10,10 +10,11 @@ export const runtime = "edge";
 export default async function PostOG({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
 
   const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`)
     ? domain.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")

@@ -10,9 +10,10 @@ import { fontMapper } from "@/styles/fonts";
 export async function generateMetadata({
   params,
 }: {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }): Promise<Metadata | null> {
-  const domain = decodeURIComponent(params.domain);
+  const { domain: rawDomain } = await params;
+  const domain = decodeURIComponent(rawDomain);
   const data = await getOrganizationData(domain);
   if (!data) {
     return null;
@@ -60,10 +61,11 @@ export default async function OrganizationLayout({
   params,
   children,
 }: {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
   children: ReactNode;
 }) {
-  const domain = decodeURIComponent(params.domain);
+  const { domain: rawDomain } = await params;
+  const domain = decodeURIComponent(rawDomain);
   const data = await getOrganizationData(domain);
 
   if (!data) {

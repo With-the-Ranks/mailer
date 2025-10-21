@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getFirstAudienceListId } from "@/lib/actions/audience-list";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 function SegmentsLoadingSkeleton() {
@@ -34,7 +34,7 @@ function SegmentsLoadingSkeleton() {
 }
 
 export default async function OrganizationSegmentsPage({ params }: PageProps) {
-  const orgId = params.id;
+  const { id: orgId } = await params;
   const audienceListId = await getFirstAudienceListId(orgId);
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

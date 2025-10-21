@@ -11,10 +11,11 @@ import { getUnsubscribeUrl } from "@/lib/utils";
 type Stats = { label: string; value: number };
 
 export default async function EmailDetailPage({
-  params: { id },
+  params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) redirect("/login");
 
