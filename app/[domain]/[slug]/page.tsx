@@ -80,7 +80,7 @@ async function parseEmailContent(
   let jsonContent;
   try {
     jsonContent = JSON.parse(content);
-  } catch (error) {
+  } catch {
     console.error("Invalid JSON content:", content);
     return "Invalid email content.";
   }

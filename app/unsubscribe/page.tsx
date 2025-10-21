@@ -47,11 +47,6 @@ function UnsubscribePageContent() {
   const [manualEmail, setManualEmail] = useState("");
   const [manualListId, setManualListId] = useState("");
 
-  const hasLoaded = useMemo(
-    () => fetchState.status === "ready" || fetchState.status === "manual",
-    [fetchState],
-  );
-
   useEffect(() => {
     if (!emailParam) {
       setManualEmail("");
