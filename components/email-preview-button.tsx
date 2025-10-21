@@ -4,6 +4,7 @@ import { EyeIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -81,22 +82,29 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button
-          className="btn flex items-center gap-1 text-sm"
+        <Button
+          className="flex items-center gap-1 text-sm"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             handlePreview();
           }}
           disabled={isPending}
+          aria-label={isPending ? "Loading preview" : "Preview email"}
         >
           {isPending ? (
-            <Loader2Icon className="inline-block size-4 shrink-0 animate-spin" />
+            <Loader2Icon
+              className="inline-block size-4 shrink-0 animate-spin"
+              aria-hidden="true"
+            />
           ) : (
-            <EyeIcon className="inline-block size-4 shrink-0" />
+            <EyeIcon
+              className="mr-2 inline-block size-4 shrink-0"
+              aria-hidden="true"
+            />
           )}
           <span>Preview</span>
-        </button>
+        </Button>
       </DialogTrigger>
 
       {open && (
