@@ -265,23 +265,29 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
           Audience List: {listName}
         </h1>
         <div className="flex flex-wrap gap-2">
-          <button
+          <Button
             onClick={handleAddCustomFieldClick}
-            className="btn border border-stone-300 bg-white text-black hover:bg-stone-100 hover:text-black dark:border-stone-600 dark:bg-stone-800 dark:text-white dark:hover:bg-stone-700"
+            variant="outline"
+            className="flex items-center"
+            aria-label="Add Custom Field"
           >
-            <PlusIcon className="mr-0 h-4 w-4 2xl:mr-2" />
+            <PlusIcon className="mr-0 h-4 w-4 2xl:mr-2" aria-hidden="true" />
             <span className="hidden lg:inline">Add Custom Field</span>
-          </button>
+          </Button>
           <CreateAudienceButton>
             <AddAudienceModal
               audienceListId={audienceListId}
               addNewAudience={addNewAudience}
             />
           </CreateAudienceButton>
-          <button className="btn" onClick={handleImportEntriesClick}>
-            <UploadIcon className="mr-0 h-4 w-4 2xl:mr-2" />
+          <Button
+            onClick={handleImportEntriesClick}
+            className="flex items-center"
+            aria-label="Import Entries"
+          >
+            <UploadIcon className="mr-0 h-4 w-4 2xl:mr-2" aria-hidden="true" />
             <span className="hidden lg:inline">Import Entries</span>
-          </button>
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
@@ -303,13 +309,15 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
               {customFields.map((field, index) => (
                 <TableHead key={index} className="gap-4">
                   {field}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDeleteCustomField(field)}
-                    className="text-red-600 hover:text-red-800"
+                    className="ml-2 h-6 w-6 text-red-600 hover:text-red-800"
                     aria-label={`Delete custom field ${field}`}
                   >
-                    <TrashIcon className="h-4 w-4 pt-1" />
-                  </button>
+                    <TrashIcon className="h-4 w-4" aria-hidden="true" />
+                  </Button>
                 </TableHead>
               ))}
               <TableHead className="w-[100px]">
