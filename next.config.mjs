@@ -1,7 +1,14 @@
+import nextra from "nextra";
+
+const withNextra = nextra({
+  theme: "nextra-theme-docs",
+  themeConfig: "./theme.config.jsx",
+});
+
 /**
  * @type {import('next').NextConfig}
  */
-module.exports = {
+export default withNextra({
   experimental: {
     serverActions: {
       allowedOrigins: ["app.localhost:3000"],
@@ -21,4 +28,4 @@ module.exports = {
       { hostname: "illustrations.popsy.co" },
     ],
   },
-};
+});
