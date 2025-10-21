@@ -34,9 +34,9 @@ type SubmitState =
 
 function UnsubscribePageContent() {
   const searchParams = useSearchParams();
-  const emailParam = searchParams.get("email");
-  const listParam = searchParams.get("list");
-  const organizationParam = searchParams.get("organization");
+  const emailParam = searchParams?.get("email");
+  const listParam = searchParams?.get("list");
+  const organizationParam = searchParams?.get("organization");
 
   const [fetchState, setFetchState] = useState<FetchState>({ status: "idle" });
   const [selectedReason, setSelectedReason] = useState("");

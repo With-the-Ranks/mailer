@@ -62,7 +62,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const { data: emailData } = useSWR(
-    id && pathname.includes("/email") ? `/api/email/${id}` : null,
+    id && pathname?.includes("/email") ? `/api/email/${id}` : null,
     fetcher,
   );
 
@@ -79,7 +79,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     if (loading) return [];
 
     // Email context
-    if (segments[0] === "email" && id) {
+    if (segments?.[0] === "email" && id) {
       const isPublished = emailData?.published;
       return [
         {
@@ -90,13 +90,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         isPublished && {
           name: "Details",
           href: `/email/${id}/`,
-          isActive: segments.length === 2,
+          isActive: segments?.length === 2,
           icon: Info,
         },
         !isPublished && {
           name: "Editor",
           href: `/email/${id}/editor`,
-          isActive: segments.includes("editor"),
+          isActive: segments?.includes("editor"),
           icon: Edit3,
         },
       ].filter(Boolean);
@@ -104,9 +104,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
     // Audience or Segments context
     if (
-      segments[0] === "audience" ||
-      segments[0] === "segments" ||
-      pathname.includes("/segments")
+      segments?.[0] === "audience" ||
+      segments?.[0] === "segments" ||
+      pathname?.includes("/segments")
     ) {
       return [
         {
@@ -117,12 +117,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments[0] === "audience",
+          isActive: segments?.[0] === "audience",
           submenu: [
             {
               name: "Contacts",
               href: `/audience/${audienceListId}`,
-              isActive: segments[0] === "audience" && segments.length === 2,
+              isActive: segments?.[0] === "audience" && segments?.length === 2,
               icon: List,
             },
             {
@@ -161,7 +161,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {
               name: "Segments",
               href: `/organization/${siteId}/segments`,
-              isActive: segments.includes("segments"),
+              isActive: segments?.includes("segments"),
               icon: Filter,
             },
           ],
@@ -175,13 +175,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Dashboard",
           href: "/",
-          isActive: segments[0] === "organizations",
+          isActive: segments?.[0] === "organizations",
           icon: LayoutDashboard,
         },
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments.includes("audience"),
+          isActive: segments?.includes("audience"),
           submenu: [
             {
               name: "Lists",
@@ -194,7 +194,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {
               name: "Signup Forms",
               href: `/organization/${siteId}/signup-forms`,
-              isActive: segments.includes("signup-forms"),
+              isActive: segments?.includes("signup-forms"),
               icon: FormInput,
             },
             {
@@ -202,7 +202,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               href: `/organization/${siteId}/segments`,
               isActive:
                 pathname === `/organization/${siteId}/segments` ||
-                pathname.startsWith(`/organization/${siteId}/segments/`),
+                pathname?.startsWith(`/organization/${siteId}/segments/`),
               icon: Filter,
             },
           ],
@@ -210,13 +210,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Emails",
           href: `/organization/${siteId}`,
-          isActive: segments.length === 2,
+          isActive: segments?.length === 2,
           icon: Newspaper,
         },
         {
           name: "Settings",
           icon: Settings,
-          isActive: segments.includes("settings"),
+          isActive: segments?.includes("settings"),
           submenu: [
             {
               name: "General",
@@ -229,7 +229,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {
               name: "Appearance",
               href: `/organization/${siteId}/settings/appearance`,
-              isActive: pathname.includes("/settings/appearance"),
+              isActive: pathname?.includes("/settings/appearance"),
               icon: Palette,
             },
           ],
@@ -242,13 +242,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       {
         name: "Overview",
         href: "/",
-        isActive: segments.length === 0,
+        isActive: segments?.length === 0,
         icon: LayoutDashboard,
       },
       {
         name: "Settings",
         icon: Settings,
-        isActive: segments[0] === "settings",
+        isActive: segments?.[0] === "settings",
         submenu: [
           {
             name: "General",
@@ -260,7 +260,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           {
             name: "Appearance",
             href: "/settings/appearance",
-            isActive: pathname.includes("/settings/appearance"),
+            isActive: pathname?.includes("/settings/appearance"),
             icon: Palette,
           },
         ],

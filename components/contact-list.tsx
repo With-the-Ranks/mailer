@@ -171,11 +171,11 @@ export function ContactList({
   const [isInitialized, setIsInitialized] = React.useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const action = searchParams.get("action");
+  const action = searchParams?.get("action");
 
   const handleActionChange = (key: string, open: boolean) => {
     // Add or remove action param
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString());
     if (open) {
       params.set("action", key);
     } else {

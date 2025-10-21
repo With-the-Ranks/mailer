@@ -23,5 +23,5 @@
     ],
     "react-hooks/exhaustive-deps": "warn"
   },
-  "ignorePatterns": ["tailwind.config.js"]
+  "ignorePatterns": ["tailwind.config.js", "pages/**/*"]
 }

@@ -11,9 +11,9 @@ function AutoSignInContent() {
   const searchParams = useSearchParams();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  const email = searchParams.get("email");
-  const verified = searchParams.get("verified");
-  const token = searchParams.get("token");
+  const email = searchParams?.get("email");
+  const verified = searchParams?.get("verified");
+  const token = searchParams?.get("token");
 
   useEffect(() => {
     if (!email || verified !== "true" || !token) {
