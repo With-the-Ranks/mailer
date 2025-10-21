@@ -1,28 +1,33 @@
 "use client";
 
 import va from "@vercel/analytics";
+import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
-import LoadingDots from "@/components/icons/loading-dots";
+import { Button } from "@/components/ui/button";
 import { deleteOrganization } from "@/lib/actions";
-import { cn } from "@/lib/utils";
 
 function FormButton() {
   const { pending } = useFormStatus();
   return (
-    <button
+    <Button
       type="submit"
-      className={cn(
-        "btn border bg-red-600 text-sm text-white",
-        "hover:bg-white hover:text-red-600 dark:hover:bg-transparent",
-        pending && "cursor-not-allowed opacity-50",
-      )}
       disabled={pending}
+      variant="destructive"
+      size="sm"
+      aria-label={pending ? "Deleting" : "Confirm Delete"}
     >
-      {pending ? <LoadingDots color="#fff" /> : <span>Confirm Delete</span>}
-    </button>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          Deleting...
+        </>
+      ) : (
+        "Confirm Delete"
+      )}
+    </Button>
   );
 }
 
