@@ -94,7 +94,8 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="my-4 w-full rounded-md border border-stone-300 px-3 py-2 text-sm dark:border-stone-600 dark:bg-black dark:text-white"
+              disabled={isSubmitting}
+              className="my-4 w-full rounded-md border border-stone-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-black dark:text-white"
             />
             <FormButton isSubmitting={isSubmitting} label="Reset Password" />
           </form>
@@ -106,7 +107,8 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="my-4 w-full rounded-md border border-stone-300 px-3 py-2 text-sm dark:border-stone-600 dark:bg-black dark:text-white"
+              disabled={isSubmitting}
+              className="my-4 w-full rounded-md border border-stone-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-black dark:text-white"
             />
             <FormButton isSubmitting={isSubmitting} label="Send Reset Link" />
           </form>
