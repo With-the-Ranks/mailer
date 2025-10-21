@@ -206,3 +206,25 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 select {
   background-image: unset;
 }
+
+/* Nextra custom css */
+:root {
+  --nextra-primary-hue: 237deg;
+  --nextra-primary-saturation: 53%;
+}
+
+/* Override Nextra link colors with Mailer purple */
+.nextra-content a {
+  color: #252753 !important;
+}
+
+.nextra-content a:hover {
+  color: #8c9dff !important;
+}
+
+/* Sidebar active item */
+.nextra-sidebar-container a[aria-current="page"] {
+  background-color: rgba(37, 39, 83, 0.1) !important;
+  color: #252753 !important;
+  font-weight: 600;
+}
