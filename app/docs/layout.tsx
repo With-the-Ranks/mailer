@@ -12,6 +12,9 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className={cn(cal.variable, inter.variable)}>
       <RootProvider
+        search={{
+          enabled: true,
+        }}
         theme={{
           enabled: false,
           defaultTheme: "light",
