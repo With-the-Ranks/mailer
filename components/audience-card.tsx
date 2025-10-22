@@ -63,7 +63,7 @@ export default function AudienceCard({
         {editing ? (
           <form onSubmit={handleSave} className="flex w-full items-center">
             <input
-              className="flex-1 rounded border px-2 py-1 font-cal text-xl font-bold tracking-wide dark:text-white"
+              className="flex-1 rounded-sm border px-2 py-1 font-cal text-xl font-bold tracking-wide dark:text-white"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={loading}

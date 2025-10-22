@@ -288,7 +288,7 @@ export function CsvImportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex max-h-[95vh] min-h-0 max-w-5xl flex-col overflow-hidden">
-        <DialogHeader className="flex-shrink-0">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <UsersIcon className="h-5 w-5" />
             Import Contacts from CSV
@@ -300,7 +300,7 @@ export function CsvImportDialog({
         </DialogHeader>
         <div className="flex h-0 min-h-0 flex-1 flex-col">
           <Tabs value={step} className="flex flex-1 flex-col">
-            <TabsList className="grid w-full flex-shrink-0 grid-cols-5">
+            <TabsList className="grid w-full shrink-0 grid-cols-5">
               <TabsTrigger value="upload" className="flex items-center gap-1">
                 <FileIcon className="h-4 w-4" />
                 Upload

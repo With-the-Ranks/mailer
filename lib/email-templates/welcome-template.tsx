@@ -112,7 +112,7 @@ export const WelcomeTemplate = () => (
             >
               Here’s what to expect:
             </Text>
-            <Container className="container-responsive mt-6 flex flex-col items-center self-stretch rounded-[40px] border border-solid border-zinc-400 bg-white px-4 py-8 text-center shadow-sm">
+            <Container className="container-responsive mt-6 flex flex-col items-center self-stretch rounded-[40px] border border-solid border-zinc-400 bg-white px-4 py-8 text-center shadow-xs">
               <Container className="bg-brand flex h-[3px] flex-col self-stretch" />
               <Text
                 className="text-brand sub-heading mt-2 text-xl font-bold uppercase"

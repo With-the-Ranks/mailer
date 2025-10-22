@@ -104,7 +104,7 @@ export const ResetPasswordEmail = ({ resetUrl }: ResetPasswordEmailProps) => (
             </Text>
 
             <Container className="px-8">
-              <Container className="border-brand mt-10 flex flex-col items-center self-stretch rounded-[40px] border border-solid bg-white px-4 py-8 text-center shadow-sm">
+              <Container className="border-brand mt-10 flex flex-col items-center self-stretch rounded-[40px] border border-solid bg-white px-4 py-8 text-center shadow-xs">
                 <Container className="bg-brand flex h-[3px] flex-col self-stretch" />
                 <Text
                   className="sub-heading mt-2 text-xl font-bold uppercase"

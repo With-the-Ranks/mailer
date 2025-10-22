@@ -1,6 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../tailwind.config.js';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility overflow-hidden {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+/* Components */
+@utility btn {
+  @apply inline-flex justify-center items-center gap-3 px-4 py-2.5 rounded-[28px]
+      bg-primary text-white
+      hover:bg-accent hover:shadow-xl hover:translate-y-0.5
+      transition duration-300 ease-in-out
+      text-center font-semibold uppercase text-sm tracking-[0.08em] no-underline;
+}
 
 /* Color variables and theme */
 @layer base {
@@ -83,29 +114,15 @@
   }
 }
 
-/* Light mode body fallback */
-@media (prefers-color-scheme: light) {
-  body {
-    background-color: #ffffff;
-  }
-}
-
-/* Utilities */
 @layer utilities {
-  .overflow-hidden {
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  /* Light mode body fallback */
+  @media (prefers-color-scheme: light) {
+    body {
+      background-color: #ffffff;
+    }
   }
-}
 
-/* Components */
-@layer components {
-  .btn {
-    @apply inline-flex justify-center items-center gap-3 px-4 py-2.5 rounded-[28px]
-      bg-primary text-white
-      hover:bg-accent hover:shadow-xl hover:translate-y-0.5
-      transition duration-300 ease-in-out
-      text-center font-semibold uppercase text-sm tracking-[0.08em] no-underline;
-  }
+  /* Utilities */
 }
 
 /* ProseMirror editor placeholder and image styles */
