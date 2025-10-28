@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/auto-signin",
   "/unsubscribe",
+  "/accept-invite",
 ];
 
 export default async function middleware(req: NextRequest) {

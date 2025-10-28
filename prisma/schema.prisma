@@ -11,6 +11,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum OrganizationRole {
+  ADMIN
+  MANAGER
+}
+
 model User {
   id             String        @id @default(cuid())
   name           String?
@@ -25,11 +30,14 @@ model User {
   updatedAt      DateTime      @updatedAt
   accounts       Account[]
   sessions       Session[]
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organization   Organization? @relation("UserOrganization", fields: [organizationId], references: [id])
   emails         Email[]
   organizationId String?
   twoFactorEnabled Boolean      @default(false)
   twoFactorSecret  String?
+  currentOrganizationId String?  // Tracks user's currently selected org
+  organizationMembers   OrganizationMember[]
+  invitationsSent       OrganizationInvitation[] @relation("InvitationSender")
 }
 
 model Account {
@@ -133,7 +141,9 @@ model Organization {
   message404    String?  @default("Blimey! You've found a page that doesn't exist.") @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  users         User[]
+  users         User[] @relation("UserOrganization")  // Legacy - will be removed after migration
+  members       OrganizationMember[]
+  invitations   OrganizationInvitation[]
   emails        Email[]
   audienceLists AudienceList[]
   emailApiKey    String?       @db.Text  // Optional per-org override
@@ -340,4 +350,37 @@ model SignupSubmission {
   
   @@index([signupFormId])
   @@index([audienceId])
+}
+
+model OrganizationMember {
+  id             String           @id @default(cuid())
+  role           OrganizationRole @default(MANAGER)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model OrganizationInvitation {
+  id             String           @id @default(cuid())
+  email          String?
+  role           OrganizationRole @default(MANAGER)
+  token          String           @unique
+  expiresAt      DateTime?
+  acceptedAt     DateTime?
+  createdAt      DateTime         @default(now())
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  invitedBy      User             @relation("InvitationSender", fields: [invitedById], references: [id])
+  invitedById    String
+  
+  @@index([organizationId])
+  @@index([token])
+  @@index([email])
 }

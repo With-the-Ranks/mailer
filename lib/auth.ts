@@ -157,14 +157,21 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ session, token }) => {
+      // Fetch fresh user data to get currentOrganizationId
+      const user: any = token.sub
+        ? await prisma.user.findUnique({
+            where: { id: token.sub },
+          })
+        : null;
+
       session.user = {
         ...session.user,
         // @ts-expect-error
         id: token.sub,
         // @ts-expect-error
         username: token?.user?.username || token?.user?.gh_username,
-        // @ts-expect-error
-        organizationId: token?.user?.organizationId,
+        organizationId: user?.organizationId,
+        currentOrganizationId: user?.currentOrganizationId,
       };
       return session;
     },
@@ -254,11 +261,28 @@ export function getSession() {
       email: string;
       image: string;
       organizationId: string;
+      currentOrganizationId?: string;
     };
   } | null>;
 }
 
-export function withOrgAuth(action: any) {
+// Helper to get user's role in an organization
+export async function getUserOrgRole(userId: string, organizationId: string) {
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+    select: {
+      role: true,
+    },
+  });
+  return member?.role || null;
+}
+
+export function withOrgAuth(action: any, requiredRole?: "ADMIN" | "MANAGER") {
   return async (
     formData: FormData | null,
     organizationId: string,
@@ -270,26 +294,40 @@ export function withOrgAuth(action: any) {
         error: "Not authenticated",
       };
     }
-    const organization = await prisma.organization.findUnique({
+
+    // Check membership via OrganizationMember
+    const member = await (prisma as any).organizationMember.findUnique({
       where: {
-        id: organizationId,
-        users: {
-          some: {
-            id: {
-              in: [session.user.id as string],
-            },
-          },
+        userId_organizationId: {
+          userId: session.user.id as string,
+          organizationId,
         },
       },
+      include: {
+        organization: true,
+      },
     });
-    if (!organization) {
+
+    if (!member) {
       return {
         error: "Not authorized",
       };
     }
 
-    return action(formData, organization, key);
+    // Check role if required
+    if (requiredRole === "ADMIN" && member.role !== "ADMIN") {
+      return {
+        error: "Admin access required",
+      };
+    }
+
+    return action(formData, member.organization, key, member.role);
   };
+}
+
+// Convenience wrapper for admin-only actions
+export function withAdminAuth(action: any) {
+  return withOrgAuth(action, "ADMIN");
 }
 
 export function withEmailAuth(action: any) {
