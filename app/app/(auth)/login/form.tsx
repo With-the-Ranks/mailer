@@ -99,7 +99,7 @@ function SignInForm() {
             className="my-4 w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
             required
           />
-          <FormButton isSubmitting={isSubmitting} label="Continue" />
+          <FormButton isSubmitting={isSubmitting} label="Log in" />
         </>
       ) : (
         <>
