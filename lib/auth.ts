@@ -166,9 +166,9 @@ export const authOptions: NextAuthOptions = {
 
       session.user = {
         ...session.user,
-        // @ts-expect-error
+        // @ts-expect-error - NextAuth session user type doesn't include id by default
         id: token.sub,
-        // @ts-expect-error
+        // @ts-expect-error - Custom username field not in default user type
         username: token?.user?.username || token?.user?.gh_username,
         organizationId: user?.organizationId,
         currentOrganizationId: user?.currentOrganizationId,

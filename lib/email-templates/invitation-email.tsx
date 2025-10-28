@@ -81,7 +81,7 @@ export const InvitationEmail = ({
       </style>
     </Head>
     <Preview>You've been invited to join {organizationName}</Preview>
-    <Tailwind config={{ theme: { extend: { colors: { brand: "#252753" } } } }}>
+    <Tailwind config={{ theme: { extend: { colors: { brand: "#252753" } } } } as any}>
       <Body className="bg-[#ffffff]" style={{ margin: 0, padding: 0 }}>
         <Container className="mx-auto -mt-2 flex flex-col items-stretch">
           <Container>
