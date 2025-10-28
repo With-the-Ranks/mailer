@@ -184,14 +184,14 @@ export function SegmentsList({
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
-              <div className="bg-muted h-4 w-3/4 rounded"></div>
-              <div className="bg-muted h-3 w-1/2 rounded"></div>
+              <div className="bg-muted h-4 w-3/4 rounded-sm"></div>
+              <div className="bg-muted h-3 w-1/2 rounded-sm"></div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="bg-muted h-3 w-full rounded"></div>
-                <div className="bg-muted h-3 w-2/3 rounded"></div>
-                <div className="bg-muted h-3 w-1/2 rounded"></div>
+                <div className="bg-muted h-3 w-full rounded-sm"></div>
+                <div className="bg-muted h-3 w-2/3 rounded-sm"></div>
+                <div className="bg-muted h-3 w-1/2 rounded-sm"></div>
               </div>
             </CardContent>
           </Card>

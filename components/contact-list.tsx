@@ -514,7 +514,7 @@ export function ContactList({
     );
 
   return (
-    <div className="flex h-full max-w-screen-2xl flex-col space-y-4 p-4">
+    <div className="flex h-full max-w-(--breakpoint-2xl) flex-col space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>

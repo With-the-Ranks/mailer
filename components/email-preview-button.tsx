@@ -100,13 +100,13 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
       </DialogTrigger>
 
       {open && (
-        <DialogContent className="z-[99999] flex max-w-[620px] flex-col border-none bg-transparent p-0 shadow-none max-[680px]:h-full max-[680px]:border-0 max-[680px]:p-2">
+        <DialogContent className="z-99999 flex max-w-[620px] flex-col border-none bg-transparent p-0 shadow-none max-[680px]:h-full max-[680px]:border-0 max-[680px]:p-2">
           <DialogTitle className="sr-only">Email Preview</DialogTitle>
           <DialogDescription className="sr-only">
             Preview of your email content as it will appear to recipients
           </DialogDescription>
           <div className="flex flex-col gap-4">
-            <div className="shadow-xs flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-3">
+            <div className="shadow-2xs flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-3">
               <div className="flex size-8 items-center justify-center rounded-full border border-gray-200 bg-white text-sm">
                 W
               </div>
@@ -122,7 +122,7 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
               </div>
             </div>
 
-            <div className="shadow-xs flex min-h-[75vh] w-full grow overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="shadow-2xs flex min-h-[75vh] w-full grow overflow-hidden rounded-xl border border-gray-200 bg-white">
               {html ? (
                 <EmailPreviewIFrame
                   wrapperClassName="w-full"

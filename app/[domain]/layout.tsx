@@ -84,7 +84,7 @@ export default async function OrganizationLayout({
   return (
     <div className={fontMapper[data.font]}>
       <header className="sticky top-0 z-50 bg-gradient-to-r from-indigo-600 to-blue-600 shadow-lg">
-        <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-(--breakpoint-xl) items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center">
             <div className="relative h-10 w-10">
               <Image
