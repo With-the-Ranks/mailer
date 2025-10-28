@@ -28,6 +28,8 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   emails         Email[]
   organizationId String?
+  twoFactorEnabled Boolean      @default(false)
+  twoFactorSecret  String?
 }
 
 model Account {
