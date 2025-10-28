@@ -27,7 +27,7 @@ export function replaceLinks({
 async function getExamples(node: any, prisma: PrismaClient) {
   const names = node?.attributes[0].value.split(",");
 
-  const data = new Array<Example | null>();
+  const data: (Example | null)[] = [];
 
   for (let i = 0; i < names.length; i++) {
     const results = await prisma.example.findUnique({
@@ -44,7 +44,7 @@ async function getExamples(node: any, prisma: PrismaClient) {
 export function replaceTweets() {
   return (tree: any) =>
     new Promise<void>(async (resolve, reject) => {
-      const nodesToChange = new Array();
+      const nodesToChange: any[] = [];
 
       visit(tree, "link", (node: any) => {
         if (
@@ -88,7 +88,7 @@ export function replaceTweets() {
 export function replaceExamples(prisma: PrismaClient) {
   return (tree: any) =>
     new Promise<void>(async (resolve, reject) => {
-      const nodesToChange = new Array();
+      const nodesToChange: any[] = [];
 
       visit(tree, "mdxJsxFlowElement", (node: any) => {
         if (node.name == "Examples") {

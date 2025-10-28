@@ -3,17 +3,16 @@ import Link from "next/link";
 
 import RegisterForm from "./form";
 
-export default function RegisterPage({
+export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await searchParams;
   const callbackUrl =
-    typeof searchParams.callbackUrl === "string"
-      ? searchParams.callbackUrl
-      : null;
+    typeof params.callbackUrl === "string" ? params.callbackUrl : null;
   return (
-    <div className="mx-5 border border-stone-200 py-10 dark:border-stone-700 sm:mx-auto sm:w-full sm:max-w-md sm:rounded-lg sm:shadow-md">
+    <div className="mx-5 border border-stone-200 py-10 sm:mx-auto sm:w-full sm:max-w-md sm:rounded-lg sm:shadow-md dark:border-stone-700">
       <Image
         alt="Mailer"
         width={100}
@@ -21,7 +20,7 @@ export default function RegisterPage({
         className="relative mx-auto h-12 w-auto dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
         src="/logo.png"
       />
-      <h1 className="mt-6 text-center font-cal text-3xl dark:text-white">
+      <h1 className="font-cal mt-6 text-center text-3xl dark:text-white">
         Mailer
       </h1>
       <p className="mt-2 text-center text-sm text-stone-600 dark:text-stone-400">
