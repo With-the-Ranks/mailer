@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { useModal } from "@/components/modal/provider";
+import { Button } from "@/components/ui/button";
 
 export default function CreateAudienceListButton({
   children,
@@ -12,8 +13,8 @@ export default function CreateAudienceListButton({
   const modal = useModal();
 
   return (
-    <button onClick={() => modal?.show(children)} className="btn">
+    <Button onClick={() => modal?.show(children)} aria-label="Create New List">
       Create New List
-    </button>
+    </Button>
   );
 }
