@@ -7,13 +7,14 @@ import prisma from "@/lib/prisma";
 export default async function OrganizationAnalytics({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
-  const organizationId = decodeURIComponent(params.id);
+  const organizationId = decodeURIComponent(id);
 
   // Check if user is a member of this organization
   const member = await (prisma as any).organizationMember.findUnique({

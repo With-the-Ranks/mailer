@@ -47,11 +47,6 @@ function UnsubscribePageContent() {
   const [manualEmail, setManualEmail] = useState("");
   const [manualListId, setManualListId] = useState("");
 
-  const hasLoaded = useMemo(
-    () => fetchState.status === "ready" || fetchState.status === "manual",
-    [fetchState],
-  );
-
   useEffect(() => {
     if (!emailParam) {
       setManualEmail("");
@@ -224,7 +219,14 @@ function UnsubscribePageContent() {
         message: error?.message || "Failed to unsubscribe. Please try again.",
       });
     }
-  }, [customReason, fetchState, selectedReason]);
+  }, [
+    customReason,
+    fetchState,
+    selectedReason,
+    manualEmail,
+    manualListId,
+    organizationParam,
+  ]);
 
   const renderContent = useCallback(() => {
     if (fetchState.status === "loading") {
@@ -298,7 +300,15 @@ function UnsubscribePageContent() {
     }
 
     return null;
-  }, [customReason, fetchState, handleSubmit, selectedReason, submitState]);
+  }, [
+    customReason,
+    fetchState,
+    handleSubmit,
+    selectedReason,
+    submitState,
+    manualEmail,
+    manualListId,
+  ]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-10">

@@ -8,13 +8,14 @@ import prisma from "@/lib/prisma";
 export default async function SiteEmails({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
-  const organizationId = decodeURIComponent(params.id);
+  const organizationId = decodeURIComponent(id);
 
   // Check if user is a member of this organization
   const member = await (prisma as any).organizationMember.findUnique({
@@ -62,9 +63,9 @@ export default async function SiteEmails({
             {url} ↗
           </a> */}
         </div>
-        <CreateEmailButton organizationId={decodeURIComponent(params.id)} />
+        <CreateEmailButton organizationId={decodeURIComponent(id)} />
       </div>
-      <Emails organizationId={decodeURIComponent(params.id)} />
+      <Emails organizationId={decodeURIComponent(id)} />
     </>
   );
 }

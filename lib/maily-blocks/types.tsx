@@ -11,8 +11,8 @@ export interface BlockItem {
   searchTerms: string[];
   icon?: ReactElement;
   preview?: string;
-  command?: (args: BlockCommandArgs) => void;
-  render?: (editor: any) => ReactElement | null;
+  command?: (_args: BlockCommandArgs) => void;
+  render?: (_editor: any) => ReactElement | null;
   id?: string;
   commands?: BlockItem[];
 }

@@ -10,7 +10,7 @@ export default async function OrganizationAnalyticsLayout({
   params,
   children,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   children: ReactNode;
 }) {
   const session = await getSession();
@@ -18,7 +18,8 @@ export default async function OrganizationAnalyticsLayout({
     redirect("/login");
   }
 
-  const organizationId = decodeURIComponent(params.id);
+  const { id } = await params;
+  const organizationId = decodeURIComponent(id);
 
   // Check if user is a member and get their role
   const userRole = await getUserOrgRole(

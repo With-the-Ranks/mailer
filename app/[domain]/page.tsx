@@ -36,9 +36,10 @@ export async function generateStaticParams() {
 export default async function OrganizationHomePage({
   params,
 }: {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
+  const { domain: rawDomain } = await params;
+  const domain = decodeURIComponent(rawDomain);
   const [data, emails] = await Promise.all([
     getOrganizationData(domain),
     getEmailsForOrganization(domain),

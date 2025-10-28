@@ -8,14 +8,15 @@ import prisma from "@/lib/prisma";
 export default async function SignupFormsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
 
-  const organizationId = decodeURIComponent(params.id);
+  const organizationId = decodeURIComponent(id);
 
   // Check if user is a member of this organization
   const member = await (prisma as any).organizationMember.findUnique({
@@ -49,11 +50,9 @@ export default async function SignupFormsPage({
             Signup Forms for Audience list
           </h1>
         </div>
-        <CreateSignupFormButton
-          organizationId={decodeURIComponent(params.id)}
-        />
+        <CreateSignupFormButton organizationId={decodeURIComponent(id)} />
       </div>
-      <SignupForms organizationId={decodeURIComponent(params.id)} />
+      <SignupForms organizationId={decodeURIComponent(id)} />
     </>
   );
 }

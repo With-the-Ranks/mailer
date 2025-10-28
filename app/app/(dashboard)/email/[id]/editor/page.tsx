@@ -7,15 +7,16 @@ import prisma from "@/lib/prisma";
 export default async function EmailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
   const data = await prisma.email.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
     },
     include: {
       organization: {
