@@ -47,6 +47,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { getOrgAndAudienceList } from "@/lib/actions";
 
@@ -56,6 +57,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const segments = useSelectedLayoutSegments();
   const { id } = useParams() as { id?: string };
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   const [siteId, setSiteId] = useState<string | null>(null);
   const [audienceListId, setAudienceListId] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       return [
         {
           name: "Back to Dashboard",
-          href: siteId ? `/organization/${siteId}/audience` : "/organizations",
+          href: "/",
           icon: ArrowLeft,
         },
         {
@@ -189,9 +191,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           isActive: segments.includes("audience"),
           submenu: [
             {
-              name: "Lists",
-              href: `/organization/${siteId}/audience`,
+              name: "List",
+              href: `/audience/${audienceListId}`,
               isActive:
+                pathname === `/audience/${audienceListId}` ||
                 pathname === `/organization/${siteId}/audience` ||
                 pathname === `/organization/${siteId}/audience/lists`,
               icon: List,
@@ -201,14 +204,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               href: `/organization/${siteId}/signup-forms`,
               isActive: segments.includes("signup-forms"),
               icon: FormInput,
-            },
-            {
-              name: "Segments",
-              href: `/organization/${siteId}/segments`,
-              isActive:
-                pathname === `/organization/${siteId}/segments` ||
-                pathname.startsWith(`/organization/${siteId}/segments/`),
-              icon: Filter,
             },
           ],
         },
@@ -291,12 +286,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       collapsible="icon"
-      className="h-full border-r bg-sidebar text-sidebar-foreground"
+      className="bg-sidebar text-sidebar-foreground h-full border-r"
     >
       <SidebarHeader>
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 transition-colors"
         >
           <Image
             src="/logo.png"
@@ -305,9 +300,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             alt="Logo"
             className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
           />
-          <span className="font-bold">Mailer</span>
+          {state === "expanded" && <span className="font-bold">Mailer</span>}
         </Link>
-        {userOrgs.length > 0 && (
+        {userOrgs.length > 0 && state === "expanded" && (
           <div className="px-2 py-2">
             <OrganizationSwitcher
               organizations={userOrgs}
@@ -333,7 +328,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                         <SidebarMenuButton
                           tooltip={item.name}
                           isActive={item.isActive}
-                          className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                         >
                           <item.icon className="mr-2" size={18} />
                           <span>{item.name}</span>
@@ -347,7 +342,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                               >
                                 <Link
                                   href={sub.href}
@@ -369,7 +364,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       asChild
                       isActive={item.isActive}
                       tooltip={item.name}
-                      className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                     >
                       <Link href={item.href} className="flex items-center">
                         <item.icon className="mr-2" size={18} />
