@@ -120,7 +120,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments[0] === "audience",
           submenu: [
             {
               name: "Contacts",
@@ -131,34 +130,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {
               name: "Add Contact",
               href: `/audience/${audienceListId}?action=add-contact`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "add-contact"
-                  : false,
               icon: Edit3,
             },
             {
               name: "Import Contacts",
               href: `/audience/${audienceListId}?action=import`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "import"
-                  : false,
               icon: UploadIcon,
             },
             {
               name: "Custom Fields",
               href: `/audience/${audienceListId}?action=custom-fields`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "custom-fields"
-                  : false,
               icon: Settings,
             },
             {
@@ -184,7 +165,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments.includes("audience"),
           submenu: [
             {
               name: "List",
