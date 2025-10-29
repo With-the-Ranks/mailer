@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  BookOpen,
   ChevronRight,
   Edit3,
   Filter,
@@ -360,6 +361,17 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <div className="px-2 py-2">
+          <Link
+            href="/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            {state === "expanded" && <span>Documentation</span>}
+          </Link>
+        </div>
         <SidebarSeparator />
         {children}
       </SidebarFooter>
