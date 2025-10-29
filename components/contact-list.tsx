@@ -505,7 +505,7 @@ export function ContactList({
     );
 
   return (
-    <div className="flex h-full max-w-screen-2xl flex-col space-y-4 p-4">
+    <div className="flex h-full w-full max-w-[calc(90vw-var(--sidebar-width))] flex-col space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>
