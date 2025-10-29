@@ -51,17 +51,13 @@ export default async function OrganizationSettingsIndex({
         handleSubmit={updateOrganization}
       />
       <div className="flex justify-end gap-2">
-        <Link href="https://resend.com/api-keys" target="_blank">
-          <Button variant="outline" size="sm">
-            Create API Key
-          </Button>
-        </Link>
         <Link
-          href="https://resend.com/docs/api-reference/api-keys/create-api-key"
+          href="/docs/advanced-users/resend-integration"
           target="_blank"
+          rel="noopener noreferrer"
         >
           <Button variant="outline" size="sm">
-            View API Docs
+            View Docs
           </Button>
         </Link>
       </div>
@@ -79,17 +75,13 @@ export default async function OrganizationSettingsIndex({
         handleSubmit={updateOrganization}
       />
       <div className="flex justify-end gap-2">
-        <Link href="https://resend.com/domains" target="_blank">
-          <Button variant="outline" size="sm">
-            Custom Domain
-          </Button>
-        </Link>
         <Link
-          href="https://resend.com/docs/api-reference/domains/create-domain"
+          href="/docs/advanced-users/resend-integration"
           target="_blank"
+          rel="noopener noreferrer"
         >
           <Button variant="outline" size="sm">
-            View API Docs
+            View Docs
           </Button>
         </Link>
       </div>
