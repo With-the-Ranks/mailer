@@ -46,6 +46,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { getOrgAndAudienceList } from "@/lib/actions";
 
@@ -55,6 +56,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const segments = useSelectedLayoutSegments();
   const { id } = useParams() as { id?: string };
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   const [siteId, setSiteId] = useState<string | null>(null);
   const [audienceListId, setAudienceListId] = useState<string | null>(null);
@@ -111,7 +113,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       return [
         {
           name: "Back to Dashboard",
-          href: siteId ? `/organization/${siteId}/audience` : "/organizations",
+          href: "/",
           icon: ArrowLeft,
         },
         {
@@ -184,9 +186,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           isActive: segments.includes("audience"),
           submenu: [
             {
-              name: "Lists",
-              href: `/organization/${siteId}/audience`,
+              name: "List",
+              href: `/audience/${audienceListId}`,
               isActive:
+                pathname === `/audience/${audienceListId}` ||
                 pathname === `/organization/${siteId}/audience` ||
                 pathname === `/organization/${siteId}/audience/lists`,
               icon: List,
@@ -196,14 +199,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               href: `/organization/${siteId}/signup-forms`,
               isActive: segments.includes("signup-forms"),
               icon: FormInput,
-            },
-            {
-              name: "Segments",
-              href: `/organization/${siteId}/segments`,
-              isActive:
-                pathname === `/organization/${siteId}/segments` ||
-                pathname.startsWith(`/organization/${siteId}/segments/`),
-              icon: Filter,
             },
           ],
         },
@@ -294,7 +289,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             alt="Logo"
             className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
           />
-          <span className="font-bold">Mailer</span>
+          {state === "expanded" && <span className="font-bold">Mailer</span>}
         </Link>
       </SidebarHeader>
       <SidebarContent>
