@@ -47,7 +47,7 @@ function AutoSignInContent() {
 
             if (inviteCheck.ok) {
               const inviteData = await inviteCheck.json();
-              if (inviteData.hasInvite && inviteData.token) {
+              if (inviteData?.hasInvite && inviteData?.token) {
                 // Redirect to accept invite page
                 window.location.href = `/accept-invite?token=${inviteData.token}`;
                 return;

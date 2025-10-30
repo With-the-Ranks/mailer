@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ hasInvite: false });
+      return NextResponse.json({ error: "Missing email" }, { status: 400 });
     }
 
     // Find the most recent pending invitation for this email
@@ -32,6 +32,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ hasInvite: false });
   } catch (error) {
     console.error("Error checking pending invite:", error);
-    return NextResponse.json({ hasInvite: false });
+    return NextResponse.json(
+      { error: "Failed to check invites" },
+      { status: 500 },
+    );
   }
 }
