@@ -95,7 +95,7 @@ export default async function EmailDetailPage({
   }
 
   return (
-    <div className="mx-auto w-full max-w-screen-lg px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-(--breakpoint-lg) px-4 py-6 sm:px-6 lg:px-8">
       <section className="mb-8 space-y-4">
         <h1 className="text-2xl font-bold dark:text-white sm:text-3xl">
           {email.title}
@@ -131,7 +131,7 @@ export default async function EmailDetailPage({
               {stats.map(({ label, value }) => (
                 <div
                   key={label}
-                  className="flex flex-col rounded-lg bg-white p-4 shadow dark:bg-gray-800"
+                  className="flex flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
                 >
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {label}
@@ -142,7 +142,7 @@ export default async function EmailDetailPage({
                 </div>
               ))}
             </div>
-            <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
               <Chart emailId={email.id} />
             </div>
           </section>
@@ -151,7 +151,7 @@ export default async function EmailDetailPage({
               Sent to
             </h2>
             {recipients.length ? (
-              <div className="overflow-x-auto rounded-lg shadow">
+              <div className="overflow-x-auto rounded-lg shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -189,7 +189,7 @@ export default async function EmailDetailPage({
             Sending to
           </h2>
           {recipients.length ? (
-            <div className="overflow-x-auto rounded-lg shadow">
+            <div className="overflow-x-auto rounded-lg shadow-sm">
               <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>

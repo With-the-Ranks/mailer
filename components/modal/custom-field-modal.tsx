@@ -44,7 +44,7 @@ export function AddCustomFieldModal({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded bg-white p-6 md:max-w-md md:border md:shadow"
+      className="w-full rounded-sm bg-white p-6 md:max-w-md md:border md:shadow-sm"
     >
       <h2 className="mb-4 font-cal text-2xl">New Custom Field</h2>
       <input
@@ -54,7 +54,7 @@ export function AddCustomFieldModal({
         value={newField}
         onChange={(e) => setNewField(e.target.value)}
         required
-        className="mb-4 w-full rounded border px-3 py-2"
+        className="mb-4 w-full rounded-sm border px-3 py-2"
       />
 
       <div className="flex justify-end gap-2">
@@ -101,7 +101,7 @@ export function ConfirmDeleteFieldModal({
   };
 
   return (
-    <div className="w-full rounded bg-white p-6 md:max-w-md md:border md:shadow">
+    <div className="w-full rounded-sm bg-white p-6 md:max-w-md md:border md:shadow-sm">
       <h2 className="mb-2 font-cal text-2xl">Remove “{fieldName}”?</h2>
       <p className="mb-4 text-sm text-gray-600">
         This will delete that column and all its values from every audience.

@@ -311,10 +311,10 @@ function UnsubscribePageContent() {
   ]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-10">
+    <main className="min-h-screen from-slate-50 via-white to-slate-100 px-4 py-10">
       <div className="mx-auto w-full max-w-2xl">
         <header className="mb-8 text-center">
-          <ShieldAlert className="mx-auto h-12 w-12 text-blue-500" />
+          <ShieldAlert className="mx-auto h-12 w-12 text-[#252753]" />
           <h1 className="mt-4 text-3xl font-bold text-slate-900">
             Manage Your Email Preferences
           </h1>
@@ -324,7 +324,7 @@ function UnsubscribePageContent() {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-xl backdrop-blur">
+        <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
           {renderContent()}
         </section>
       </div>
@@ -341,7 +341,7 @@ function LoadingState({
 }) {
   return (
     <div className="flex flex-col items-center gap-4 py-10 text-center">
-      <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+      <Loader2 className="h-10 w-10 animate-spin text-[#252753]" />
       <div>
         <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
         <p className="mt-2 text-sm text-slate-600">{description}</p>
@@ -413,8 +413,8 @@ function UnsubscribeForm({
 }: UnsubscribeFormProps) {
   return (
     <div className="space-y-6">
-      <header className="rounded-xl bg-blue-50/80 p-4">
-        <p className="text-sm text-blue-800">
+      <header className="rounded-xl bg-[#252753]/5 p-4">
+        <p className="text-sm text-[#252753]">
           You&apos;re unsubscribing the email address:
           <span className="ml-1 font-semibold">{email}</span>
         </p>
@@ -431,7 +431,7 @@ function UnsubscribeForm({
           {reasons.map((reason) => (
             <label
               key={reason}
-              className="flex cursor-pointer items-start rounded-lg border border-transparent px-3 py-2 transition hover:border-blue-200 hover:bg-blue-50"
+              className="flex cursor-pointer items-start rounded-lg border border-transparent px-3 py-2 transition hover:border-[#252753]/20 hover:bg-[#252753]/5"
             >
               <input
                 type="radio"
@@ -439,7 +439,7 @@ function UnsubscribeForm({
                 value={reason}
                 checked={selectedReason === reason}
                 onChange={(event) => onSelectReason(event.target.value)}
-                className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 text-[#252753] focus:ring-[#252753]"
               />
               <span className="ml-3 text-sm text-slate-700">{reason}</span>
             </label>
@@ -460,7 +460,7 @@ function UnsubscribeForm({
               onChange={(event) => onCustomReasonChange(event.target.value)}
               rows={3}
               placeholder="Your feedback helps us improve..."
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-xs focus:border-[#252753] focus:ring-2 focus:ring-[#252753]/20 focus:outline-hidden"
             />
           </div>
         ) : null}
@@ -483,7 +483,7 @@ function UnsubscribeForm({
           type="button"
           onClick={onSubmit}
           disabled={submitState.status === "submitting"}
-          className="inline-flex w-full flex-1 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full flex-1 items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitState.status === "submitting" ? (
             <span className="flex items-center gap-2">
@@ -538,11 +538,11 @@ function ManualEntryForm({
 }: ManualEntryFormProps) {
   return (
     <div className="space-y-6">
-      <header className="rounded-xl bg-blue-50/80 p-4">
-        <h2 className="text-lg font-semibold text-blue-900">
+      <header className="rounded-xl bg-[#252753]/5 p-4">
+        <h2 className="text-lg font-semibold text-[#252753]">
           Find your subscription
         </h2>
-        <p className="mt-1 text-sm text-blue-700">
+        <p className="mt-1 text-sm text-[#252753]/90">
           Enter the email address you want to unsubscribe. If you know the list
           ID from the link you received, include it below (optional).
         </p>
@@ -562,7 +562,7 @@ function ManualEntryForm({
             value={email}
             onChange={(event) => onEmailChange(event.target.value)}
             placeholder="you@example.com"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-xs focus:border-[#252753] focus:ring-2 focus:ring-[#252753]/20 focus:outline-hidden"
           />
         </div>
 
@@ -579,7 +579,7 @@ function ManualEntryForm({
             value={listId}
             onChange={(event) => onListChange(event.target.value)}
             placeholder="Paste the list identifier if you have it"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-xs focus:border-[#252753] focus:ring-2 focus:ring-[#252753]/20 focus:outline-hidden"
           />
           <p className="mt-1 text-xs text-slate-500">
             We&apos;ll look up your subscription using just the email if you
@@ -598,7 +598,7 @@ function ManualEntryForm({
         type="button"
         onClick={onSubmit}
         disabled={submitState.status === "submitting"}
-        className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center rounded-lg bg-[#252753] px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-[#252753]/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitState.status === "submitting" ? (
           <span className="flex items-center gap-2">
@@ -620,7 +620,7 @@ export default function UnsubscribePage() {
         <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-10">
           <div className="mx-auto w-full max-w-2xl">
             <div className="flex flex-col items-center gap-4 py-10 text-center">
-              <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+              <Loader2 className="h-10 w-10 animate-spin text-[#252753]" />
               <p className="text-sm text-slate-600">Loading...</p>
             </div>
           </div>

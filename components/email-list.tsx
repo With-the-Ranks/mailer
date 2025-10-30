@@ -358,7 +358,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                         onChange={(e) =>
                           handleEditChange(index, "email", e.target.value)
                         }
-                        className="w-full rounded border p-2"
+                        className="w-full rounded-sm border p-2"
                       />
                     ) : (
                       audience.email
@@ -372,7 +372,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                         onChange={(e) =>
                           handleEditChange(index, "firstName", e.target.value)
                         }
-                        className="w-full rounded border p-2"
+                        className="w-full rounded-sm border p-2"
                       />
                     ) : (
                       audience.firstName
@@ -386,7 +386,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                         onChange={(e) =>
                           handleEditChange(index, "lastName", e.target.value)
                         }
-                        className="w-full rounded border p-2"
+                        className="w-full rounded-sm border p-2"
                       />
                     ) : (
                       audience.lastName
@@ -419,7 +419,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                               updatedCustomFields,
                             );
                           }}
-                          className="w-full rounded border p-2"
+                          className="w-full rounded-sm border p-2"
                         />
                       ) : (
                         (audience.customFields as Record<string, any>)?.[

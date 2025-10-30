@@ -32,7 +32,7 @@ export default function OverviewStats() {
           <Metric className="font-cal">170,418</Metric>
           <BadgeDelta
             deltaType="moderateIncrease"
-            className="dark:bg-green-900 dark:bg-opacity-50 dark:text-green-400"
+            className="dark:bg-opacity-50 dark:bg-green-900 dark:text-green-400"
           >
             34.3%
           </BadgeDelta>

@@ -86,7 +86,7 @@ export default function CreateEmailModal({
       onSubmit={handleCreateEmail}
       className={cn(
         "w-full rounded-md bg-white dark:bg-black md:max-w-md",
-        "md:border md:border-stone-200 md:shadow dark:md:border-stone-700",
+        "md:border md:border-stone-200 md:shadow-sm dark:md:border-stone-700",
       )}
     >
       <div className="space-y-4 p-5 md:p-10">
@@ -124,7 +124,7 @@ export default function CreateEmailModal({
                 type="button"
                 onClick={() => setData({ ...data, template: tpl.id })}
                 className={cn(
-                  "flex h-24 flex-col items-center justify-center rounded-md border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600",
+                  "flex h-24 flex-col items-center justify-center rounded-md border border-stone-200 bg-white p-4 shadow-xs transition-colors hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600",
                   data.template === tpl.id &&
                     "border-2 border-black dark:border-white",
                 )}
