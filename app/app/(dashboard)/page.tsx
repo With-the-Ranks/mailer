@@ -3,8 +3,6 @@ import { Suspense } from "react";
 
 import Emails from "@/components/emails";
 import EmailStats from "@/components/EmailStats";
-import Organizations from "@/components/organizations";
-import OverviewOrganizationCTA from "@/components/overview-organizations-cta";
 import PlaceholderCard from "@/components/placeholder-card";
 import { getOrgAndAudienceList } from "@/lib/actions";
 import { getSession } from "@/lib/auth";
@@ -30,23 +28,11 @@ export default async function Overview() {
 
   // Get current organization ID for filtering
   const orgData = await getOrgAndAudienceList();
-  const currentOrgId = orgData?.orgId || null;
+  const currentOrgId = orgData?.orgId;
 
   return (
     <div className="flex max-w-screen-xl flex-col space-y-12 p-8">
-      {/* <div className="flex flex-col space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="font-cal text-3xl font-bold dark:text-white">
-            Your Organization
-          </h1>
-          {!hasOrganization && <OverviewOrganizationCTA />}
-        </div>
-        <Organizations limit={1} />
-      </div> */}
-
-      {hasOrganization && (
-        <EmailStats organizationId={currentOrgId || undefined} />
-      )}
+      {hasOrganization && <EmailStats organizationId={currentOrgId} />}
       {hasOrganization && (
         <div className="flex flex-col space-y-6">
           <h1 className="font-cal text-3xl font-bold dark:text-white">

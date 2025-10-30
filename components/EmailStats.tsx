@@ -21,27 +21,19 @@ type EmailStat = {
 };
 
 interface EmailStatsProps {
-  userId?: string;
-  organizationId?: string;
+  organizationId: string;
 }
 
-export default function EmailStats({
-  userId,
-  organizationId,
-}: EmailStatsProps) {
+export default function EmailStats({ organizationId }: EmailStatsProps) {
   const [data, setData] = useState<EmailStat[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const params = organizationId
-          ? `organizationId=${organizationId}`
-          : userId
-            ? `userId=${userId}`
-            : "";
-        if (!params) return;
-
-        const response = await fetch(`/api/email-stats?${params}`);
+        if (!organizationId) return;
+        const response = await fetch(
+          `/api/email-stats?organizationId=${organizationId}`,
+        );
         const stats = await response.json();
         setData(stats);
       } catch (error) {
@@ -50,7 +42,7 @@ export default function EmailStats({
     };
 
     fetchData();
-  }, [userId, organizationId]);
+  }, [organizationId]);
 
   if (data.length === 0) {
     return null;
