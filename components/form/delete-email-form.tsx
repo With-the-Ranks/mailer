@@ -1,28 +1,33 @@
 "use client";
 
 import va from "@vercel/analytics";
+import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
-import LoadingDots from "@/components/icons/loading-dots";
+import { Button } from "@/components/ui/button";
 import { deleteEmail } from "@/lib/actions";
-import { cn } from "@/lib/utils";
 
 function FormButton() {
   const { pending } = useFormStatus();
   return (
-    <button
+    <Button
       type="submit"
       disabled={pending}
-      className={cn(
-        "btn border bg-red-600 text-sm text-white",
-        "hover:bg-white hover:text-red-600 dark:hover:bg-transparent",
-        pending && "cursor-not-allowed opacity-50",
-      )}
+      variant="destructive"
+      size="sm"
+      aria-label={pending ? "Deleting" : "Confirm Delete"}
     >
-      {pending ? <LoadingDots color="#fff" /> : <span>Confirm Delete</span>}
-    </button>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          Deleting...
+        </>
+      ) : (
+        "Confirm Delete"
+      )}
+    </Button>
   );
 }
 
@@ -61,7 +66,7 @@ export default function DeleteEmailForm({ emailName }: { emailName: string }) {
           required
           pattern={emailName}
           placeholder={emailName}
-          className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+          className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-hidden focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
         />
       </div>
 

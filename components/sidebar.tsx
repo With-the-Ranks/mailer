@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  BookOpen,
   ChevronRight,
   Edit3,
   Filter,
@@ -46,6 +47,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { getOrgAndAudienceList } from "@/lib/actions";
 
@@ -55,6 +57,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const segments = useSelectedLayoutSegments();
   const { id } = useParams() as { id?: string };
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   const [siteId, setSiteId] = useState<string | null>(null);
   const [audienceListId, setAudienceListId] = useState<string | null>(null);
@@ -111,13 +114,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       return [
         {
           name: "Back to Dashboard",
-          href: siteId ? `/organization/${siteId}/audience` : "/organizations",
+          href: "/",
           icon: ArrowLeft,
         },
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments[0] === "audience",
           submenu: [
             {
               name: "Contacts",
@@ -128,34 +130,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {
               name: "Add Contact",
               href: `/audience/${audienceListId}?action=add-contact`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "add-contact"
-                  : false,
               icon: Edit3,
             },
             {
               name: "Import Contacts",
               href: `/audience/${audienceListId}?action=import`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "import"
-                  : false,
               icon: UploadIcon,
             },
             {
               name: "Custom Fields",
               href: `/audience/${audienceListId}?action=custom-fields`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "custom-fields"
-                  : false,
               icon: Settings,
             },
             {
@@ -181,12 +165,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Audience",
           icon: RadioTower,
-          isActive: segments.includes("audience"),
           submenu: [
             {
-              name: "Lists",
-              href: `/organization/${siteId}/audience`,
+              name: "List",
+              href: `/audience/${audienceListId}`,
               isActive:
+                pathname === `/audience/${audienceListId}` ||
                 pathname === `/organization/${siteId}/audience` ||
                 pathname === `/organization/${siteId}/audience/lists`,
               icon: List,
@@ -196,14 +180,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               href: `/organization/${siteId}/signup-forms`,
               isActive: segments.includes("signup-forms"),
               icon: FormInput,
-            },
-            {
-              name: "Segments",
-              href: `/organization/${siteId}/segments`,
-              isActive:
-                pathname === `/organization/${siteId}/segments` ||
-                pathname.startsWith(`/organization/${siteId}/segments/`),
-              icon: Filter,
             },
           ],
         },
@@ -294,7 +270,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             alt="Logo"
             className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
           />
-          <span className="font-bold">Mailer</span>
+          {state === "expanded" && <span className="font-bold">Mailer</span>}
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -364,10 +340,23 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
-        {children}
-      </SidebarFooter>
+      {loading ? null : (
+        <SidebarFooter>
+          <div className="px-2 py-2">
+            <Link
+              href="/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            >
+              <BookOpen className="h-4 w-4" />
+              {state === "expanded" && <span>Documentation</span>}
+            </Link>
+          </div>
+          <SidebarSeparator />
+          {children}
+        </SidebarFooter>
+      )}
       <SidebarRail />
     </Sidebar>
   );

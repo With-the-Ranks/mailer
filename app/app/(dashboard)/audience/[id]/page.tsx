@@ -7,8 +7,9 @@ import prisma from "@/lib/prisma";
 export default async function AudiencePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
@@ -16,7 +17,7 @@ export default async function AudiencePage({
 
   const data = await prisma.audienceList.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
     },
     include: {
       organization: {

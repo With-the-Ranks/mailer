@@ -16,9 +16,10 @@ const updateCustomFieldSchema = z.object({
 // PUT /api/custom-fields/[id] - Update a custom field definition
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +31,7 @@ export async function PUT(
     // Verify the custom field belongs to the user's organization
     const existingField = await prisma.customFieldDefinition.findFirst({
       where: {
-        id: params.id,
+        id,
         organizationId: session.user.organizationId,
       },
     });
@@ -62,7 +63,7 @@ export async function PUT(
     }
 
     const updatedField = await prisma.customFieldDefinition.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     });
 
@@ -85,9 +86,10 @@ export async function PUT(
 // DELETE /api/custom-fields/[id] - Delete a custom field definition
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -96,7 +98,7 @@ export async function DELETE(
     // Verify the custom field belongs to the user's organization
     const existingField = await prisma.customFieldDefinition.findFirst({
       where: {
-        id: params.id,
+        id,
         organizationId: session.user.organizationId,
       },
     });
@@ -109,7 +111,7 @@ export async function DELETE(
     }
 
     await prisma.customFieldDefinition.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

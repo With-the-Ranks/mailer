@@ -10,16 +10,17 @@ export default async function OrganizationAnalyticsLayout({
   params,
   children,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   children: ReactNode;
 }) {
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
+  const { id } = await params;
   const data = await prisma.organization.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
       users: {
         some: {
           id: {

@@ -7,9 +7,10 @@ import prisma from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +22,7 @@ export async function POST(
     // Verify user has access to signup form
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         organization: {
           users: {
             some: {
@@ -48,7 +49,7 @@ export async function POST(
         placeholder,
         options: options || [],
         order: order || 0,
-        signupFormId: params.id,
+        signupFormId: id,
       },
     });
 
@@ -67,9 +68,10 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -80,7 +82,7 @@ export async function PUT(
     // Verify user has access to signup form
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         organization: {
           users: {
             some: {
@@ -103,7 +105,7 @@ export async function PUT(
       // Get existing field IDs to preserve them
       const existingFields = await tx.signupFormField.findMany({
         where: {
-          signupFormId: params.id,
+          signupFormId: id,
         },
         select: {
           id: true,
@@ -147,7 +149,7 @@ export async function PUT(
             placeholder: field.placeholder,
             options: field.options || [],
             order: fieldsToUpdate.length + index,
-            signupFormId: params.id,
+            signupFormId: id,
           },
         }),
       );

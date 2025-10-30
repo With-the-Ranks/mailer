@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { getEmailsForOrganization } from "@/lib/fetchers";
 
 export default async function Sitemap() {
-  const headersList = headers();
+  const headersList = await headers();
   const domain =
     headersList
       .get("host")

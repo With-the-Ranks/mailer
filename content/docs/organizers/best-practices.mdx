@@ -1,0 +1,126 @@
+---
+title: Deliverability Best Practices
+description: Email deliverability best practices
+---
+
+# Deliverability Best Practices
+
+Best practices to ensure your emails reach the inbox.
+
+## Email Content
+
+### Subject Lines
+
+- Keep them under 50 characters
+- Be clear and descriptive
+- Personalize when possible
+- Test different variations
+
+Avoid:
+
+- Excessive capitalization
+- Too many exclamation marks
+- Spam trigger words
+- Misleading promises
+
+### Email Body
+
+- Use a clear structure
+- Include a clear call-to-action
+- Keep paragraphs short
+- Use images with alt text
+- Write for mobile devices
+
+Avoid:
+
+- Too many different colors
+- Too many links
+- Overloading with images
+
+## List Management
+
+### Clean Your List
+
+- Remove bounced addresses immediately
+- Clean inactive subscribers (6-12 months)
+- Segment your list
+- Try to re-engage before removing
+
+> Never use purchased email lists. This will damage your sender reputation.
+
+### Unsubscribe Handling
+
+- Provide clear unsubscribe links
+- Process unsubscribes within 24 hours
+- Honor preferences promptly
+
+### Bounce Management
+
+**Hard Bounces** - Remove immediately:
+
+- Invalid email addresses
+- Blocked domains
+
+**Soft Bounces** - Retry temporarily, then remove:
+
+- Mailbox full
+- Server temporarily unavailable
+
+## Authentication
+
+Set up SPF, DKIM, and DMARC records with your email provider. See the [Resend Integration guide](/docs/advanced-users/resend-integration) for detailed setup instructions.
+
+## Testing Before Sending
+
+Always test your emails before sending:
+
+1. Send to yourself - Check formatting and links
+2. Test on mobile - Most emails are read on phones
+3. Test email clients - Gmail, Outlook, Apple Mail
+4. Verify all links work correctly
+
+## Monitoring Performance
+
+Track these key metrics in your Resend dashboard:
+
+- **Open Rate** - Percentage of recipients who opened your email
+- **Click Rate** - Percentage of recipients who clicked a link
+- **Bounce Rate** - Emails that failed to deliver (remove these addresses immediately)
+- **Unsubscribe Rate** - Recipients who opted out
+
+Use [Gmail Postmaster Tools](https://postmaster.google.com/) to monitor:
+
+- Spam rate
+- IP reputation
+- Domain reputation
+- Feedback loop reports
+
+### Warning Signs
+
+- Increasing bounce rate - Clean your list
+- Declining open rate - Review subject lines and sender reputation
+- High spam complaints - Review content and list quality
+
+## Warming Up New Domains
+
+Gradually increase volume when setting up a new sending domain:
+
+- Week 1: 50-100 emails/day
+- Week 2: 200-500 emails/day
+- Week 3: 1,000 emails/day
+- Week 4+: Full capacity
+
+## Common Mistakes
+
+- Using link shorteners (bit.ly, tinyurl)
+- Deceptive subject lines
+- Missing unsubscribe links
+- Using no-reply addresses
+
+See [how to avoid Gmail's spam folder](https://resend.com/docs/knowledge-base/how-do-i-avoid-gmails-spam-folder) and [how to avoid Outlook's spam folder](https://resend.com/docs/knowledge-base/how-do-i-avoid-outlooks-spam-folder) for more details.
+
+## Resources
+
+- [Gmail Postmaster Tools](https://postmaster.google.com/)
+- [Avoid Gmail's Spam Folder](https://resend.com/docs/knowledge-base/how-do-i-avoid-gmails-spam-folder)
+- [Avoid Outlook's Spam Folder](https://resend.com/docs/knowledge-base/how-do-i-avoid-outlooks-spam-folder)

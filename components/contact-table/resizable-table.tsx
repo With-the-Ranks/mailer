@@ -27,7 +27,7 @@ export function ResizableTable<T>({
     Record<string, number>
   >({});
 
-  // Update the table's column sizing state
+  // Sync column sizing with table instance
   React.useEffect(() => {
     table.setColumnSizing(columnSizing);
   }, [columnSizing, table]);

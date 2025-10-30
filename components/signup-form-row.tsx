@@ -53,7 +53,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
     try {
       await navigator.clipboard.writeText(signupUrl);
       toast.success("Signup URL copied to clipboard!");
-    } catch (error) {
+    } catch {
       // Fallback for older browsers
       const textArea = document.createElement("textarea");
       textArea.value = signupUrl;

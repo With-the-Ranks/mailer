@@ -7,8 +7,9 @@ import prisma from "@/lib/prisma";
 export default async function EditSignupFormPage({
   params,
 }: {
-  params: { id: string; formId: string };
+  params: Promise<{ id: string; formId: string }>;
 }) {
+  const { id, formId } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
@@ -16,8 +17,8 @@ export default async function EditSignupFormPage({
 
   const signupForm = await prisma.signupForm.findFirst({
     where: {
-      id: decodeURIComponent(params.formId),
-      organizationId: decodeURIComponent(params.id),
+      id: decodeURIComponent(formId),
+      organizationId: decodeURIComponent(id),
       organization: {
         users: {
           some: {
@@ -44,7 +45,7 @@ export default async function EditSignupFormPage({
   // Get audience lists for the organization
   const audienceLists = await prisma.audienceList.findMany({
     where: {
-      organizationId: decodeURIComponent(params.id),
+      organizationId: decodeURIComponent(id),
     },
     select: {
       id: true,
@@ -66,7 +67,7 @@ export default async function EditSignupFormPage({
       <SignupFormEditor
         signupForm={signupForm}
         audienceLists={audienceLists}
-        organizationId={decodeURIComponent(params.id)}
+        organizationId={decodeURIComponent(id)}
       />
     </div>
   );

@@ -6,13 +6,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import SignInForm from "./form";
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const verify =
-    typeof searchParams.verify === "string" ? searchParams.verify : null;
+  const params = await searchParams;
+  const verify = typeof params.verify === "string" ? params.verify : null;
 
   const alert =
     verify === "success"

@@ -22,16 +22,17 @@ function safeFilterCriteria(filterCriteria: unknown): Record<string, any> {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const segment = await prisma.segment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         audienceList: { select: { id: true, name: true } },
       },
@@ -61,9 +62,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -74,7 +76,7 @@ export async function PUT(
 
     // Check segment exists and belongs to org
     const segment = await prisma.segment.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!segment || segment.organizationId !== session.user.organizationId) {
@@ -83,7 +85,7 @@ export async function PUT(
 
     // Update segment
     const updatedSegment = await prisma.segment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...validatedData,
         updatedAt: new Date(),
@@ -126,9 +128,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -136,7 +139,7 @@ export async function DELETE(
 
     // Check segment exists and belongs to org
     const segment = await prisma.segment.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!segment || segment.organizationId !== session.user.organizationId) {
@@ -144,7 +147,7 @@ export async function DELETE(
     }
 
     await prisma.segment.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

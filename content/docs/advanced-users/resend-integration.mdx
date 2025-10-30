@@ -1,0 +1,101 @@
+---
+title: Resend Integration
+description: Set up your own Resend account and custom sending domain
+---
+
+# Resend Integration
+
+Mailer uses Resend as the email provider. You can set up your own Resend account for full control over your email sending.
+
+## Why Use Your Own Resend Account?
+
+- Custom domains - Send from your own verified domain
+- Better deliverability - Control your own sender reputation
+- Advanced tracking - Access to Resend's analytics dashboard
+
+## Getting Started
+
+### 1. Create a Resend Account
+
+Go to [resend.com](https://resend.com) and sign up for an account.
+
+### 2. Get Your API Key
+
+Navigate to [API Keys](https://resend.com/api-keys) in your Resend dashboard and create a new API key.
+
+> Security Tip: Create a key with only "Send emails" permissions.
+
+### 3. Add Your API Key to Mailer
+
+1. Go to your Organization Settings
+2. Find the "Email API Key" section
+3. Paste your Resend API key
+4. Click "Save"
+
+Your organization will now use your Resend account for all email sending.
+
+## Setting Up Custom Domains
+
+### Add Domain to Resend
+
+1. Go to [resend.com/domains](https://resend.com/domains)
+2. Click "Add Domain"
+3. Enter your domain
+4. Add the DNS records provided by Resend
+
+### DNS Records
+
+Resend will provide you with specific DNS records to add. These include:
+
+- SPF records
+- DKIM records
+- DMARC records (recommended)
+
+### Verify Domain
+
+1. Return to [resend.com/domains](https://resend.com/domains)
+2. Wait for DNS verification (usually 24-48 hours)
+3. Status will change to "Verified" when ready
+
+### Use Custom Domain in Mailer
+
+Once verified, your domain will appear in your organization's domain list:
+
+1. Go to Organization Settings
+2. In the "Active Sending Domain" section
+3. Select your verified domain from the dropdown
+
+All emails from this organization will now be sent from your custom domain.
+
+## Custom Send-From Address
+
+With a verified domain, you can send from any address on that domain.
+
+Simply update the "from" field when creating emails in Mailer.
+
+## Troubleshooting
+
+### Domain Not Verifying
+
+- Check DNS records are correctly added
+- Wait 24-48 hours for propagation
+- Verify TXT record format is correct
+
+### Low Deliverability
+
+- Ensure SPF, DKIM, DMARC are all configured
+- Clean your email lists
+- Warm up new domains gradually
+- Monitor and remove hard bounces
+
+### API Key Not Working
+
+- Verify the key is correctly pasted
+- Check key has "Send emails" permission
+- Ensure key hasn't been revoked in Resend dashboard
+
+## Resources
+
+- [Resend Dashboard](https://resend.com/overview)
+- [Resend API Documentation](https://resend.com/docs)
+- [Resend Domain Setup](https://resend.com/docs/dashboard/domains/introduction)

@@ -79,6 +79,11 @@ function convertAudienceToContact(audience: any): Contact {
       ? new Date(audience.updatedAt).toISOString()
       : undefined,
     audienceListId: audience.audienceListId,
+    isUnsubscribed: audience.isUnsubscribed || false,
+    unsubscribedAt: audience.unsubscribedAt
+      ? new Date(audience.unsubscribedAt).toISOString()
+      : undefined,
+    unsubscribeReason: audience.unsubscribeReason,
   };
 }
 
@@ -175,11 +180,13 @@ export function ContactList({
     }
     router.replace(`?${params.toString()}`, { scroll: false });
   };
-  // Initialize contacts from props
+  // Initialize contacts from props, but always refresh from API to get latest data
   React.useEffect(() => {
     if (initialContacts && initialContacts.length > 0 && !isInitialized) {
       setContacts(initialContacts.map(convertAudienceToContact));
       setIsInitialized(true);
+      // Refresh from API to get latest data (including unsubscribe status)
+      loadContacts();
     } else if (!initialContacts || initialContacts.length === 0) {
       loadContacts();
     }
@@ -284,6 +291,8 @@ export function ContactList({
                 : contact,
             ),
           );
+          // Refresh from API to ensure we have the latest data
+          await loadContacts();
           toast.success("Contact updated successfully");
         } else {
           const error = await parseResponse(response);
@@ -502,7 +511,7 @@ export function ContactList({
     );
 
   return (
-    <div className="flex h-full max-w-screen-2xl flex-col space-y-4 p-4">
+    <div className="flex h-full w-full max-w-[calc(90vw-var(--sidebar-width))] flex-col space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>

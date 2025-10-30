@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export const config = {
-  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
+  matcher: ["/((?!api/|_next/|_static/|_vercel|docs|[\\w-]+\\.\\w+).*)"],
 };
 
 const PUBLIC_PATHS = [
@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/auto-signin",
+  "/unsubscribe",
 ];
 
 export default async function middleware(req: NextRequest) {

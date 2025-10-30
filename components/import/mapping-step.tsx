@@ -41,7 +41,7 @@ export function MappingStep({
         className="flex h-full min-h-0 flex-1 flex-col"
       >
         <Card className="flex h-[70vh] max-h-[700px] flex-col overflow-hidden">
-          <CardHeader className="flex-shrink-0 px-8 pb-2 pt-6">
+          <CardHeader className="shrink-0 px-8 pb-2 pt-6">
             <CardTitle className="text-xl">
               Map CSV Columns to Contact Fields
             </CardTitle>

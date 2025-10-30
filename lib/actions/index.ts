@@ -364,7 +364,7 @@ export const createEmail = async (
     });
 
     return response;
-  } catch (error) {
+  } catch {
     return { error: "An error occurred while creating the email." };
   }
 };

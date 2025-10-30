@@ -1,15 +1,26 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { getSession } from "@/lib/auth";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import LogoutButton from "./logout-button";
 
-export default async function Profile() {
-  const session = await getSession();
+export default function Profile() {
+  const { state } = useSidebar();
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => setSession(data))
+      .catch(() => setSession(null));
+  }, []);
+
   if (!session?.user) {
-    redirect("/login");
+    return null;
   }
 
   return (
@@ -28,11 +39,13 @@ export default async function Profile() {
           alt={session.user.name ?? "User avatar"}
           className="h-6 w-6 rounded-full"
         />
-        <span className="truncate text-sm font-medium">
-          {session.user.name}
-        </span>
+        {state === "expanded" && (
+          <span className="truncate text-sm font-medium">
+            {session.user.name}
+          </span>
+        )}
       </Link>
-      <LogoutButton />
+      {state === "expanded" && <LogoutButton />}
     </div>
   );
 }

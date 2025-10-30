@@ -6,9 +6,10 @@ import prisma from "@/lib/prisma";
 export default async function PublicSignupFormPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const decodedSlug = decodeURIComponent(params.slug);
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
 
   const signupForm = await prisma.signupForm.findFirst({
     where: {

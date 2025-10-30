@@ -67,7 +67,7 @@ export function ImportingStep({ importProgress }: ImportingStepProps) {
             {importProgress.errors.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Import Errors:</Label>
-                <ScrollArea className="h-32 rounded border p-2">
+                <ScrollArea className="h-32 rounded-sm border p-2">
                   {importProgress.errors.map((error, index) => (
                     <div key={index} className="mb-1 text-sm text-red-600">
                       Row {error.row}: {error.error}

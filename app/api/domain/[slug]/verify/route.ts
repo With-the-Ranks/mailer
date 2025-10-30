@@ -9,9 +9,10 @@ import type { DomainVerificationStatusProps } from "@/lib/types";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { slug: string } },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
-  const domain = decodeURIComponent(params.slug);
+  const { slug } = await params;
+  const domain = decodeURIComponent(slug);
   let status: DomainVerificationStatusProps = "Valid Configuration";
 
   const [domainJson, configJson] = await Promise.all([

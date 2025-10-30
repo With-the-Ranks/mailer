@@ -38,7 +38,7 @@ export const getBlurDataURL = async (url: string | null) => {
     const base64 = Buffer.from(buffer).toString("base64");
 
     return `data:image/png;base64,${base64}`;
-  } catch (error) {
+  } catch {
     return "data:image/webp;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   }
 };
@@ -73,7 +73,7 @@ export function buildAudienceWhere(
   audienceListId: string,
   filterCriteria: Record<string, any>,
 ) {
-  const where: any = { audienceListId };
+  const where: any = { audienceListId, isUnsubscribed: false }; // Exclude unsubscribed contacts by default
 
   // List of built-in fields
   const BUILT_IN_KEYS = new Set([
@@ -156,4 +156,31 @@ export function buildAudienceWhere(
   });
 
   return where;
+}
+
+export function getBaseAppUrl() {
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://app.localhost:3000";
+  return baseUrl;
+}
+
+export function getUnsubscribeUrl({
+  email,
+  listId,
+  organizationId,
+}: {
+  email?: string | null;
+  listId?: string | null;
+  organizationId?: string | null;
+}) {
+  const baseUrl = getBaseAppUrl();
+
+  const params = new URLSearchParams();
+
+  if (email) params.set("email", email);
+  if (listId) params.set("list", listId);
+  if (organizationId) params.set("organization", organizationId);
+
+  return `${baseUrl}/unsubscribe${params.size ? `?${params.toString()}` : ""}`;
 }

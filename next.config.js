@@ -1,7 +1,11 @@
+import { createMDX } from "fumadocs-mdx/next";
+
+const withMDX = createMDX();
+
 /**
  * @type {import('next').NextConfig}
  */
-module.exports = {
+const config = {
   experimental: {
     serverActions: {
       allowedOrigins: ["app.localhost:3000"],
@@ -22,3 +26,5 @@ module.exports = {
     ],
   },
 };
+
+export default withMDX(config);

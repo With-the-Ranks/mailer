@@ -13,7 +13,7 @@ interface CreateSignupFormButtonProps {
 export default function CreateSignupFormButton({
   organizationId,
 }: CreateSignupFormButtonProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {

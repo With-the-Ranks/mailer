@@ -46,16 +46,16 @@ export default function Uploader({
       <label
         htmlFor={`${name}-upload`}
         className={cn(
-          "group relative mt-2 flex cursor-pointer flex-col items-center justify-center rounded-md border border-gray-300 bg-white shadow-sm transition-all hover:bg-gray-50",
+          "group relative mt-2 flex cursor-pointer flex-col items-center justify-center rounded-md border border-gray-300 bg-white shadow-xs transition-all hover:bg-gray-50",
           aspectRatio,
           {
-            "max-w-screen-md": aspectRatio === "aspect-video",
+            "max-w-(--breakpoint-md)": aspectRatio === "aspect-video",
             "max-w-xs": aspectRatio === "aspect-square",
           },
         )}
       >
         <div
-          className="absolute z-[5] h-full w-full rounded-md"
+          className="absolute z-5 h-full w-full rounded-md"
           onDragOver={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -84,7 +84,7 @@ export default function Uploader({
         <div
           className={`${
             dragActive ? "border-2 border-black" : ""
-          } absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all ${
+          } absolute z-3 flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all ${
             data[name]
               ? "bg-white/80 opacity-0 hover:opacity-100 hover:backdrop-blur-md"
               : "bg-white opacity-100 hover:bg-gray-50"
@@ -125,7 +125,7 @@ export default function Uploader({
           />
         )}
       </label>
-      <div className="mt-1 flex rounded-md shadow-sm">
+      <div className="mt-1 flex rounded-md shadow-xs">
         <input
           id={`${name}-upload`}
           ref={inputRef}

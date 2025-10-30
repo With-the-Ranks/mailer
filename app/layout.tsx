@@ -1,3 +1,4 @@
+import "fumadocs-ui/style.css";
 import "@/styles/globals.css";
 
 import { Analytics } from "@vercel/analytics/react";

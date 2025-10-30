@@ -11,14 +11,15 @@ import prisma from "@/lib/prisma";
 export default async function AudienceList({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
 
-  const orgId = decodeURIComponent(params.id);
+  const orgId = decodeURIComponent(id);
 
   const organization = await prisma.organization.findUnique({
     where: {

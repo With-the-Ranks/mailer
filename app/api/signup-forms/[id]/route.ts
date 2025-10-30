@@ -7,9 +7,10 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,7 +18,7 @@ export async function GET(
 
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         organization: {
           users: {
             some: {
@@ -61,9 +62,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -88,7 +90,7 @@ export async function PUT(
 
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         organization: {
           users: {
             some: {
@@ -111,7 +113,7 @@ export async function PUT(
       where: {
         slug: slug.trim(),
         organizationId: signupForm.organizationId,
-        id: { not: params.id },
+        id: { not: id },
       },
     });
 
@@ -124,7 +126,7 @@ export async function PUT(
 
     const updatedSignupForm = await prisma.signupForm.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
         name,
@@ -168,9 +170,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -178,7 +181,7 @@ export async function DELETE(
 
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         organization: {
           users: {
             some: {
@@ -198,7 +201,7 @@ export async function DELETE(
 
     await prisma.signupForm.delete({
       where: {
-        id: params.id,
+        id,
       },
     });
 

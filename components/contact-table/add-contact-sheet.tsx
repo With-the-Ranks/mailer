@@ -382,7 +382,7 @@ export function AddContactSheet({
                 Object.entries(formData.customFields).map(([key, value]) => (
                   <div
                     key={key}
-                    className="flex items-center gap-2 rounded border p-2"
+                    className="flex items-center gap-2 rounded-sm border p-2"
                   >
                     <div className="flex-1">
                       <span className="font-medium">{key}:</span> {value}

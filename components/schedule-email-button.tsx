@@ -52,13 +52,13 @@ export default function ScheduleEmailButton({
                 e.stopPropagation();
                 if (!isDisabled) openCalendar();
               }}
-              className="flex items-center gap-2 rounded border border-gray-300 bg-white px-2 py-1"
+              className="flex items-center gap-2 rounded-sm border border-gray-300 bg-white px-2 py-1"
             >
               <CalendarDays className="h-5 w-5 text-gray-500" />
               <input
                 {...props}
                 disabled={isDisabled}
-                className="w-full cursor-pointer bg-transparent pl-1 focus:outline-none"
+                className="w-full cursor-pointer bg-transparent pl-1 focus:outline-hidden"
                 placeholder="YYYY-MM-DD HH:mm"
               />
             </div>

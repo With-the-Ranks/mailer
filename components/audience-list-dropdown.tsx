@@ -56,14 +56,14 @@ export function AudienceListDropdown({
           onValueChange={(value) => setSelectedAudienceList(value)}
           disabled={disabled}
         >
-          <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400">
+          <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs transition-colors hover:bg-gray-50 focus:outline-hidden focus:ring-1 focus:ring-gray-400">
             <SelectValue placeholder="Select an audience list…" />
           </SelectTrigger>
           <SelectContent
             position="popper"
             side="bottom"
             align="start"
-            className="z-[10000001] max-h-[300px] overflow-y-auto bg-white"
+            className="z-10000001 max-h-[300px] overflow-y-auto bg-white"
           >
             <SelectGroup>
               {audienceLists.length > 0 ? (

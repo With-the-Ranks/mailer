@@ -5,15 +5,16 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const email = await prisma.email.findUnique({
-    where: { id: decodeURIComponent(params.id) },
+    where: { id: decodeURIComponent(id) },
     select: { published: true },
   });
 

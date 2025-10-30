@@ -89,10 +89,10 @@ export default function Uploader() {
         </div>
         <label
           htmlFor="image-upload"
-          className="group relative mt-2 flex h-72 cursor-pointer flex-col items-center justify-center rounded-md border border-gray-300 bg-white shadow-sm transition-all hover:bg-gray-50"
+          className="group relative mt-2 flex h-72 cursor-pointer flex-col items-center justify-center rounded-md border border-gray-300 bg-white shadow-xs transition-all hover:bg-gray-50"
         >
           <div
-            className="absolute z-[5] h-full w-full rounded-md"
+            className="absolute z-5 h-full w-full rounded-md"
             onDragOver={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -134,7 +134,7 @@ export default function Uploader() {
           <div
             className={`${
               dragActive ? "border-2 border-black" : ""
-            } absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all ${
+            } absolute z-3 flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all ${
               data.image
                 ? "bg-white/80 opacity-0 hover:opacity-100 hover:backdrop-blur-md"
                 : "bg-white opacity-100 hover:bg-gray-50"
@@ -175,7 +175,7 @@ export default function Uploader() {
             />
           )}
         </label>
-        <div className="mt-1 flex rounded-md shadow-sm">
+        <div className="mt-1 flex rounded-md shadow-xs">
           <input
             id="image-upload"
             name="image"
@@ -193,7 +193,7 @@ export default function Uploader() {
           saveDisabled
             ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400"
             : "border-black bg-black text-white hover:bg-white hover:text-black"
-        } flex h-10 w-full items-center justify-center rounded-md border text-sm transition-all focus:outline-none`}
+        } flex h-10 w-full items-center justify-center rounded-md border text-sm transition-all focus:outline-hidden`}
       >
         {saving ? (
           <LoadingDots color="#808080" />
