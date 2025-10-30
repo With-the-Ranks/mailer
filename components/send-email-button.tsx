@@ -4,10 +4,9 @@ import { Loader2, Send } from "lucide-react";
 import type { Moment } from "moment";
 import React, { useTransition } from "react";
 
-import { cn } from "@/lib/utils";
-
 import { useModal } from "./modal/provider";
 import { SendEmailModal } from "./modal/send-email-modal";
+import { Button } from "./ui/button";
 
 interface SendEmailButtonProps {
   isSending: boolean;
@@ -73,23 +72,23 @@ export default function SendEmailButton({
     );
   };
 
+  const isLoading = isSending || isPending;
+
   return (
-    <button
+    <Button
       onClick={handleClick}
-      disabled={isSending || isPending}
-      className={cn(
-        "btn flex items-center text-sm",
-        (isSending || isPending) && "cursor-not-allowed opacity-50",
-      )}
+      disabled={isLoading}
+      className="flex items-center text-sm"
+      aria-label={isLoading ? "Sending" : String(getButtonLabel())}
     >
-      {isSending || isPending ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
       ) : (
         <>
-          <Send className="h-4 w-4" />
+          <Send className="mr-2 h-4 w-4" aria-hidden="true" />
           <span>{getButtonLabel()}</span>
         </>
       )}
-    </button>
+    </Button>
   );
 }
