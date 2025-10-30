@@ -69,6 +69,11 @@ export function isSafari() {
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
 
+export function isSafeCallbackPath(value: string | null | undefined): boolean {
+  if (!value) return false;
+  return value.startsWith("/") && !value.startsWith("//");
+}
+
 export function buildAudienceWhere(
   audienceListId: string,
   filterCriteria: Record<string, any>,

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
+import { isSafeCallbackPath } from "@/lib/utils";
 
 function SignInForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -60,7 +61,10 @@ function SignInForm() {
         }
 
         toast.success("Login Successful");
-        router.push(callbackUrl || "/");
+        const destination = isSafeCallbackPath(callbackUrl)
+          ? callbackUrl!
+          : "/";
+        router.push(destination);
       }}
     >
       <input

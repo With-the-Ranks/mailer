@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { isSafeCallbackPath } from "@/lib/utils";
 
 import SignInForm from "./form";
 
@@ -82,7 +83,7 @@ export default function LoginPage({
       <div className="mt-5 text-center text-sm text-stone-400">
         Don&apos;t have an account?
         <Link
-          href={`/register${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
+          href={`/register${isSafeCallbackPath(callbackUrl) ? `?callbackUrl=${encodeURIComponent(callbackUrl as string)}` : ""}`}
           className="rounded-lg p-2 underline hover:text-stone-200 dark:hover:text-stone-200"
         >
           Sign up
