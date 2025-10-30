@@ -164,7 +164,8 @@ export async function acceptInvitation(token: string) {
     invitation.email.toLowerCase() !== session.user.email?.toLowerCase()
   ) {
     return {
-      error: `This invitation was sent to ${invitation.email}. Please sign in or create an account with that email address.`,
+      error:
+        "This invitation is linked to a different email address. Please sign in or create an account using the invited email.",
     };
   }
 
