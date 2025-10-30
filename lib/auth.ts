@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { addHours } from "date-fns";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -13,6 +13,13 @@ import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
+
+// Function to detect if we're on a Vercel preview deployment
+function isVercelPreviewDeployment(host?: string) {
+  if (process.env.VERCEL_ENV === "preview") return true;
+  if (host && host.endsWith(".vercel.app")) return true;
+  return false;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -59,6 +66,24 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Please verify your email before logging in.");
           }
 
+          // Check if this is an auto-signin token
+          const autoSigninToken = await prisma.verificationToken.findFirst({
+            where: {
+              identifier: email,
+              token: password,
+              expires: { gt: new Date() },
+            },
+          });
+
+          if (autoSigninToken) {
+            // Clean up the auto-signin token
+            await prisma.verificationToken.deleteMany({
+              where: { token: password },
+            });
+            return user;
+          }
+
+          // Normal password verification
           const passwordIsValid = await bcrypt.compare(
             password,
             user.password || "",
@@ -91,9 +116,12 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         // When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
-        domain: VERCEL_DEPLOYMENT
-          ? `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
-          : undefined,
+        domain:
+          VERCEL_DEPLOYMENT &&
+          !isVercelPreviewDeployment() &&
+          process.env.NEXT_PUBLIC_ROOT_DOMAIN
+            ? `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+            : undefined,
         secure: VERCEL_DEPLOYMENT,
       },
     },
@@ -117,6 +145,9 @@ export const authOptions: NextAuthOptions = {
         organizationId: token?.user?.organizationId,
       };
       return session;
+    },
+    redirect: async ({ baseUrl }) => {
+      return `${baseUrl}/`;
     },
   },
 };

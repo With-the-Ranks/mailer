@@ -3,24 +3,27 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export const config = {
-  matcher: [
-    /*
-     * Match all paths except for:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. /_static (inside /public)
-     * 4. all root files inside /public (e.g. /favicon.ico)
-     */
-    "/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)",
-  ],
+  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
 };
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/auto-signin",
+];
 
 export default async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const { pathname, search } = url;
   const host = req.headers.get("host")!;
+
+  const isVercelPreview =
+    process.env.VERCEL_ENV === "preview" || host.endsWith(".vercel.app");
+
+  if (isVercelPreview) {
+    return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
+  }
 
   const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
   const SUFFIX = process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_SUFFIX!;

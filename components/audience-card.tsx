@@ -3,6 +3,7 @@
 import type { AudienceList, Organization } from "@prisma/client";
 import {
   Filter,
+  FormInput,
   Info,
   Pencil,
   RowsIcon,
@@ -158,14 +159,20 @@ export default function AudienceCard({
             Manage Segments
           </Button>
         </Link>
+        <Link href={`/organization/${data.organization.id}/signup-forms`}>
+          <Button variant="outline" size="sm">
+            <FormInput className="mr-2 h-4 w-4" />
+            Signup Forms
+          </Button>
+        </Link>
       </div>
 
       <Alert className="mt-6">
         <Info className="h-4 w-4" />
         <AlertTitle>Tip</AlertTitle>
         <AlertDescription>
-          You can import contacts, add custom fields, or segment your audience
-          for better targeting.
+          You can import contacts, add custom fields, create signup forms, or
+          segment your audience for better targeting.
         </AlertDescription>
       </Alert>
     </div>

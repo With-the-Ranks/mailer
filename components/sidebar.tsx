@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Edit3,
   Filter,
+  FormInput,
   Info,
   LayoutDashboard,
   List,
@@ -189,6 +190,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 pathname === `/organization/${siteId}/audience` ||
                 pathname === `/organization/${siteId}/audience/lists`,
               icon: List,
+            },
+            {
+              name: "Signup Forms",
+              href: `/organization/${siteId}/signup-forms`,
+              isActive: segments.includes("signup-forms"),
+              icon: FormInput,
             },
             {
               name: "Segments",
