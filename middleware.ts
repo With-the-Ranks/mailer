@@ -1,9 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export const config = {
-  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
-};
+import { isSameOrigin } from "@/lib/utils";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -13,8 +11,26 @@ const PUBLIC_PATHS = [
 ];
 
 export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Handle API routes first
+  if (pathname.startsWith("/api/")) {
+    // CSRF protection for sensitive API routes
+    if (
+      req.method !== "GET" &&
+      req.method !== "OPTIONS" &&
+      (pathname.startsWith("/api/2fa/") || pathname.startsWith("/api/password"))
+    ) {
+      if (!isSameOrigin(req)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+    // Let API routes pass through without domain routing
+    return NextResponse.next();
+  }
+
   const url = req.nextUrl.clone();
-  const { pathname, search } = url;
+  const { search } = url;
   const host = req.headers.get("host")!;
 
   const isVercelPreview =
@@ -55,3 +71,7 @@ export default async function middleware(req: NextRequest) {
     new URL(`/${hostname}${pathname}${search}`, req.url),
   );
 }
+
+export const config = {
+  matcher: ["/((?!_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)", "/api/:path*"],
+};

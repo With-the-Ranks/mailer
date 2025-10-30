@@ -4,8 +4,7 @@ import speakeasy from "speakeasy";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { logError } from "@/lib/utils";
-import { TOTP_TIME_WINDOW } from "@/lib/utils";
+import { logError, TOTP_TIME_WINDOW } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {

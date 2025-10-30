@@ -178,3 +178,30 @@ export function logError(
 
   console.error(`[${event}]`, payload);
 }
+
+export function isSameOrigin(req: {
+  headers: { get: (name: string) => string | null };
+  url: string;
+}): boolean {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  const host = req.headers.get("host");
+
+  try {
+    // Build expected origin from Host header (more reliable than req.url in middleware)
+    const protocol = req.url.startsWith("https") ? "https" : "http";
+    const expectedOrigin = `${protocol}://${host}`;
+
+    // Check Origin header
+    if (origin === expectedOrigin) return true;
+
+    // Check Referer header
+    if (referer && new URL(referer).origin === expectedOrigin) return true;
+
+    // Allow if no Origin/Referer (same-site browser requests)
+    return !origin && !referer;
+  } catch (err) {
+    console.error("[isSameOrigin] Error:", err);
+    return false;
+  }
+}
