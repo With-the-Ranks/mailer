@@ -8,10 +8,11 @@ import { getUnsubscribeUrl, toDateString } from "@/lib/utils";
 export async function generateMetadata({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
 
   const [data, organizationData] = await Promise.all([
     getPostData(domain, slug),
@@ -79,7 +80,7 @@ async function parseEmailContent(
   let jsonContent;
   try {
     jsonContent = JSON.parse(content);
-  } catch (error) {
+  } catch {
     console.error("Invalid JSON content:", content);
     return "Invalid email content.";
   }
@@ -100,10 +101,11 @@ async function parseEmailContent(
 export default async function OrganizationPostPage({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
   const data = await getPostData(domain, slug);
 
   if (!data) {
@@ -146,7 +148,7 @@ export default async function OrganizationPostPage({
           </div>
         </a> */}
       </div>
-      {/* <div className="relative m-auto mb-10 h-80 w-full max-w-screen-lg overflow-hidden md:mb-20 md:h-150 md:w-5/6 md:rounded-2xl lg:w-2/3">
+      {/* <div className="relative m-auto mb-10 h-80 w-full max-w-(--breakpoint-lg) overflow-hidden md:mb-20 md:h-150 md:w-5/6 md:rounded-2xl lg:w-2/3">
         <BlurImage
           alt={data.title ?? "Post image"}
           width={1200}

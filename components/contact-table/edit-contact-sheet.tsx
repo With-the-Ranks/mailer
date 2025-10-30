@@ -341,7 +341,7 @@ export function EditContactSheet({
                 Object.entries(formData.customFields).map(([key, value]) => (
                   <div
                     key={key}
-                    className="flex items-center gap-2 rounded border p-2"
+                    className="flex items-center gap-2 rounded-sm border p-2"
                   >
                     <div className="flex-1">
                       <span className="font-medium">{key}:</span> {value}
@@ -394,7 +394,7 @@ export function EditContactSheet({
                       : undefined,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded-sm border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <Label htmlFor="isUnsubscribed" className="cursor-pointer">
                 Mark as unsubscribed

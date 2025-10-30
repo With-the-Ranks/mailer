@@ -16,7 +16,7 @@ export default function EmailPreview({ html }: PreviewEmailProps) {
   const openModal = () => {
     modal.show(
       <div
-        className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/50 p-4"
+        className="fixed inset-0 z-10001 flex items-center justify-center bg-black/50 p-4"
         onClick={() => modal.hide()}
       >
         <div

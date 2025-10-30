@@ -1,6 +1,5 @@
 "use client";
 
-import "react-multi-email/dist/style.css";
 import "@maily-to/core/style.css";
 
 import { Editor as MailyEditor } from "@maily-to/core";
@@ -195,8 +194,8 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   };
 
   return (
-    <div className="relative mx-auto min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 dark:border-stone-700 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg">
-      <div className="absolute right-5 top-5 mb-5 flex flex-wrap items-center gap-3">
+    <div className="relative mx-auto min-h-[500px] w-full max-w-(--breakpoint-lg) border-stone-200 p-12 px-8 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg dark:border-stone-700">
+      <div className="absolute top-5 right-5 mb-5 flex flex-wrap items-center gap-3">
         <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-sm text-stone-400 dark:bg-stone-800 dark:text-stone-500">
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
@@ -233,7 +232,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           defaultValue={email?.title || ""}
           autoFocus
           onChange={(e) => setData({ ...data, title: e.target.value })}
-          className="dark:placeholder-text-600 border-none px-0 font-cal text-3xl placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:bg-black dark:text-white"
+          className="dark:placeholder-text-600 font-cal border-none px-0 text-3xl placeholder:text-stone-400 focus:ring-0 focus:outline-hidden dark:bg-black dark:text-white"
           required
         />
       </div>

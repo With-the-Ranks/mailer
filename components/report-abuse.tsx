@@ -16,7 +16,7 @@ function SubmitButton() {
   return (
     <button
       className={cn(
-        "h flex h-8 w-full items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-none sm:h-10",
+        "h flex h-8 w-full items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-hidden sm:h-10",
         pending
           ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400"
           : "border-black bg-black text-white hover:bg-white hover:text-black",
@@ -36,7 +36,7 @@ export default function ReportAbuse() {
   return (
     <div className="fixed bottom-5 right-5">
       <button
-        className="rounded-full bg-black p-4 text-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 active:shadow-sm"
+        className="rounded-full bg-black p-4 text-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 active:shadow-xs"
         onClick={() => setOpen(!open)}
       >
         <AlertTriangle size={24} />
@@ -78,7 +78,7 @@ export default function ReportAbuse() {
                 id="url"
                 readOnly
                 value={url}
-                className="block w-full cursor-not-allowed rounded-md border border-stone-200 bg-stone-100 py-1.5 text-stone-900 shadow-sm ring-0 focus:outline-none sm:text-sm sm:leading-6"
+                className="block w-full cursor-not-allowed rounded-md border border-stone-200 bg-stone-100 py-1.5 text-stone-900 shadow-xs ring-0 focus:outline-hidden sm:text-sm sm:leading-6"
               />
             </div>
           </div>

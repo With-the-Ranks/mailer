@@ -29,7 +29,11 @@ function multiSelectFilter(row: any, columnId: string, filterValue: string[]) {
   return filterValue.includes(raw);
 }
 
-function customFieldsFilter(row: any, columnId: string, filterValue: string[]) {
+function _customFieldsFilter(
+  row: any,
+  columnId: string,
+  filterValue: string[],
+) {
   if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
   const customFields = row.getValue(columnId) as Record<string, any>;
   if (!customFields) return false;
