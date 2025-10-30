@@ -36,6 +36,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# fumadocs
+.source
+
 # playwright
 /test-results/
 /playwright-report/

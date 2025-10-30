@@ -40,7 +40,7 @@ export default function ClientSettingsForm({
         </h2>
         <p className="text-sm text-stone-600 dark:text-stone-400">
           Optional. Overrides the global{" "}
-          <code className="rounded bg-stone-100 px-1 text-xs dark:bg-stone-800">
+          <code className="rounded-sm bg-stone-100 px-1 text-xs dark:bg-stone-800">
             RESEND_API_KEY
           </code>
           .
@@ -74,7 +74,7 @@ export default function ClientSettingsForm({
             defaultValue={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="re_abc123..."
-            className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+            className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-hidden focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
           />
           <button
             type="button"

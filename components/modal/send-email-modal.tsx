@@ -31,6 +31,7 @@ interface SendEmailModalProps {
   from: string;
   content: string;
   emailId: string;
+  audienceListId?: string | null;
 }
 
 export function SendEmailModal({
@@ -45,6 +46,7 @@ export function SendEmailModal({
   from,
   content,
   emailId,
+  audienceListId: audienceListIdProp,
 }: SendEmailModalProps) {
   const modal = useModal();
   const [testEmail, setTestEmail] = useState("");
@@ -69,6 +71,7 @@ export function SendEmailModal({
         content,
         previewText,
         organizationId,
+        audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
       toast.success("Test email sent");
     } catch {
@@ -133,7 +136,7 @@ export function SendEmailModal({
     <form
       noValidate
       onSubmit={handleSubmit}
-      className="w-full max-w-md rounded bg-white p-6 md:border md:shadow"
+      className="w-full max-w-md rounded-sm bg-white p-6 md:border md:shadow-sm"
     >
       <h2 className="mb-4 font-cal text-2xl">Send Email</h2>
 
@@ -201,7 +204,7 @@ export function SendEmailModal({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="btn mt-4 w-full rounded-2xl py-2 text-center text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus:outline-none disabled:opacity-50"
+        className="btn mt-4 w-full rounded-2xl py-2 text-center text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus:outline-hidden disabled:opacity-50"
       >
         {isSubmitting ? (
           <div className="flex items-center justify-center gap-2">

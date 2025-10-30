@@ -74,7 +74,13 @@ export const WelcomeTemplate = () => (
       </style>
     </Head>
     <Preview>Welcome to Mailer — email built for organizers</Preview>
-    <Tailwind config={{ theme: { extend: { colors: { brand: "#107FE5" } } } }}>
+    <Tailwind
+      config={
+        {
+          theme: { extend: { colors: { brand: "#107FE5" } } },
+        } as any
+      }
+    >
       <Body className="bg-[#1E90FF]" style={{ margin: 0, padding: 0 }}>
         <Container className="container-responsive mx-auto -mt-2 flex flex-col items-stretch">
           <Container>
@@ -82,11 +88,11 @@ export const WelcomeTemplate = () => (
               src={`https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png`}
               height="35"
               alt="Mailer"
-              className="mx-auto mb-4 mt-6"
+              className="mx-auto mt-6 mb-4"
             />
             <Img
               src="https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png"
-              className="mt-6 max-h-[300px] w-full max-w-full rounded-t-[24px]  object-cover object-top"
+              className="mt-6 max-h-[300px] w-full max-w-full rounded-t-[24px] object-cover object-top"
               alt="Bernie Sanders & AOC"
             />
           </Container>
@@ -112,7 +118,7 @@ export const WelcomeTemplate = () => (
             >
               Here’s what to expect:
             </Text>
-            <Container className="container-responsive mt-6 flex flex-col items-center self-stretch rounded-[40px] border border-solid border-zinc-400 bg-white px-4 py-8 text-center shadow-sm">
+            <Container className="container-responsive mt-6 flex flex-col items-center self-stretch rounded-[40px] border border-solid border-zinc-400 bg-white px-4 py-8 text-center shadow-xs">
               <Container className="bg-brand flex h-[3px] flex-col self-stretch" />
               <Text
                 className="text-brand sub-heading mt-2 text-xl font-bold uppercase"
@@ -148,7 +154,7 @@ export const WelcomeTemplate = () => (
                   </li>
                 </ul>
                 <Text
-                  className="notice mt-6 text-lg italic text-zinc-700"
+                  className="notice mt-6 text-lg text-zinc-700 italic"
                   style={{ fontFamily: '"Roboto", Arial' }}
                 >
                   Mailer is currently in pre‑alpha. Things may change — and your
@@ -156,14 +162,14 @@ export const WelcomeTemplate = () => (
                 </Text>
               </Container>
               <Button
-                className="button-text mt-4 w-5/6 items-center justify-center whitespace-nowrap rounded-[100px] bg-red-500 px-6 py-4 text-center text-2xl uppercase text-white"
+                className="button-text mt-4 w-5/6 items-center justify-center rounded-[100px] bg-red-500 px-6 py-4 text-center text-2xl whitespace-nowrap text-white uppercase"
                 href={baseUrl}
                 type="submit"
               >
                 Get Started
               </Button>
             </Container>
-            <Container className="container-responsive mb-10 mt-4 self-center text-center text-3xl text-white">
+            <Container className="container-responsive mt-4 mb-10 self-center text-center text-3xl text-white">
               <Text
                 className="body-text"
                 style={{ fontFamily: '"Roboto", Arial' }}

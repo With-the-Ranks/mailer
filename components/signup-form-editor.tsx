@@ -253,7 +253,7 @@ export default function SignupFormEditor({
   audienceLists,
   organizationId,
 }: SignupFormEditorProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
 
   // Find the master audience list (first one or create default)

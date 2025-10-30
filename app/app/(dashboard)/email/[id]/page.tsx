@@ -6,14 +6,16 @@ import CancelScheduleModal from "@/components/modal/cancel-schedule-modal";
 import EmailPreview from "@/components/modal/preview-email";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getUnsubscribeUrl } from "@/lib/utils";
 
 type Stats = { label: string; value: number };
 
 export default async function EmailDetailPage({
-  params: { id },
+  params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) redirect("/login");
 
@@ -36,7 +38,21 @@ export default async function EmailDetailPage({
       const json = JSON.parse(email.content);
       const maily = new Maily(json);
       if (email.previewText) maily.setPreviewText(email.previewText);
+      const variables = {
+        unsubscribe_url: getUnsubscribeUrl({
+          email: session.user.email,
+          listId: email.audienceListId,
+          organizationId: email.organizationId || undefined,
+        }),
+      };
+      maily.setVariableValues(variables);
       previewHtml = await maily.render();
+
+      // Replace variable placeholders in href attributes
+      for (const [key, value] of Object.entries(variables)) {
+        const placeholder = `{{${key}}}`;
+        previewHtml = previewHtml.replaceAll(placeholder, value);
+      }
     } catch {
       previewHtml = "<p>Invalid email content</p>";
     }
@@ -79,7 +95,7 @@ export default async function EmailDetailPage({
   }
 
   return (
-    <div className="mx-auto w-full max-w-screen-lg px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-(--breakpoint-lg) px-4 py-6 sm:px-6 lg:px-8">
       <section className="mb-8 space-y-4">
         <h1 className="text-2xl font-bold dark:text-white sm:text-3xl">
           {email.title}
@@ -115,7 +131,7 @@ export default async function EmailDetailPage({
               {stats.map(({ label, value }) => (
                 <div
                   key={label}
-                  className="flex flex-col rounded-lg bg-white p-4 shadow dark:bg-gray-800"
+                  className="flex flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
                 >
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {label}
@@ -126,7 +142,7 @@ export default async function EmailDetailPage({
                 </div>
               ))}
             </div>
-            <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
               <Chart emailId={email.id} />
             </div>
           </section>
@@ -135,7 +151,7 @@ export default async function EmailDetailPage({
               Sent to
             </h2>
             {recipients.length ? (
-              <div className="overflow-x-auto rounded-lg shadow">
+              <div className="overflow-x-auto rounded-lg shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -173,7 +189,7 @@ export default async function EmailDetailPage({
             Sending to
           </h2>
           {recipients.length ? (
-            <div className="overflow-x-auto rounded-lg shadow">
+            <div className="overflow-x-auto rounded-lg shadow-sm">
               <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
