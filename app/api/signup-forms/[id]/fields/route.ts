@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(
   request: NextRequest,
@@ -57,7 +58,7 @@ export async function POST(
 
     return NextResponse.json(field);
   } catch (error) {
-    console.error("Error creating signup form field:", error);
+    logError("Error creating signup form field", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -178,7 +179,7 @@ export async function PUT(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error updating signup form fields:", error);
+    logError("Error updating signup form fields", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

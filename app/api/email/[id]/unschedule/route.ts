@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { unscheduleEmail } from "@/lib/actions/send-email";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(
   request: Request,
@@ -40,7 +41,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Error unscheduling email:", err);
+    logError("Error unscheduling email", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -5,6 +5,7 @@ import speakeasy from "speakeasy";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
       qrCode: qrCodeUrl,
     });
   } catch (error) {
-    console.error("2FA setup error:", error);
+    logError("2FA setup error", error);
     return NextResponse.json({ error: "Failed to setup 2FA" }, { status: 500 });
   }
 }

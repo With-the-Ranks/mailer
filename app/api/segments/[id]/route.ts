@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { buildAudienceWhere } from "@/lib/utils";
+import { logError } from "@/lib/utils";
 
 // Zod schema for updating a segment
 const updateSegmentSchema = z.object({
@@ -51,7 +52,7 @@ export async function GET(
 
     return NextResponse.json({ ...segment, contactCount });
   } catch (error) {
-    console.error("Failed to get segment:", error);
+    logError("Failed to get segment", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -116,7 +117,7 @@ export async function PUT(
       );
     }
 
-    console.error("Failed to update segment:", error);
+    logError("Failed to update segment", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -149,7 +150,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete segment:", error);
+    logError("Failed to delete segment", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

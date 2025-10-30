@@ -7,7 +7,7 @@ import { Resend } from "resend";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-import { buildAudienceWhere } from "../utils";
+import { buildAudienceWhere, logError } from "../utils";
 
 async function getEmailClientForOrg(orgId?: string) {
   let apiKey = process.env.RESEND_API_KEY!;
@@ -42,7 +42,7 @@ const parseContent = async (
     }
     return await maily.render();
   } catch (error) {
-    console.error("Error parsing content:", error);
+    logError("Error parsing content", error);
     throw new Error("Failed to parse email content");
   }
 };
@@ -97,7 +97,7 @@ export const sendEmail = async ({
 
     return { data };
   } catch (err) {
-    console.error("sendEmail thrown error:", err);
+    logError("sendEmail thrown error", err);
     return { error: "Something went wrong" };
   }
 };
@@ -197,9 +197,10 @@ export const sendBulkEmail = async ({
         errorMessage =
           typeof error === "string" ? error : JSON.stringify(error);
         resendId = null; // Failed, so no resendId
-        console.error(
-          `Failed to send email to ${audience.email}: ${errorMessage}`,
-        );
+        logError("Failed to send email", null, {
+          to: audience.email,
+          error: errorMessage,
+        });
       } else {
         // Still update email with resendId if you want (optional)
         await prisma.email.update({
@@ -219,13 +220,12 @@ export const sendBulkEmail = async ({
           },
         });
       } catch (err: any) {
-        if (err.code !== "P2002")
-          console.error("Error logging email event:", err);
+        if (err.code !== "P2002") logError("Error logging email event", err);
       }
     }
     return { success: true };
   } catch (e) {
-    console.error("Error sending bulk email:", e);
+    logError("Error sending bulk email", e);
     return { error: "Something went wrong" };
   }
 };

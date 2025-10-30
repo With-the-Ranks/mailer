@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -20,7 +21,7 @@ export async function GET() {
       enabled: user?.twoFactorEnabled || false,
     });
   } catch (error) {
-    console.error("2FA status error:", error);
+    logError("2FA status error", error);
     return NextResponse.json(
       { error: "Failed to get 2FA status" },
       { status: 500 },

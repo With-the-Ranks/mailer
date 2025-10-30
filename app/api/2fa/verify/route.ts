@@ -4,6 +4,7 @@ import speakeasy from "speakeasy";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 import { TOTP_TIME_WINDOW } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
       message: "2FA enabled successfully",
     });
   } catch (error) {
-    console.error("2FA verification error:", error);
+    logError("2FA verification error", error);
     return NextResponse.json(
       { error: "Failed to verify 2FA token" },
       { status: 500 },

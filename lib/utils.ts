@@ -161,3 +161,20 @@ export function buildAudienceWhere(
 
   return where;
 }
+
+export function logError(
+  event: string,
+  error: unknown,
+  meta: Record<string, unknown> = {},
+) {
+  const payload: Record<string, unknown> = {
+    message: error instanceof Error ? error.message : String(error),
+    ...meta,
+  };
+
+  if (process.env.NODE_ENV !== "production" && error instanceof Error) {
+    payload.stack = error.stack;
+  }
+
+  console.error(`[${event}]`, payload);
+}

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(
   request: NextRequest,
@@ -109,7 +110,7 @@ export async function POST(
       submissionId: submission.id,
     });
   } catch (error) {
-    console.error("Error submitting signup form:", error);
+    logError("Error submitting signup form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

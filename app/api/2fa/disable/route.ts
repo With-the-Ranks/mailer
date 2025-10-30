@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
       message: "2FA disabled successfully",
     });
   } catch (error) {
-    console.error("2FA disable error:", error);
+    logError("2FA disable error", error);
     return NextResponse.json(
       { error: "Failed to disable 2FA" },
       { status: 500 },

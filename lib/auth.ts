@@ -9,7 +9,7 @@ import speakeasy from "speakeasy";
 
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
-import { TOTP_TIME_WINDOW } from "@/lib/utils";
+import { logError, TOTP_TIME_WINDOW } from "@/lib/utils";
 
 import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
@@ -117,7 +117,7 @@ export const authOptions: NextAuthOptions = {
 
           return user;
         } catch (error: any) {
-          console.error("Login error:", error);
+          logError("Login error", error);
           throw new Error(error.message || "Login failed");
         }
       },

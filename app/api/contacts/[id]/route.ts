@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 import { updateContactSchema } from "@/lib/validations";
 
 // PUT: Update a contact
@@ -57,7 +58,7 @@ export async function PUT(
 
     return NextResponse.json(updatedContact);
   } catch (error) {
-    console.error("Error updating contact:", error);
+    logError("Error updating contact", error);
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -107,7 +108,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting contact:", error);
+    logError("Error deleting contact", error);
     return NextResponse.json(
       { error: "Failed to delete contact" },
       { status: 500 },
