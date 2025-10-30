@@ -6,10 +6,11 @@ import { updateOrganization } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 
 export default async function OrganizationSettingsIndex({
-  params: { id },
+  params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const data = await prisma.organization.findUnique({
     where: { id: decodeURIComponent(id) },
     select: {

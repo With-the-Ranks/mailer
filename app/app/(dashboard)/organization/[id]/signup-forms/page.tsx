@@ -8,8 +8,9 @@ import prisma from "@/lib/prisma";
 export default async function SignupFormsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
@@ -17,7 +18,7 @@ export default async function SignupFormsPage({
 
   const data = await prisma.organization.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
       users: {
         some: {
           id: {
@@ -40,11 +41,9 @@ export default async function SignupFormsPage({
             Signup Forms for Audience list
           </h1>
         </div>
-        <CreateSignupFormButton
-          organizationId={decodeURIComponent(params.id)}
-        />
+        <CreateSignupFormButton organizationId={decodeURIComponent(id)} />
       </div>
-      <SignupForms organizationId={decodeURIComponent(params.id)} />
+      <SignupForms organizationId={decodeURIComponent(id)} />
     </>
   );
 }

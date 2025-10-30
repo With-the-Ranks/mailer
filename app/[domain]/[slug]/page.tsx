@@ -8,10 +8,11 @@ import { getUnsubscribeUrl, toDateString } from "@/lib/utils";
 export async function generateMetadata({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
 
   const [data, organizationData] = await Promise.all([
     getPostData(domain, slug),
@@ -79,7 +80,7 @@ async function parseEmailContent(
   let jsonContent;
   try {
     jsonContent = JSON.parse(content);
-  } catch (error) {
+  } catch {
     console.error("Invalid JSON content:", content);
     return "Invalid email content.";
   }
@@ -100,10 +101,11 @@ async function parseEmailContent(
 export default async function OrganizationPostPage({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
   const data = await getPostData(domain, slug);
 
   if (!data) {

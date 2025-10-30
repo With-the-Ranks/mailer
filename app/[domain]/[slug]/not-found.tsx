@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getOrganizationData } from "@/lib/fetchers";
 
 export default async function NotFound() {
-  const headersList = headers();
+  const headersList = await headers();
   const domain = headersList
     .get("host")
     ?.replace(".localhost:3000", `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
