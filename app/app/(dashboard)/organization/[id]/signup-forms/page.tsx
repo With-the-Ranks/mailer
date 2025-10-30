@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import CreateSignupFormButton from "@/components/create-signup-form-button";
 import SignupForms from "@/components/signup-forms";
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export default async function SignupFormsPage({
@@ -17,17 +17,8 @@ export default async function SignupFormsPage({
 
   const organizationId = decodeURIComponent(params.id);
 
-  // Check if user is a member of this organization
-  const member = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id as string,
-        organizationId: organizationId,
-      },
-    },
-  });
-
-  if (!member) {
+  const isMember = await isOrgMember(session.user.id as string, organizationId);
+  if (!isMember) {
     notFound();
   }
 

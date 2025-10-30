@@ -7,7 +7,7 @@ import { revalidateTag } from "next/cache";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole } from "@/lib/auth";
 import {
   addDomainToVercel,
   // getApexDomain,
@@ -666,15 +666,7 @@ export const getOrgAndAudienceList = async () => {
   }
 
   // Fetch user's role for the current organization
-  const currentOrgMember = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId: currentOrgId,
-      },
-    },
-    select: { role: true },
-  });
+  const currentRole = await getUserOrgRole(session.user.id, currentOrgId);
 
   // Fetch current organization's first audience list
   const currentOrg = await prisma.organization.findUnique({
@@ -694,6 +686,6 @@ export const getOrgAndAudienceList = async () => {
     orgId: currentOrgId,
     audienceListId,
     userOrgs,
-    userRole: currentOrgMember?.role || null,
+    userRole: currentRole || null,
   };
 };

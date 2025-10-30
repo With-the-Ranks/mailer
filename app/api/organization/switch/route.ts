@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
@@ -20,17 +20,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user is a member of this organization
-    const member = await (prisma as any).organizationMember.findUnique({
-      where: {
-        userId_organizationId: {
-          userId: session.user.id,
-          organizationId,
-        },
-      },
-    });
-
-    if (!member) {
+    const isMember = await isOrgMember(session.user.id, organizationId);
+    if (!isMember) {
       return NextResponse.json(
         { error: "Not a member of this organization" },
         { status: 403 },

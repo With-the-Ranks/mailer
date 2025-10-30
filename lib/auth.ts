@@ -337,3 +337,16 @@ export function withEmailAuth(action: any) {
     return action(formData, email, key);
   };
 }
+
+export async function isOrgMember(userId: string, organizationId: string) {
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+    select: { userId: true },
+  });
+  return !!member;
+}

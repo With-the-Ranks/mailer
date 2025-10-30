@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import Audiences from "@/components/audiences";
 import CreateAudienceListButton from "@/components/create-audience-list-button";
 import CreateAudienceModal from "@/components/modal/create-audience-list";
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export default async function AudienceList({
@@ -20,17 +20,8 @@ export default async function AudienceList({
 
   const orgId = decodeURIComponent(params.id);
 
-  // Check if user is a member of this organization
-  const member = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id as string,
-        organizationId: orgId,
-      },
-    },
-  });
-
-  if (!member) {
+  const isMember = await isOrgMember(session.user.id as string, orgId);
+  if (!isMember) {
     notFound();
   }
 

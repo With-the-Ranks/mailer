@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import React from "react";
 
 import { sendEmail } from "@/lib/actions/send-email";
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole, isOrgMember } from "@/lib/auth";
 import InvitationEmail from "@/lib/email-templates/invitation-email";
 import prisma from "@/lib/prisma";
 
@@ -24,16 +24,8 @@ export async function createInvitation(
   }
 
   // Check if user is an admin of this organization
-  const member = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId,
-      },
-    },
-  });
-
-  if (!member || member.role !== "ADMIN") {
+  const requesterRole = await getUserOrgRole(session.user.id, organizationId);
+  if (requesterRole !== "ADMIN") {
     return { error: "Only admins can invite members" };
   }
 
@@ -169,14 +161,10 @@ export async function acceptInvitation(token: string) {
     };
   }
 
-  const existingMember = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId: invitation.organizationId,
-      },
-    },
-  });
+  const existingMember = await isOrgMember(
+    session.user.id,
+    invitation.organizationId,
+  );
 
   if (existingMember) {
     return { error: "You are already a member of this organization" };
@@ -236,16 +224,8 @@ export async function revokeInvitation(invitationId: string) {
   }
 
   // Check if user is an admin of this organization
-  const member = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId: invitation.organizationId,
-      },
-    },
-  });
-
-  if (!member || member.role !== "ADMIN") {
+  const role = await getUserOrgRole(session.user.id, invitation.organizationId);
+  if (role !== "ADMIN") {
     return { error: "Only admins can revoke invitations" };
   }
 
@@ -273,15 +253,7 @@ export async function getOrganizationInvitations(organizationId: string) {
   }
 
   // Check if user is a member of this organization
-  const member = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId,
-      },
-    },
-  });
-
+  const member = await isOrgMember(session.user.id, organizationId);
   if (!member) {
     return { error: "Not authorized" };
   }
@@ -313,16 +285,8 @@ export async function removeMember(organizationId: string, userId: string) {
   }
 
   // Check if requester is an admin
-  const requesterMember = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId,
-      },
-    },
-  });
-
-  if (!requesterMember || requesterMember.role !== "ADMIN") {
+  const requesterRole = await getUserOrgRole(session.user.id, organizationId);
+  if (requesterRole !== "ADMIN") {
     return { error: "Only admins can remove members" };
   }
 
@@ -362,16 +326,11 @@ export async function updateMemberRole(
   }
 
   // Check if requester is an admin
-  const requesterMember = await (prisma as any).organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId,
-      },
-    },
-  });
-
-  if (!requesterMember || requesterMember.role !== "ADMIN") {
+  const requesterMemberRole = await getUserOrgRole(
+    session.user.id,
+    organizationId,
+  );
+  if (requesterMemberRole !== "ADMIN") {
     return { error: "Only admins can change member roles" };
   }
 
