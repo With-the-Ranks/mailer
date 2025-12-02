@@ -3,6 +3,7 @@
   "root": true,
   "pages": [
     "index",
+    "two-factor-authentication",
     "best-practices",
     "team-collaboration",
     "inviting-members",
