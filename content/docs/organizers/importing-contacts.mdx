@@ -1,0 +1,158 @@
+---
+title: Importing Contacts
+description: Import contacts in bulk from CSV files
+---
+
+# Importing Contacts
+
+Import multiple contacts at once by uploading a CSV file.
+
+## Preparing Your CSV File
+
+### Required Columns
+
+Your CSV must include these columns:
+
+- `email`
+- `firstName`
+- `lastName`
+
+### Optional Columns
+
+Add any of these standard fields:
+
+- `phone`
+- `note`
+- `tags`
+- `defaultAddressCompany`
+- `defaultAddressAddress1`
+- `defaultAddressAddress2`
+- `defaultAddressCity`
+- `defaultAddressProvinceCode`
+- `defaultAddressCountryCode`
+- `defaultAddressZip`
+- `defaultAddressPhone`
+
+### Custom Fields
+
+Include any custom field names as column headers. Values will be imported automatically.
+
+### Sample CSV File
+
+Download a sample CSV directly from the import dialog, or use this format:
+
+```csv
+firstName,lastName,email,phone,defaultAddressCity,defaultAddressProvinceCode,defaultAddressZip,tags,volunteerSkills
+Person1,Last1,person1@example.org,555-0101,Springfield,IL,62701,volunteer;events,Phone Banking;Event Support
+Person2,Last2,person2@example.org,555-0102,Chicago,IL,60601,donor;supporter,Fundraising;Outreach
+Person3,Last3,person3@example.org,555-0103,Peoria,IL,61602,phonebank;canvassing,Research;Social Media
+```
+
+## Import Process
+
+The import wizard has 5 steps:
+
+### 1. Upload
+
+Click Choose File or drag and drop your CSV file.
+
+Click Download Sample CSV to get a template file.
+
+### 2. Mapping
+
+The system auto-maps CSV columns to contact fields. Review and adjust mappings if needed.
+
+**Required fields** (must be mapped):
+- Email
+- First Name
+- Last Name
+
+**Optional fields** can be:
+- Mapped to standard fields
+- Mapped to custom fields
+- Skipped
+
+### 3. Preview
+
+Review the first 5 contacts to verify the import looks correct.
+
+Check that data appears in the right fields.
+
+### 4. Import
+
+Click Start Import to begin. Progress bar shows:
+- Total contacts
+- Successful imports
+- Failed imports with errors
+
+### 5. Complete
+
+Review import results:
+- Number of contacts imported
+- Any errors or skipped rows
+
+## Import Behavior
+
+- **Duplicate emails** in your list are skipped
+- **Invalid data** rows are reported with specific errors
+- **Unmapped columns** are added as custom fields automatically
+
+## Handling Errors
+
+### Duplicate Emails
+
+Contacts with emails already in the list are skipped. Update existing contacts manually if needed.
+
+### Invalid Data
+
+Common issues:
+
+- Missing required fields (email, firstName, lastName)
+- Invalid email format
+- Wrong data type for custom fields
+
+The import report shows which rows failed and why.
+
+## CSV Format Requirements
+
+- Use UTF-8 encoding
+- First row must be column headers
+- Use commas as delimiters
+- Enclose values containing commas in quotes
+
+## Best Practices
+
+- Test with a small file first (5-10 contacts)
+- Review the preview before importing
+- Keep a backup of your original CSV
+- Clean your data before import (remove duplicates, fix formatting)
+- Use consistent naming for custom fields
+
+## Troubleshooting
+
+### Import Fails Completely
+
+- Check file is valid CSV format
+- Ensure required columns are present
+- Verify file encoding is UTF-8
+
+### Some Contacts Skipped
+
+Check import report for specific errors. Common issues:
+
+- Duplicate emails
+- Missing required fields
+- Invalid email addresses
+
+### Custom Fields Not Importing
+
+- Ensure custom fields exist in your organization
+- Column names must match field names exactly
+- Check data types match field definitions
+
+## Next Steps
+
+- [Managing contacts](/docs/organizers/managing-contacts)
+- [Custom fields](/docs/organizers/custom-fields)
+- [Segments](/docs/organizers/segments)
+
