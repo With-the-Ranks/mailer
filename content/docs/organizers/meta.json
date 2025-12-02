@@ -1,5 +1,11 @@
 {
   "title": "For Organizers",
   "root": true,
-  "pages": ["index", "best-practices"]
+  "pages": [
+    "index",
+    "best-practices",
+    "team-collaboration",
+    "inviting-members",
+    "managing-members"
+  ]
 }
