@@ -45,6 +45,11 @@
   -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
+/* Hide theme toggle in docs */
+[data-theme-toggle] {
+  display: none !important;
+}
+
 /* Components */
 @utility btn {
   @apply inline-flex justify-center items-center gap-3 px-4 py-2.5 rounded-[28px]
