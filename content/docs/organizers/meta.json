@@ -1,5 +1,24 @@
 {
   "title": "For Organizers",
   "root": true,
-  "pages": ["index", "best-practices"]
+  "pages": [
+    "---Account & Security---",
+    "index",
+    "two-factor-authentication",
+    "---Audience & Contacts---",
+    "managing-contacts",
+    "custom-fields",
+    "importing-contacts",
+    "segments",
+    "---Email Campaigns---",
+    "creating-emails",
+    "sending-emails",
+    "managing-emails",
+    "---Organization Management---",
+    "team-collaboration",
+    "inviting-members",
+    "managing-members",
+    "---Guides---",
+    "best-practices"
+  ]
 }
