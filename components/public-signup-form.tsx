@@ -40,10 +40,17 @@ interface SignupForm {
 
 interface PublicSignupFormProps {
   signupForm: SignupForm;
+  theme?: {
+    buttonBg?: string;
+    buttonText?: string;
+    inputBg?: string;
+    inputText?: string;
+  };
 }
 
 export default function PublicSignupForm({
   signupForm,
+  theme,
 }: PublicSignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -197,6 +204,15 @@ export default function PublicSignupForm({
               placeholder={field.placeholder || undefined}
               {...register(field.name)}
               className={errors[field.name] ? "border-red-500" : ""}
+              style={
+                theme?.inputBg
+                  ? {
+                      backgroundColor: theme.inputBg,
+                      color: `#${theme.inputText || "ffffff"}`,
+                      borderColor: "transparent",
+                    }
+                  : undefined
+              }
             />
           ) : field.type === "textarea" ? (
             <Textarea
@@ -204,6 +220,15 @@ export default function PublicSignupForm({
               placeholder={field.placeholder || undefined}
               {...register(field.name)}
               className={errors[field.name] ? "border-red-500" : ""}
+              style={
+                theme?.inputBg
+                  ? {
+                      backgroundColor: theme.inputBg,
+                      color: `#${theme.inputText || "ffffff"}`,
+                      borderColor: "transparent",
+                    }
+                  : undefined
+              }
             />
           ) : field.type === "select" ? (
             <Select onValueChange={(value) => setValue(field.name, value)}>
@@ -267,7 +292,19 @@ export default function PublicSignupForm({
         </div>
       ))}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting}
+        style={
+          theme?.buttonBg
+            ? {
+                backgroundColor: `#${theme.buttonBg}`,
+                color: `#${theme.buttonText || "000000"}`,
+              }
+            : undefined
+        }
+      >
         {isSubmitting ? "Submitting..." : "Submit"}
       </Button>
     </form>

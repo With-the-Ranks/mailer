@@ -1,15 +1,19 @@
 import { notFound } from "next/navigation";
 
+import { EmbedResizeScript } from "@/components/embed-resize-script";
 import PublicSignupForm from "@/components/public-signup-form";
 import prisma from "@/lib/prisma";
 
 export default async function PublicSignupFormPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
+  const search = await searchParams;
 
   const signupForm = await prisma.signupForm.findFirst({
     where: {
@@ -30,19 +34,55 @@ export default async function PublicSignupFormPage({
     notFound();
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 dark:bg-gray-900">
-      <div className="mx-auto max-w-md">
-        <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
-          <div className="mb-8 text-center">
-            <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-              {signupForm.name}
-            </h1>
-          </div>
+  // Theme parameters
+  const theme = search.theme as string | undefined;
+  const bgColor = search.bg as string | undefined;
+  const embed = search.embed === "true";
 
-          <PublicSignupForm signupForm={signupForm} />
+  // Apply custom theme styles
+  const getContainerStyle = () => {
+    if (theme === "dark") {
+      return "bg-[#282c4a] text-white border-[#282c4a]";
+    }
+    if (bgColor) {
+      return `text-white border-transparent`;
+    }
+    return "bg-white text-gray-900 dark:bg-gray-800 dark:text-white";
+  };
+
+  const containerClass = `rounded-lg shadow-lg p-8 ${getContainerStyle()}`;
+  const customBgStyle = bgColor
+    ? { backgroundColor: `#${bgColor}` }
+    : undefined;
+  const pageClass = embed
+    ? "min-h-screen bg-transparent py-8 px-4"
+    : "min-h-screen bg-gray-50 py-12 dark:bg-gray-900";
+
+  return (
+    <>
+      {embed && <EmbedResizeScript formSlug={decodedSlug} />}
+      <div className={pageClass}>
+        <div className="mx-auto max-w-2xl">
+          <div className={containerClass} style={customBgStyle}>
+            <div className="mb-6 text-center">
+              <h1 className="text-3xl font-bold">{signupForm.name}</h1>
+            </div>
+            <PublicSignupForm
+              signupForm={signupForm}
+              theme={{
+                buttonBg:
+                  (search.buttonBg as string | undefined) ||
+                  (theme === "dark" ? "ffffff" : undefined),
+                buttonText:
+                  (search.buttonText as string | undefined) ||
+                  (theme === "dark" ? "000000" : undefined),
+                inputBg: theme === "dark" ? "rgba(255,255,255,0.1)" : undefined,
+                inputText: theme === "dark" ? "ffffff" : undefined,
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
