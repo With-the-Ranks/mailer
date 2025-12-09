@@ -90,22 +90,34 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
 
   const editUrl = `/organization/${data.organizationId}/signup-forms/${data.id}/edit`;
 
+  const handleRowClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    // Don't navigate if clicking on buttons or links
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest('[role="menuitem"]')
+    ) {
+      return;
+    }
+    router.push(editUrl);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleRowClick(e);
+    }
+  };
+
   return (
     <tr
       key={data.id}
-      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-      onClick={(e) => {
-        // Don't navigate if clicking on buttons or links
-        const target = e.target as HTMLElement;
-        if (
-          target.closest("button") ||
-          target.closest("a") ||
-          target.closest('[role="menuitem"]')
-        ) {
-          return;
-        }
-        window.location.href = editUrl;
-      }}
+      role="button"
+      tabIndex={0}
+      className="cursor-pointer hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset dark:hover:bg-gray-800"
+      onClick={handleRowClick}
+      onKeyDown={handleKeyDown}
     >
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">

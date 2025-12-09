@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { EmbedResizeScript } from "@/components/embed-resize-script";
 import PublicSignupForm from "@/components/public-signup-form";
+import { isValidHexColor } from "@/lib/color-validation";
 import prisma from "@/lib/prisma";
 
 export default async function PublicSignupFormPage({
@@ -52,11 +53,14 @@ export default async function PublicSignupFormPage({
   };
 
   const containerClass = `rounded-lg shadow-lg p-8 ${getContainerStyle()}`;
-  const customBgStyle = bgColor
-    ? { backgroundColor: `#${bgColor}` }
-    : undefined;
+  const customBgStyle =
+    bgColor && isValidHexColor(bgColor)
+      ? { backgroundColor: `#${bgColor}` }
+      : undefined;
   const pageBgStyle =
-    embed && bgColor ? { backgroundColor: `#${bgColor}` } : undefined;
+    embed && bgColor && isValidHexColor(bgColor)
+      ? { backgroundColor: `#${bgColor}` }
+      : undefined;
   const pageClass = embed
     ? "min-h-screen"
     : "min-h-screen bg-gray-50 py-12 dark:bg-gray-900";
@@ -75,20 +79,39 @@ export default async function PublicSignupFormPage({
             <PublicSignupForm
               signupForm={signupForm}
               theme={{
-                buttonBg:
-                  (search.buttonBg as string | undefined) ||
-                  (theme === "dark" || bgColor ? "ffffff" : undefined),
-                buttonText:
-                  (search.buttonText as string | undefined) ||
-                  (theme === "dark" || bgColor ? "000000" : undefined),
+                buttonBg: (() => {
+                  const btnBg = search.buttonBg as string | undefined;
+                  return btnBg && isValidHexColor(btnBg)
+                    ? btnBg
+                    : theme === "dark" || bgColor
+                      ? "ffffff"
+                      : undefined;
+                })(),
+                buttonText: (() => {
+                  const btnText = search.buttonText as string | undefined;
+                  return btnText && isValidHexColor(btnText)
+                    ? btnText
+                    : theme === "dark" || bgColor
+                      ? "000000"
+                      : undefined;
+                })(),
                 inputBg:
                   theme === "dark" || bgColor
                     ? "rgba(255,255,255,0.1)"
                     : undefined,
-                inputText:
-                  (search.inputTextColor as string | undefined) ||
-                  (search.inputColor as string | undefined) ||
-                  (theme === "dark" || bgColor ? "232656" : undefined),
+                inputText: (() => {
+                  const inputTextColor = search.inputTextColor as
+                    | string
+                    | undefined;
+                  const inputColor = search.inputColor as string | undefined;
+                  if (inputTextColor && isValidHexColor(inputTextColor)) {
+                    return inputTextColor;
+                  }
+                  if (inputColor && isValidHexColor(inputColor)) {
+                    return inputColor;
+                  }
+                  return theme === "dark" || bgColor ? "232656" : undefined;
+                })(),
               }}
             />
           </div>

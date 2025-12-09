@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { escapeHtml, escapeJs } from "@/lib/color-validation";
 
 interface EmbedCodeDialogProps {
   formSlug: string;
@@ -31,15 +32,18 @@ export function EmbedCodeDialog({ formSlug, formName }: EmbedCodeDialogProps) {
       : "https://yourdomain.com";
 
   const embedUrl = `${baseUrl}/app/signup-forms/${encodeURIComponent(formSlug)}?embed=true`;
+  const safeFormName = escapeHtml(formName);
+  const safeFormNameJs = escapeJs(formName);
+  const safeFormSlug = escapeJs(formSlug);
+  const safeBaseUrl = escapeJs(baseUrl);
 
   // iframe embed code
   const iframeCode = `<iframe 
   src="${embedUrl}" 
   width="100%" 
   height="800" 
-  frameborder="0" 
   style="border: none; max-width: 600px;"
-  title="${formName}">
+  title="${safeFormName}">
 </iframe>`;
 
   // JavaScript embed code
@@ -50,10 +54,9 @@ export function EmbedCodeDialog({ formSlug, formName }: EmbedCodeDialogProps) {
     iframe.src = '${embedUrl}';
     iframe.width = '100%';
     iframe.height = '800';
-    iframe.frameBorder = '0';
     iframe.style.border = 'none';
     iframe.style.maxWidth = '600px';
-    iframe.title = '${formName}';
+    iframe.title = '${safeFormNameJs}';
     
     var container = document.getElementById('signup-form-${formSlug}');
     if (container) {
@@ -62,7 +65,7 @@ export function EmbedCodeDialog({ formSlug, formName }: EmbedCodeDialogProps) {
     
     // Auto-resize iframe based on content
     window.addEventListener('message', function(event) {
-      if (event.origin === '${baseUrl}' && event.data.formSlug === '${formSlug}') {
+      if (event.origin === '${safeBaseUrl}' && event.data.formSlug === '${safeFormSlug}') {
         if (event.data.height) {
           iframe.height = event.data.height + 'px';
         }
@@ -72,13 +75,18 @@ export function EmbedCodeDialog({ formSlug, formName }: EmbedCodeDialogProps) {
 </script>`;
 
   const copyToClipboard = async (text: string, type: "iframe" | "script") => {
-    await navigator.clipboard.writeText(text);
-    if (type === "iframe") {
-      setCopiedIframe(true);
-      setTimeout(() => setCopiedIframe(false), 2000);
-    } else {
-      setCopiedScript(true);
-      setTimeout(() => setCopiedScript(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === "iframe") {
+        setCopiedIframe(true);
+        setTimeout(() => setCopiedIframe(false), 2000);
+      } else {
+        setCopiedScript(true);
+        setTimeout(() => setCopiedScript(false), 2000);
+      }
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      // Optionally show error toast
     }
   };
 

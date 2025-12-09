@@ -8,18 +8,43 @@ interface EmbedResizeScriptProps {
 
 export function EmbedResizeScript({ formSlug }: EmbedResizeScriptProps) {
   useEffect(() => {
+    // Get parent origin from referrer for secure postMessage
+    const getParentOrigin = (): string | null => {
+      try {
+        if (document.referrer) {
+          const url = new URL(document.referrer);
+          return url.origin;
+        }
+      } catch (e) {
+        // ignore
+      }
+      return null;
+    };
+
+    let lastHeight = 0;
+
     // Function to send height to parent window
     const sendHeight = () => {
       if (window.parent && window.parent !== window) {
         const height = document.documentElement.scrollHeight;
-        window.parent.postMessage(
-          {
-            formSlug,
-            height,
-            type: "resize",
-          },
-          "*",
-        );
+
+        // Only send if height actually changed
+        if (height === lastHeight) {
+          return;
+        }
+        lastHeight = height;
+
+        const parentOrigin = getParentOrigin();
+        if (parentOrigin) {
+          window.parent.postMessage(
+            {
+              formSlug,
+              height,
+              type: "resize",
+            },
+            parentOrigin,
+          );
+        }
       }
     };
 
@@ -36,13 +61,9 @@ export function EmbedResizeScript({ formSlug }: EmbedResizeScriptProps) {
 
     resizeObserver.observe(document.body);
 
-    // Send height periodically in case of dynamic content
-    const interval = setInterval(sendHeight, 500);
-
     return () => {
       window.removeEventListener("resize", sendHeight);
       resizeObserver.disconnect();
-      clearInterval(interval);
     };
   }, [formSlug]);
 

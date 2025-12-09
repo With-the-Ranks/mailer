@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { isValidHexColor } from "@/lib/color-validation";
 
 interface SignupFormField {
   id: string;
@@ -154,7 +155,7 @@ export default function PublicSignupForm({
   };
 
   if (isSubmitted) {
-    const isDarkTheme = theme?.inputBg || theme?.buttonBg;
+    const isDarkTheme = Boolean(theme?.inputBg || theme?.buttonBg);
     return (
       <div
         className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-gray-800"}`}
@@ -219,9 +220,10 @@ export default function PublicSignupForm({
                 theme?.inputBg
                   ? {
                       backgroundColor: theme.inputBg,
-                      color: theme.inputText
-                        ? `#${theme.inputText}`
-                        : "#232656",
+                      color:
+                        theme.inputText && isValidHexColor(theme.inputText)
+                          ? `#${theme.inputText}`
+                          : "#232656",
                       borderColor: "transparent",
                     }
                   : undefined
@@ -237,9 +239,10 @@ export default function PublicSignupForm({
                 theme?.inputBg
                   ? {
                       backgroundColor: theme.inputBg,
-                      color: theme.inputText
-                        ? `#${theme.inputText}`
-                        : "#232656",
+                      color:
+                        theme.inputText && isValidHexColor(theme.inputText)
+                          ? `#${theme.inputText}`
+                          : "#232656",
                       borderColor: "transparent",
                     }
                   : undefined
@@ -312,10 +315,13 @@ export default function PublicSignupForm({
         className="w-full"
         disabled={isSubmitting}
         style={
-          theme?.buttonBg
+          theme?.buttonBg && isValidHexColor(theme.buttonBg)
             ? {
                 backgroundColor: `#${theme.buttonBg}`,
-                color: `#${theme.buttonText || "000000"}`,
+                color:
+                  theme.buttonText && isValidHexColor(theme.buttonText)
+                    ? `#${theme.buttonText}`
+                    : "#000000",
               }
             : undefined
         }
