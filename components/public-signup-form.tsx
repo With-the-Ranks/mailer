@@ -154,18 +154,29 @@ export default function PublicSignupForm({
   };
 
   if (isSubmitted) {
+    const isDarkTheme = theme?.inputBg || theme?.buttonBg;
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <div className="mb-4 text-6xl text-green-600">✓</div>
-          <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-            Thank you for signing up!
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Your information has been submitted successfully.
-          </p>
-        </CardContent>
-      </Card>
+      <div
+        className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-gray-800"}`}
+      >
+        <div
+          className={`mb-4 text-6xl ${isDarkTheme ? "text-white" : "text-green-600"}`}
+        >
+          ✓
+        </div>
+        <h2
+          className={`mb-2 text-xl font-semibold ${isDarkTheme ? "text-white" : "text-gray-900 dark:text-white"}`}
+        >
+          Thank you for signing up!
+        </h2>
+        <p
+          className={
+            isDarkTheme ? "text-white/80" : "text-gray-600 dark:text-gray-400"
+          }
+        >
+          Your information has been submitted successfully.
+        </p>
+      </div>
     );
   }
 
@@ -208,7 +219,9 @@ export default function PublicSignupForm({
                 theme?.inputBg
                   ? {
                       backgroundColor: theme.inputBg,
-                      color: `#${theme.inputText || "ffffff"}`,
+                      color: theme.inputText
+                        ? `#${theme.inputText}`
+                        : "#232656",
                       borderColor: "transparent",
                     }
                   : undefined
@@ -224,7 +237,9 @@ export default function PublicSignupForm({
                 theme?.inputBg
                   ? {
                       backgroundColor: theme.inputBg,
-                      color: `#${theme.inputText || "ffffff"}`,
+                      color: theme.inputText
+                        ? `#${theme.inputText}`
+                        : "#232656",
                       borderColor: "transparent",
                     }
                   : undefined
