@@ -55,14 +55,16 @@ export default async function PublicSignupFormPage({
   const customBgStyle = bgColor
     ? { backgroundColor: `#${bgColor}` }
     : undefined;
+  const pageBgStyle =
+    embed && bgColor ? { backgroundColor: `#${bgColor}` } : undefined;
   const pageClass = embed
-    ? "min-h-screen bg-transparent"
+    ? "min-h-screen"
     : "min-h-screen bg-gray-50 py-12 dark:bg-gray-900";
 
   return (
     <>
       {embed && <EmbedResizeScript formSlug={decodedSlug} />}
-      <div className={pageClass}>
+      <div className={pageClass} style={pageBgStyle}>
         <div className="mx-auto max-w-2xl">
           <div className={containerClass} style={customBgStyle}>
             {!hideTitle && (
