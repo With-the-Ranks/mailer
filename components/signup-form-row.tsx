@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { EmbedCodeDialog } from "@/components/embed-code-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,7 +49,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
 
   const handleCopyUrl = async () => {
     const baseUrl = window.location.origin;
-    const signupUrl = `${baseUrl}/signup-forms/${data.slug}`;
+    const signupUrl = `${baseUrl}/app/signup-forms/${data.slug}`;
 
     try {
       await navigator.clipboard.writeText(signupUrl);
@@ -87,9 +88,26 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
     });
   };
 
+  const editUrl = `/organization/${data.organizationId}/signup-forms/${data.id}/edit`;
+
   return (
-    <tr key={data.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-      <td className="whitespace-nowrap px-6 py-4">
+    <tr
+      key={data.id}
+      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+      onClick={(e) => {
+        // Don't navigate if clicking on buttons or links
+        const target = e.target as HTMLElement;
+        if (
+          target.closest("button") ||
+          target.closest("a") ||
+          target.closest('[role="menuitem"]')
+        ) {
+          return;
+        }
+        window.location.href = editUrl;
+      }}
+    >
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div>
             <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -101,19 +119,22 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
           </div>
         </div>
       </td>
-      <td className="whitespace-nowrap px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         {getStatusBadge(data.isActive)}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">
+      <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white">
         {data._count?.submissions || 0}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+      <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
         {formatDate(data.createdAt)}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-        <div className="flex items-center justify-end space-x-2">
+      <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+        <div
+          className="flex items-center justify-end space-x-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/signup-forms/${data.slug}`} target="_blank">
+            <Link href={`/app/signup-forms/${data.slug}`} target="_blank">
               <ExternalLink className="h-4 w-4" />
             </Link>
           </Button>
@@ -125,6 +146,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
           >
             <Copy className="h-4 w-4" />
           </Button>
+          <EmbedCodeDialog formSlug={data.slug} formName={data.name} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
@@ -133,9 +155,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link
-                  href={`/organization/${data.organizationId}/signup-forms/${data.id}/edit`}
-                >
+                <Link href={editUrl}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit
                 </Link>
