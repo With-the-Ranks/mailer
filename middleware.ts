@@ -13,6 +13,8 @@ const PUBLIC_PATHS = [
   "/unsubscribe",
 ];
 
+const PUBLIC_PREFIXES = ["/app/signup-forms/", "/app/unsubscribe"];
+
 export default async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const { pathname, search } = url;
@@ -36,7 +38,16 @@ export default async function middleware(req: NextRequest) {
   const isAppHost = hostname === `app.${ROOT}`;
   const isRootHost = hostname === ROOT || host === "localhost:3000";
 
+  // Check if path starts with any public prefix
+  const isPublicPrefix = PUBLIC_PREFIXES.some((prefix) =>
+    pathname.startsWith(prefix),
+  );
+
   if (isAppHost) {
+    // Don't rewrite public prefix paths - they should be accessed directly
+    if (isPublicPrefix) {
+      return NextResponse.next();
+    }
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
