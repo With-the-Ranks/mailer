@@ -20,10 +20,19 @@ export default async function middleware(req: NextRequest) {
   const { pathname, search } = url;
   const host = req.headers.get("host")!;
 
+  // Check if path starts with any public prefix
+  const isPublicPrefix = PUBLIC_PREFIXES.some((prefix) =>
+    pathname.startsWith(prefix),
+  );
+
   const isVercelPreview =
     process.env.VERCEL_ENV === "preview" || host.endsWith(".vercel.app");
 
   if (isVercelPreview) {
+    // Don't rewrite public prefix paths - they should be accessed directly
+    if (isPublicPrefix) {
+      return NextResponse.next();
+    }
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
@@ -37,11 +46,6 @@ export default async function middleware(req: NextRequest) {
 
   const isAppHost = hostname === `app.${ROOT}`;
   const isRootHost = hostname === ROOT || host === "localhost:3000";
-
-  // Check if path starts with any public prefix
-  const isPublicPrefix = PUBLIC_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix),
-  );
 
   if (isAppHost) {
     // Don't rewrite public prefix paths - they should be accessed directly
