@@ -118,7 +118,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: ArrowLeft,
         },
         {
-          name: "Audience",
+          name: "People",
           icon: RadioTower,
           submenu: [
             {
@@ -163,25 +163,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: LayoutDashboard,
         },
         {
-          name: "Audience",
+          name: "People",
+          href: `/audience/${audienceListId}`,
+          isActive:
+            pathname === `/audience/${audienceListId}` ||
+            pathname === `/organization/${siteId}/audience` ||
+            pathname === `/organization/${siteId}/audience/lists`,
           icon: RadioTower,
-          submenu: [
-            {
-              name: "List",
-              href: `/audience/${audienceListId}`,
-              isActive:
-                pathname === `/audience/${audienceListId}` ||
-                pathname === `/organization/${siteId}/audience` ||
-                pathname === `/organization/${siteId}/audience/lists`,
-              icon: List,
-            },
-            {
-              name: "Signup Forms",
-              href: `/organization/${siteId}/signup-forms`,
-              isActive: segments.includes("signup-forms"),
-              icon: FormInput,
-            },
-          ],
+        },
+        {
+          name: "Signup Forms",
+          href: `/organization/${siteId}/signup-forms`,
+          isActive: segments.includes("signup-forms"),
+          icon: FormInput,
         },
         {
           name: "Emails",
@@ -209,6 +203,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               icon: Palette,
             },
           ],
+        },
+        {
+          name: "Documentation",
+          href: "/docs",
+          isActive: pathname.includes("/docs"),
+          icon: BookOpen,
         },
       ];
     }
@@ -241,6 +241,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           },
         ],
       },
+      {
+        name: "Documentation",
+        href: "/docs",
+        isActive: pathname.includes("/docs"),
+        icon: BookOpen,
+      },
     ];
   }, [
     segments,
@@ -256,21 +262,27 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       collapsible="icon"
-      className="bg-sidebar text-sidebar-foreground h-full border-r"
+      className="bg-sidebar text-sidebar-foreground h-full border-r p-4"
     >
       <SidebarHeader>
         <Link
           href="/"
-          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 transition-colors"
+          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground inline-flex items-baseline justify-start gap-2 transition-colors"
         >
-          <Image
-            src="/mailer.svg"
-            width={18}
-            height={18}
-            alt="Mailer Logo"
-            className="flex-shrink-0"
-          />
-          {state === "expanded" && <span className="font-bold">Mailer</span>}
+          <div className="relative h-4 w-4">
+            <Image
+              src="/mailer.svg"
+              width={16}
+              height={16}
+              alt="Mailer Logo"
+              className="h-4 w-4"
+            />
+          </div>
+          {state === "expanded" && (
+            <div className="flex h-7 w-20 justify-start text-3xl leading-8 font-bold text-white">
+              Mailer
+            </div>
+          )}
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -342,19 +354,18 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       </SidebarContent>
       {loading ? null : (
         <SidebarFooter>
-          <div className="px-2 py-2">
-            <Link
-              href="/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 text-base transition-colors"
-            >
-              <BookOpen className="h-4 w-4" />
-              {state === "expanded" && <span>Documentation</span>}
-            </Link>
+          <div className="flex flex-col items-center justify-center gap-2">
+            {state === "expanded" && (
+              <Image
+                src="/wtr.png"
+                alt="With the Ranks"
+                width={129}
+                height={58}
+                className="h-14 w-32"
+              />
+            )}
+            {children}
           </div>
-          <SidebarSeparator />
-          {children}
         </SidebarFooter>
       )}
       <SidebarRail />

@@ -3,18 +3,15 @@
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 
-import { Button } from "@/components/ui/button";
-
 export default function LogoutButton() {
   return (
-    <Button
+    <button
       onClick={() => signOut()}
-      variant="ghost"
-      size="icon"
-      className="rounded-lg"
+      className="flex items-center justify-start gap-[5px] text-sm font-normal text-white transition-opacity hover:opacity-80"
       aria-label="Logout"
     >
+      <span>Logout</span>
       <LogOut width={18} aria-hidden="true" />
-    </Button>
+    </button>
   );
 }
