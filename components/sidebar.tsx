@@ -256,19 +256,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       collapsible="icon"
-      className="h-full border-r bg-sidebar text-sidebar-foreground"
+      className="bg-sidebar text-sidebar-foreground h-full border-r"
     >
       <SidebarHeader>
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 transition-colors"
         >
           <Image
-            src="/logo.png"
-            width={24}
-            height={24}
-            alt="Logo"
-            className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
+            src="/mailer.svg"
+            width={18}
+            height={18}
+            alt="Mailer Logo"
+            className="flex-shrink-0"
           />
           {state === "expanded" && <span className="font-bold">Mailer</span>}
         </Link>
@@ -290,7 +290,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                         <SidebarMenuButton
                           tooltip={item.name}
                           isActive={item.isActive}
-                          className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                         >
                           <item.icon className="mr-2" size={18} />
                           <span>{item.name}</span>
@@ -304,7 +304,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                               >
                                 <Link
                                   href={sub.href}
@@ -326,7 +326,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       asChild
                       isActive={item.isActive}
                       tooltip={item.name}
-                      className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                     >
                       <Link href={item.href} className="flex items-center">
                         <item.icon className="mr-2" size={18} />
@@ -347,7 +347,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               href="/docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 text-base transition-colors"
             >
               <BookOpen className="h-4 w-4" />
               {state === "expanded" && <span>Documentation</span>}
