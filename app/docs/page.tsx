@@ -38,7 +38,7 @@ export default function DocsPage() {
           <Item key={item.name} href={item.href}>
             <Icon>{item.icon}</Icon>
             <h2 className="mb-2 font-medium">{item.name}</h2>
-            <p className="text-fd-muted-foreground text-sm">
+            <p className="text-fd-muted-foreground text-base">
               {item.description}
             </p>
           </Item>

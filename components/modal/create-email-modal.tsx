@@ -85,7 +85,7 @@ export default function CreateEmailModal({
     <form
       onSubmit={handleCreateEmail}
       className={cn(
-        "w-full rounded-md bg-white dark:bg-black md:max-w-md",
+        "w-full rounded-md bg-white md:max-w-md dark:bg-black",
         "md:border md:border-stone-200 md:shadow-sm dark:md:border-stone-700",
       )}
     >
@@ -98,7 +98,7 @@ export default function CreateEmailModal({
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="campaignName"
-            className="text-sm font-medium text-stone-500 dark:text-stone-400"
+            className="text-base font-medium text-stone-500 dark:text-stone-400"
           >
             Campaign Name
           </label>
@@ -114,7 +114,7 @@ export default function CreateEmailModal({
 
         {/* Template Picker */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-500 dark:text-stone-400">
+          <label className="text-base font-medium text-stone-500 dark:text-stone-400">
             Template
           </label>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -138,7 +138,7 @@ export default function CreateEmailModal({
                 {tpl.id === "blank" && (
                   <PlusCircle className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
                 )}
-                <span className="text-sm font-medium">{tpl.name}</span>
+                <span className="text-base font-medium">{tpl.name}</span>
               </button>
             ))}
           </div>
@@ -146,7 +146,7 @@ export default function CreateEmailModal({
       </div>
 
       {/* Submit */}
-      <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
+      <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-stone-800">
         <button
           type="submit"
           className={cn("btn", isPending && "cursor-not-allowed opacity-50")}

@@ -59,7 +59,7 @@ export function PreviewStep({
                         ({contact.email})
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-2 gap-4 text-base">
                       <div>
                         <strong>Phone:</strong> {contact.phone || "N/A"}
                       </div>

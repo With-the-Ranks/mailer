@@ -182,7 +182,7 @@ export function CustomFieldsManager({
                           </Badge>
                         )}
                       </div>
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-muted-foreground text-base">
                         Field name: {field.name}
                         {field.description && ` • ${field.description}`}
                       </p>

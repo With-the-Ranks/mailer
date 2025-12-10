@@ -260,7 +260,7 @@ export default function PublicSignupForm({
           ) : null}
 
           {errors[field.name] && (
-            <p className="text-sm text-red-500">
+            <p className="text-base text-red-500">
               {String(errors[field.name]?.message || "Invalid input")}
             </p>
           )}

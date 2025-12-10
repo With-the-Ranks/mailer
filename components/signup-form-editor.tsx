@@ -147,7 +147,7 @@ function SortableField({
           >
             <GripVertical className="h-4 w-4 text-gray-400" />
           </div>
-          <span className="text-sm font-medium">
+          <span className="text-base font-medium">
             {fieldType?.label || field.label}
           </span>
           {field.required && <Badge variant="secondary">Required</Badge>}
@@ -581,7 +581,7 @@ export default function SignupFormEditor({
                   <Input
                     value={`${window.location.origin}/signup-forms/${formData.slug}`}
                     readOnly
-                    className="bg-gray-50 text-sm"
+                    className="bg-gray-50 text-base"
                   />
                   <Button
                     variant="outline"

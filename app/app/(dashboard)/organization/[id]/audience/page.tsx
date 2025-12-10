@@ -44,8 +44,8 @@ export default async function AudienceList({
   return (
     <>
       <div className="flex flex-col items-center justify-between space-y-4 xl:flex-row xl:space-y-0">
-        <div className="flex flex-col items-center space-y-2 xl:flex-row xl:space-x-4 xl:space-y-0">
-          <h1 className="w-60 truncate font-cal text-xl font-bold dark:text-white sm:w-auto sm:text-3xl">
+        <div className="flex flex-col items-center space-y-2 xl:flex-row xl:space-y-0 xl:space-x-4">
+          <h1 className="font-cal w-60 truncate text-xl font-bold sm:w-auto sm:text-3xl dark:text-white">
             All Contacts – {organization.name}
           </h1>
         </div>
@@ -57,7 +57,7 @@ export default async function AudienceList({
         )}
       </div>
       <section>
-        <p className="text-sm text-stone-600 dark:text-stone-400">
+        <p className="text-base text-stone-600 dark:text-stone-400">
           {hasList
             ? "This is your organization's global audience list. Manage your contacts and custom fields here."
             : "No audience list found. Create your Master List to get started."}

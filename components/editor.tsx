@@ -196,7 +196,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   return (
     <div className="relative mx-auto min-h-[500px] w-full max-w-(--breakpoint-lg) border-stone-200 p-12 px-8 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg dark:border-stone-700">
       <div className="absolute top-5 right-5 mb-5 flex flex-wrap items-center gap-3">
-        <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-sm text-stone-400 dark:bg-stone-800 dark:text-stone-500">
+        <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-base text-stone-400 dark:bg-stone-800 dark:text-stone-500">
           {isPendingSaving ? "Saving..." : "Saved"}
         </div>
         <EmailPreviewButton
@@ -267,7 +267,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
         </Label>
         {!showReplyTo ? (
           <button
-            className="inline-block h-full shrink-0 bg-transparent px-1 text-sm text-gray-500 hover:text-gray-700"
+            className="inline-block h-full shrink-0 bg-transparent px-1 text-base text-gray-500 hover:text-gray-700"
             onClick={() => setShowReplyTo(true)}
             type="button"
           >
@@ -300,7 +300,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       )}
       <div className="relative my-6">
         <Input
-          className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-base focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-2xl focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
           onChange={(e) => setData({ ...data, previewText: e.target.value })}
           placeholder="Preview Text"
           type="text"

@@ -173,7 +173,7 @@ export function SendEmailModal({
             type="button"
             onClick={() => setMode(m)}
             variant={mode === m ? "default" : "ghost"}
-            className={`rounded-none px-4 py-1 text-sm font-medium ${
+            className={`rounded-none px-4 py-1 text-base font-medium ${
               mode === m ? "" : "hover:bg-gray-50"
             }`}
             aria-label={m === "now" ? "Send Now" : "Schedule"}
@@ -192,7 +192,7 @@ export function SendEmailModal({
             setScheduledTimeValue={setLocalScheduledDate}
             isDisabled={isSubmitting || isScheduleDisabled}
           />
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-base text-gray-500">
             Timezone:{" "}
             <span className="font-medium">
               {scheduledTimeValue.format("Z")}

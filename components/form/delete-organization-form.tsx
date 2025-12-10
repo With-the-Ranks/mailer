@@ -65,7 +65,7 @@ export default function DeleteOrganizationForm({
     >
       <div className="relative flex flex-col space-y-4 p-5 sm:p-10">
         <h2 className="font-cal text-xl dark:text-white">Delete Site</h2>
-        <p className="text-sm text-stone-500 dark:text-stone-400">
+        <p className="text-base text-stone-500 dark:text-stone-400">
           Deletes your organization and all emails associated with it. Type in
           the name of your organization <b>{organizationName}</b> to confirm.
         </p>
@@ -76,12 +76,12 @@ export default function DeleteOrganizationForm({
           required
           pattern={organizationName}
           placeholder={organizationName}
-          className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-hidden focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+          className="w-full max-w-md rounded-md border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-hidden dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
         />
       </div>
 
-      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10">
-        <p className="text-center text-sm text-stone-500 dark:text-stone-400">
+      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10 dark:border-stone-700 dark:bg-stone-800">
+        <p className="text-center text-base text-stone-500 dark:text-stone-400">
           This action is irreversible. Please proceed with caution.
         </p>
         <div>

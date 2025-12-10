@@ -596,7 +596,7 @@ export function ContactList({
             </Button>
           )}
         </div>
-        <div className="text-muted-foreground text-sm">
+        <div className="text-muted-foreground text-base">
           {selectedRowCount > 0 &&
             `${selectedRowCount} of ${contacts.length} row(s) selected`}
         </div>

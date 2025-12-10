@@ -63,7 +63,7 @@ export default function AudienceCard({
         {editing ? (
           <form onSubmit={handleSave} className="flex w-full items-center">
             <input
-              className="flex-1 rounded-sm border px-2 py-1 font-cal text-xl font-bold tracking-wide dark:text-white"
+              className="font-cal flex-1 rounded-sm border px-2 py-1 text-xl font-bold tracking-wide dark:text-white"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
@@ -94,7 +94,7 @@ export default function AudienceCard({
               className="group flex-1"
               title="Go to contact list"
             >
-              <h3 className="my-0 truncate font-cal text-2xl font-bold tracking-wide group-hover:underline dark:text-white">
+              <h3 className="font-cal my-0 truncate text-2xl font-bold tracking-wide group-hover:underline dark:text-white">
                 {name}
               </h3>
             </Link>
@@ -115,15 +115,15 @@ export default function AudienceCard({
 
       <div className="mb-4 grid grid-cols-2 gap-4">
         <div>
-          <div className="text-sm text-stone-500">Organization</div>
+          <div className="text-base text-stone-500">Organization</div>
           <div className="font-medium">{data.organization.name}</div>
         </div>
         <div>
-          <div className="text-sm text-stone-500">Created on</div>
+          <div className="text-base text-stone-500">Created on</div>
           <div className="font-medium">{createdAtFormatted}</div>
         </div>
         <div>
-          <div className="text-sm text-stone-500">Contacts</div>
+          <div className="text-base text-stone-500">Contacts</div>
           <div className="font-medium">{contactsCount}</div>
         </div>
       </div>

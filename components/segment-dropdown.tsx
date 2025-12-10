@@ -61,7 +61,7 @@ export function SegmentDropdown({
           disabled={disabled || loading}
           required={required}
         >
-          <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-xs transition-colors hover:bg-gray-50 focus:outline-hidden focus:ring-1 focus:ring-gray-400">
+          <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-base shadow-xs transition-colors hover:bg-gray-50 focus:ring-1 focus:ring-gray-400 focus:outline-hidden">
             <SelectValue
               placeholder={
                 loading ? "Loading segments..." : "Select a segment…"
@@ -99,7 +99,7 @@ export function SegmentDropdown({
                   </SelectItem>
                 ))
               ) : !loading ? (
-                <div className="flex items-center justify-center py-4 text-sm text-gray-500">
+                <div className="flex items-center justify-center py-4 text-base text-gray-500">
                   <AlertCircle className="mr-2 h-4 w-4" />
                   No segments available
                 </div>

@@ -89,28 +89,28 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
 
   return (
     <tr key={data.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-      <td className="whitespace-nowrap px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div>
-            <div className="text-sm font-medium text-gray-900 dark:text-white">
+            <div className="text-base font-medium text-gray-900 dark:text-white">
               {data.name}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-base text-gray-500 dark:text-gray-400">
               /{data.slug}
             </div>
           </div>
         </div>
       </td>
-      <td className="whitespace-nowrap px-6 py-4">
+      <td className="px-6 py-4 whitespace-nowrap">
         {getStatusBadge(data.isActive)}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">
+      <td className="px-6 py-4 text-base whitespace-nowrap text-gray-900 dark:text-white">
         {data._count?.submissions || 0}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+      <td className="px-6 py-4 text-base whitespace-nowrap text-gray-500 dark:text-gray-400">
         {formatDate(data.createdAt)}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+      <td className="px-6 py-4 text-right text-base font-medium whitespace-nowrap">
         <div className="flex items-center justify-end space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/signup-forms/${data.slug}`} target="_blank">

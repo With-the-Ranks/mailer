@@ -62,7 +62,7 @@ export default function ClientSettingsForm({
         <h2 className="mb-1 text-xl font-semibold dark:text-white">
           Email API Key
         </h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400">
+        <p className="text-base text-stone-600 dark:text-stone-400">
           Optional. Overrides the global{" "}
           <code className="rounded-sm bg-stone-100 px-1 text-xs dark:bg-stone-800">
             RESEND_API_KEY
@@ -73,7 +73,7 @@ export default function ClientSettingsForm({
           <a
             href="https://resend.com/api-keys"
             target="_blank"
-            className="text-sm text-blue-600 underline hover:text-blue-800"
+            className="text-base text-blue-600 underline hover:text-blue-800"
           >
             Create an API key
           </a>
@@ -81,7 +81,7 @@ export default function ClientSettingsForm({
           <a
             href="https://resend.com/docs/api-reference/api-keys/create-api-key"
             target="_blank"
-            className="text-sm text-blue-600 underline hover:text-blue-800"
+            className="text-base text-blue-600 underline hover:text-blue-800"
           >
             API docs
           </a>
@@ -94,7 +94,7 @@ export default function ClientSettingsForm({
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="re_abc123..."
             disabled={isSaving}
-            className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+            className="w-full max-w-md rounded-md border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
           />
           <Button
             type="button"

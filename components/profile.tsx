@@ -40,7 +40,7 @@ export default function Profile() {
           className="h-6 w-6 rounded-full"
         />
         {state === "expanded" && (
-          <span className="truncate text-sm font-medium">
+          <span className="truncate text-base font-medium">
             {session.user.name}
           </span>
         )}

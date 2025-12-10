@@ -246,7 +246,7 @@ export function SegmentsList({
                       tabIndex={-1}
                     >
                       <CardTitle className="text-lg">{segment.name}</CardTitle>
-                      <CardDescription className="text-sm">
+                      <CardDescription className="text-base">
                         {segment.audienceList.name}
                       </CardDescription>
                     </Link>
@@ -288,14 +288,14 @@ export function SegmentsList({
 
               <CardContent className="space-y-4">
                 {segment.description && (
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-base">
                     {segment.description}
                   </p>
                 )}
 
                 <div className="flex items-center gap-2">
                   <UsersIcon className="text-muted-foreground h-4 w-4" />
-                  <span className="text-sm font-medium">
+                  <span className="text-base font-medium">
                     {segment.contactCount} contacts
                   </span>
                 </div>
@@ -304,7 +304,7 @@ export function SegmentsList({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <FilterIcon className="text-muted-foreground h-4 w-4" />
-                      <span className="text-sm font-medium">
+                      <span className="text-base font-medium">
                         Applied Filters
                       </span>
                     </div>
