@@ -12,10 +12,11 @@ import {
   List,
   Newspaper,
   Palette,
-  RadioTower,
   Settings,
   SlidersHorizontal,
+  TrendingUp,
   UploadIcon,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -119,7 +120,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         },
         {
           name: "People",
-          icon: RadioTower,
+          icon: Users,
           submenu: [
             {
               name: "Contacts",
@@ -169,7 +170,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             pathname === `/audience/${audienceListId}` ||
             pathname === `/organization/${siteId}/audience` ||
             pathname === `/organization/${siteId}/audience/lists`,
-          icon: RadioTower,
+          icon: Users,
         },
         {
           name: "Signup Forms",
@@ -184,25 +185,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: Newspaper,
         },
         {
+          name: "Reports",
+          href: `/organization/${siteId}/analytics`,
+          isActive: segments.includes("analytics"),
+          icon: TrendingUp,
+        },
+        {
           name: "Settings",
+          href: `/organization/${siteId}/settings`,
           icon: Settings,
-          isActive: segments.includes("settings"),
-          submenu: [
-            {
-              name: "General",
-              href: `/organization/${siteId}/settings`,
-              isActive:
-                pathname === `/organization/${siteId}/settings` ||
-                pathname === `/organization/${siteId}/settings/general`,
-              icon: SlidersHorizontal,
-            },
-            {
-              name: "Appearance",
-              href: `/organization/${siteId}/settings/appearance`,
-              isActive: pathname.includes("/settings/appearance"),
-              icon: Palette,
-            },
-          ],
+          isActive:
+            pathname === `/organization/${siteId}/settings` ||
+            pathname === `/organization/${siteId}/settings/general` ||
+            pathname.includes("/settings/appearance"),
         },
         {
           name: "Documentation",
@@ -223,23 +218,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       },
       {
         name: "Settings",
+        href: "/settings",
         icon: Settings,
-        isActive: segments[0] === "settings",
-        submenu: [
-          {
-            name: "General",
-            href: "/settings",
-            isActive:
-              pathname === "/settings" || pathname === "/settings/general",
-            icon: SlidersHorizontal,
-          },
-          {
-            name: "Appearance",
-            href: "/settings/appearance",
-            isActive: pathname.includes("/settings/appearance"),
-            icon: Palette,
-          },
-        ],
+        isActive:
+          pathname === "/settings" || pathname.includes("/settings/appearance"),
       },
       {
         name: "Documentation",
@@ -262,12 +244,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       collapsible="icon"
-      className="bg-sidebar text-sidebar-foreground h-full border-r p-4"
+      className={`bg-sidebar text-sidebar-foreground h-full border-r ${state === "expanded" ? "p-4" : ""}`}
     >
       <SidebarHeader>
         <Link
           href="/"
-          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground inline-flex items-baseline justify-start gap-2 transition-colors"
+          className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground inline-flex items-baseline gap-2 rounded-md transition-all duration-200 ${state === "expanded" ? "justify-start px-2 py-1.5" : "justify-center p-1.5"}`}
         >
           <div className="relative h-4 w-4">
             <Image
@@ -340,7 +322,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       tooltip={item.name}
                       className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                     >
-                      <Link href={item.href} className="flex items-center">
+                      <Link
+                        href={item.href}
+                        className="flex items-center"
+                        {...(item.name === "Documentation"
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
                         <item.icon className="mr-2" size={18} />
                         <span>{item.name}</span>
                       </Link>
