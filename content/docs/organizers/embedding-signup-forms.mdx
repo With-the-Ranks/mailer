@@ -1,0 +1,310 @@
+---
+title: Embedding Signup Forms
+description: Learn how to embed your signup forms on external websites
+---
+
+# Embedding Signup Forms
+
+You can easily embed your signup forms on any website using iframe or JavaScript. This allows you to collect signups directly from your own website, landing pages, or any other web property.
+
+## Getting the Embed Code
+
+1. Navigate to your **Signup Forms** page in the dashboard
+2. Find the form you want to embed
+3. Click the **"Embed Code"** button next to the form
+4. Choose your preferred embedding method
+
+## Embedding Methods
+
+### Method 1: iframe Embed (Recommended)
+
+The simplest way to embed your form. Just copy and paste the iframe code into your HTML:
+
+```html
+<iframe
+  src="https://yourdomain.com/app/signup-forms/your-form-slug?embed=true"
+  width="100%"
+  height="800"
+  style="border: none; max-width: 600px;"
+  title="Signup Form"
+>
+</iframe>
+```
+
+**Pros:**
+
+- Simple and straightforward
+- Works on almost all platforms
+- No JavaScript required
+- Isolated from your site's CSS
+
+**Cons:**
+
+- Fixed height (you need to adjust manually)
+- May have scrollbars if height is too small
+
+### Method 2: JavaScript Embed (Auto-Resize)
+
+This method automatically adjusts the iframe height based on the form content:
+
+```html
+<div id="signup-form-container"></div>
+<script>
+  (function () {
+    var iframe = document.createElement("iframe");
+    iframe.src =
+      "https://yourdomain.com/app/signup-forms/your-form-slug?embed=true";
+    iframe.width = "100%";
+    iframe.height = "800";
+    iframe.style.border = "none";
+    iframe.style.maxWidth = "600px";
+    iframe.title = "Signup Form";
+
+    var container = document.getElementById("signup-form-container");
+    if (container) {
+      container.appendChild(iframe);
+    }
+
+    // Auto-resize iframe based on content
+    window.addEventListener("message", function (event) {
+      if (
+        event.origin === "https://yourdomain.com" &&
+        event.data.formSlug === "your-form-slug"
+      ) {
+        if (event.data.height) {
+          iframe.height = event.data.height + "px";
+        }
+      }
+    });
+  })();
+</script>
+```
+
+**Pros:**
+
+- Automatically adjusts height
+- No scrollbars
+- Better user experience
+
+**Cons:**
+
+- Requires JavaScript
+- Slightly more complex
+
+### Method 3: Direct Link
+
+You can also share the direct link to your signup form:
+
+```
+https://yourdomain.com/app/signup-forms/your-form-slug
+```
+
+This opens the form in a full-page view, perfect for:
+
+- Email campaigns
+- Social media posts
+- QR codes
+- Direct sharing
+
+## Platform-Specific Instructions
+
+### WordPress
+
+1. Edit the page or post where you want to add the form
+2. Add a **"Custom HTML"** block (or use the HTML editor)
+3. Paste the iframe or JavaScript embed code
+4. Publish or update the page
+
+### HTML Websites
+
+Simply paste the embed code into your HTML file where you want the form to appear.
+
+## Customization Options
+
+### Theming
+
+Customize your form appearance using URL parameters:
+
+**Dark Theme:**
+
+```
+?embed=true&theme=dark
+```
+
+**Custom Colors:**
+
+```
+?embed=true&bg=252753&buttonBg=ffffff&buttonText=252753&inputTextColor=232656
+```
+
+**Hide Title:**
+
+```
+?embed=true&hideTitle=true
+```
+
+**Available Parameters:**
+
+- `embed=true` - Required for transparent background when embedding
+- `theme=dark` - Pre-styled dark theme (#282c4a background)
+- `bg=252753` - Custom background color (hex without #)
+- `buttonBg=ffffff` - Button background color
+- `buttonText=252753` - Button text color
+- `inputTextColor=232656` or `inputColor=232656` - Input text color when typing
+- `hideTitle=true` or `notitle=true` - Hide the form title
+
+### Example: Complete Customization
+
+```html
+<iframe
+  src="https://yourdomain.com/app/signup-forms/your-form-slug?embed=true&bg=252753&buttonBg=ffffff&buttonText=252753&hideTitle=true&inputTextColor=232656"
+  width="100%"
+  height="600"
+  style="border: none; max-width: 600px;"
+  title="Signup Form"
+></iframe>
+```
+
+This example uses a custom dark blue background, white button, hides the title, and sets dark input text color.
+
+## Best Practices
+
+### 1. Choose the Right Height
+
+- Short forms (2-3 fields): 400-600px
+- Medium forms (4-6 fields): 600-800px
+- Long forms (7+ fields): 800-1200px
+
+Use the JavaScript embed method for automatic height adjustment.
+
+### 2. Make it Responsive
+
+Always use `width="100%"` and set a `max-width` to ensure your form looks good on all devices:
+
+```html
+<iframe width="100%" style="max-width: 600px;" ...> </iframe>
+```
+
+### 3. Test on Multiple Devices
+
+Always test your embedded form on:
+
+- Desktop browsers (Chrome, Firefox, Safari)
+- Mobile devices (iOS, Android)
+- Tablets
+
+### 4. Use HTTPS
+
+Ensure your website uses HTTPS to avoid mixed content warnings when embedding forms.
+
+### 5. Set Appropriate Titles
+
+Use descriptive iframe titles for accessibility:
+
+```html
+<iframe title="Newsletter Signup Form" ...></iframe>
+```
+
+## Troubleshooting
+
+### Form Not Displaying
+
+**Possible causes:**
+
+- Incorrect form slug
+- Form is set to inactive
+- Wrong domain in embed URL
+
+**Solutions:**
+
+1. Verify the form slug in your dashboard
+2. Check that the form is set to "Active"
+3. Ensure the domain matches your actual domain
+
+### Form Appears Cut Off
+
+**Solutions:**
+
+1. Increase the `height` value in the iframe
+2. Use the JavaScript embed method for auto-resize
+3. Check if your container has height restrictions
+
+### Styling Looks Different
+
+The embedded form uses its own styles and won't inherit CSS from your website. This is intentional to ensure consistent appearance across all embedding locations.
+
+### Form Not Submitting
+
+**Possible causes:**
+
+- JavaScript errors on your page
+- Browser blocking third-party cookies
+- Form validation errors
+
+**Solutions:**
+
+1. Check browser console for errors
+2. Test in an incognito/private window
+3. Verify all required fields are filled
+
+## Security Considerations
+
+### Data Collection
+
+All form submissions are securely stored in your dashboard. The embedded form uses the same security measures as the standalone version.
+
+### CORS and CSP
+
+The signup form pages are configured to allow embedding from any domain when using the `?embed=true` parameter. If you need to restrict this, contact support.
+
+## Advanced Usage
+
+### Custom Styling Container
+
+You can add custom styling around your embedded form:
+
+```html
+<div
+  style="
+  background: #f5f5f5;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+"
+>
+  <h2 style="text-align: center; margin-bottom: 20px;">Join Our Newsletter</h2>
+  <iframe
+    src="https://yourdomain.com/app/signup-forms/newsletter?embed=true"
+    width="100%"
+    height="600"
+    style="border: none; max-width: 600px; margin: 0 auto; display: block;"
+    title="Newsletter Signup"
+  >
+  </iframe>
+</div>
+```
+
+### Multiple Forms on One Page
+
+You can embed multiple forms on the same page:
+
+```html
+<!-- Form 1 -->
+<div id="signup-form-1"></div>
+<script>
+  // Embed code for form 1
+</script>
+
+<!-- Form 2 -->
+<div id="signup-form-2"></div>
+<script>
+  // Embed code for form 2
+</script>
+```
+
+Just make sure each form has a unique container ID.
+
+## Next Steps
+
+- [Managing Form Submissions](/docs/organizers/managing-contacts)
+- [Customizing Form Fields](/docs/organizers/custom-fields)
