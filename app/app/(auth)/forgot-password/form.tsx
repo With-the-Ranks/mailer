@@ -82,7 +82,7 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
         </div>
       </div>
 
-      <h1 className="font-cal mt-6 text-center text-3xl text-white!">
+      <h1 className="font-cal mt-6 text-center text-3xl !text-white">
         {token ? "Reset Password" : "Forgot Password"}
       </h1>
       <p className="mt-2 text-center text-base text-white">
