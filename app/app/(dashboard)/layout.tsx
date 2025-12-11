@@ -1,10 +1,21 @@
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import Profile from "@/components/profile";
 import Nav from "@/components/sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { getSession } from "@/lib/auth";
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const session = await getSession();
+  if (!session || !session.user?.id) {
+    redirect("/login");
+  }
+
   return (
     <SidebarProvider>
       <Nav>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Code2, Copy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +25,13 @@ interface EmbedCodeDialogProps {
 export function EmbedCodeDialog({ formSlug, formName }: EmbedCodeDialogProps) {
   const [copiedIframe, setCopiedIframe] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [baseUrl, setBaseUrl] = useState("");
 
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://yourdomain.com";
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
 
   const embedUrl = `${baseUrl}/app/signup-forms/${encodeURIComponent(formSlug)}?embed=true`;
   const safeFormName = escapeHtml(formName);
