@@ -10,8 +10,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <Nav>
         <Profile />
       </Nav>
-      <div className="min-h-screen w-full pt-5 dark:bg-black">
-        <SidebarTrigger className="fixed left-4 top-4 z-50 md:hidden" />
+      <div className="min-h-screen w-full overflow-x-hidden pt-5 dark:bg-black">
+        <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
         {children}
       </div>
     </SidebarProvider>

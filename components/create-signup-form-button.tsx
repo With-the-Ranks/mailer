@@ -1,6 +1,5 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -45,7 +44,6 @@ export default function CreateSignupFormButton({
 
   return (
     <Button onClick={handleCreate} disabled={isCreating}>
-      <Plus className="mr-2 h-4 w-4" />
       {isCreating ? "Creating..." : "Create Signup Form"}
     </Button>
   );

@@ -47,7 +47,7 @@ export default function EmailStats({ userId }: EmailStatsProps) {
   return (
     <div className="flex flex-col space-y-6">
       <h1 className="font-cal text-3xl font-bold dark:text-white">
-        Organization Email Analytics
+        Email Analytics
       </h1>
       <div className="h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">

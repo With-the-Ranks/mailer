@@ -19,11 +19,11 @@ const buttonVariants = cva(
           "border border-black bg-black text-white hover:bg-white hover:text-black active:bg-stone-100 dark:border-stone-700 dark:hover:border-stone-200 dark:hover:bg-black dark:hover:text-white dark:active:bg-stone-800",
       },
       size: {
-        default: "px-8 py-2 gap-4 text-2xl rounded-md",
-        sm: "h-9 rounded-md px-3 text-base gap-2",
-        lg: "h-11 rounded-md px-8 text-2xl gap-4",
-        icon: "h-10 w-10 rounded-md",
-        custom: "h-8 w-36 sm:h-9 text-base rounded-md",
+        default: "px-8 py-2 gap-4 text-base",
+        sm: "h-9 px-3 text-sm gap-2",
+        lg: "h-11 px-8 text-2xl gap-4",
+        icon: "h-10 w-10",
+        custom: "h-8 w-36 sm:h-9 text-base",
       },
     },
     defaultVariants: {
