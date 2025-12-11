@@ -8,7 +8,7 @@ import { ModalProvider } from "@/components/modal/provider";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="bottom-right" />
       <ModalProvider>{children}</ModalProvider>
     </SessionProvider>
   );
