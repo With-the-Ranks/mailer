@@ -9,16 +9,15 @@ import { cal, inter } from "@/styles/fonts";
 
 import { Providers } from "./providers";
 
-const title =
-  "Mailer – Simple solution for managing and automating digital campaigns.";
+const title = "Mailer - Easiest way to send organizing emails";
 const description =
-  "Mailer is a comprehensive platform designed to streamline digital marketing and campaign management.";
+  "Mailer makes it easy for anyone to quickly send high-performing emails.";
 const image = "https://withtheranks.com/assets/meta.png";
 
 export const metadata: Metadata = {
   title,
   description,
-  icons: ["https://withtheranks.com/favicon.svg"],
+  icons: ["/mailer.svg"],
   openGraph: {
     title,
     description,
