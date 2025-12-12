@@ -328,14 +328,9 @@ select {
   color: var(--color-fd-foreground, hsl(var(--foreground)));
 }
 
-.prose code {
+.prose code, .prose figure, .prose pre {
   color: var(--color-fd-foreground, hsl(var(--foreground)));
-  background-color: var(--color-fd-muted, hsl(var(--muted)));
-}
-
-.prose pre {
-  background-color: var(--color-fd-muted, hsl(var(--muted)));
-  color: var(--color-fd-foreground, hsl(var(--foreground)));
+  background-color: transparent;
 }
 
 .prose pre code {
