@@ -271,7 +271,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             </div>
           )}
         </Link>
-        {userOrgs.length > 0 && (
+        {userOrgs.length > 0 && state === "expanded" && (
           <div className="px-2 py-2">
             <OrganizationSwitcher
               organizations={userOrgs}
