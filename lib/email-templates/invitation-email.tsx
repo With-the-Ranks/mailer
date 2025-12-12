@@ -81,7 +81,13 @@ export const InvitationEmail = ({
       </style>
     </Head>
     <Preview>You've been invited to join {organizationName}</Preview>
-    <Tailwind config={{ theme: { extend: { colors: { brand: "#252753" } } } }}>
+    <Tailwind
+      config={
+        {
+          theme: { extend: { colors: { brand: "#252753" } } },
+        } as any
+      }
+    >
       <Body className="bg-[#ffffff]" style={{ margin: 0, padding: 0 }}>
         <Container className="mx-auto -mt-2 flex flex-col items-stretch">
           <Container>
@@ -89,15 +95,15 @@ export const InvitationEmail = ({
               src={`https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png`}
               height="35"
               alt="Mailer"
-              className="mx-auto mb-4 mt-6"
+              className="mx-auto mt-6 mb-4"
             />
             <Img
               src="https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png"
-              className="mt-6 max-h-[300px] w-full max-w-full rounded-[24px]  object-cover object-top"
+              className="mt-6 max-h-[300px] w-full max-w-full rounded-[24px] object-cover object-top"
               alt="WTR"
             />
           </Container>
-          <Container className="text-brand pb-12-responsive mb-10 mt-0 flex w-full flex-col py-8">
+          <Container className="text-brand pb-12-responsive mt-0 mb-10 flex w-full flex-col py-8">
             <Text
               className="heading mt-2 text-3xl font-bold"
               style={{ fontFamily: "Georgia" }}
@@ -124,7 +130,7 @@ export const InvitationEmail = ({
                 <Container className="bg-brand mt-2 flex h-[3px] flex-col self-stretch" />
                 <Container className="text-brand text-center">
                   <Text
-                    className="notice mt-6 text-lg italic "
+                    className="notice mt-6 text-lg italic"
                     style={{ fontFamily: '"Roboto", Arial' }}
                   >
                     Click the button below to accept your invitation and get
@@ -132,7 +138,7 @@ export const InvitationEmail = ({
                   </Text>
                 </Container>
                 <Button
-                  className="button-text bg-brand mt-4 w-5/6 items-center justify-center whitespace-nowrap rounded-[100px] px-6 py-4 text-center text-2xl uppercase text-white"
+                  className="button-text bg-brand mt-4 w-5/6 items-center justify-center rounded-[100px] px-6 py-4 text-center text-2xl whitespace-nowrap text-white uppercase"
                   href={inviteUrl}
                   type="submit"
                 >
@@ -160,7 +166,7 @@ export const InvitationEmail = ({
                 </Text>
               </Container>
             </Container>
-            <Container className="container-responsive text-brand mb-10 mt-4 self-center text-center text-3xl">
+            <Container className="container-responsive text-brand mt-4 mb-10 self-center text-center text-3xl">
               <Text
                 className="body-text"
                 style={{ fontFamily: '"Roboto", Arial' }}

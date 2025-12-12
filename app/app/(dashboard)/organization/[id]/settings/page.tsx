@@ -44,7 +44,7 @@ export default async function OrganizationSettingsIndex({
         inputAttrs={{
           name: "name",
           type: "text",
-          defaultValue: data?.name!,
+          defaultValue: data?.name ?? "",
           placeholder: "My Campaign Organization",
           maxLength: 32,
         }}

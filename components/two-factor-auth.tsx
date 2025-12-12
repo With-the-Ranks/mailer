@@ -36,21 +36,21 @@ export default function TwoFactorAuth() {
   const [password, setPassword] = useState("");
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => {
-    checkStatus();
-  }, []);
-
   const checkStatus = async () => {
     try {
       const response = await fetch("/api/2fa/status");
       const data = await response.json();
       setIsEnabled(data.enabled);
-    } catch (error) {
+    } catch {
       toast.error("Failed to check 2FA status");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkStatus();
+  }, []);
 
   const handleSetup = async () => {
     setProcessing(true);

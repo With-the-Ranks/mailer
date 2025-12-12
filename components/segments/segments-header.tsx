@@ -4,7 +4,7 @@ interface SegmentsHeaderProps {
   orgId: string;
 }
 
-export function SegmentsHeader({ orgId }: SegmentsHeaderProps) {
+export function SegmentsHeader({ orgId: _orgId }: SegmentsHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="space-y-1">

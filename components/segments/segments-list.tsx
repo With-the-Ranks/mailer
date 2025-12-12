@@ -68,11 +68,6 @@ export function SegmentsList({
     null,
   );
 
-  React.useEffect(() => {
-    loadSegments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId]);
-
   const loadSegments = async () => {
     try {
       const response = await fetch(`/api/segments?organizationId=${orgId}`);
@@ -90,6 +85,11 @@ export function SegmentsList({
       setLoading(false);
     }
   };
+
+  React.useEffect(() => {
+    loadSegments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
 
   const handleDeleteSegment = (segmentId: string) => {
     setSegmentToDelete(segmentId);

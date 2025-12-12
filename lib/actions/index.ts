@@ -19,7 +19,7 @@ import prisma from "@/lib/prisma";
 // import { seedOrgTemplates } from "@/lib/seedTemplates";
 import { getBlurDataURL, logError } from "@/lib/utils";
 
-import { withAdminAuth, withEmailAuth, withOrgAuth } from "../auth";
+import { withAdminAuth, withEmailAuth } from "../auth";
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",

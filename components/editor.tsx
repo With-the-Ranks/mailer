@@ -53,7 +53,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   ]);
 
   const [signupForms, setSignupForms] = useState<SignupForm[]>([]);
-  const [signupFormsLoading, setSignupFormsLoading] = useState(true);
+  const [_signupFormsLoading, setSignupFormsLoading] = useState(true);
 
   const defaultJson = useMemo(() => {
     return email.content

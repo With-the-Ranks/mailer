@@ -17,7 +17,6 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  Code2,
   Copy,
   ExternalLink,
   GripVertical,

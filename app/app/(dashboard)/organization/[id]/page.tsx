@@ -15,7 +15,7 @@ export default async function SiteEmails({
   if (!session) {
     redirect("/login");
   }
-  const organizationId = decodeURIComponent(params.id);
+  const organizationId = decodeURIComponent(id);
 
   const isMember = await isOrgMember(session.user.id as string, organizationId);
   if (!isMember) {

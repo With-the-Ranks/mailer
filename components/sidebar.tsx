@@ -11,9 +11,7 @@ import {
   LayoutDashboard,
   List,
   Newspaper,
-  Palette,
   Settings,
-  SlidersHorizontal,
   TrendingUp,
   UploadIcon,
   Users,
@@ -48,7 +46,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { getOrgAndAudienceList } from "@/lib/actions";

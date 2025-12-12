@@ -63,7 +63,7 @@ export default function InviteMemberModal({
         router.refresh();
         onOpenChange(false);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to send invitation");
     } finally {
       setLoading(false);
@@ -90,7 +90,7 @@ export default function InviteMemberModal({
         router.refresh();
         toast.success("Invite link generated");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to generate invite link");
     } finally {
       setLoading(false);

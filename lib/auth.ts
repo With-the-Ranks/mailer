@@ -166,9 +166,9 @@ export const authOptions: NextAuthOptions = {
 
       session.user = {
         ...session.user,
-        // @ts-expect-error
+        // @ts-expect-error - NextAuth token.sub type doesn't match user.id
         id: token.sub,
-        // @ts-expect-error
+        // @ts-expect-error - NextAuth token user properties type mismatch
         username: token?.user?.username || token?.user?.gh_username,
         organizationId: user?.organizationId,
         currentOrganizationId: user?.currentOrganizationId,

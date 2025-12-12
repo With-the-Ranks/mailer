@@ -9,14 +9,15 @@ import MembersPageClient from "./members-client";
 export default async function MembersPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const session = await getSession();
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const organizationId = decodeURIComponent(params.id);
+  const { id } = await params;
+  const organizationId = decodeURIComponent(id);
 
   // Check if user is a member
   const userRole = await getUserOrgRole(session.user.id, organizationId);

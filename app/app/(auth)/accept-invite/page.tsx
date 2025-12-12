@@ -54,7 +54,7 @@ function AcceptInviteContent() {
         // Use full page reload to ensure session is updated
         window.location.href = `/organization/${result.organizationId}`;
       }
-    } catch (err) {
+    } catch {
       setError("Failed to accept invitation");
       toast.error("Failed to accept invitation");
     } finally {
@@ -120,7 +120,7 @@ function AcceptInviteContent() {
         </div>
 
         {error && (
-          <div className="rounded-lg bg-destructive/15 p-4 text-destructive">
+          <div className="bg-destructive/15 text-destructive rounded-lg p-4">
             {error}
           </div>
         )}
