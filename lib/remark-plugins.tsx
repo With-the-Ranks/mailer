@@ -76,7 +76,6 @@ export function replaceTweets() {
             },
           ];
         } catch (e) {
-          console.log("ERROR", e);
           return reject(e);
         }
       }

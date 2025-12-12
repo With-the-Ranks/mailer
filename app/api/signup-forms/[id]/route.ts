@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function GET(
   request: NextRequest,
@@ -52,7 +53,7 @@ export async function GET(
 
     return NextResponse.json(signupForm);
   } catch (error) {
-    console.error("Error fetching signup form:", error);
+    logError("Error fetching signup form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -160,7 +161,7 @@ export async function PUT(
 
     return NextResponse.json(updatedSignupForm);
   } catch (error) {
-    console.error("Error updating signup form:", error);
+    logError("Error updating signup form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -207,7 +208,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting signup form:", error);
+    logError("Error deleting signup form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

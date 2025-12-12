@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(signupForm);
   } catch (error) {
-    console.error("Error creating signup form:", error);
+    logError("Error creating signup form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -149,7 +150,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(signupForms);
   } catch (error) {
-    console.error("Error fetching signup forms:", error);
+    logError("Error fetching signup forms", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 const updateCustomFieldSchema = z.object({
   name: z.string().min(1).optional(),
@@ -75,7 +76,7 @@ export async function PUT(
         { status: 400 },
       );
     }
-    console.error("Error updating custom field:", error);
+    logError("Error updating custom field", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -116,7 +117,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting custom field:", error);
+    logError("Error deleting custom field", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

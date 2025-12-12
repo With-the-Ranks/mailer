@@ -49,7 +49,7 @@ export default function Leaflet({
         dragConstraints={{ top: 0, bottom: 0 }}
       >
         <div
-          className={`rounded-t-4xl -mb-1 flex h-7 w-full items-center justify-center border-t border-gray-200`}
+          className={`-mb-1 flex h-7 w-full items-center justify-center rounded-t-4xl border-t border-gray-200`}
         >
           <div className="-mr-1 h-1 w-6 rounded-full bg-gray-300 transition-all group-active:rotate-12" />
           <div className="h-1 w-6 rounded-full bg-gray-300 transition-all group-active:-rotate-12" />
@@ -58,7 +58,7 @@ export default function Leaflet({
       </motion.div>
       <motion.div
         key="leaflet-backdrop"
-        className="fixed inset-0 z-30 bg-gray-100 bg-opacity-10 backdrop-blur-sm"
+        className="bg-opacity-10 fixed inset-0 z-30 bg-gray-100 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

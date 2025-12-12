@@ -12,7 +12,7 @@ interface Props {
   contentJson: any;
   organizationId: string;
   disabled?: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   onCreate?: (tpl: { id: string; name: string }) => void;
 }
 

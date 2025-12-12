@@ -55,7 +55,7 @@ export default async function LoginPage({
         </div>
       </div>
       <p className="mt-2 text-center text-base text-white">
-        Build engaging email campaigns.
+        Easiest way to send organizing emails.
       </p>
 
       {alert && (

@@ -21,6 +21,7 @@ export default [
       "next.config.js",
       ".next/**",
       "node_modules/**",
+      "next-env.d.ts",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

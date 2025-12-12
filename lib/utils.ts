@@ -1,6 +1,10 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// Authentication constants
+export const TOTP_CODE_LENGTH = 6;
+export const TOTP_TIME_WINDOW = 2;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -156,6 +160,50 @@ export function buildAudienceWhere(
   });
 
   return where;
+}
+
+export function logError(
+  event: string,
+  error: unknown,
+  meta: Record<string, unknown> = {},
+) {
+  const payload: Record<string, unknown> = {
+    message: error instanceof Error ? error.message : String(error),
+    ...meta,
+  };
+
+  if (process.env.NODE_ENV !== "production" && error instanceof Error) {
+    payload.stack = error.stack;
+  }
+
+  console.error(`[${event}]`, payload);
+}
+
+export function isSameOrigin(req: {
+  headers: { get: (name: string) => string | null };
+  url: string;
+}): boolean {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  const host = req.headers.get("host");
+
+  try {
+    // Build expected origin from Host header (more reliable than req.url in middleware)
+    const protocol = req.url.startsWith("https") ? "https" : "http";
+    const expectedOrigin = `${protocol}://${host}`;
+
+    // Check Origin header
+    if (origin === expectedOrigin) return true;
+
+    // Check Referer header
+    if (referer && new URL(referer).origin === expectedOrigin) return true;
+
+    // Allow if no Origin/Referer (same-site browser requests)
+    return !origin && !referer;
+  } catch (err) {
+    console.error("[isSameOrigin] Error:", err);
+    return false;
+  }
 }
 
 export function getBaseAppUrl() {
