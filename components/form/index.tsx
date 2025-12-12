@@ -88,7 +88,7 @@ export default function Form({
       className="rounded-lg border border-stone-200 bg-white dark:border-stone-700 dark:bg-black"
     >
       <div className="relative flex flex-col space-y-4 p-5 sm:p-10">
-        <h2 className="font-cal text-xl dark:text-white">{title}</h2>
+        <h2 className="text-xl dark:text-white">{title}</h2>
         <p className="text-base text-stone-500 dark:text-stone-400">
           {description}
         </p>
@@ -104,9 +104,7 @@ export default function Form({
               defaultValue={inputAttrs.defaultValue}
               className="w-full rounded-none border-none bg-white px-4 py-2 text-base font-medium text-stone-700 focus:ring-black focus:outline-hidden dark:bg-black dark:text-stone-200 dark:focus:ring-white"
             >
-              <option value="font-cal">Cal Sans</option>
-              <option value="font-lora">Lora</option>
-              <option value="font-work">Work Sans</option>
+              <option value="font-league-spartan">League Spartan</option>
             </select>
           </div>
         ) : inputAttrs.name === "subdomain" ? (

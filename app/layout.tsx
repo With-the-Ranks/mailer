@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 
 import { cn } from "@/lib/utils";
-import { cal, inter } from "@/styles/fonts";
+import { leagueSpartan } from "@/styles/fonts";
 
 import { Providers } from "./providers";
 
@@ -40,7 +40,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="light" suppressHydrationWarning>
-      <body className={cn(cal.variable, inter.variable)}>
+      <body className={cn(leagueSpartan.variable, "font-sans")}>
         <Providers>
           {children}
           <Analytics />

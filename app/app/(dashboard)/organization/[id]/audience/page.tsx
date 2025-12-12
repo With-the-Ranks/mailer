@@ -45,7 +45,7 @@ export default async function AudienceList({
     <>
       <div className="flex flex-col items-center justify-between space-y-4 xl:flex-row xl:space-y-0">
         <div className="flex flex-col items-center space-y-2 xl:flex-row xl:space-y-0 xl:space-x-4">
-          <h1 className="font-cal w-60 truncate text-xl font-bold sm:w-auto sm:text-3xl dark:text-white">
+          <h1 className="w-60 truncate text-xl font-bold sm:w-auto sm:text-3xl dark:text-white">
             All Contacts – {organization.name}
           </h1>
         </div>

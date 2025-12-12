@@ -38,7 +38,7 @@ export default async function OrganizationAnalyticsLayout({
   return (
     <>
       <div className="flex flex-col items-center space-y-2 space-x-4 lg:flex-row lg:space-y-0">
-        <h1 className="font-cal text-xl font-bold sm:text-3xl dark:text-white">
+        <h1 className="text-xl font-bold sm:text-3xl dark:text-white">
           Settings for {data.name}
         </h1>
       </div>

@@ -3,8 +3,6 @@ import { Suspense } from "react";
 
 import Emails from "@/components/emails";
 import EmailStats from "@/components/EmailStats";
-import Organizations from "@/components/organizations";
-import OverviewOrganizationCTA from "@/components/overview-organizations-cta";
 import PlaceholderCard from "@/components/placeholder-card";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -34,9 +32,7 @@ export default async function Overview() {
       {hasOrganization && <EmailStats userId={userId} />}
       {hasOrganization && (
         <div className="flex min-w-0 flex-col space-y-6">
-          <h1 className="font-cal text-3xl font-bold dark:text-white">
-            Recent Emails
-          </h1>
+          <h1 className="text-3xl font-bold dark:text-white">Recent Emails</h1>
           <Suspense
             fallback={
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

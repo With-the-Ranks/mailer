@@ -49,7 +49,7 @@ export default function CreateEmailModal({
       predefinedTemplates.find((t) => t.id === data.template) ||
       predefinedTemplates[0];
     setTemplateContent(JSON.stringify(tpl.content));
-  }, [data.template]);
+  }, [data.template, predefinedTemplates]);
 
   const handleCreateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,9 +91,7 @@ export default function CreateEmailModal({
       )}
     >
       <div className="space-y-4 p-5 md:p-10">
-        <h2 className="font-cal text-2xl dark:text-white">
-          Create a new email
-        </h2>
+        <h2 className="text-2xl dark:text-white">Create a new email</h2>
 
         {/* Campaign Name */}
         <div className="flex flex-col space-y-2">

@@ -108,7 +108,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
     ];
 
     return finalBlocks;
-  }, [signupForms, signupFormsLoading, email.organization]);
+  }, [signupForms, email.organization]);
 
   // Redirect if email is already published.
   useEffect(() => {
@@ -232,7 +232,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           defaultValue={email?.title || ""}
           autoFocus
           onChange={(e) => setData({ ...data, title: e.target.value })}
-          className="dark:placeholder-text-600 font-cal border-none px-0 text-3xl placeholder:text-stone-400 focus:ring-0 focus:outline-hidden dark:bg-black dark:text-white"
+          className="dark:placeholder-text-600 border-none px-0 text-3xl placeholder:text-stone-400 focus:ring-0 focus:outline-hidden dark:bg-black dark:text-white"
           required
         />
       </div>

@@ -31,7 +31,7 @@ function renderHTMLToIFrame(
   const fontLink = iframeDocument.createElement("link");
   fontLink.rel = "stylesheet";
   fontLink.href =
-    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";
+    "https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&display=swap";
   iframeDocument.head.appendChild(fontLink);
   iframeDocument.body.innerHTML = html;
 }

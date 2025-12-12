@@ -121,7 +121,7 @@ export default async function OrganizationPostPage({
     <>
       <div className="mt-10 flex flex-col items-center justify-center">
         <div className="m-auto w-full text-center md:w-7/12">
-          <h1 className="font-title mb-10 text-3xl font-bold text-stone-800 md:text-6xl dark:text-white">
+          <h1 className="mb-10 text-3xl font-bold text-stone-800 md:text-6xl dark:text-white">
             Campaign: {data.title}
           </h1>
           <p className="m-auto my-5 w-10/12 text-base font-light text-stone-500 md:text-2xl dark:text-stone-400">

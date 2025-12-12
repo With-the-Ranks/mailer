@@ -46,7 +46,7 @@ export function AddCustomFieldModal({
       onSubmit={handleSubmit}
       className="w-full rounded-sm bg-white p-6 md:max-w-md md:border md:shadow-sm"
     >
-      <h2 className="font-cal mb-4 text-2xl">New Custom Field</h2>
+      <h2 className="mb-4 text-2xl">New Custom Field</h2>
       <input
         autoFocus
         type="text"
@@ -102,7 +102,7 @@ export function ConfirmDeleteFieldModal({
 
   return (
     <div className="w-full rounded-sm bg-white p-6 md:max-w-md md:border md:shadow-sm">
-      <h2 className="font-cal mb-2 text-2xl">Remove “{fieldName}”?</h2>
+      <h2 className="mb-2 text-2xl">Remove &ldquo;{fieldName}&rdquo;?</h2>
       <p className="mb-4 text-base text-gray-600">
         This will delete that column and all its values from every audience.
       </p>

@@ -63,7 +63,7 @@ export default function AudienceCard({
         {editing ? (
           <form onSubmit={handleSave} className="flex w-full items-center">
             <input
-              className="font-cal flex-1 rounded-sm border px-2 py-1 text-xl font-bold tracking-wide dark:text-white"
+              className="flex-1 rounded-sm border px-2 py-1 text-xl font-bold tracking-wide dark:text-white"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={loading}
@@ -94,7 +94,7 @@ export default function AudienceCard({
               className="group flex-1"
               title="Go to contact list"
             >
-              <h3 className="font-cal my-0 truncate text-2xl font-bold tracking-wide group-hover:underline dark:text-white">
+              <h3 className="my-0 truncate text-2xl font-bold tracking-wide group-hover:underline dark:text-white">
                 {name}
               </h3>
             </Link>

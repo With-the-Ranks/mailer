@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 import { sql } from "@vercel/postgres";
 import { ImageResponse } from "next/og";
 
@@ -40,8 +38,9 @@ export default async function PostOG({
     return new Response("Not found", { status: 404 });
   }
 
-  const clashData = await fetch(
-    new URL("@/styles/CalSans-SemiBold.otf", import.meta.url),
+  // Fetch League Spartan font from Google Fonts
+  const leagueSpartanData = await fetch(
+    "https://fonts.gstatic.com/s/leaguespartan/v11/kJEqBuEW6A0lliaV_m88ja5Twtx8BWhtkDVmjZvM.woff2",
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
@@ -75,8 +74,8 @@ export default async function PostOG({
       height: 600,
       fonts: [
         {
-          name: "Clash",
-          data: clashData,
+          name: "League Spartan",
+          data: leagueSpartanData,
         },
       ],
       emoji: "blobmoji",

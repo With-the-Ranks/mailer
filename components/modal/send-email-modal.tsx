@@ -138,7 +138,7 @@ export function SendEmailModal({
       onSubmit={handleSubmit}
       className="w-full max-w-md rounded-sm bg-white p-6 md:border md:shadow-sm"
     >
-      <h2 className="font-cal mb-4 text-2xl">Send Email</h2>
+      <h2 className="mb-4 text-2xl">Send Email</h2>
 
       <div className="mb-6">
         <Label>Send test email</Label>

@@ -63,7 +63,7 @@ export default async function OrganizationHomePage({
 
       {emails.length > 0 ? (
         <div className="mx-auto max-w-(--breakpoint-xl) px-4 py-10">
-          <h2 className="font-title mb-6 border-b pb-4 text-4xl text-stone-800 md:text-5xl dark:text-white">
+          <h2 className="mb-6 border-b pb-4 text-4xl text-stone-800 md:text-5xl dark:text-white">
             All Created Emails
           </h2>
           <ul className="space-y-6">
@@ -118,7 +118,7 @@ export default async function OrganizationHomePage({
             height={400}
             className="hidden dark:block"
           />
-          <p className="font-title mt-6 text-2xl text-stone-600 dark:text-stone-400">
+          <p className="mt-6 text-2xl text-stone-600 dark:text-stone-400">
             No emails yet.
           </p>
         </div>

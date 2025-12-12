@@ -56,9 +56,7 @@ export default function ReportAbuse() {
           className="animate-in slide-in-from-bottom-5 absolute right-2 bottom-20 flex w-96 flex-col space-y-6 rounded-lg border border-stone-200 bg-white p-8 shadow-lg"
         >
           <div>
-            <h2 className="font-cal text-xl leading-7 text-stone-900">
-              Report Abuse
-            </h2>
+            <h2 className="text-xl leading-7 text-stone-900">Report Abuse</h2>
             <p className="mt-2 text-base leading-6 text-stone-600">
               Found a site with abusive content? Let us know!
             </p>

@@ -64,7 +64,7 @@ export default function DeleteOrganizationForm({
       className="rounded-lg border border-red-600 bg-white dark:bg-black"
     >
       <div className="relative flex flex-col space-y-4 p-5 sm:p-10">
-        <h2 className="font-cal text-xl dark:text-white">Delete Site</h2>
+        <h2 className="text-xl dark:text-white">Delete Site</h2>
         <p className="text-base text-stone-500 dark:text-stone-400">
           Deletes your organization and all emails associated with it. Type in
           the name of your organization <b>{organizationName}</b> to confirm.

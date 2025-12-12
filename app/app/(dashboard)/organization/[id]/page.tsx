@@ -35,7 +35,7 @@ export default async function SiteEmails({
   return (
     <>
       <div className="flex flex-col items-center space-y-4 md:items-start">
-        <h1 className="font-cal mb-0 text-center text-2xl font-bold sm:text-3xl md:text-left dark:text-white">
+        <h1 className="mb-0 text-center text-2xl font-bold sm:text-3xl md:text-left dark:text-white">
           Emails
         </h1>
         <div className="py-4 md:py-6 lg:py-8">

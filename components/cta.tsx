@@ -31,7 +31,7 @@ export default function CTA() {
         </svg>
       </button>
       <div className="text-center lg:text-left">
-        <p className="font-title text-lg text-black sm:text-2xl dark:text-white">
+        <p className="text-lg text-black sm:text-2xl dark:text-white">
           Platforms Starter Kit Demo
         </p>
         <p
@@ -58,7 +58,7 @@ export default function CTA() {
         } flex w-full flex-col space-y-3 text-center sm:flex-row sm:space-y-0 sm:space-x-3 lg:w-auto`}
       >
         <a
-          className="whitespace-no-wrap font-title flex-auto rounded-md border border-stone-200 px-5 py-1 text-lg text-black transition-all duration-150 ease-in-out hover:border-black sm:py-3 dark:border-stone-700 dark:text-white dark:hover:border-white"
+          className="whitespace-no-wrap flex-auto rounded-md border border-stone-200 px-5 py-1 text-lg text-black transition-all duration-150 ease-in-out hover:border-black sm:py-3 dark:border-stone-700 dark:text-white dark:hover:border-white"
           href="https://app.vercel.pub"
           rel="noreferrer"
           target="_blank"
@@ -66,7 +66,7 @@ export default function CTA() {
           Create your publication
         </a>
         <a
-          className="whitespace-no-wrap font-title flex-auto rounded-md border border-black bg-black px-5 py-1 text-lg text-white transition-all duration-150 ease-in-out hover:bg-white hover:text-black sm:py-3 dark:border-white dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
+          className="whitespace-no-wrap flex-auto rounded-md border border-black bg-black px-5 py-1 text-lg text-white transition-all duration-150 ease-in-out hover:bg-white hover:text-black sm:py-3 dark:border-white dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
           href="https://vercel.com/guides/nextjs-multi-tenant-application"
           rel="noreferrer"
           target="_blank"
