@@ -65,10 +65,10 @@ export default function EmailRow({
           >
             <StatusIcon size={16} />
             <div className="flex flex-col leading-tight">
-              <span className="text-xs uppercase text-gray-400 dark:text-gray-500">
+              <span className="text-xs text-gray-400 uppercase dark:text-gray-500">
                 {timeLabel}
               </span>
-              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
                 {fmtDate(timestamp)}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400">

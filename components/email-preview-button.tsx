@@ -83,7 +83,7 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="flex items-center gap-1 text-sm"
+          className="flex items-center gap-1 text-base"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -114,23 +114,23 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
             Preview of your email content as it will appear to recipients
           </DialogDescription>
           <div className="flex flex-col gap-4">
-            <div className="shadow-2xs flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-3">
-              <div className="flex size-8 items-center justify-center rounded-full border border-gray-200 bg-white text-sm">
+            <div className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-3 shadow-2xs">
+              <div className="flex size-8 items-center justify-center rounded-full border border-gray-200 bg-white text-base">
                 W
               </div>
               <div className="flex flex-col gap-0.5">
                 <h3 className="font-medium">{fromName}</h3>
-                <h4 className="text-sm">
+                <h4 className="text-base">
                   {subject || "Your Subject Goes Here"}
                 </h4>
-                <p className="text-sm text-gray-500">
+                <p className="text-base text-gray-500">
                   {previewText ||
                     "This is a preview text of your email, that will be shown in the inbox preview..."}
                 </p>
               </div>
             </div>
 
-            <div className="shadow-2xs flex min-h-[75vh] w-full grow overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="flex min-h-[75vh] w-full grow overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xs">
               {html ? (
                 <EmailPreviewIFrame
                   wrapperClassName="w-full"
@@ -141,7 +141,7 @@ export function EmailPreviewButton(props: EmailPreviewButtonProps) {
                 <div className="flex h-full w-full items-center justify-center text-gray-500">
                   <div className="text-center">
                     <div className="mb-2">Loading preview...</div>
-                    <div className="text-sm">
+                    <div className="text-base">
                       Please wait while we generate your email preview
                     </div>
                   </div>

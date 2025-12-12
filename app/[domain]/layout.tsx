@@ -97,7 +97,7 @@ export default async function OrganizationLayout({
             </div>
             <div className="ml-3">
               <h1 className="text-xl font-bold text-white">{data.name}</h1>
-              <p className="text-sm text-white opacity-75">
+              <p className="text-base text-white opacity-75">
                 {data.description}
               </p>
             </div>

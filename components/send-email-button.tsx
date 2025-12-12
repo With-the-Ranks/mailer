@@ -78,7 +78,7 @@ export default function SendEmailButton({
     <Button
       onClick={handleClick}
       disabled={isLoading}
-      className="flex items-center text-sm"
+      className="flex items-center text-base"
       aria-label={isLoading ? "Sending" : String(getButtonLabel())}
     >
       {isLoading ? (

@@ -16,7 +16,7 @@ function SubmitButton() {
   return (
     <button
       className={cn(
-        "h flex h-8 w-full items-center justify-center space-x-2 rounded-md border text-sm transition-all focus:outline-hidden sm:h-10",
+        "h flex h-8 w-full items-center justify-center space-x-2 rounded-md border text-base transition-all focus:outline-hidden sm:h-10",
         pending
           ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400"
           : "border-black bg-black text-white hover:bg-white hover:text-black",
@@ -34,7 +34,7 @@ export default function ReportAbuse() {
   const url = slug ? `https://${domain}/${slug}` : `https://${domain}`;
 
   return (
-    <div className="fixed bottom-5 right-5">
+    <div className="fixed right-5 bottom-5">
       <button
         className="rounded-full bg-black p-4 text-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 active:shadow-xs"
         onClick={() => setOpen(!open)}
@@ -53,13 +53,11 @@ export default function ReportAbuse() {
               "Successfully reported abuse – thank you for helping us keep the internet safe!",
             );
           }}
-          className="absolute bottom-20 right-2 flex w-96 flex-col space-y-6 rounded-lg border border-stone-200 bg-white p-8 shadow-lg animate-in slide-in-from-bottom-5"
+          className="animate-in slide-in-from-bottom-5 absolute right-2 bottom-20 flex w-96 flex-col space-y-6 rounded-lg border border-stone-200 bg-white p-8 shadow-lg"
         >
           <div>
-            <h2 className="font-cal text-xl leading-7 text-stone-900">
-              Report Abuse
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-stone-600">
+            <h2 className="text-xl leading-7 text-stone-900">Report Abuse</h2>
+            <p className="mt-2 text-base leading-6 text-stone-600">
               Found a site with abusive content? Let us know!
             </p>
           </div>
@@ -67,7 +65,7 @@ export default function ReportAbuse() {
           <div>
             <label
               htmlFor="domain"
-              className="block text-sm font-medium leading-6 text-stone-900"
+              className="block text-base leading-6 font-medium text-stone-900"
             >
               URL to report
             </label>
@@ -78,7 +76,7 @@ export default function ReportAbuse() {
                 id="url"
                 readOnly
                 value={url}
-                className="block w-full cursor-not-allowed rounded-md border border-stone-200 bg-stone-100 py-1.5 text-stone-900 shadow-xs ring-0 focus:outline-hidden sm:text-sm sm:leading-6"
+                className="block w-full cursor-not-allowed rounded-md border border-stone-200 bg-stone-100 py-1.5 text-stone-900 shadow-xs ring-0 focus:outline-hidden sm:text-base sm:leading-6"
               />
             </div>
           </div>

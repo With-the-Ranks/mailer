@@ -35,13 +35,13 @@ export default async function SignupFormsPage({
 
   return (
     <>
-      <div className="flex flex-col items-center justify-between space-y-4 xl:flex-row xl:space-y-0">
-        <div className="flex flex-col items-center space-y-2 xl:flex-row xl:space-x-4 xl:space-y-0">
-          <h1 className="w-60 truncate font-cal text-xl font-bold dark:text-white sm:w-auto sm:text-3xl">
-            Signup Forms for Audience list
-          </h1>
+      <div className="flex flex-col items-center space-y-4 md:items-start">
+        <h1 className="mb-0 text-center text-2xl font-bold sm:text-3xl md:text-left dark:text-white">
+          Signup Forms
+        </h1>
+        <div className="py-4 md:py-6 lg:py-8">
+          <CreateSignupFormButton organizationId={decodeURIComponent(id)} />
         </div>
-        <CreateSignupFormButton organizationId={decodeURIComponent(id)} />
       </div>
       <SignupForms organizationId={decodeURIComponent(id)} />
     </>

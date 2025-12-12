@@ -40,7 +40,7 @@ export default function CreateEmailButton({
     <Button
       onClick={handleClick}
       disabled={isFetching}
-      aria-label={isFetching ? "Loading" : "Create an email"}
+      aria-label={isFetching ? "Loading" : "Create a new email"}
     >
       {isFetching ? (
         <>
@@ -48,7 +48,7 @@ export default function CreateEmailButton({
           Loading...
         </>
       ) : (
-        "Create an email"
+        "Create a new email"
       )}
     </Button>
   );

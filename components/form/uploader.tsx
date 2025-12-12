@@ -108,10 +108,10 @@ export default function Uploader({
             <path d="M12 12v9"></path>
             <path d="m16 16-4-4-4 4"></path>
           </svg>
-          <p className="mt-2 text-center text-sm text-gray-500">
+          <p className="mt-2 text-center text-base text-gray-500">
             Drag and drop or click to upload.
           </p>
-          <p className="mt-2 text-center text-sm text-gray-500">
+          <p className="mt-2 text-center text-base text-gray-500">
             Max file size: 50MB
           </p>
           <span className="sr-only">Photo upload</span>

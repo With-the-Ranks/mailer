@@ -12,10 +12,11 @@ import {
   List,
   Newspaper,
   Palette,
-  RadioTower,
   Settings,
   SlidersHorizontal,
+  TrendingUp,
   UploadIcon,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -118,8 +119,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: ArrowLeft,
         },
         {
-          name: "Audience",
-          icon: RadioTower,
+          name: "People",
+          icon: Users,
           submenu: [
             {
               name: "Contacts",
@@ -163,25 +164,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: LayoutDashboard,
         },
         {
-          name: "Audience",
-          icon: RadioTower,
-          submenu: [
-            {
-              name: "List",
-              href: `/audience/${audienceListId}`,
-              isActive:
-                pathname === `/audience/${audienceListId}` ||
-                pathname === `/organization/${siteId}/audience` ||
-                pathname === `/organization/${siteId}/audience/lists`,
-              icon: List,
-            },
-            {
-              name: "Signup Forms",
-              href: `/organization/${siteId}/signup-forms`,
-              isActive: segments.includes("signup-forms"),
-              icon: FormInput,
-            },
-          ],
+          name: "People",
+          href: `/audience/${audienceListId}`,
+          isActive:
+            pathname === `/audience/${audienceListId}` ||
+            pathname === `/organization/${siteId}/audience` ||
+            pathname === `/organization/${siteId}/audience/lists`,
+          icon: Users,
+        },
+        {
+          name: "Signup Forms",
+          href: `/organization/${siteId}/signup-forms`,
+          isActive: segments.includes("signup-forms"),
+          icon: FormInput,
         },
         {
           name: "Emails",
@@ -190,25 +185,25 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: Newspaper,
         },
         {
+          name: "Reports",
+          href: `/organization/${siteId}/analytics`,
+          isActive: segments.includes("analytics"),
+          icon: TrendingUp,
+        },
+        {
           name: "Settings",
+          href: `/organization/${siteId}/settings`,
           icon: Settings,
-          isActive: segments.includes("settings"),
-          submenu: [
-            {
-              name: "General",
-              href: `/organization/${siteId}/settings`,
-              isActive:
-                pathname === `/organization/${siteId}/settings` ||
-                pathname === `/organization/${siteId}/settings/general`,
-              icon: SlidersHorizontal,
-            },
-            {
-              name: "Appearance",
-              href: `/organization/${siteId}/settings/appearance`,
-              isActive: pathname.includes("/settings/appearance"),
-              icon: Palette,
-            },
-          ],
+          isActive:
+            pathname === `/organization/${siteId}/settings` ||
+            pathname === `/organization/${siteId}/settings/general` ||
+            pathname.includes("/settings/appearance"),
+        },
+        {
+          name: "Documentation",
+          href: "/docs",
+          isActive: pathname.includes("/docs"),
+          icon: BookOpen,
         },
       ];
     }
@@ -223,23 +218,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       },
       {
         name: "Settings",
+        href: "/settings",
         icon: Settings,
-        isActive: segments[0] === "settings",
-        submenu: [
-          {
-            name: "General",
-            href: "/settings",
-            isActive:
-              pathname === "/settings" || pathname === "/settings/general",
-            icon: SlidersHorizontal,
-          },
-          {
-            name: "Appearance",
-            href: "/settings/appearance",
-            isActive: pathname.includes("/settings/appearance"),
-            icon: Palette,
-          },
-        ],
+        isActive:
+          pathname === "/settings" || pathname.includes("/settings/appearance"),
+      },
+      {
+        name: "Documentation",
+        href: "/docs",
+        isActive: pathname.includes("/docs"),
+        icon: BookOpen,
       },
     ];
   }, [
@@ -256,21 +244,27 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       collapsible="icon"
-      className="h-full border-r bg-sidebar text-sidebar-foreground"
+      className={`bg-sidebar text-sidebar-foreground h-full border-r ${state === "expanded" ? "p-4" : ""}`}
     >
       <SidebarHeader>
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground inline-flex items-baseline gap-2 rounded-md transition-all duration-200 ${state === "expanded" ? "justify-start px-2 py-1.5" : "justify-center p-1.5"}`}
         >
-          <Image
-            src="/logo.png"
-            width={24}
-            height={24}
-            alt="Logo"
-            className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
-          />
-          {state === "expanded" && <span className="font-bold">Mailer</span>}
+          <div className="relative h-4 w-4">
+            <Image
+              src="/mailer.svg"
+              width={16}
+              height={16}
+              alt="Mailer Logo"
+              className="h-4 w-4"
+            />
+          </div>
+          {state === "expanded" && (
+            <div className="flex h-7 w-20 justify-start text-3xl leading-8 font-bold text-white">
+              Mailer
+            </div>
+          )}
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -290,7 +284,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                         <SidebarMenuButton
                           tooltip={item.name}
                           isActive={item.isActive}
-                          className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                         >
                           <item.icon className="mr-2" size={18} />
                           <span>{item.name}</span>
@@ -304,7 +298,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                               >
                                 <Link
                                   href={sub.href}
@@ -326,9 +320,15 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       asChild
                       isActive={item.isActive}
                       tooltip={item.name}
-                      className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                     >
-                      <Link href={item.href} className="flex items-center">
+                      <Link
+                        href={item.href}
+                        className="flex items-center"
+                        {...(item.name === "Documentation"
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
                         <item.icon className="mr-2" size={18} />
                         <span>{item.name}</span>
                       </Link>
@@ -342,19 +342,18 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       </SidebarContent>
       {loading ? null : (
         <SidebarFooter>
-          <div className="px-2 py-2">
-            <Link
-              href="/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              <BookOpen className="h-4 w-4" />
-              {state === "expanded" && <span>Documentation</span>}
-            </Link>
+          <div className="flex flex-col items-center justify-center gap-2">
+            {state === "expanded" && (
+              <Image
+                src="/wtr.png"
+                alt="With the Ranks"
+                width={129}
+                height={58}
+                className="h-14 w-32"
+              />
+            )}
+            {children}
           </div>
-          <SidebarSeparator />
-          {children}
         </SidebarFooter>
       )}
       <SidebarRail />

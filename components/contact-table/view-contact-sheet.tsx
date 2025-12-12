@@ -41,30 +41,30 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
             <h3 className="text-lg font-medium">Basic Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   First Name
                 </Label>
-                <p className="text-sm">{contact.firstName}</p>
+                <p className="text-base">{contact.firstName}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   Last Name
                 </Label>
-                <p className="text-sm">{contact.lastName}</p>
+                <p className="text-base">{contact.lastName}</p>
               </div>
             </div>
             <div>
-              <Label className="text-muted-foreground text-sm font-medium">
+              <Label className="text-muted-foreground text-base font-medium">
                 Email
               </Label>
-              <p className="text-sm text-blue-600">{contact.email}</p>
+              <p className="text-base text-blue-600">{contact.email}</p>
             </div>
             {contact.phone && (
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   Phone
                 </Label>
-                <p className="text-sm">{contact.phone}</p>
+                <p className="text-base">{contact.phone}</p>
               </div>
             )}
           </div>
@@ -81,18 +81,18 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                 <h3 className="text-lg font-medium">Address Information</h3>
                 {contact.defaultAddressCompany && (
                   <div>
-                    <Label className="text-muted-foreground text-sm font-medium">
+                    <Label className="text-muted-foreground text-base font-medium">
                       Organization
                     </Label>
-                    <p className="text-sm">{contact.defaultAddressCompany}</p>
+                    <p className="text-base">{contact.defaultAddressCompany}</p>
                   </div>
                 )}
                 {contact.defaultAddressAddress1 && (
                   <div>
-                    <Label className="text-muted-foreground text-sm font-medium">
+                    <Label className="text-muted-foreground text-base font-medium">
                       Address
                     </Label>
-                    <p className="text-sm">
+                    <p className="text-base">
                       {contact.defaultAddressAddress1}
                       {contact.defaultAddressAddress2 && <br />}
                       {contact.defaultAddressAddress2}
@@ -102,25 +102,25 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                 <div className="grid grid-cols-2 gap-4">
                   {contact.defaultAddressCity && (
                     <div>
-                      <Label className="text-muted-foreground text-sm font-medium">
+                      <Label className="text-muted-foreground text-base font-medium">
                         City
                       </Label>
-                      <p className="text-sm">{contact.defaultAddressCity}</p>
+                      <p className="text-base">{contact.defaultAddressCity}</p>
                     </div>
                   )}
                   {contact.defaultAddressZip && (
                     <div>
-                      <Label className="text-muted-foreground text-sm font-medium">
+                      <Label className="text-muted-foreground text-base font-medium">
                         Zip Code
                       </Label>
-                      <p className="text-sm">{contact.defaultAddressZip}</p>
+                      <p className="text-base">{contact.defaultAddressZip}</p>
                     </div>
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {contact.defaultAddressProvinceCode && (
                     <div>
-                      <Label className="text-muted-foreground text-sm font-medium">
+                      <Label className="text-muted-foreground text-base font-medium">
                         State/Province
                       </Label>
                       <Badge variant="outline" className="font-mono">
@@ -130,7 +130,7 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                   )}
                   {contact.defaultAddressCountryCode && (
                     <div>
-                      <Label className="text-muted-foreground text-sm font-medium">
+                      <Label className="text-muted-foreground text-base font-medium">
                         Country
                       </Label>
                       <Badge variant="outline" className="font-mono">
@@ -141,10 +141,10 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                 </div>
                 {contact.defaultAddressPhone && (
                   <div>
-                    <Label className="text-muted-foreground text-sm font-medium">
+                    <Label className="text-muted-foreground text-base font-medium">
                       Address Phone
                     </Label>
-                    <p className="text-sm">{contact.defaultAddressPhone}</p>
+                    <p className="text-base">{contact.defaultAddressPhone}</p>
                   </div>
                 )}
               </div>
@@ -157,7 +157,7 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
             <h3 className="text-lg font-medium">Additional Information</h3>
             {contact.tags && (
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   Tags
                 </Label>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -171,10 +171,10 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
             )}
             {contact.note && (
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   Note
                 </Label>
-                <p className="bg-muted mt-1 rounded-md p-3 text-sm">
+                <p className="bg-muted mt-1 rounded-md p-3 text-base">
                   {contact.note}
                 </p>
               </div>
@@ -192,10 +192,10 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                     {Object.entries(contact.customFields).map(
                       ([key, value]) => (
                         <div key={key}>
-                          <Label className="text-muted-foreground text-sm font-medium capitalize">
+                          <Label className="text-muted-foreground text-base font-medium capitalize">
                             {key.replace(/([A-Z])/g, " $1").trim()}
                           </Label>
-                          <p className="text-sm">{value}</p>
+                          <p className="text-base">{value}</p>
                         </div>
                       ),
                     )}
@@ -209,7 +209,7 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Subscription Status</h3>
             <div>
-              <Label className="text-muted-foreground text-sm font-medium">
+              <Label className="text-muted-foreground text-base font-medium">
                 Status
               </Label>
               <div className="mt-2">
@@ -232,20 +232,20 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
             </div>
             {contact.isUnsubscribed && contact.unsubscribedAt && (
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   Unsubscribed On
                 </Label>
-                <p className="text-sm">
+                <p className="text-base">
                   {new Date(contact.unsubscribedAt).toLocaleDateString()}
                 </p>
               </div>
             )}
             {contact.isUnsubscribed && contact.unsubscribeReason && (
               <div>
-                <Label className="text-muted-foreground text-sm font-medium">
+                <Label className="text-muted-foreground text-base font-medium">
                   Reason
                 </Label>
-                <p className="text-sm">{contact.unsubscribeReason}</p>
+                <p className="text-base">{contact.unsubscribeReason}</p>
               </div>
             )}
           </div>
@@ -257,20 +257,20 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
             <div className="grid grid-cols-2 gap-4">
               {contact.createdAt && (
                 <div>
-                  <Label className="text-muted-foreground text-sm font-medium">
+                  <Label className="text-muted-foreground text-base font-medium">
                     Created
                   </Label>
-                  <p className="text-sm">
+                  <p className="text-base">
                     {new Date(contact.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               )}
               {contact.updatedAt && (
                 <div>
-                  <Label className="text-muted-foreground text-sm font-medium">
+                  <Label className="text-muted-foreground text-base font-medium">
                     Last Updated
                   </Label>
-                  <p className="text-sm">
+                  <p className="text-base">
                     {new Date(contact.updatedAt).toLocaleDateString()}
                   </p>
                 </div>

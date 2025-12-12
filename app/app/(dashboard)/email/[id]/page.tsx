@@ -97,12 +97,12 @@ export default async function EmailDetailPage({
   return (
     <div className="mx-auto w-full max-w-(--breakpoint-lg) px-4 py-6 sm:px-6 lg:px-8">
       <section className="mb-8 space-y-4">
-        <h1 className="text-2xl font-bold dark:text-white sm:text-3xl">
+        <h1 className="text-2xl font-bold sm:text-3xl dark:text-white">
           {email.title}
         </h1>
         {isScheduled ? (
           <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+            <span className="text-base font-medium text-yellow-600 dark:text-yellow-400">
               Scheduled for{" "}
               <time dateTime={email.scheduledTime.toISOString()}>
                 {new Date(email.scheduledTime).toLocaleString()}
@@ -115,7 +115,7 @@ export default async function EmailDetailPage({
             />
           </div>
         ) : (
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-base text-gray-500 dark:text-gray-400">
             Sent at{" "}
             <time dateTime={email.updatedAt.toISOString()}>
               {new Date(email.updatedAt).toLocaleString()}
@@ -133,7 +133,7 @@ export default async function EmailDetailPage({
                   key={label}
                   className="flex flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
                 >
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <span className="text-base font-medium text-gray-500 dark:text-gray-400">
                     {label}
                   </span>
                   <span className="mt-1 text-2xl font-semibold dark:text-white">
@@ -147,7 +147,7 @@ export default async function EmailDetailPage({
             </div>
           </section>
           <section className="mb-8">
-            <h2 className="mb-4 text-xl font-semibold dark:text-gray-100 sm:text-2xl">
+            <h2 className="mb-4 text-xl font-semibold sm:text-2xl dark:text-gray-100">
               Sent to
             </h2>
             {recipients.length ? (
@@ -155,7 +155,7 @@ export default async function EmailDetailPage({
                 <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                      <th className="px-4 py-2 text-left text-base font-medium text-gray-500 dark:text-gray-300">
                         Recipient Email
                       </th>
                     </tr>
@@ -166,7 +166,7 @@ export default async function EmailDetailPage({
                         key={addr}
                         className="hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
-                        <td className="break-all px-4 py-2 text-sm dark:text-gray-200">
+                        <td className="px-4 py-2 text-base break-all dark:text-gray-200">
                           {addr}
                         </td>
                       </tr>
@@ -185,7 +185,7 @@ export default async function EmailDetailPage({
 
       {!isSent && (
         <section className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold dark:text-gray-100 sm:text-2xl">
+          <h2 className="mb-4 text-xl font-semibold sm:text-2xl dark:text-gray-100">
             Sending to
           </h2>
           {recipients.length ? (
@@ -193,7 +193,7 @@ export default async function EmailDetailPage({
               <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                    <th className="px-4 py-2 text-left text-base font-medium text-gray-500 dark:text-gray-300">
                       Recipient Email
                     </th>
                   </tr>
@@ -204,7 +204,7 @@ export default async function EmailDetailPage({
                       key={addr}
                       className="hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <td className="break-all px-4 py-2 text-sm dark:text-gray-200">
+                      <td className="px-4 py-2 text-base break-all dark:text-gray-200">
                         {addr}
                       </td>
                     </tr>

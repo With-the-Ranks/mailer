@@ -10,10 +10,10 @@ export default function DocsPage() {
       <p className="mb-2 text-lg font-medium">
         Mailer is the easiest way to send organizing emails.
       </p>
-      <p className="text-fd-muted-foreground">
+      <p className="text-fd-muted-foreground mb-8">
         Choose your path to get started with Mailer.
       </p>
-      <div className="mt-8 grid grid-cols-1 gap-4 text-start md:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-6 text-start md:grid-cols-3">
         {[
           {
             name: "For Organizers",
@@ -37,8 +37,10 @@ export default function DocsPage() {
         ].map((item) => (
           <Item key={item.name} href={item.href}>
             <Icon>{item.icon}</Icon>
-            <h2 className="mb-2 font-medium">{item.name}</h2>
-            <p className="text-fd-muted-foreground text-sm">
+            <h2 className="text-fd-muted-foreground mb-2 text-lg font-semibold">
+              {item.name}
+            </h2>
+            <p className="text-fd-muted-foreground text-sm leading-relaxed">
               {item.description}
             </p>
           </Item>
@@ -50,7 +52,7 @@ export default function DocsPage() {
 
 function Icon({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-fd-muted text-fd-muted-foreground mb-2 size-8 rounded-lg border p-1 shadow-md">
+    <div className="bg-fd-muted text-fd-muted-foreground mb-4 size-10 border p-2">
       {children}
     </div>
   );
@@ -60,7 +62,7 @@ function Item(props: LinkProps & { children: React.ReactNode }) {
   return (
     <Link
       {...props}
-      className="bg-fd-card rounded-2xl border p-4 shadow-lg transition-shadow hover:shadow-xl"
+      className="group bg-fd-card hover:bg-fd-card/90 border p-6 transition-colors duration-200"
     >
       {props.children}
     </Link>

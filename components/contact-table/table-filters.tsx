@@ -132,7 +132,7 @@ export function TableFilters({
     <div className="space-y-4">
       {/* Search Bar */}
       <div className="relative">
-        <SearchIcon className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           placeholder="Search contacts..."
           value={searchValue}
@@ -171,7 +171,7 @@ export function TableFilters({
                           checked={activeFilters[field]?.includes(v)}
                           onCheckedChange={() => handleFilterToggle(field, v)}
                         />
-                        <label htmlFor={`${field}-${v}`} className="text-sm">
+                        <label htmlFor={`${field}-${v}`} className="text-base">
                           {v}
                         </label>
                       </div>
@@ -212,7 +212,7 @@ export function TableFilters({
                           checked={activeFilters[field]?.includes(v)}
                           onCheckedChange={() => handleFilterToggle(field, v)}
                         />
-                        <label htmlFor={`${field}-${v}`} className="text-sm">
+                        <label htmlFor={`${field}-${v}`} className="text-base">
                           {v}
                         </label>
                       </div>

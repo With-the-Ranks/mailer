@@ -3,7 +3,7 @@
 import FocusTrap from "focus-trap-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 
 import useWindowSize from "@/lib/hooks/use-window-size";
 
@@ -18,8 +18,6 @@ export default function Modal({
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
 }) {
-  const desktopModalRef = useRef(null);
-
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -45,14 +43,13 @@ export default function Modal({
             <>
               <FocusTrap focusTrapOptions={{ initialFocus: false }}>
                 <motion.div
-                  ref={desktopModalRef}
                   key="desktop-modal"
                   className="fixed inset-0 z-10001 hidden min-h-screen items-center justify-center md:flex"
                   initial={{ scale: 0.95 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0.95 }}
                   onMouseDown={(e) => {
-                    if (desktopModalRef.current === e.target) {
+                    if (e.target === e.currentTarget) {
                       setShowModal(false);
                     }
                   }}
@@ -62,7 +59,7 @@ export default function Modal({
               </FocusTrap>
               <motion.div
                 key="desktop-backdrop"
-                className="fixed inset-0 z-10000 bg-black bg-opacity-50 backdrop-blur-sm"
+                className="fixed inset-0 z-10000 bg-black/30 backdrop-blur-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

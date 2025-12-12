@@ -6,11 +6,11 @@ import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
 import { source } from "@/lib/source";
 import { cn } from "@/lib/utils";
-import { cal, inter } from "@/styles/fonts";
+import { leagueSpartan } from "@/styles/fonts";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className={cn(cal.variable, inter.variable)}>
+    <div className={cn(leagueSpartan.variable, "font-sans")}>
       <RootProvider
         search={{
           enabled: true,
@@ -25,7 +25,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           {...baseOptions}
           sidebar={{
             tabs: {
-              transform(option, node) {
+              transform(option, _node) {
                 const icons: Record<string, ReactNode> = {
                   "For Organizers": <Users className="size-full" />,
                   "For Developers": <Code className="size-full" />,

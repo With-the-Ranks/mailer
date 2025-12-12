@@ -10,7 +10,8 @@ interface FormButtonProps {
 const FormButton: React.FC<FormButtonProps> = ({ isSubmitting, label }) => (
   <Button
     type="submit"
-    className="w-full"
+    variant="secondary"
+    className="w-full rounded-none bg-white text-blue-700 hover:bg-gray-100"
     disabled={isSubmitting}
     aria-label={isSubmitting ? "Submitting" : label}
   >
