@@ -31,13 +31,11 @@ export default async function Overview() {
   const currentOrgId = orgData?.orgId;
 
   return (
-    <div className="flex max-w-screen-xl flex-col space-y-12 p-8">
+    <div className="flex w-full min-w-0 flex-col space-y-12 p-4 md:p-8 lg:p-16">
       {hasOrganization && <EmailStats organizationId={currentOrgId} />}
       {hasOrganization && (
-        <div className="flex flex-col space-y-6">
-          <h1 className="font-cal text-3xl font-bold dark:text-white">
-            Recent Emails
-          </h1>
+        <div className="flex min-w-0 flex-col space-y-6">
+          <h1 className="text-3xl font-bold dark:text-white">Recent Emails</h1>
           <Suspense
             fallback={
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

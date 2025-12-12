@@ -1,5 +1,6 @@
-import LoadingDots from "@/components/icons/loading-dots";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 interface FormButtonProps {
   isSubmitting: boolean;
@@ -7,16 +8,22 @@ interface FormButtonProps {
 }
 
 const FormButton: React.FC<FormButtonProps> = ({ isSubmitting, label }) => (
-  <button
+  <Button
     type="submit"
-    className={cn(
-      "btn w-full",
-      isSubmitting && "cursor-not-allowed opacity-50",
-    )}
+    variant="secondary"
+    className="w-full rounded-none bg-white text-blue-700 hover:bg-gray-100"
     disabled={isSubmitting}
+    aria-label={isSubmitting ? "Submitting" : label}
   >
-    {isSubmitting ? <LoadingDots color="#FFFCF7" /> : <span>{label}</span>}
-  </button>
+    {isSubmitting ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+        Submitting...
+      </>
+    ) : (
+      label
+    )}
+  </Button>
 );
 
 export default FormButton;

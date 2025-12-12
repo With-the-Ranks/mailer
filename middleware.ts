@@ -1,8 +1,10 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { isSameOrigin } from "@/lib/utils";
+
 export const config = {
-  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
+  matcher: ["/((?!api/|_next/|_static/|_vercel|docs|[\\w-]+\\.\\w+).*)"],
 };
 
 const PUBLIC_PATHS = [
@@ -11,17 +13,47 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/auto-signin",
   "/accept-invite",
+  "/unsubscribe",
 ];
 
+const PUBLIC_PREFIXES = ["/app/signup-forms/", "/app/unsubscribe"];
+
 export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Handle API routes first
+  if (pathname.startsWith("/api/")) {
+    // CSRF protection for sensitive API routes
+    if (
+      req.method !== "GET" &&
+      req.method !== "OPTIONS" &&
+      (pathname.startsWith("/api/2fa/") || pathname.startsWith("/api/password"))
+    ) {
+      if (!isSameOrigin(req)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+    // Let API routes pass through without domain routing
+    return NextResponse.next();
+  }
+
   const url = req.nextUrl.clone();
-  const { pathname, search } = url;
+  const { search } = url;
   const host = req.headers.get("host")!;
+
+  // Check if path starts with any public prefix
+  const isPublicPrefix = PUBLIC_PREFIXES.some((prefix) =>
+    pathname.startsWith(prefix),
+  );
 
   const isVercelPreview =
     process.env.VERCEL_ENV === "preview" || host.endsWith(".vercel.app");
 
   if (isVercelPreview) {
+    // Don't rewrite public prefix paths - they should be accessed directly
+    if (isPublicPrefix) {
+      return NextResponse.next();
+    }
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
@@ -37,6 +69,10 @@ export default async function middleware(req: NextRequest) {
   const isRootHost = hostname === ROOT || host === "localhost:3000";
 
   if (isAppHost) {
+    // Don't rewrite public prefix paths - they should be accessed directly
+    if (isPublicPrefix) {
+      return NextResponse.next();
+    }
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 

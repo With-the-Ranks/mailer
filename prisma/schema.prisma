@@ -36,6 +36,8 @@ model User {
   currentOrganizationId String?  // Tracks user's currently selected org
   organizationMembers   OrganizationMember[]
   invitationsSent       OrganizationInvitation[] @relation("InvitationSender")
+  twoFactorEnabled Boolean      @default(false)
+  twoFactorSecret  String?
 }
 
 model Account {
@@ -229,6 +231,11 @@ model Audience {
   
   // Custom fields as JSON for flexibility
   customFields               Json?
+
+  // Unsubscribe metadata
+  isUnsubscribed             Boolean       @default(false)
+  unsubscribedAt             DateTime?
+  unsubscribeReason          String?       @db.Text
   
   // Metadata
   createdAt                  DateTime      @default(now())
@@ -243,6 +250,7 @@ model Audience {
   @@index([audienceListId])
   @@index([email])
   @@index([firstName, lastName])
+  @@index([isUnsubscribed])
 }
 
 model CustomFieldDefinition {

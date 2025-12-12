@@ -5,9 +5,11 @@ import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import React from "react";
+import speakeasy from "speakeasy";
 
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
+import { logError, TOTP_TIME_WINDOW } from "@/lib/utils";
 
 import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
@@ -45,13 +47,14 @@ export const authOptions: NextAuthOptions = {
           placeholder: "you@example.com",
         },
         password: { label: "Password", type: "password" },
+        twoFactorToken: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials || !credentials.email || !credentials.password) {
           return null;
         }
 
-        const { email, password } = credentials;
+        const { email, password, twoFactorToken } = credentials;
 
         try {
           const user = await prisma.user.findUnique({
@@ -93,9 +96,28 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Password is incorrect");
           }
 
+          // Check if 2FA is enabled
+          if (user.twoFactorEnabled && user.twoFactorSecret) {
+            if (!twoFactorToken) {
+              throw new Error("2FA_REQUIRED");
+            }
+
+            // Verify 2FA token
+            const verified = speakeasy.totp.verify({
+              secret: user.twoFactorSecret,
+              encoding: "base32",
+              token: twoFactorToken,
+              window: TOTP_TIME_WINDOW,
+            });
+
+            if (!verified) {
+              throw new Error("Invalid 2FA token");
+            }
+          }
+
           return user;
         } catch (error: any) {
-          console.error("Login error:", error);
+          logError("Login error", error);
           throw new Error(error.message || "Login failed");
         }
       },

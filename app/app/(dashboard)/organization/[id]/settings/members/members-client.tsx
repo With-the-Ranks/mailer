@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  MoreVertical,
-  Shield,
-  ShieldCheck,
-  Trash2,
-  UserPlus,
-  X,
-} from "lucide-react";
+import { MoreVertical, Shield, ShieldCheck, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -154,7 +147,6 @@ export default function MembersPageClient({
         </div>
         {isAdmin && (
           <Button onClick={() => setInviteModalOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
             Invite Member
           </Button>
         )}
@@ -207,23 +199,25 @@ export default function MembersPageClient({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          member.role === "ADMIN" ? "default" : "secondary"
-                        }
-                        className={`inline-flex items-center gap-1 px-2 py-1 ${
-                          member.role === "ADMIN"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-600 text-white"
-                        }`}
-                      >
-                        {member.role === "ADMIN" ? (
-                          <ShieldCheck className="h-3 w-3" />
-                        ) : (
-                          <Shield className="h-3 w-3" />
-                        )}
-                        <span className="text-xs">{member.role}</span>
-                      </Badge>
+                      <div className="flex items-center justify-center">
+                        <Badge
+                          variant={
+                            member.role === "ADMIN" ? "default" : "secondary"
+                          }
+                          className={`inline-flex items-center justify-center gap-1 px-2 py-1 ${
+                            member.role === "ADMIN"
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-600 text-white"
+                          }`}
+                        >
+                          {member.role === "ADMIN" ? (
+                            <ShieldCheck className="h-3 w-3" />
+                          ) : (
+                            <Shield className="h-3 w-3" />
+                          )}
+                          <span className="text-xs">{member.role}</span>
+                        </Badge>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {isAdmin && !isCurrentUser && (
@@ -261,7 +255,7 @@ export default function MembersPageClient({
                               <AlertDialogTrigger asChild>
                                 <DropdownMenuItem
                                   onSelect={(e) => e.preventDefault()}
-                                  className="cursor-pointer text-destructive"
+                                  className="text-destructive cursor-pointer"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Remove Member
@@ -340,21 +334,23 @@ export default function MembersPageClient({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`inline-flex items-center gap-1 px-2 py-1 ${
-                          invitation.role === "ADMIN"
-                            ? "border-primary bg-primary/10 text-primary dark:bg-primary/20"
-                            : "border-gray-800 bg-gray-800 text-white dark:border-gray-200 dark:bg-gray-200 dark:text-gray-900"
-                        }`}
-                      >
-                        {invitation.role === "ADMIN" ? (
-                          <ShieldCheck className="h-3 w-3" />
-                        ) : (
-                          <Shield className="h-3 w-3" />
-                        )}
-                        <span className="text-xs">{invitation.role}</span>
-                      </Badge>
+                      <div className="flex items-center justify-center">
+                        <Badge
+                          variant="outline"
+                          className={`inline-flex items-center justify-center gap-1 px-2 py-1 ${
+                            invitation.role === "ADMIN"
+                              ? "border-primary bg-primary/10 text-primary dark:bg-primary/20"
+                              : "border-gray-800 bg-gray-800 text-white dark:border-gray-200 dark:bg-gray-200 dark:text-gray-900"
+                          }`}
+                        >
+                          {invitation.role === "ADMIN" ? (
+                            <ShieldCheck className="h-3 w-3" />
+                          ) : (
+                            <Shield className="h-3 w-3" />
+                          )}
+                          <span className="text-xs">{invitation.role}</span>
+                        </Badge>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {invitation.invitedBy.name || invitation.invitedBy.email}

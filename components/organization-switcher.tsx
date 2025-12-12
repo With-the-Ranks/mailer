@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -78,11 +78,10 @@ export default function OrganizationSwitcher({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full items-center justify-between px-4"
           disabled={switching}
         >
           <div className="flex items-center gap-2 truncate">
-            <Building2 className="h-4 w-4 shrink-0" />
             <span className="truncate">
               {currentOrg?.name || "Select organization..."}
             </span>
@@ -90,7 +89,7 @@ export default function OrganizationSwitcher({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[250px] p-0">
+      <PopoverContent className="w-[250px] rounded-none p-0">
         <Command>
           <CommandList>
             <CommandEmpty>No organization found.</CommandEmpty>

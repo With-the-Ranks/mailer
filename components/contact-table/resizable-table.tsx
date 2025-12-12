@@ -27,7 +27,7 @@ export function ResizableTable<T>({
     Record<string, number>
   >({});
 
-  // Update the table's column sizing state
+  // Sync column sizing with table instance
   React.useEffect(() => {
     table.setColumnSizing(columnSizing);
   }, [columnSizing, table]);
@@ -60,7 +60,7 @@ export function ResizableTable<T>({
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
-                          className="bg-border absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none hover:bg-primary/50 active:bg-primary"
+                          className="bg-border hover:bg-primary/50 active:bg-primary absolute top-0 right-0 h-full w-1 cursor-col-resize touch-none select-none"
                           style={{
                             transform: header.column.getIsResizing()
                               ? `translateX(${table.getState().columnSizingInfo.deltaOffset}px)`

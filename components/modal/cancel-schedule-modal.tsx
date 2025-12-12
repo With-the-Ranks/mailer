@@ -64,13 +64,13 @@ export default function CancelScheduleModal({
               e.preventDefault();
               handleUnschedule();
             }}
-            className="w-full rounded-md bg-white text-left dark:bg-black md:max-w-md md:border md:border-stone-200 md:shadow dark:md:border-stone-700"
+            className="w-full rounded-md bg-white text-left md:max-w-md md:border md:border-stone-200 md:shadow-sm dark:bg-black dark:md:border-stone-700"
           >
             <div className="relative flex flex-col space-y-4 p-5 md:p-10">
-              <h2 className="font-cal text-2xl dark:text-white">
+              <h2 className="text-2xl dark:text-white">
                 Cancel Scheduled Email?
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-base text-gray-500 dark:text-gray-400">
                 Scheduled for{" "}
                 <time dateTime={scheduledTime}>
                   {new Date(scheduledTime).toLocaleString()}
@@ -78,7 +78,7 @@ export default function CancelScheduleModal({
                 . Are you sure you want to move it back to draft?
               </p>
             </div>
-            <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
+            <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-stone-800">
               <Button
                 type="button"
                 variant="outline"

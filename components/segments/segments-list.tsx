@@ -184,14 +184,14 @@ export function SegmentsList({
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
-              <div className="bg-muted h-4 w-3/4 rounded"></div>
-              <div className="bg-muted h-3 w-1/2 rounded"></div>
+              <div className="bg-muted h-4 w-3/4 rounded-sm"></div>
+              <div className="bg-muted h-3 w-1/2 rounded-sm"></div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="bg-muted h-3 w-full rounded"></div>
-                <div className="bg-muted h-3 w-2/3 rounded"></div>
-                <div className="bg-muted h-3 w-1/2 rounded"></div>
+                <div className="bg-muted h-3 w-full rounded-sm"></div>
+                <div className="bg-muted h-3 w-2/3 rounded-sm"></div>
+                <div className="bg-muted h-3 w-1/2 rounded-sm"></div>
               </div>
             </CardContent>
           </Card>
@@ -246,7 +246,7 @@ export function SegmentsList({
                       tabIndex={-1}
                     >
                       <CardTitle className="text-lg">{segment.name}</CardTitle>
-                      <CardDescription className="text-sm">
+                      <CardDescription className="text-base">
                         {segment.audienceList.name}
                       </CardDescription>
                     </Link>
@@ -288,14 +288,14 @@ export function SegmentsList({
 
               <CardContent className="space-y-4">
                 {segment.description && (
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-base">
                     {segment.description}
                   </p>
                 )}
 
                 <div className="flex items-center gap-2">
                   <UsersIcon className="text-muted-foreground h-4 w-4" />
-                  <span className="text-sm font-medium">
+                  <span className="text-base font-medium">
                     {segment.contactCount} contacts
                   </span>
                 </div>
@@ -304,7 +304,7 @@ export function SegmentsList({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <FilterIcon className="text-muted-foreground h-4 w-4" />
-                      <span className="text-sm font-medium">
+                      <span className="text-base font-medium">
                         Applied Filters
                       </span>
                     </div>

@@ -3,15 +3,16 @@ import { notFound } from "next/navigation";
 
 import { getOrganizationData, getPostData } from "@/lib/fetchers";
 import prisma from "@/lib/prisma";
-import { toDateString } from "@/lib/utils";
+import { getUnsubscribeUrl, toDateString } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
 
   const [data, organizationData] = await Promise.all([
     getPostData(domain, slug),
@@ -70,6 +71,7 @@ export async function generateStaticParams() {
 async function parseEmailContent(
   content: string | null,
   previewText: string | null,
+  unsubscribeOpts: { listId?: string | null; organizationId?: string | null },
 ) {
   if (!content) {
     return "";
@@ -78,7 +80,7 @@ async function parseEmailContent(
   let jsonContent;
   try {
     jsonContent = JSON.parse(content);
-  } catch (error) {
+  } catch {
     console.error("Invalid JSON content:", content);
     return "Invalid email content.";
   }
@@ -87,35 +89,45 @@ async function parseEmailContent(
   if (previewText) {
     maily.setPreviewText(previewText);
   }
+  maily.setVariableValues({
+    unsubscribe_url: getUnsubscribeUrl({
+      listId: unsubscribeOpts.listId || undefined,
+      organizationId: unsubscribeOpts.organizationId || undefined,
+    }),
+  });
   return await maily.render();
 }
 
 export default async function OrganizationPostPage({
   params,
 }: {
-  params: { domain: string; slug: string };
+  params: Promise<{ domain: string; slug: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
-  const slug = decodeURIComponent(params.slug);
+  const { domain: rawDomain, slug: rawSlug } = await params;
+  const domain = decodeURIComponent(rawDomain);
+  const slug = decodeURIComponent(rawSlug);
   const data = await getPostData(domain, slug);
 
   if (!data) {
     notFound();
   }
 
-  const emailContent = await parseEmailContent(data.content, data.previewText);
+  const emailContent = await parseEmailContent(data.content, data.previewText, {
+    listId: data.audienceListId ?? undefined,
+    organizationId: data.organizationId ?? undefined,
+  });
 
   return (
     <>
       <div className="mt-10 flex flex-col items-center justify-center">
         <div className="m-auto w-full text-center md:w-7/12">
-          <h1 className="mb-10 font-title text-3xl font-bold text-stone-800 dark:text-white md:text-6xl">
+          <h1 className="mb-10 text-3xl font-bold text-stone-800 md:text-6xl dark:text-white">
             Campaign: {data.title}
           </h1>
-          <p className="m-auto my-5 w-10/12 text-sm font-light text-stone-500 dark:text-stone-400 md:text-base">
+          <p className="m-auto my-5 w-10/12 text-base font-light text-stone-500 md:text-2xl dark:text-stone-400">
             {toDateString(data.createdAt)}
           </p>
-          <p className="text-md m-auto w-10/12 text-stone-600 dark:text-stone-400 md:text-lg">
+          <p className="text-md m-auto w-10/12 text-stone-600 md:text-lg dark:text-stone-400">
             {data.description}
           </p>
         </div>
@@ -136,7 +148,7 @@ export default async function OrganizationPostPage({
           </div>
         </a> */}
       </div>
-      {/* <div className="relative m-auto mb-10 h-80 w-full max-w-screen-lg overflow-hidden md:mb-20 md:h-150 md:w-5/6 md:rounded-2xl lg:w-2/3">
+      {/* <div className="relative m-auto mb-10 h-80 w-full max-w-(--breakpoint-lg) overflow-hidden md:mb-20 md:h-150 md:w-5/6 md:rounded-2xl lg:w-2/3">
         <BlurImage
           alt={data.title ?? "Post image"}
           width={1200}

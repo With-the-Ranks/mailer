@@ -97,6 +97,9 @@ export interface Contact {
   createdAt?: string;
   updatedAt?: string;
   audienceListId: string;
+  isUnsubscribed?: boolean;
+  unsubscribedAt?: string;
+  unsubscribeReason?: string;
 }
 
 export interface ImportProgress {

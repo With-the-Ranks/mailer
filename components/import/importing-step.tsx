@@ -33,7 +33,7 @@ export function ImportingStep({ importProgress }: ImportingStepProps) {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-base">
                 <span>Progress</span>
                 <span>
                   {importProgress.processed} of {importProgress.total}
@@ -49,27 +49,29 @@ export function ImportingStep({ importProgress }: ImportingStepProps) {
                 <div className="text-2xl font-bold text-green-600">
                   {importProgress.successful}
                 </div>
-                <div className="text-muted-foreground text-sm">Successful</div>
+                <div className="text-muted-foreground text-base">
+                  Successful
+                </div>
               </div>
               <div className="rounded-lg border p-4 text-center">
                 <div className="text-2xl font-bold text-red-600">
                   {importProgress.failed}
                 </div>
-                <div className="text-muted-foreground text-sm">Failed</div>
+                <div className="text-muted-foreground text-base">Failed</div>
               </div>
               <div className="rounded-lg border p-4 text-center">
                 <div className="text-2xl font-bold">
                   {importProgress.processed}
                 </div>
-                <div className="text-muted-foreground text-sm">Processed</div>
+                <div className="text-muted-foreground text-base">Processed</div>
               </div>
             </div>
             {importProgress.errors.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Import Errors:</Label>
-                <ScrollArea className="h-32 rounded border p-2">
+                <Label className="text-base font-medium">Import Errors:</Label>
+                <ScrollArea className="h-32 rounded-sm border p-2">
                   {importProgress.errors.map((error, index) => (
-                    <div key={index} className="mb-1 text-sm text-red-600">
+                    <div key={index} className="mb-1 text-base text-red-600">
                       Row {error.row}: {error.error}
                     </div>
                   ))}

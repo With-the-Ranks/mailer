@@ -12,7 +12,7 @@ interface Props {
   contentJson: any;
   organizationId: string;
   disabled?: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   onCreate?: (tpl: { id: string; name: string }) => void;
 }
 
@@ -62,7 +62,7 @@ export default function SaveTemplateButton({
       </Button>
 
       {isEditing && (
-        <div className="absolute right-0 mt-1 flex items-center space-x-2 rounded border bg-white p-3 shadow-lg">
+        <div className="absolute right-0 mt-1 flex items-center space-x-2 rounded-sm border bg-white p-3 shadow-lg">
           <Input
             className="w-48"
             placeholder="Template name"

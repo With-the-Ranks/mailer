@@ -101,7 +101,7 @@ export default function SegmentContactsPage() {
   ).length;
 
   return (
-    <div className="flex h-full w-full max-w-screen-2xl flex-col space-y-4 p-4">
+    <div className="flex h-full w-full max-w-(--breakpoint-2xl) flex-col space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="mb-1 text-2xl font-bold">
