@@ -158,20 +158,8 @@ function AcceptInviteContent() {
             </div>
           ) : (
             <>
-              <Button
-                onClick={handleAccept}
-                disabled={loading}
-                className="w-full"
-                size="lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Accepting...
-                  </>
-                ) : (
-                  "Accept Invitation"
-                )}
+              <Button onClick={handleAccept} className="w-full" size="lg">
+                Accept Invitation
               </Button>
 
               <Button
