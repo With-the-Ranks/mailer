@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
-import { TOTP_CODE_LENGTH } from "@/lib/utils";
+import { isSafeCallbackPath, TOTP_CODE_LENGTH } from "@/lib/utils";
 
 function SignInForm() {
   const [formData, setFormData] = useState({
@@ -17,6 +17,8 @@ function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"credentials" | "2fa">("credentials");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -69,7 +71,8 @@ function SignInForm() {
     }
 
     toast.success("Login Successful");
-    router.push("/");
+    const destination = isSafeCallbackPath(callbackUrl) ? callbackUrl! : "/";
+    router.push(destination);
   };
 
   return (
@@ -97,7 +100,7 @@ function SignInForm() {
             className="my-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             required
           />
-          <FormButton isSubmitting={isSubmitting} label="Continue" />
+          <FormButton isSubmitting={isSubmitting} label="Login" />
         </>
       ) : (
         <>

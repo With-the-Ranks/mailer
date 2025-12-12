@@ -25,6 +25,11 @@ export default function SiteSettingsNav() {
       href: `/organization/${id}/settings/appearance`,
       segment: "appearance",
     },
+    {
+      name: "Members",
+      href: `/organization/${id}/settings/members`,
+      segment: "members",
+    },
   ];
 
   return (

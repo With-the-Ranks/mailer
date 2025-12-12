@@ -44,7 +44,7 @@ async function getExamples(node: any, prisma: PrismaClient) {
 export function replaceTweets() {
   return (tree: any) =>
     new Promise<void>(async (resolve, reject) => {
-      const nodesToChange = new Array();
+      const nodesToChange: Array<{ node: any }> = [];
 
       visit(tree, "link", (node: any) => {
         if (
@@ -87,7 +87,7 @@ export function replaceTweets() {
 export function replaceExamples(prisma: PrismaClient) {
   return (tree: any) =>
     new Promise<void>(async (resolve, reject) => {
-      const nodesToChange = new Array();
+      const nodesToChange: Array<{ node: any }> = [];
 
       visit(tree, "mdxJsxFlowElement", (node: any) => {
         if (node.name == "Examples") {

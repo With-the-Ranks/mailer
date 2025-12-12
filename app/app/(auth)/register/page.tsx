@@ -3,7 +3,14 @@ import Link from "next/link";
 
 import RegisterForm from "./form";
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const callbackUrl =
+    typeof params.callbackUrl === "string" ? params.callbackUrl : null;
   return (
     <div className="mx-5 bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="flex items-center justify-center gap-2">
@@ -24,7 +31,7 @@ export default function RegisterPage() {
         Create your account and start sending beautiful emails.
       </p>
       <div className="mx-auto mt-4 w-11/12 max-w-xs sm:w-full">
-        <RegisterForm />
+        <RegisterForm callbackUrl={callbackUrl} />
       </div>
       <div className="mt-5 text-center text-base text-white">
         Already have an account?{" "}

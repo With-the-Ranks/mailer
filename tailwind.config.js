@@ -19,7 +19,7 @@ module.exports = {
         foreground: "hsl(var(--foreground))",
         popover: "hsl(var(--popover))",
         primary: "#252753",
-        accent: "#8c9dff",
+        accent: "#2b6cb0",
         destructive: "#ef4444",
         "destructive-foreground": "#fff",
         tremor: {

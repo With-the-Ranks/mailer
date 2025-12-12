@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 import SiteSettingsNav from "./nav";
@@ -17,18 +17,27 @@ export default async function OrganizationAnalyticsLayout({
   if (!session) {
     redirect("/login");
   }
+
   const { id } = await params;
+  const organizationId = decodeURIComponent(id);
+
+  // Check if user is a member and get their role
+  const userRole = await getUserOrgRole(
+    session.user.id as string,
+    organizationId,
+  );
+
+  if (!userRole) {
+    notFound();
+  }
+
+  // Settings pages require ADMIN role
+  if (userRole !== "ADMIN") {
+    redirect(`/organization/${organizationId}`);
+  }
+
   const data = await prisma.organization.findUnique({
-    where: {
-      id: decodeURIComponent(id),
-      users: {
-        some: {
-          id: {
-            in: [session!.user.id as string],
-          },
-        },
-      },
-    },
+    where: { id: organizationId },
   });
 
   if (!data) {

@@ -7,7 +7,7 @@ import { revalidateTag } from "next/cache";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole } from "@/lib/auth";
 import {
   addDomainToVercel,
   // getApexDomain,
@@ -19,7 +19,7 @@ import prisma from "@/lib/prisma";
 // import { seedOrgTemplates } from "@/lib/seedTemplates";
 import { getBlurDataURL, logError } from "@/lib/utils";
 
-import { withEmailAuth, withOrgAuth } from "../auth";
+import { withAdminAuth, withEmailAuth } from "../auth";
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -53,12 +53,23 @@ export const createOrganization = async (
     });
 
     try {
+      // Create organization member record with ADMIN role
+      await (prisma as any).organizationMember.create({
+        data: {
+          userId: uid,
+          organizationId: response.id,
+          role: "ADMIN",
+        },
+      });
+
+      // Update user with legacy organizationId and set as current organization
       await prisma.user.update({
         where: {
           id: uid,
         },
         data: {
           organizationId: response.id,
+          currentOrganizationId: response.id,
         },
       });
     } catch (error: any) {
@@ -84,7 +95,7 @@ export const createOrganization = async (
   }
 };
 
-export const updateOrganization = withOrgAuth(
+export const updateOrganization = withAdminAuth(
   async (formData: FormData, organization: Organization, key: string) => {
     const value = formData.get(key) as string;
 
@@ -269,7 +280,7 @@ export const updateOrganization = withOrgAuth(
   },
 );
 
-export const deleteOrganization = withOrgAuth(
+export const deleteOrganization = withAdminAuth(
   async (_: FormData, organization: Organization) => {
     try {
       const response = await prisma.organization.delete({
@@ -567,10 +578,11 @@ export const getOrgAndAudienceList = async () => {
   const session = await getSession();
   if (!session?.user.id) return null;
 
-  const user = await prisma.user.findUnique({
+  const user: any = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
       organizationId: true,
+      currentOrganizationId: true,
       organization: {
         select: {
           audienceLists: {
@@ -583,10 +595,99 @@ export const getOrgAndAudienceList = async () => {
     },
   });
 
-  if (!user?.organizationId || !user.organization) return null;
+  // Fetch user's organizations via OrganizationMember
+  const userOrganizations = await (prisma as any).organizationMember.findMany({
+    where: { userId: session.user.id },
+    include: {
+      organization: {
+        select: { id: true, name: true },
+      },
+    },
+  });
 
-  const orgId = user.organizationId;
-  const audienceListId = user.organization.audienceLists[0]?.id ?? null;
+  // Legacy migration: If user has organizationId but no OrganizationMember record, create one
+  if (user?.organizationId && userOrganizations.length === 0) {
+    try {
+      await (prisma as any).organizationMember.create({
+        data: {
+          userId: session.user.id,
+          organizationId: user.organizationId,
+          role: "ADMIN", // Original org owner is admin
+        },
+      });
 
-  return { orgId, audienceListId };
+      // Update currentOrganizationId if not set
+      if (!user.currentOrganizationId) {
+        await prisma.user.update({
+          where: { id: session.user.id },
+          data: { currentOrganizationId: user.organizationId },
+        });
+      }
+
+      // Refetch organizations after creating the member record
+      const updatedUserOrgs = await (prisma as any).organizationMember.findMany(
+        {
+          where: { userId: session.user.id },
+          include: {
+            organization: {
+              select: { id: true, name: true },
+            },
+          },
+        },
+      );
+
+      const userOrgs = updatedUserOrgs.map((member: any) => ({
+        id: member.organization.id,
+        name: member.organization.name,
+        role: member.role,
+      }));
+
+      const currentOrgId = user.currentOrganizationId || user.organizationId;
+
+      return {
+        currentOrgId,
+        userOrgs,
+        defaultAudienceId: user.organization?.audienceLists?.[0]?.id || null,
+      };
+    } catch (error) {
+      console.error("Error creating legacy organization member:", error);
+    }
+  }
+
+  const userOrgs = userOrganizations.map((member: any) => ({
+    id: member.organization.id,
+    name: member.organization.name,
+    role: member.role,
+  }));
+
+  // Determine current org - prefer currentOrganizationId, fall back to organizationId
+  const currentOrgId = user?.currentOrganizationId || user?.organizationId;
+
+  if (!currentOrgId) {
+    return { orgId: null, audienceListId: null, userOrgs, userRole: null };
+  }
+
+  // Fetch user's role for the current organization
+  const currentRole = await getUserOrgRole(session.user.id, currentOrgId);
+
+  // Fetch current organization's first audience list
+  const currentOrg = await prisma.organization.findUnique({
+    where: { id: currentOrgId },
+    select: {
+      audienceLists: {
+        select: { id: true, name: true },
+        orderBy: { createdAt: "asc" },
+        take: 1,
+      },
+    },
+  });
+
+  const audienceListId = currentOrg?.audienceLists[0]?.id ?? null;
+
+  return {
+    orgId: currentOrgId,
+    audienceListId,
+    userOrgs,
+    userRole: currentRole || null,
+  };
 };

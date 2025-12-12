@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { isSafeCallbackPath } from "@/lib/utils";
 
 import SignInForm from "./form";
 
@@ -13,6 +14,8 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const verify = typeof params.verify === "string" ? params.verify : null;
+  const callbackUrl =
+    typeof params.callbackUrl === "string" ? params.callbackUrl : null;
 
   const alert =
     verify === "success"
@@ -86,7 +89,10 @@ export default async function LoginPage({
       </div>
       <div className="mt-5 text-center text-base text-white">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="p-2 underline hover:text-gray-200">
+        <Link
+          href={`/register${isSafeCallbackPath(callbackUrl) ? `?callbackUrl=${encodeURIComponent(callbackUrl as string)}` : ""}`}
+          className="p-2 underline hover:text-gray-200"
+        >
           Sign up
         </Link>
       </div>

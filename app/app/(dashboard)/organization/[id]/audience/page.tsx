@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import Audiences from "@/components/audiences";
 import CreateAudienceListButton from "@/components/create-audience-list-button";
 import CreateAudienceModal from "@/components/modal/create-audience-list";
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export default async function AudienceList({
@@ -21,14 +21,14 @@ export default async function AudienceList({
 
   const orgId = decodeURIComponent(id);
 
+  const isMember = await isOrgMember(session.user.id as string, orgId);
+  if (!isMember) {
+    notFound();
+  }
+
   const organization = await prisma.organization.findUnique({
     where: {
       id: orgId,
-      users: {
-        some: {
-          id: session.user.id as string,
-        },
-      },
     },
     include: {
       audienceLists: true,

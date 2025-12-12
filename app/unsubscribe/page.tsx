@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 const DEFAULT_REASONS = [
   "I receive too many emails",

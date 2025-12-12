@@ -23,7 +23,7 @@ export default async function OrganizationSettingsAppearance({
         inputAttrs={{
           name: "image",
           type: "file",
-          defaultValue: data?.image!,
+          defaultValue: data?.image ?? "",
         }}
         handleSubmit={updateOrganization}
       />
@@ -34,7 +34,7 @@ export default async function OrganizationSettingsAppearance({
         inputAttrs={{
           name: "logo",
           type: "file",
-          defaultValue: data?.logo!,
+          defaultValue: data?.logo ?? "",
         }}
         handleSubmit={updateOrganization}
       />

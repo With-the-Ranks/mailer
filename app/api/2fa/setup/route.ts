@@ -7,7 +7,7 @@ import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     const session = await getSession();
 

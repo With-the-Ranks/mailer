@@ -67,6 +67,19 @@ export function CustomFieldsManager({
   });
   const [newOption, setNewOption] = React.useState("");
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      label: "",
+      type: "text",
+      required: false,
+      description: "",
+      options: [],
+    });
+    setEditingField(null);
+    setNewOption("");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.label) {
@@ -95,19 +108,6 @@ export function CustomFieldsManager({
     }
 
     resetForm();
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      label: "",
-      type: "text",
-      required: false,
-      description: "",
-      options: [],
-    });
-    setEditingField(null);
-    setNewOption("");
   };
 
   const handleEdit = (field: CustomFieldDefinition) => {

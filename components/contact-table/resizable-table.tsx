@@ -20,10 +20,10 @@ interface ResizableTableProps<T> {
 
 export function ResizableTable<T>({
   table,
-  data,
+  data: _data,
   columns,
 }: ResizableTableProps<T>) {
-  const [columnSizing, setColumnSizing] = React.useState<
+  const [columnSizing, _setColumnSizing] = React.useState<
     Record<string, number>
   >({});
 

@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/auto-signin",
+  "/accept-invite",
   "/unsubscribe",
 ];
 

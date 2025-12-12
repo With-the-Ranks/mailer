@@ -1,11 +1,13 @@
-import { getEmailStatsByUser } from "@/lib/getEmailStats";
+import { getEmailStatsByOrganization } from "@/lib/getEmailStats";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId");
+  const organizationId = searchParams.get("organizationId");
 
-  if (!userId) return new Response("Missing userId", { status: 400 });
+  if (!organizationId) {
+    return new Response("Missing organizationId", { status: 400 });
+  }
 
-  const stats = await getEmailStatsByUser(userId);
+  const stats = await getEmailStatsByOrganization(organizationId);
   return Response.json(stats);
 }

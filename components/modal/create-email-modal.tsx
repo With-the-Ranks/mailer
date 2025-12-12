@@ -29,11 +29,14 @@ export default function CreateEmailModal({
   const router = useRouter();
   const modal = useModal();
 
-  const predefinedTemplates: TemplateRecord[] = [
-    { id: "signup", name: "Signup", content: signupJson },
-    { id: "donation", name: "Donation", content: donationJson },
-    { id: "blank", name: "Blank", content: blankJson },
-  ];
+  const predefinedTemplates: TemplateRecord[] = React.useMemo(
+    () => [
+      { id: "signup", name: "Signup", content: signupJson },
+      { id: "donation", name: "Donation", content: donationJson },
+      { id: "blank", name: "Blank", content: blankJson },
+    ],
+    [],
+  );
 
   const [data, setData] = useState({
     campaignName: "",

@@ -183,37 +183,8 @@ export function ContactList({
     }
     router.replace(`?${params.toString()}`, { scroll: false });
   };
-  // Initialize contacts from props, but always refresh from API to get latest data
-  React.useEffect(() => {
-    if (initialContacts && initialContacts.length > 0 && !isInitialized) {
-      setContacts(initialContacts.map(convertAudienceToContact));
-      setIsInitialized(true);
-      // Refresh from API to get latest data (including unsubscribe status)
-      loadContacts();
-    } else if (!initialContacts || initialContacts.length === 0) {
-      loadContacts();
-    }
-  }, [initialContacts, isInitialized, listId]);
 
-  // Load custom fields
-  React.useEffect(() => {
-    loadCustomFields();
-  }, []);
-
-  const loadCustomFields = async () => {
-    try {
-      const response = await fetch("/api/custom-fields");
-      if (response.ok) {
-        const fields = await parseResponse(response);
-        setCustomFields(fields);
-      }
-    } catch (error) {
-      console.error("Failed to load custom fields:", error);
-      toast.error("Failed to load custom fields");
-    }
-  };
-
-  const loadContacts = async () => {
+  const loadContacts = React.useCallback(async () => {
     try {
       const response = await fetch(`/api/contacts?audienceListId=${listId}`);
       if (response.ok) {
@@ -227,7 +198,37 @@ export function ContactList({
       console.error("Failed to load contacts:", error);
       toast.error("Failed to load contacts");
     }
-  };
+  }, [listId]);
+
+  const loadCustomFields = React.useCallback(async () => {
+    try {
+      const response = await fetch("/api/custom-fields");
+      if (response.ok) {
+        const fields = await parseResponse(response);
+        setCustomFields(fields);
+      }
+    } catch (error) {
+      console.error("Failed to load custom fields:", error);
+      toast.error("Failed to load custom fields");
+    }
+  }, []);
+
+  // Initialize contacts from props, but always refresh from API to get latest data
+  React.useEffect(() => {
+    if (initialContacts && initialContacts.length > 0 && !isInitialized) {
+      setContacts(initialContacts.map(convertAudienceToContact));
+      setIsInitialized(true);
+      // Refresh from API to get latest data (including unsubscribe status)
+      loadContacts();
+    } else if (!initialContacts || initialContacts.length === 0) {
+      loadContacts();
+    }
+  }, [initialContacts, isInitialized, listId, loadContacts]);
+
+  // Load custom fields
+  React.useEffect(() => {
+    loadCustomFields();
+  }, [loadCustomFields]);
   const handleAddContact = React.useCallback(
     async (contactData: Omit<Contact, "id">) => {
       try {
@@ -315,7 +316,7 @@ export function ContactList({
         );
       }
     },
-    [contacts, listId],
+    [contacts, listId, loadContacts],
   );
 
   const handleDeleteContact = React.useCallback(async (id: string) => {
@@ -498,7 +499,7 @@ export function ContactList({
         );
       }
     },
-    [listId],
+    [listId, loadContacts],
   );
 
   const selectedRowCount = Object.keys(rowSelection).filter(

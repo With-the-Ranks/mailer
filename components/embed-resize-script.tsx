@@ -15,7 +15,7 @@ export function EmbedResizeScript({ formSlug }: EmbedResizeScriptProps) {
           const url = new URL(document.referrer);
           return url.origin;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
       return null;

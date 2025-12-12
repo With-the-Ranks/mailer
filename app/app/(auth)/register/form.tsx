@@ -6,8 +6,9 @@ import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
+import { isSafeCallbackPath } from "@/lib/utils";
 
-function RegisterForm() {
+function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -36,7 +37,10 @@ function RegisterForm() {
     toast.success(
       "Registration successful. Please check your email to verify.",
     );
-    router.push("/login");
+    const nextUrl = isSafeCallbackPath(callbackUrl)
+      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl as string)}`
+      : "/login";
+    router.push(nextUrl);
   };
 
   return (

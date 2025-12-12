@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let where: any = {
+    const where: any = {
       organizationId: session.user.organizationId,
     };
 
