@@ -38,11 +38,6 @@ export default async function PostOG({
     return new Response("Not found", { status: 404 });
   }
 
-  // Fetch League Spartan font from Google Fonts
-  const leagueSpartanData = await fetch(
-    "https://fonts.gstatic.com/s/leaguespartan/v11/kJEqBuEW6A0lliaV_m88ja5Twtx8BWhtkDVmjZvM.woff2",
-  ).then((res) => res.arrayBuffer());
-
   return new ImageResponse(
     (
       <div tw="flex flex-col items-center w-full h-full bg-white">
@@ -72,12 +67,6 @@ export default async function PostOG({
     {
       width: 1200,
       height: 600,
-      fonts: [
-        {
-          name: "League Spartan",
-          data: leagueSpartanData,
-        },
-      ],
       emoji: "blobmoji",
     },
   );
