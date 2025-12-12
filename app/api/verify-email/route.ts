@@ -44,8 +44,19 @@ export async function GET(req: NextRequest) {
     where: { token },
   });
 
-  // Redirect to auto-signin page with token
-  return NextResponse.redirect(
-    `${baseUrl}/auto-signin?email=${encodeURIComponent(user.email)}&verified=true&token=${autoSigninToken}`,
+  // Create response with HttpOnly cookie containing the token
+  const response = NextResponse.redirect(
+    `${baseUrl}/auto-signin?email=${encodeURIComponent(user.email)}&verified=true`,
   );
+
+  // Set auto-signin token in HttpOnly cookie
+  response.cookies.set("auto-signin-token", autoSigninToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 5 * 60, // 5 minutes
+    path: "/",
+  });
+
+  return response;
 }

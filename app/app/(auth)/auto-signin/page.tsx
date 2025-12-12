@@ -13,19 +13,34 @@ function AutoSignInContent() {
 
   const email = searchParams.get("email");
   const verified = searchParams.get("verified");
-  const token = searchParams.get("token");
 
   useEffect(() => {
-    if (!email || verified !== "true" || !token) {
+    if (!email || verified !== "true") {
       router.push("/login?verify=invalid");
       return;
     }
 
-    // Automatically sign in the user using the temporary token
+    // Automatically sign in the user using the temporary token from HttpOnly cookie
     const autoSignIn = async () => {
       setIsSigningIn(true);
 
       try {
+        // Get the token from the API (which reads from HttpOnly cookie)
+        const tokenResponse = await fetch("/api/auto-signin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+
+        if (!tokenResponse.ok) {
+          // If token retrieval fails, redirect to login with success message
+          toast.success("Email verified successfully! Please sign in.");
+          router.push("/login?verify=success");
+          return;
+        }
+
+        const { token } = await tokenResponse.json();
+
         const result = await signIn("credentials", {
           redirect: false,
           email,
@@ -68,7 +83,7 @@ function AutoSignInContent() {
     };
 
     autoSignIn();
-  }, [email, verified, token, router]);
+  }, [email, verified, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">

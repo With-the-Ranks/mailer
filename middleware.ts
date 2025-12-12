@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 import { isSameOrigin } from "@/lib/utils";
 
@@ -67,12 +68,22 @@ export default async function middleware(req: NextRequest) {
 
   const isAppHost = hostname === `app.${ROOT}`;
   const isRootHost = hostname === ROOT || host === "localhost:3000";
+  const session = await getToken({ req: req as any });
 
   if (isAppHost) {
     // Don't rewrite public prefix paths - they should be accessed directly
     if (isPublicPrefix) {
       return NextResponse.next();
     }
+
+    if (!session && !PUBLIC_PATHS.includes(pathname)) {
+      return NextResponse.redirect(new URL(`/login${search}`, req.url));
+    }
+
+    if (session && pathname === "/login") {
+      return NextResponse.redirect(new URL(`/${search}`, req.url));
+    }
+
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
