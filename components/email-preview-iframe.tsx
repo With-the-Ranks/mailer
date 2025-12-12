@@ -31,7 +31,7 @@ function renderHTMLToIFrame(
   const fontLink = iframeDocument.createElement("link");
   fontLink.rel = "stylesheet";
   fontLink.href =
-    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";
+    "https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700;800&display=swap";
   iframeDocument.head.appendChild(fontLink);
   iframeDocument.body.innerHTML = html;
 }
@@ -93,7 +93,7 @@ export function EmailPreviewIFrame(props: EmailPreviewIFrameProps) {
 
       {showOpenInNewTab ? (
         <Button
-          className="absolute bottom-0 right-0 h-8 cursor-pointer gap-1.5 rounded-none rounded-tl-md border-l border-t border-gray-200 text-sm font-normal hover:bg-gray-50"
+          className="absolute right-0 bottom-0 h-8 cursor-pointer gap-1.5 rounded-none rounded-tl-md border-t border-l border-gray-200 text-base font-normal hover:bg-gray-50"
           onClick={handleOpen}
           type="button"
           variant="secondary"

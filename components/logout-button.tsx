@@ -1,15 +1,34 @@
 "use client";
 
 import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 export default function LogoutButton() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut({
+        redirect: false,
+        callbackUrl: "/login",
+      });
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      router.push("/login");
+      router.refresh();
+    }
+  };
+
   return (
     <button
-      onClick={() => signOut()}
-      className="rounded-lg p-1.5 text-stone-700 transition-all duration-150 ease-in-out hover:bg-stone-200 active:bg-stone-300 dark:text-white dark:hover:bg-stone-700 dark:active:bg-stone-800"
+      onClick={handleLogout}
+      className="flex items-center justify-start gap-[5px] text-sm font-normal text-white transition-opacity hover:opacity-80"
+      aria-label="Logout"
     >
-      <LogOut width={18} />
+      <span>Logout</span>
+      <LogOut width={18} aria-hidden="true" />
     </button>
   );
 }

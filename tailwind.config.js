@@ -7,7 +7,9 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
+    "./content/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
+    "./node_modules/fumadocs-ui/dist/**/*.js",
   ],
   darkMode: ["class", "class"],
   theme: {
@@ -137,22 +139,49 @@ module.exports = {
         30: "7.5rem",
       },
       fontFamily: {
-        default: ["var(--font-inter)", ...fontFamily.sans],
-        cal: ["var(--font-cal)", ...fontFamily.sans],
-        title: ["var(--font-title)", ...fontFamily.sans],
-        mono: ["Consolas", ...fontFamily.mono],
+        sans: ["var(--font-league-spartan)", "sans-serif"],
+        default: ["var(--font-league-spartan)", "sans-serif"],
+        cal: ["var(--font-league-spartan)", "sans-serif"],
+        title: ["var(--font-league-spartan)", "sans-serif"],
+        serif: ["var(--font-league-spartan)", "sans-serif"],
+        mono: ["Consolas", "Monaco", "Courier New", "monospace"],
       },
       typography: {
         DEFAULT: {
           css: {
+            fontFamily: "League Spartan, sans-serif",
             h1: {
-              fontFamily: "Cal Sans",
+              fontFamily: "League Spartan, sans-serif",
+              fontWeight: "700",
             },
             h2: {
-              fontFamily: "Cal Sans",
+              fontFamily: "League Spartan, sans-serif",
+              fontWeight: "700",
             },
             h3: {
-              fontFamily: "Cal Sans",
+              fontFamily: "League Spartan, sans-serif",
+              fontWeight: "700",
+            },
+            h4: {
+              fontFamily: "League Spartan, sans-serif",
+              fontWeight: "700",
+            },
+            h5: {
+              fontFamily: "League Spartan, sans-serif",
+              fontWeight: "700",
+            },
+            h6: {
+              fontFamily: "League Spartan, sans-serif",
+              fontWeight: "700",
+            },
+            p: {
+              fontFamily: "League Spartan, sans-serif",
+            },
+            li: {
+              fontFamily: "League Spartan, sans-serif",
+            },
+            a: {
+              fontFamily: "League Spartan, sans-serif",
             },
             "blockquote p:first-of-type::before": {
               content: "none",

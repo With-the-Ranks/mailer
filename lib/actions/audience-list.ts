@@ -52,7 +52,7 @@ export const createAudienceList = async (
       },
     });
     return newList;
-  } catch (error: any) {
+  } catch {
     return { error: "Unable to create audience list" };
   }
 };
@@ -77,7 +77,7 @@ export const addAudience = async (formData: FormData) => {
   if (typeof customFieldsRaw === "string") {
     try {
       customFields = JSON.parse(customFieldsRaw);
-    } catch (error) {
+    } catch {
       return { error: "Invalid custom fields format" };
     }
   }
@@ -142,7 +142,7 @@ export const addCustomFieldToAudienceList = async (
     });
 
     return updatedAudienceList;
-  } catch (error) {
+  } catch {
     return { error: "Unable to add custom field." };
   }
 };
@@ -188,7 +188,7 @@ export const removeCustomFieldFromAudienceList = async (
     });
 
     return updated;
-  } catch (error) {
+  } catch {
     return { error: "Unable to remove custom field." };
   }
 };
@@ -223,7 +223,7 @@ export const deleteAudience = async (id: string) => {
       where: { id },
     });
     return { success: true };
-  } catch (error: any) {
+  } catch {
     return { error: "Unable to delete audience." };
   }
 };
@@ -251,7 +251,7 @@ export const getAudiences = async (audienceListId: string) => {
       audiences: audienceList.audiences,
       customFields,
     };
-  } catch (error: any) {
+  } catch {
     return { error: "Unable to fetch audiences." };
   }
 };

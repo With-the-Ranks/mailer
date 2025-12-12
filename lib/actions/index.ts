@@ -250,8 +250,9 @@ export const updateOrganization = withOrgAuth(
       await revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
       );
-      organization.customDomain &&
-        (await revalidateTag(`${organization.customDomain}-metadata`));
+      if (organization.customDomain) {
+        await revalidateTag(`${organization.customDomain}-metadata`);
+      }
 
       return response;
     } catch (error: any) {
@@ -279,8 +280,9 @@ export const deleteOrganization = withOrgAuth(
       await revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
       );
-      response.customDomain &&
-        (await revalidateTag(`${organization.customDomain}-metadata`));
+      if (response.customDomain) {
+        await revalidateTag(`${response.customDomain}-metadata`);
+      }
       return response;
     } catch (error: any) {
       return {
@@ -360,7 +362,7 @@ export const createEmail = async (
     });
 
     return response;
-  } catch (error) {
+  } catch {
     return { error: "An error occurred while creating the email." };
   }
 };
@@ -467,11 +469,10 @@ export const updatePostMetadata = withEmailAuth(
       );
 
       // if the organization has a custom domain, we need to revalidate those tags too
-      email.organization?.customDomain &&
-        (await revalidateTag(`${email.organization?.customDomain}-emails`),
-        await revalidateTag(
-          `${email.organization?.customDomain}-${email.slug}`,
-        ));
+      if (email.organization?.customDomain) {
+        await revalidateTag(`${email.organization.customDomain}-emails`);
+        await revalidateTag(`${email.organization.customDomain}-${email.slug}`);
+      }
 
       return response;
     } catch (error: any) {

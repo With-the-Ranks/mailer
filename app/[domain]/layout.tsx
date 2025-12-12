@@ -10,9 +10,10 @@ import { fontMapper } from "@/styles/fonts";
 export async function generateMetadata({
   params,
 }: {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }): Promise<Metadata | null> {
-  const domain = decodeURIComponent(params.domain);
+  const { domain: rawDomain } = await params;
+  const domain = decodeURIComponent(rawDomain);
   const data = await getOrganizationData(domain);
   if (!data) {
     return null;
@@ -60,10 +61,11 @@ export default async function OrganizationLayout({
   params,
   children,
 }: {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
   children: ReactNode;
 }) {
-  const domain = decodeURIComponent(params.domain);
+  const { domain: rawDomain } = await params;
+  const domain = decodeURIComponent(rawDomain);
   const data = await getOrganizationData(domain);
 
   if (!data) {
@@ -82,7 +84,7 @@ export default async function OrganizationLayout({
   return (
     <div className={fontMapper[data.font]}>
       <header className="sticky top-0 z-50 bg-gradient-to-r from-indigo-600 to-blue-600 shadow-lg">
-        <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-(--breakpoint-xl) items-center justify-between px-4 py-4">
           <Link href="/" className="flex items-center">
             <div className="relative h-10 w-10">
               <Image
@@ -95,7 +97,7 @@ export default async function OrganizationLayout({
             </div>
             <div className="ml-3">
               <h1 className="text-xl font-bold text-white">{data.name}</h1>
-              <p className="text-sm text-white opacity-75">
+              <p className="text-base text-white opacity-75">
                 {data.description}
               </p>
             </div>

@@ -9,26 +9,25 @@ import prisma from "@/lib/prisma";
 export default async function PostSettings({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     redirect("/login");
   }
   const data = await prisma.email.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
     },
   });
   if (!data || data.userId !== session.user.id) {
     notFound();
   }
   return (
-    <div className="flex max-w-screen-xl flex-col space-y-12 p-6">
+    <div className="flex max-w-(--breakpoint-xl) flex-col space-y-12 p-6">
       <div className="flex flex-col space-y-6">
-        <h1 className="font-cal text-3xl font-bold dark:text-white">
-          Email Settings
-        </h1>
+        <h1 className="text-3xl font-bold dark:text-white">Email Settings</h1>
         <Form
           title="Email Display Url"
           description="The slug is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens."
@@ -36,7 +35,7 @@ export default async function PostSettings({
           inputAttrs={{
             name: "slug",
             type: "text",
-            defaultValue: data?.slug!,
+            defaultValue: data?.slug ?? "",
             placeholder: "slug",
           }}
           handleSubmit={updatePostMetadata}
@@ -49,12 +48,12 @@ export default async function PostSettings({
           inputAttrs={{
             name: "image",
             type: "file",
-            defaultValue: data?.image!,
+            defaultValue: data?.image ?? "",
           }}
           handleSubmit={updatePostMetadata}
         />
 
-        <DeleteEmailForm emailName={data?.title!} />
+        <DeleteEmailForm emailName={data?.title ?? ""} />
       </div>
     </div>
   );

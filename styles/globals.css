@@ -1,12 +1,114 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../tailwind.config.js';
+@import 'fumadocs-ui/css/ocean.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* Fumadocs Theme Customization */
+@theme {
+  /* Light mode colors */
+  --color-fd-background: hsl(0, 0%, 86%);
+  --color-fd-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-muted: hsl(224, 76%, 48%);
+  --color-fd-muted-foreground: hsl(0, 0%, 100%);
+  --color-fd-popover: hsl(0, 0%, 98%);
+  --color-fd-popover-foreground: hsl(0, 0%, 15.1%);
+  --color-fd-card: hsl(224, 76%, 48%);
+  --color-fd-card-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-border: hsla(0, 0%, 80%, 50%);
+  --color-fd-primary: hsl(224, 76%, 48%);
+  --color-fd-primary-foreground: hsl(0, 0%, 98%);
+  --color-fd-secondary: hsl(0, 0%, 93.1%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 9%);
+  --color-fd-accent: hsla(0, 0%, 100%, 30%);
+  --color-fd-accent-foreground: hsl(224, 76%, 48%);
+  --color-fd-ring: hsl(237, 47%, 24%);
+  --foreground: hsl(0, 0%, 100%);
+
+  /* Typography - Use app fonts */
+  --font-sans: var(--font-league-spartan), sans-serif;
+  --font-heading: var(--font-league-spartan), sans-serif;
+
+  /* Sidebar width - matches app sidebar */
+  --fd-sidebar-width: 16rem;
+}
+
+.dark {
+  /* Dark mode colors */
+  --color-fd-primary: hsl(237, 55%, 65%);
+  --color-fd-primary-foreground: hsl(0, 0%, 9%);
+  --color-fd-accent: hsl(237, 30%, 18%);/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+}
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+  html,
+  body {
+    font-family: var(--font-league-spartan), sans-serif;
+  }
+  
+  /* Override any serif fonts (like Times) - ensure League Spartan is used everywhere */
+  *:not(code):not(pre):not(.font-mono):not([class*="font-mono"]) {
+    font-family: var(--font-league-spartan), sans-serif;
+  }
+  
+  /* Ensure all headers have font-weight 700 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+  }
+  
+  /* Ensure monospace elements use proper monospace font */
+  code,
+  pre,
+  .font-mono,
+  [class*="font-mono"] {
+    font-family: Consolas, Monaco, "Courier New", monospace;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@utility overflow-hidden {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+/* Hide theme toggle in docs */
+[data-theme-toggle] {
+  display: none !important;
+}
+
+/* Components */
+@utility btn {
+  @apply inline-flex justify-center items-center gap-3 px-4 py-2.5 rounded-[28px]
+      bg-primary text-white
+      hover:bg-accent hover:shadow-xl hover:translate-y-0.5
+      transition duration-300 ease-in-out
+      text-center font-semibold uppercase text-sm tracking-[0.08em] no-underline;
+}
 
 /* Color variables and theme */
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    --foreground: hsl(0, 0%, 100%);
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
@@ -30,14 +132,14 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-background: 224 76% 48%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 100% / 0.1;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 224 76% 48% / 0.2;
+    --sidebar-ring: 224 76% 48%;
   }
 
   .dark {
@@ -80,32 +182,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-league-spartan), sans-serif;
   }
 }
 
-/* Light mode body fallback */
-@media (prefers-color-scheme: light) {
-  body {
-    background-color: #ffffff;
-  }
-}
-
-/* Utilities */
 @layer utilities {
-  .overflow-hidden {
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
-  }
-}
-
-/* Components */
-@layer components {
-  .btn {
-    @apply inline-flex justify-center items-center gap-3 px-4 py-2.5 rounded-[28px]
-      bg-primary text-white
-      hover:bg-accent hover:shadow-xl hover:translate-y-0.5
-      transition duration-300 ease-in-out
-      text-center font-semibold uppercase text-sm tracking-[0.08em] no-underline;
-  }
+  /* Utilities */
 }
 
 /* ProseMirror editor placeholder and image styles */
@@ -150,23 +232,23 @@ ul[data-type="taskList"] li > label {
 ul[data-type="taskList"] li > label input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
-  background-color: #fff;
+  background-color: hsl(var(--background));
   margin: 0;
   cursor: pointer;
   width: 1.2em;
   height: 1.2em;
   position: relative;
   top: 5px;
-  border: 2px solid black;
+  border: 2px solid hsl(var(--border));
   margin-right: 0.3rem;
   display: grid;
   place-content: center;
 }
 ul[data-type="taskList"] li > label input[type="checkbox"]:hover {
-  background-color: #f8f9fa;
+  background-color: hsl(var(--muted));
 }
 ul[data-type="taskList"] li > label input[type="checkbox"]:active {
-  background-color: #e9ecef;
+  background-color: hsl(var(--muted));
 }
 ul[data-type="taskList"] li > label input[type="checkbox"]::before {
   content: "";
@@ -205,4 +287,115 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
 /* Fix double select dropdown arrow */
 select {
   background-image: unset;
+}
+
+/* Fumadocs Typography */
+.prose {
+  font-family: var(--font-league-spartan), sans-serif;
+  /* Ensure prose respects Fumadocs color variables */
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-family: var(--font-league-spartan), sans-serif;
+  font-weight: 700;
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+}
+
+.prose a {
+  color: var(--color-fd-primary);
+  text-decoration: none !important;
+  font-weight: 700;
+}
+
+.prose a:hover {
+  text-decoration: underline !important;
+}
+
+.prose strong,
+.prose b {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+  font-weight: 600;
+}
+
+.prose em,
+.prose i {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+}
+
+.prose code, .prose figure, .prose pre {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+  background-color: transparent;
+}
+
+.prose pre code {
+  background-color: transparent;
+}
+
+.prose blockquote {
+  color: var(--color-fd-muted-foreground, hsl(var(--muted-foreground)));
+  border-left-color: var(--color-fd-border, hsl(var(--border)));
+}
+
+.prose ul,
+.prose ol {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+}
+
+.prose li {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+}
+
+.prose p {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+}
+
+.prose td,
+.prose th {
+  color: var(--color-fd-foreground, hsl(var(--foreground)));
+  border-color: var(--color-fd-border, hsl(var(--border)));
+}
+
+/* Docs page specific typography */
+.docs-page {
+  font-family: var(--font-league-spartan), sans-serif;
+}
+
+.docs-page h1,
+.docs-page h2,
+.docs-page h3,
+.docs-page h4,
+.docs-page h5,
+.docs-page h6 {
+  font-family: var(--font-league-spartan), sans-serif;
+  font-weight: 700;
+}
+
+[data-nav-title],
+nav a[href="/docs"] {
+  font-family: var(--font-league-spartan), sans-serif;
+  font-weight: 600;
+}
+
+aside#nd-sidebar {
+  width: var(--fd-sidebar-width) !important;
+  p {
+    color: var(--foreground);
+    font-weight: 700;
+  }
+  a {
+    color: var(--foreground);
+  }
+  a[data-active="true"] {
+    background: var(--color-fd-accent);
+  }
+  button:hover {
+    background-color: var(--color-fd-accent);
+    color: var(--foreground);
+  }
 }

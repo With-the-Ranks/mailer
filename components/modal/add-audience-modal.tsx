@@ -16,7 +16,7 @@ export default function AddAudienceModal({
   addNewAudience,
 }: {
   audienceListId: string;
-  // eslint-disable-next-line no-unused-vars
+
   addNewAudience: (newAudience: Audience) => void;
 }) {
   const router = useRouter();
@@ -93,15 +93,15 @@ export default function AddAudienceModal({
   return (
     <form
       onSubmit={handleAddAudience}
-      className="w-full rounded-md bg-white dark:bg-black md:max-w-md md:border md:border-stone-200 md:shadow dark:md:border-stone-700"
+      className="w-full rounded-md bg-white md:max-w-md md:border md:border-stone-200 md:shadow-sm dark:bg-black dark:md:border-stone-700"
     >
       <div className="relative flex flex-col space-y-4 p-5 md:p-10">
-        <h2 className="font-cal text-2xl dark:text-white">Add New Audience</h2>
+        <h2 className="text-2xl dark:text-white">Add New Audience</h2>
 
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="email"
-            className="text-sm font-medium text-stone-500 dark:text-stone-400"
+            className="text-base font-medium text-stone-500 dark:text-stone-400"
           >
             Email
           </label>
@@ -112,14 +112,14 @@ export default function AddAudienceModal({
             value={data.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
             required
-            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600 placeholder:text-stone-400 focus:border-black focus:outline-none focus:ring-black dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
+            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-base text-stone-600 placeholder:text-stone-400 focus:border-black focus:ring-black focus:outline-hidden dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
           />
         </div>
 
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="firstName"
-            className="text-sm font-medium text-stone-500"
+            className="text-base font-medium text-stone-500"
           >
             First Name
           </label>
@@ -130,14 +130,14 @@ export default function AddAudienceModal({
             value={data.firstName}
             onChange={(e) => handleInputChange("firstName", e.target.value)}
             required
-            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600 placeholder:text-stone-400 focus:border-black focus:outline-none focus:ring-black dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
+            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-base text-stone-600 placeholder:text-stone-400 focus:border-black focus:ring-black focus:outline-hidden dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
           />
         </div>
 
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="lastName"
-            className="text-sm font-medium text-stone-500"
+            className="text-base font-medium text-stone-500"
           >
             Last Name
           </label>
@@ -148,14 +148,14 @@ export default function AddAudienceModal({
             value={data.lastName}
             onChange={(e) => handleInputChange("lastName", e.target.value)}
             required
-            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600 placeholder:text-stone-400 focus:border-black focus:outline-none focus:ring-black dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
+            className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-base text-stone-600 placeholder:text-stone-400 focus:border-black focus:ring-black focus:outline-hidden dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
           />
         </div>
 
         {/* Dynamic Custom Fields */}
         {customFields.map((field) => (
           <div key={field} className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-stone-500 dark:text-stone-400">
+            <label className="text-base font-medium text-stone-500 dark:text-stone-400">
               {field}
             </label>
             <input
@@ -163,13 +163,13 @@ export default function AddAudienceModal({
               placeholder={field}
               value={data.customFields[field] || ""}
               onChange={(e) => handleCustomFieldChange(field, e.target.value)}
-              className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600 placeholder:text-stone-400 focus:border-black focus:outline-none focus:ring-black dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
+              className="w-full rounded-md border border-stone-200 bg-stone-50 px-4 py-2 text-base text-stone-600 placeholder:text-stone-400 focus:border-black focus:ring-black focus:outline-hidden dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700 dark:focus:ring-white"
             />
           </div>
         ))}
       </div>
 
-      <div className="flex items-center justify-end rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
+      <div className="flex items-center justify-end rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-stone-800">
         <button
           type="submit"
           className={cn("btn", isPending && "cursor-not-allowed opacity-50")}

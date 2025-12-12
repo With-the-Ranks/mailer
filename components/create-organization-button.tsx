@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { useModal } from "@/components/modal/provider";
+import { Button } from "@/components/ui/button";
 
 export default function CreateOrganizationButton({
   children,
@@ -11,8 +12,11 @@ export default function CreateOrganizationButton({
 }) {
   const modal = useModal();
   return (
-    <button onClick={() => modal?.show(children)} className="btn">
+    <Button
+      onClick={() => modal?.show(children)}
+      aria-label="Create New Organization"
+    >
       Create New Organization
-    </button>
+    </Button>
   );
 }

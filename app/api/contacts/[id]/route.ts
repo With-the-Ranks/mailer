@@ -8,15 +8,15 @@ import { updateContactSchema } from "@/lib/validations";
 // PUT: Update a contact
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
     const body = await request.json();
 
     // Validate the request body
@@ -77,15 +77,14 @@ export async function PUT(
 // DELETE: Delete a contact
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id } = params;
 
     // Find the contact and verify ownership
     const contact = await prisma.audience.findUnique({

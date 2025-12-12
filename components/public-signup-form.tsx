@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { isValidHexColor } from "@/lib/color-validation";
 
 interface SignupFormField {
   id: string;
@@ -40,10 +41,17 @@ interface SignupForm {
 
 interface PublicSignupFormProps {
   signupForm: SignupForm;
+  theme?: {
+    buttonBg?: string;
+    buttonText?: string;
+    inputBg?: string;
+    inputText?: string;
+  };
 }
 
 export default function PublicSignupForm({
   signupForm,
+  theme,
 }: PublicSignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -147,18 +155,29 @@ export default function PublicSignupForm({
   };
 
   if (isSubmitted) {
+    const isDarkTheme = Boolean(theme?.inputBg || theme?.buttonBg);
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <div className="mb-4 text-6xl text-green-600">✓</div>
-          <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-            Thank you for signing up!
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Your information has been submitted successfully.
-          </p>
-        </CardContent>
-      </Card>
+      <div
+        className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-gray-800"}`}
+      >
+        <div
+          className={`mb-4 text-6xl ${isDarkTheme ? "text-white" : "text-green-600"}`}
+        >
+          ✓
+        </div>
+        <h2
+          className={`mb-2 text-xl font-semibold ${isDarkTheme ? "text-white" : "text-gray-900 dark:text-white"}`}
+        >
+          Thank you for signing up!
+        </h2>
+        <p
+          className={
+            isDarkTheme ? "text-white/80" : "text-gray-600 dark:text-gray-400"
+          }
+        >
+          Your information has been submitted successfully.
+        </p>
+      </div>
     );
   }
 
@@ -197,6 +216,18 @@ export default function PublicSignupForm({
               placeholder={field.placeholder || undefined}
               {...register(field.name)}
               className={errors[field.name] ? "border-red-500" : ""}
+              style={
+                theme?.inputBg
+                  ? {
+                      backgroundColor: theme.inputBg,
+                      color:
+                        theme.inputText && isValidHexColor(theme.inputText)
+                          ? `#${theme.inputText}`
+                          : "#232656",
+                      borderColor: "transparent",
+                    }
+                  : undefined
+              }
             />
           ) : field.type === "textarea" ? (
             <Textarea
@@ -204,6 +235,18 @@ export default function PublicSignupForm({
               placeholder={field.placeholder || undefined}
               {...register(field.name)}
               className={errors[field.name] ? "border-red-500" : ""}
+              style={
+                theme?.inputBg
+                  ? {
+                      backgroundColor: theme.inputBg,
+                      color:
+                        theme.inputText && isValidHexColor(theme.inputText)
+                          ? `#${theme.inputText}`
+                          : "#232656",
+                      borderColor: "transparent",
+                    }
+                  : undefined
+              }
             />
           ) : field.type === "select" ? (
             <Select onValueChange={(value) => setValue(field.name, value)}>
@@ -260,14 +303,29 @@ export default function PublicSignupForm({
           ) : null}
 
           {errors[field.name] && (
-            <p className="text-sm text-red-500">
+            <p className="text-base text-red-500">
               {String(errors[field.name]?.message || "Invalid input")}
             </p>
           )}
         </div>
       ))}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting}
+        style={
+          theme?.buttonBg && isValidHexColor(theme.buttonBg)
+            ? {
+                backgroundColor: `#${theme.buttonBg}`,
+                color:
+                  theme.buttonText && isValidHexColor(theme.buttonText)
+                    ? `#${theme.buttonText}`
+                    : "#000000",
+              }
+            : undefined
+        }
+      >
         {isSubmitting ? "Submitting..." : "Submit"}
       </Button>
     </form>

@@ -7,14 +7,15 @@ import { logError } from "@/lib/utils";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const emailId = decodeURIComponent(params.id);
+  const emailId = decodeURIComponent(id);
   const email = await prisma.email.findUnique({
     where: { id: emailId },
     select: { resendId: true },

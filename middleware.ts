@@ -3,12 +3,19 @@ import { NextResponse } from "next/server";
 
 import { isSameOrigin } from "@/lib/utils";
 
+export const config = {
+  matcher: ["/((?!api/|_next/|_static/|_vercel|docs|[\\w-]+\\.\\w+).*)"],
+};
+
 const PUBLIC_PATHS = [
   "/login",
   "/register",
   "/forgot-password",
   "/auto-signin",
+  "/unsubscribe",
 ];
+
+const PUBLIC_PREFIXES = ["/app/signup-forms/", "/app/unsubscribe"];
 
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -33,10 +40,19 @@ export default async function middleware(req: NextRequest) {
   const { search } = url;
   const host = req.headers.get("host")!;
 
+  // Check if path starts with any public prefix
+  const isPublicPrefix = PUBLIC_PREFIXES.some((prefix) =>
+    pathname.startsWith(prefix),
+  );
+
   const isVercelPreview =
     process.env.VERCEL_ENV === "preview" || host.endsWith(".vercel.app");
 
   if (isVercelPreview) {
+    // Don't rewrite public prefix paths - they should be accessed directly
+    if (isPublicPrefix) {
+      return NextResponse.next();
+    }
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
@@ -52,6 +68,10 @@ export default async function middleware(req: NextRequest) {
   const isRootHost = hostname === ROOT || host === "localhost:3000";
 
   if (isAppHost) {
+    // Don't rewrite public prefix paths - they should be accessed directly
+    if (isPublicPrefix) {
+      return NextResponse.next();
+    }
     return NextResponse.rewrite(new URL(`/app${pathname}${search}`, req.url));
   }
 
@@ -71,7 +91,3 @@ export default async function middleware(req: NextRequest) {
     new URL(`/${hostname}${pathname}${search}`, req.url),
   );
 }
-
-export const config = {
-  matcher: ["/((?!_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)", "/api/:path*"],
-};

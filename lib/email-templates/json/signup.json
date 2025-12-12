@@ -431,6 +431,84 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "type": "section",
+                      "attrs": {
+                        "align": "center",
+                        "marginTop": 0,
+                        "showIfKey": null,
+                        "marginLeft": 0,
+                        "paddingTop": 16,
+                        "borderColor": "",
+                        "borderWidth": 0,
+                        "marginRight": 0,
+                        "paddingLeft": 16,
+                        "borderRadius": 0,
+                        "marginBottom": 0,
+                        "paddingRight": 16,
+                        "paddingBottom": 16,
+                        "backgroundColor": ""
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "attrs": {
+                            "showIfKey": null,
+                            "textAlign": "center"
+                          },
+                          "content": [
+                            {
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#6b7280",
+                                    "fontSize": "12px"
+                                  }
+                                }
+                              ],
+                              "text": "If you no longer wish to receive these emails, please "
+                            },
+                            {
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "link",
+                                  "attrs": {
+                                    "href": "{{unsubscribe_url}}",
+                                    "target": "_blank",
+                                    "rel": "noopener noreferrer nofollow"
+                                  }
+                                },
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#2563eb",
+                                    "fontSize": "12px",
+                                    "textDecoration": "underline"
+                                  }
+                                }
+                              ],
+                              "text": "unsubscribe here"
+                            },
+                            {
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#6b7280",
+                                    "fontSize": "12px"
+                                  }
+                                }
+                              ],
+                              "text": "."
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }

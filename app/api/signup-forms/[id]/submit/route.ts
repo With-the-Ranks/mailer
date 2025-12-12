@@ -6,15 +6,16 @@ import { logError } from "@/lib/utils";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const formData = await request.json();
 
     // Get the signup form
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         isActive: true,
       },
       include: {
