@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { buildAudienceWhere } from "@/lib/utils";
+import { logError } from "@/lib/utils";
 import { segmentSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let where: any = {
+    const where: any = {
       organizationId: session.user.organizationId,
     };
 
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(segmentsWithCounts);
   } catch (error) {
-    console.error("Error fetching segments:", error);
+    logError("Error fetching segments", error);
     return NextResponse.json(
       { error: "Failed to fetch segments" },
       { status: 500 },
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
     // Return with dynamic count for consistency
     return NextResponse.json({ ...segment, contactCount }, { status: 201 });
   } catch (error) {
-    console.error("Error creating segment:", error);
+    logError("Error creating segment", error);
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(

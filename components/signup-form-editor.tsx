@@ -17,6 +17,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  Copy,
   ExternalLink,
   GripVertical,
   Plus,
@@ -26,7 +27,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
+import { EmbedCodeDialog } from "@/components/embed-code-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,7 +150,7 @@ function SortableField({
           >
             <GripVertical className="h-4 w-4 text-gray-400" />
           </div>
-          <span className="text-sm font-medium">
+          <span className="text-base font-medium">
             {fieldType?.label || field.label}
           </span>
           {field.required && <Badge variant="secondary">Required</Badge>}
@@ -584,37 +587,94 @@ export default function SignupFormEditor({
                 </p>
               </div>
 
-              <div>
-                <Label>Public Form Link</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={
-                      origin
-                        ? `${origin}/signup-forms/${formData.slug}`
-                        : "Loading..."
-                    }
-                    readOnly
-                    className="bg-gray-50 text-sm"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (origin) {
-                        const url = `${origin}/signup-forms/${formData.slug}`;
-                        window.open(url, "_blank");
-                      }
-                    }}
-                    disabled={!origin}
-                    title="Open signup form in new tab"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
+              {formData.isActive && (
+                <div className="space-y-4 rounded-lg border bg-gray-50 p-4 dark:bg-gray-900">
+                  <div>
+                    <Label className="text-sm font-semibold">
+                      Public Form Link
+                    </Label>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Input
+                        value={
+                          origin
+                            ? `${origin}/app/signup-forms/${formData.slug}`
+                            : "Loading..."
+                        }
+                        readOnly
+                        className="bg-white text-sm dark:bg-gray-800"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (origin) {
+                            const url = `${origin}/app/signup-forms/${formData.slug}`;
+                            window.open(url, "_blank");
+                          }
+                        }}
+                        title="Open signup form in new tab"
+                        disabled={!origin}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          if (origin) {
+                            const url = `${origin}/app/signup-forms/${formData.slug}`;
+                            try {
+                              await navigator.clipboard.writeText(url);
+                              toast.success("Link copied to clipboard!");
+                            } catch {
+                              const textArea =
+                                document.createElement("textarea");
+                              textArea.value = url;
+                              document.body.appendChild(textArea);
+                              textArea.select();
+                              document.execCommand("copy");
+                              document.body.removeChild(textArea);
+                              toast.success("Link copied to clipboard!");
+                            }
+                          }
+                        }}
+                        title="Copy link to clipboard"
+                        disabled={!origin}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      Share this link to collect signups
+                    </p>
+                  </div>
+
+                  <div className="border-t pt-4 dark:border-gray-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm font-semibold">
+                          Embed Code
+                        </Label>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          Get code to embed this form on your website
+                        </p>
+                      </div>
+                      <EmbedCodeDialog
+                        formSlug={formData.slug}
+                        formName={formData.name}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Share this link to collect signups
-                </p>
-              </div>
+              )}
+
+              {!formData.isActive && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    Activate this form to get the public link and embed code.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

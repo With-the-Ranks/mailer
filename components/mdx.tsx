@@ -32,10 +32,10 @@ function ExamplesCard({ data }: { data: ExampleCardProps }) {
           />
         </div>
         <div className="h-36 px-5 py-6">
-          <h3 className="truncate font-cal text-2xl font-bold tracking-wide">
+          <h3 className="truncate text-2xl font-bold tracking-wide">
             {data.name}
           </h3>
-          <p className="mt-3 text-base italic leading-snug text-gray-800">
+          <p className="mt-3 text-2xl leading-snug text-gray-800 italic">
             {data.description}
           </p>
         </div>
@@ -53,10 +53,10 @@ function ExamplesCard({ data }: { data: ExampleCardProps }) {
           />
         </div>
         <div className="w-3/5 px-5 py-6">
-          <h3 className="my-0 truncate font-cal text-xl font-bold tracking-wide dark:text-white">
+          <h3 className="my-0 truncate text-xl font-bold tracking-wide dark:text-white">
             {data.name}
           </h3>
-          <p className="mt-3 text-sm font-normal italic leading-snug text-gray-800">
+          <p className="mt-3 text-base leading-snug font-normal text-gray-800 italic">
             {data.description}
           </p>
         </div>
@@ -87,10 +87,10 @@ export default function MDX({ source }: { source: MDXRemoteProps }) {
 
   return (
     <article
-      className={`prose-md prose prose-stone m-auto w-11/12 sm:prose-lg dark:prose-invert sm:w-3/4 ${styles.root}`}
+      className={`prose-md prose prose-stone sm:prose-lg dark:prose-invert m-auto w-11/12 sm:w-3/4 ${styles.root}`}
       suppressHydrationWarning={true}
     >
-      {/* @ts-ignore */}
+      {/* @ts-expect-error - MDXRemote types */}
       <MDXRemote {...source} components={components} />
     </article>
   );

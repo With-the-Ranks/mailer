@@ -11,6 +11,7 @@ import donationJson from "@/lib/email-templates/json/donation.json";
 import signupJson from "@/lib/email-templates/json/signup.json";
 import { cn } from "@/lib/utils";
 
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useModal } from "./provider";
 
@@ -28,11 +29,14 @@ export default function CreateEmailModal({
   const router = useRouter();
   const modal = useModal();
 
-  const predefinedTemplates: TemplateRecord[] = [
-    { id: "signup", name: "Signup", content: signupJson },
-    { id: "donation", name: "Donation", content: donationJson },
-    { id: "blank", name: "Blank", content: blankJson },
-  ];
+  const predefinedTemplates: TemplateRecord[] = React.useMemo(
+    () => [
+      { id: "signup", name: "Signup", content: signupJson },
+      { id: "donation", name: "Donation", content: donationJson },
+      { id: "blank", name: "Blank", content: blankJson },
+    ],
+    [],
+  );
 
   const [data, setData] = useState({
     campaignName: "",
@@ -48,7 +52,7 @@ export default function CreateEmailModal({
       predefinedTemplates.find((t) => t.id === data.template) ||
       predefinedTemplates[0];
     setTemplateContent(JSON.stringify(tpl.content));
-  }, [data.template]);
+  }, [data.template, predefinedTemplates]);
 
   const handleCreateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,20 +89,18 @@ export default function CreateEmailModal({
     <form
       onSubmit={handleCreateEmail}
       className={cn(
-        "w-full rounded-md bg-white dark:bg-black md:max-w-md",
-        "md:border md:border-stone-200 md:shadow dark:md:border-stone-700",
+        "w-full bg-white md:max-w-md dark:bg-black",
+        "md:border md:border-stone-200 md:shadow-sm dark:md:border-stone-700",
       )}
     >
       <div className="space-y-4 p-5 md:p-10">
-        <h2 className="font-cal text-2xl dark:text-white">
-          Create a new email
-        </h2>
+        <h2 className="text-2xl dark:text-white">Create a new email</h2>
 
         {/* Campaign Name */}
         <div className="flex flex-col space-y-2">
           <label
             htmlFor="campaignName"
-            className="text-sm font-medium text-stone-500 dark:text-stone-400"
+            className="text-base font-medium text-stone-500 dark:text-stone-400"
           >
             Campaign Name
           </label>
@@ -108,13 +110,14 @@ export default function CreateEmailModal({
             placeholder="Campaign Name"
             value={data.campaignName}
             onChange={(e) => setData({ ...data, campaignName: e.target.value })}
+            className="rounded-md"
             required
           />
         </div>
 
         {/* Template Picker */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-500 dark:text-stone-400">
+          <label className="text-base font-medium text-stone-500 dark:text-stone-400">
             Template
           </label>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -124,21 +127,36 @@ export default function CreateEmailModal({
                 type="button"
                 onClick={() => setData({ ...data, template: tpl.id })}
                 className={cn(
-                  "flex h-24 flex-col items-center justify-center rounded-md border border-stone-200 bg-white p-4 shadow-sm transition-colors hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600",
+                  "flex h-24 flex-col items-center justify-center border border-stone-200 bg-white p-4 shadow-xs transition-colors hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600",
                   data.template === tpl.id &&
-                    "border-2 border-black dark:border-white",
+                    "border-blue-700 bg-blue-700 text-white dark:border-blue-700 dark:bg-blue-700 dark:text-white",
                 )}
               >
                 {tpl.id === "signup" && (
-                  <FileText className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
+                  <FileText
+                    className={cn(
+                      "mb-2 h-6 w-6 text-stone-600 dark:text-stone-400",
+                      data.template === tpl.id && "text-white dark:text-white",
+                    )}
+                  />
                 )}
                 {tpl.id === "donation" && (
-                  <CreditCard className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
+                  <CreditCard
+                    className={cn(
+                      "mb-2 h-6 w-6 text-stone-600 dark:text-stone-400",
+                      data.template === tpl.id && "text-white dark:text-white",
+                    )}
+                  />
                 )}
                 {tpl.id === "blank" && (
-                  <PlusCircle className="mb-2 h-6 w-6 text-stone-600 dark:text-stone-400" />
+                  <PlusCircle
+                    className={cn(
+                      "mb-2 h-6 w-6 text-stone-600 dark:text-stone-400",
+                      data.template === tpl.id && "text-white dark:text-white",
+                    )}
+                  />
                 )}
-                <span className="text-sm font-medium">{tpl.name}</span>
+                <span className="text-base font-medium">{tpl.name}</span>
               </button>
             ))}
           </div>
@@ -146,18 +164,17 @@ export default function CreateEmailModal({
       </div>
 
       {/* Submit */}
-      <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800 md:px-10">
-        <button
-          type="submit"
-          className={cn("btn", isPending && "cursor-not-allowed opacity-50")}
-          disabled={isPending}
-        >
+      <div className="flex items-center justify-end space-x-2 border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-stone-800">
+        <Button type="submit" disabled={isPending}>
           {isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating...
+            </>
           ) : (
             "Create Email"
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -1,0 +1,27 @@
+{
+  "title": "For Organizers",
+  "root": true,
+  "pages": [
+    "---Account & Security---",
+    "index",
+    "two-factor-authentication",
+    "---Audience & Contacts---",
+    "managing-contacts",
+    "custom-fields",
+    "importing-contacts",
+    "segments",
+    "---Signup Forms---",
+    "creating-signup-forms",
+    "embedding-signup-forms",
+    "---Email Campaigns---",
+    "creating-emails",
+    "sending-emails",
+    "managing-emails",
+    "---Organization Management---",
+    "team-collaboration",
+    "inviting-members",
+    "managing-members",
+    "---Guides---",
+    "best-practices"
+  ]
+}

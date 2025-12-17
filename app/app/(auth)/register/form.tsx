@@ -6,8 +6,9 @@ import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
+import { isSafeCallbackPath } from "@/lib/utils";
 
-function RegisterForm() {
+function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -17,31 +18,41 @@ function RegisterForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const formDataObj = new FormData();
+    formDataObj.append("email", formData.email);
+    formDataObj.append("password", formData.password);
+
+    const result = await registerUser(formDataObj);
+
+    if (result?.error) {
+      toast.error(`Register Failed: ${result.error}`);
+      setIsSubmitting(false);
+      return;
+    }
+
+    toast.success(
+      "Registration successful. Please check your email to verify.",
+    );
+    const nextUrl = isSafeCallbackPath(callbackUrl)
+      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl as string)}`
+      : "/login";
+    router.push(nextUrl);
+  };
+
   return (
-    <form
-      action={async (data: FormData) => {
-        setIsSubmitting(true);
-        const result = await registerUser(data);
-
-        if (result?.error) {
-          toast.error(`Register Failed: ${result.error}`);
-          setIsSubmitting(false);
-          return;
-        }
-
-        toast.success(
-          "Registration successful. Please check your email to verify.",
-        );
-        router.push("/login");
-      }}
-    >
+    <form onSubmit={handleSubmit}>
       <input
         name="email"
         type="email"
         value={formData.email}
         onChange={handleChange}
         placeholder="Email"
-        className="mt-4 w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+        disabled={isSubmitting}
+        className="mt-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         required
       />
       <input
@@ -50,7 +61,8 @@ function RegisterForm() {
         value={formData.password}
         onChange={handleChange}
         placeholder="Password"
-        className="my-4 w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+        disabled={isSubmitting}
+        className="my-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         required
       />
       <FormButton isSubmitting={isSubmitting} label="Register" />

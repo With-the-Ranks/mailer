@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 const createCustomFieldSchema = z.object({
   name: z.string().min(1),
@@ -14,7 +15,7 @@ const createCustomFieldSchema = z.object({
 });
 
 // GET /api/custom-fields - Get all custom field definitions for organization
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getSession();
     if (!session?.user?.organizationId) {
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(customFields);
   } catch (error) {
-    console.error("Error fetching custom fields:", error);
+    logError("Error fetching custom fields", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("Error creating custom field:", error);
+    logError("Error creating custom field", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

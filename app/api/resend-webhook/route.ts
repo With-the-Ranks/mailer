@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 type ResendEventBody = {
   type: string;
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     if (err.code === "P2002") {
       console.warn(`Duplicate event skipped: ${emailId}/${emailTo}/${evt}`);
     } else {
-      console.error("Error storing event:", err);
+      logError("Error storing event", err);
       return NextResponse.json(
         { error: "Failed to store event" },
         { status: 500 },

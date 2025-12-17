@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { buildAudienceWhere } from "@/lib/utils";
+import { logError } from "@/lib/utils";
 
 // Zod schema for updating a segment
 const updateSegmentSchema = z.object({
@@ -22,16 +23,17 @@ function safeFilterCriteria(filterCriteria: unknown): Record<string, any> {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const segment = await prisma.segment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         audienceList: { select: { id: true, name: true } },
       },
@@ -51,7 +53,7 @@ export async function GET(
 
     return NextResponse.json({ ...segment, contactCount });
   } catch (error) {
-    console.error("Failed to get segment:", error);
+    logError("Failed to get segment", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -61,9 +63,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -74,7 +77,7 @@ export async function PUT(
 
     // Check segment exists and belongs to org
     const segment = await prisma.segment.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!segment || segment.organizationId !== session.user.organizationId) {
@@ -83,7 +86,7 @@ export async function PUT(
 
     // Update segment
     const updatedSegment = await prisma.segment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...validatedData,
         updatedAt: new Date(),
@@ -116,7 +119,7 @@ export async function PUT(
       );
     }
 
-    console.error("Failed to update segment:", error);
+    logError("Failed to update segment", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -126,9 +129,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -136,7 +140,7 @@ export async function DELETE(
 
     // Check segment exists and belongs to org
     const segment = await prisma.segment.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!segment || segment.organizationId !== session.user.organizationId) {
@@ -144,12 +148,12 @@ export async function DELETE(
     }
 
     await prisma.segment.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete segment:", error);
+    logError("Failed to delete segment", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

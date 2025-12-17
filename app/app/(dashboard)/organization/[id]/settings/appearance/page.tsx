@@ -5,11 +5,12 @@ import prisma from "@/lib/prisma";
 export default async function OrganizationSettingsAppearance({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const data = await prisma.organization.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
     },
   });
 
@@ -22,7 +23,7 @@ export default async function OrganizationSettingsAppearance({
         inputAttrs={{
           name: "image",
           type: "file",
-          defaultValue: data?.image!,
+          defaultValue: data?.image ?? "",
         }}
         handleSubmit={updateOrganization}
       />
@@ -33,7 +34,7 @@ export default async function OrganizationSettingsAppearance({
         inputAttrs={{
           name: "logo",
           type: "file",
-          defaultValue: data?.logo!,
+          defaultValue: data?.logo ?? "",
         }}
         handleSubmit={updateOrganization}
       />

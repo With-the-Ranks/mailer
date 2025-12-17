@@ -2,20 +2,21 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 import { updateContactSchema } from "@/lib/validations";
 
 // PUT: Update a contact
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
     const body = await request.json();
 
     // Validate the request body
@@ -57,7 +58,7 @@ export async function PUT(
 
     return NextResponse.json(updatedContact);
   } catch (error) {
-    console.error("Error updating contact:", error);
+    logError("Error updating contact", error);
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -76,15 +77,14 @@ export async function PUT(
 // DELETE: Delete a contact
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id } = params;
 
     // Find the contact and verify ownership
     const contact = await prisma.audience.findUnique({
@@ -107,7 +107,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting contact:", error);
+    logError("Error deleting contact", error);
     return NextResponse.json(
       { error: "Failed to delete contact" },
       { status: 500 },

@@ -41,11 +41,11 @@ export function MappingStep({
         className="flex h-full min-h-0 flex-1 flex-col"
       >
         <Card className="flex h-[70vh] max-h-[700px] flex-col overflow-hidden">
-          <CardHeader className="flex-shrink-0 px-8 pb-2 pt-6">
+          <CardHeader className="shrink-0 px-8 pt-6 pb-2">
             <CardTitle className="text-xl">
               Map CSV Columns to Contact Fields
             </CardTitle>
-            <CardDescription className="mt-1 text-base">
+            <CardDescription className="mt-1 text-2xl">
               We&apos;ve automatically detected and mapped common fields. Review
               and adjust as needed.
             </CardDescription>
@@ -60,7 +60,7 @@ export function MappingStep({
               />
             </ScrollArea>
             {/* STICKY FOOTER */}
-            <div className="border-t bg-background px-8 pb-6 pt-4">
+            <div className="bg-background border-t px-8 pt-4 pb-6">
               <Alert className="mb-4">
                 <InfoIcon className="h-4 w-4" />
                 <AlertDescription>

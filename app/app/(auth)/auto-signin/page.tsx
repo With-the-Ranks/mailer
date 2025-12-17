@@ -52,7 +52,26 @@ function AutoSignInContent() {
           toast.success("Email verified successfully! Please sign in.");
           router.push("/login?verify=success");
         } else if (result?.ok) {
-          // Successfully signed in
+          // Successfully signed in - check for pending invitations
+          try {
+            const inviteCheck = await fetch("/api/check-pending-invite", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            });
+
+            if (inviteCheck.ok) {
+              const inviteData = await inviteCheck.json();
+              if (inviteData?.hasInvite && inviteData?.token) {
+                // Redirect to accept invite page
+                window.location.href = `/accept-invite?token=${inviteData.token}`;
+                return;
+              }
+            }
+          } catch (err) {
+            console.error("Error checking for pending invite:", err);
+          }
+
           toast.success("Welcome! You've been automatically signed in.");
           router.push("/");
         }

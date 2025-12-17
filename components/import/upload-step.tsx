@@ -47,7 +47,7 @@ export function UploadStep({
               <UploadIcon className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
               <div className="space-y-2">
                 <p className="text-lg font-medium">Drop your CSV file here</p>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-base">
                   or click to browse
                 </p>
                 <Button onClick={() => fileInputRef.current?.click()}>
@@ -86,7 +86,7 @@ export function UploadStep({
                 <DownloadIcon className="text-muted-foreground h-5 w-5" />
                 <div>
                   <p className="font-medium">Sample CSV Template</p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-base">
                     Includes common fields for voters and volunteers
                   </p>
                 </div>

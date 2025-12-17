@@ -9,6 +9,7 @@ import { createAudienceList } from "@/lib/actions/audience-list";
 import { sendEmail } from "@/lib/actions/send-email";
 import VerifyEmail from "@/lib/email-templates/verify-email";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export const registerUser = async (formData: FormData) => {
   try {
@@ -51,7 +52,7 @@ export const registerUser = async (formData: FormData) => {
       }
     } catch (orgErr) {
       // Log the error for debugging/alerting
-      console.error("Failed to create default org/audience:", orgErr);
+      logError("Failed to create default org/audience", orgErr);
     }
     // -------------------------------------------------------
 

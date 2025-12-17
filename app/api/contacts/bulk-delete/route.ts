@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 const bulkDeleteSchema = z.object({
   ids: z.array(z.string()).min(1, "At least one contact ID is required"),
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
       deletedCount: deleteResult.count,
     });
   } catch (error) {
-    console.error("Error bulk deleting contacts:", error);
+    logError("Error bulk deleting contacts", error);
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(

@@ -1,6 +1,5 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -13,7 +12,7 @@ interface CreateSignupFormButtonProps {
 export default function CreateSignupFormButton({
   organizationId,
 }: CreateSignupFormButtonProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
@@ -45,7 +44,6 @@ export default function CreateSignupFormButton({
 
   return (
     <Button onClick={handleCreate} disabled={isCreating}>
-      <Plus className="mr-2 h-4 w-4" />
       {isCreating ? "Creating..." : "Create Signup Form"}
     </Button>
   );

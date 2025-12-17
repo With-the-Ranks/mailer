@@ -5,11 +5,12 @@ import prisma from "@/lib/prisma";
 export default async function OrganizationSettingsDomains({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const data = await prisma.organization.findUnique({
     where: {
-      id: decodeURIComponent(params.id),
+      id: decodeURIComponent(id),
     },
   });
 
@@ -22,7 +23,7 @@ export default async function OrganizationSettingsDomains({
         inputAttrs={{
           name: "subdomain",
           type: "text",
-          defaultValue: data?.subdomain!,
+          defaultValue: data?.subdomain ?? "",
           placeholder: "subdomain",
           maxLength: 32,
         }}
@@ -35,7 +36,7 @@ export default async function OrganizationSettingsDomains({
         inputAttrs={{
           name: "customDomain",
           type: "text",
-          defaultValue: data?.customDomain!,
+          defaultValue: data?.customDomain ?? "",
           placeholder: "yourdomain.com",
           maxLength: 64,
           pattern: "^[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}$",

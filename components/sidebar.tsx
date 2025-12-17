@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  BookOpen,
   ChevronRight,
   Edit3,
   Filter,
@@ -10,11 +11,10 @@ import {
   LayoutDashboard,
   List,
   Newspaper,
-  Palette,
-  RadioTower,
   Settings,
-  SlidersHorizontal,
+  TrendingUp,
   UploadIcon,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,6 +26,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
+import OrganizationSwitcher from "@/components/organization-switcher";
 import {
   Collapsible,
   CollapsibleContent,
@@ -45,7 +46,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { getOrgAndAudienceList } from "@/lib/actions";
 
@@ -55,11 +56,14 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const segments = useSelectedLayoutSegments();
   const { id } = useParams() as { id?: string };
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   const [siteId, setSiteId] = useState<string | null>(null);
   const [audienceListId, setAudienceListId] = useState<string | null>(null);
   const [organizationFound, setOrganizationFound] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [userOrgs, setUserOrgs] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const { data: emailData } = useSWR(
     id && pathname.includes("/email") ? `/api/email/${id}` : null,
@@ -71,6 +75,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       setSiteId(data?.orgId ?? null);
       setAudienceListId(data?.audienceListId ?? null);
       setOrganizationFound(!!data?.orgId);
+      setUserOrgs(data?.userOrgs || []);
+      setUserRole(data?.userRole ?? null);
       setLoading(false);
     });
   }, [id, pathname]);
@@ -111,13 +117,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       return [
         {
           name: "Back to Dashboard",
-          href: siteId ? `/organization/${siteId}/audience` : "/organizations",
+          href: "/",
           icon: ArrowLeft,
         },
         {
-          name: "Audience",
-          icon: RadioTower,
-          isActive: segments[0] === "audience",
+          name: "People",
+          icon: Users,
           submenu: [
             {
               name: "Contacts",
@@ -128,34 +133,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {
               name: "Add Contact",
               href: `/audience/${audienceListId}?action=add-contact`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "add-contact"
-                  : false,
               icon: Edit3,
             },
             {
               name: "Import Contacts",
               href: `/audience/${audienceListId}?action=import`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "import"
-                  : false,
               icon: UploadIcon,
             },
             {
               name: "Custom Fields",
               href: `/audience/${audienceListId}?action=custom-fields`,
-              isActive:
-                typeof window !== "undefined"
-                  ? new URLSearchParams(window.location.search).get(
-                      "action",
-                    ) === "custom-fields"
-                  : false,
               icon: Settings,
             },
             {
@@ -179,33 +166,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: LayoutDashboard,
         },
         {
-          name: "Audience",
-          icon: RadioTower,
-          isActive: segments.includes("audience"),
-          submenu: [
-            {
-              name: "Lists",
-              href: `/organization/${siteId}/audience`,
-              isActive:
-                pathname === `/organization/${siteId}/audience` ||
-                pathname === `/organization/${siteId}/audience/lists`,
-              icon: List,
-            },
-            {
-              name: "Signup Forms",
-              href: `/organization/${siteId}/signup-forms`,
-              isActive: segments.includes("signup-forms"),
-              icon: FormInput,
-            },
-            {
-              name: "Segments",
-              href: `/organization/${siteId}/segments`,
-              isActive:
-                pathname === `/organization/${siteId}/segments` ||
-                pathname.startsWith(`/organization/${siteId}/segments/`),
-              icon: Filter,
-            },
-          ],
+          name: "People",
+          href: `/audience/${audienceListId}`,
+          isActive:
+            pathname === `/audience/${audienceListId}` ||
+            pathname === `/organization/${siteId}/audience` ||
+            pathname === `/organization/${siteId}/audience/lists`,
+          icon: Users,
+        },
+        {
+          name: "Signup Forms",
+          href: `/organization/${siteId}/signup-forms`,
+          isActive: segments.includes("signup-forms"),
+          icon: FormInput,
         },
         {
           name: "Emails",
@@ -214,25 +187,27 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           icon: Newspaper,
         },
         {
-          name: "Settings",
-          icon: Settings,
-          isActive: segments.includes("settings"),
-          submenu: [
-            {
-              name: "General",
-              href: `/organization/${siteId}/settings`,
-              isActive:
-                pathname === `/organization/${siteId}/settings` ||
-                pathname === `/organization/${siteId}/settings/general`,
-              icon: SlidersHorizontal,
-            },
-            {
-              name: "Appearance",
-              href: `/organization/${siteId}/settings/appearance`,
-              isActive: pathname.includes("/settings/appearance"),
-              icon: Palette,
-            },
-          ],
+          name: "Reports",
+          href: `/organization/${siteId}/analytics`,
+          isActive: segments.includes("analytics"),
+          icon: TrendingUp,
+        },
+        // Only show Settings for ADMIN users
+        ...(userRole === "ADMIN"
+          ? [
+              {
+                name: "Settings",
+                icon: Settings,
+                isActive: segments.includes("settings"),
+                href: `/organization/${siteId}/settings`,
+              },
+            ]
+          : []),
+        {
+          name: "Documentation",
+          href: "/docs",
+          isActive: pathname.includes("/docs"),
+          icon: BookOpen,
         },
       ];
     }
@@ -247,23 +222,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       },
       {
         name: "Settings",
+        href: "/settings",
         icon: Settings,
-        isActive: segments[0] === "settings",
-        submenu: [
-          {
-            name: "General",
-            href: "/settings",
-            isActive:
-              pathname === "/settings" || pathname === "/settings/general",
-            icon: SlidersHorizontal,
-          },
-          {
-            name: "Appearance",
-            href: "/settings/appearance",
-            isActive: pathname.includes("/settings/appearance"),
-            icon: Palette,
-          },
-        ],
+        isActive:
+          pathname === "/settings" || pathname.includes("/settings/appearance"),
+      },
+      {
+        name: "Documentation",
+        href: "/docs",
+        isActive: pathname.includes("/docs"),
+        icon: BookOpen,
       },
     ];
   }, [
@@ -275,27 +243,42 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     loading,
     emailData,
     pathname,
+    userRole,
   ]);
 
   return (
     <Sidebar
       collapsible="icon"
-      className="h-full border-r bg-sidebar text-sidebar-foreground"
+      className={`bg-sidebar text-sidebar-foreground h-full border-r ${state === "expanded" ? "p-4" : ""}`}
     >
       <SidebarHeader>
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground inline-flex items-baseline gap-2 rounded-md transition-all duration-200 ${state === "expanded" ? "justify-start px-2 py-1.5" : "justify-center p-1.5"}`}
         >
-          <Image
-            src="/logo.png"
-            width={24}
-            height={24}
-            alt="Logo"
-            className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
-          />
-          <span className="font-bold">Mailer</span>
+          <div className="relative h-4 w-4">
+            <Image
+              src="/mailer.svg"
+              width={16}
+              height={16}
+              alt="Mailer Logo"
+              className="h-4 w-4"
+            />
+          </div>
+          {state === "expanded" && (
+            <div className="flex h-7 w-20 justify-start text-3xl leading-8 font-bold text-white">
+              Mailer
+            </div>
+          )}
         </Link>
+        {userOrgs.length > 0 && state === "expanded" && (
+          <div className="px-2 py-2">
+            <OrganizationSwitcher
+              organizations={userOrgs}
+              currentOrgId={siteId || undefined}
+            />
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -314,7 +297,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                         <SidebarMenuButton
                           tooltip={item.name}
                           isActive={item.isActive}
-                          className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                         >
                           <item.icon className="mr-2" size={18} />
                           <span>{item.name}</span>
@@ -328,7 +311,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                               >
                                 <Link
                                   href={sub.href}
@@ -350,9 +333,15 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       asChild
                       isActive={item.isActive}
                       tooltip={item.name}
-                      className="transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
                     >
-                      <Link href={item.href} className="flex items-center">
+                      <Link
+                        href={item.href}
+                        className="flex items-center"
+                        {...(item.name === "Documentation"
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
                         <item.icon className="mr-2" size={18} />
                         <span>{item.name}</span>
                       </Link>
@@ -364,10 +353,22 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
-        {children}
-      </SidebarFooter>
+      {loading ? null : (
+        <SidebarFooter>
+          <div className="flex flex-col items-center justify-center gap-2">
+            {state === "expanded" && (
+              <Image
+                src="/wtr.png"
+                alt="With the Ranks"
+                width={129}
+                height={58}
+                className="h-14 w-32"
+              />
+            )}
+            {children}
+          </div>
+        </SidebarFooter>
+      )}
       <SidebarRail />
     </Sidebar>
   );

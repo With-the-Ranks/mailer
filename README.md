@@ -1,7 +1,6 @@
-
 # Mailer
-The easiest way to send organizing emails.
 
+The easiest way to send organizing emails.
 
 ## Introduction
 
@@ -9,6 +8,10 @@ Mailer is a full-stack application designed to be the easiest way for organizers
 
 > [!NOTE]
 > **This project is in pre-alpha development.** We may introduce breaking changes without warning. Please review PR details regularly for summaries of changes when pulling new versions of this repo.
+
+## Documentation
+
+[![Documentation](https://img.shields.io/badge/Documentation-Read%20the%20Docs-252753?style=for-the-badge&logo=book)](https://app.withtheranks.coop/docs)
 
 ## Getting Started
 

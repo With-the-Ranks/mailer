@@ -1,23 +1,10 @@
 "use client";
 
-import { DownloadIcon, FilterIcon, PlusIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-import { Button } from "@/components/ui/button";
-
 interface SegmentsHeaderProps {
   orgId: string;
 }
 
-export function SegmentsHeader({ orgId }: SegmentsHeaderProps) {
-  const router = useRouter();
-
-  const handleNewSegment = () => {
-    // Navigate to a create segment page for this organization
-    router.push(`/organization/${orgId}/segments/new`);
-    // Or open a modal, etc.
-  };
-
+export function SegmentsHeader({ orgId: _orgId }: SegmentsHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="space-y-1">

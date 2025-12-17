@@ -42,7 +42,7 @@ export function CompleteStep({ importProgress, onClose }: CompleteStepProps) {
                 <div className="text-3xl font-bold text-green-600">
                   {importProgress.successful}
                 </div>
-                <div className="text-muted-foreground text-sm">
+                <div className="text-muted-foreground text-base">
                   Contacts Added
                 </div>
               </div>
@@ -50,7 +50,7 @@ export function CompleteStep({ importProgress, onClose }: CompleteStepProps) {
                 <div className="text-3xl font-bold text-red-600">
                   {importProgress.failed}
                 </div>
-                <div className="text-muted-foreground text-sm">
+                <div className="text-muted-foreground text-base">
                   Failed Imports
                 </div>
               </div>

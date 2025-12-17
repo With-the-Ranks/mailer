@@ -21,16 +21,19 @@ type EmailStat = {
 };
 
 interface EmailStatsProps {
-  userId: string;
+  organizationId: string;
 }
 
-export default function EmailStats({ userId }: EmailStatsProps) {
+export default function EmailStats({ organizationId }: EmailStatsProps) {
   const [data, setData] = useState<EmailStat[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/api/email-stats?userId=${userId}`);
+        if (!organizationId) return;
+        const response = await fetch(
+          `/api/email-stats?organizationId=${organizationId}`,
+        );
         const stats = await response.json();
         setData(stats);
       } catch (error) {
@@ -39,16 +42,14 @@ export default function EmailStats({ userId }: EmailStatsProps) {
     };
 
     fetchData();
-  }, [userId]);
+  }, [organizationId]);
 
   if (data.length === 0) {
     return null;
   }
   return (
     <div className="flex flex-col space-y-6">
-      <h1 className="font-cal text-3xl font-bold dark:text-white">
-        Organization Email Analytics
-      </h1>
+      <h1 className="text-3xl font-bold dark:text-white">Email Analytics</h1>
       <div className="h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart

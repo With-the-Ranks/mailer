@@ -21,9 +21,9 @@ type Template = {
 interface ScrollableTemplateSelectProps {
   templates: Template[];
   selectedTemplateId: string | null;
-  // eslint-disable-next-line no-unused-vars
+
   onSelect: (id: string) => void;
-  // eslint-disable-next-line no-unused-vars
+
   onDelete: (id: string) => void;
 }
 
@@ -101,7 +101,7 @@ export function ScrollableTemplateSelect({
         value={selectedTemplateId || ""}
         onValueChange={handleSelectTemplate}
       >
-        <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400">
+        <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-base shadow-xs transition-colors hover:bg-gray-50 focus:ring-1 focus:ring-gray-400 focus:outline-hidden">
           <div className="flex w-full items-center justify-between">
             <SelectValue placeholder="Select a template…" />
           </div>
@@ -153,7 +153,7 @@ export function ScrollableTemplateSelect({
                   ) : (
                     <button
                       type="button"
-                      className="flex h-6 w-6 items-center justify-center rounded-full text-red-500 opacity-0 transition-opacity hover:bg-red-50 hover:opacity-100 group-hover:opacity-100"
+                      className="flex h-6 w-6 items-center justify-center rounded-full text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:opacity-100"
                       onClick={(e) => initiateDelete(template.id, e)}
                       onMouseDown={(e) => e.preventDefault()}
                     >

@@ -2,18 +2,20 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const formData = await request.json();
 
     // Get the signup form
     const signupForm = await prisma.signupForm.findFirst({
       where: {
-        id: params.id,
+        id,
         isActive: true,
       },
       include: {
@@ -109,7 +111,7 @@ export async function POST(
       submissionId: submission.id,
     });
   } catch (error) {
-    console.error("Error submitting signup form:", error);
+    logError("Error submitting signup form", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

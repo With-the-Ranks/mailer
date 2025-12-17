@@ -1,6 +1,10 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// Authentication constants
+export const TOTP_CODE_LENGTH = 6;
+export const TOTP_TIME_WINDOW = 2;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -38,7 +42,7 @@ export const getBlurDataURL = async (url: string | null) => {
     const base64 = Buffer.from(buffer).toString("base64");
 
     return `data:image/png;base64,${base64}`;
-  } catch (error) {
+  } catch {
     return "data:image/webp;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   }
 };
@@ -69,11 +73,16 @@ export function isSafari() {
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
 
+export function isSafeCallbackPath(value: string | null | undefined): boolean {
+  if (!value) return false;
+  return value.startsWith("/") && !value.startsWith("//");
+}
+
 export function buildAudienceWhere(
   audienceListId: string,
   filterCriteria: Record<string, any>,
 ) {
-  const where: any = { audienceListId };
+  const where: any = { audienceListId, isUnsubscribed: false }; // Exclude unsubscribed contacts by default
 
   // List of built-in fields
   const BUILT_IN_KEYS = new Set([
@@ -156,4 +165,75 @@ export function buildAudienceWhere(
   });
 
   return where;
+}
+
+export function logError(
+  event: string,
+  error: unknown,
+  meta: Record<string, unknown> = {},
+) {
+  const payload: Record<string, unknown> = {
+    message: error instanceof Error ? error.message : String(error),
+    ...meta,
+  };
+
+  if (process.env.NODE_ENV !== "production" && error instanceof Error) {
+    payload.stack = error.stack;
+  }
+
+  console.error(`[${event}]`, payload);
+}
+
+export function isSameOrigin(req: {
+  headers: { get: (name: string) => string | null };
+  url: string;
+}): boolean {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  const host = req.headers.get("host");
+
+  try {
+    // Build expected origin from Host header (more reliable than req.url in middleware)
+    const protocol = req.url.startsWith("https") ? "https" : "http";
+    const expectedOrigin = `${protocol}://${host}`;
+
+    // Check Origin header
+    if (origin === expectedOrigin) return true;
+
+    // Check Referer header
+    if (referer && new URL(referer).origin === expectedOrigin) return true;
+
+    // Allow if no Origin/Referer (same-site browser requests)
+    return !origin && !referer;
+  } catch (err) {
+    console.error("[isSameOrigin] Error:", err);
+    return false;
+  }
+}
+
+export function getBaseAppUrl() {
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://app.localhost:3000";
+  return baseUrl;
+}
+
+export function getUnsubscribeUrl({
+  email,
+  listId,
+  organizationId,
+}: {
+  email?: string | null;
+  listId?: string | null;
+  organizationId?: string | null;
+}) {
+  const baseUrl = getBaseAppUrl();
+
+  const params = new URLSearchParams();
+
+  if (email) params.set("email", email);
+  if (listId) params.set("list", listId);
+  if (organizationId) params.set("organization", organizationId);
+
+  return `${baseUrl}/unsubscribe${params.size ? `?${params.toString()}` : ""}`;
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import Form from "@/components/form";
+import { Button } from "@/components/ui/button";
 import { updateOrganization } from "@/lib/actions";
 
 interface DomainOption {
@@ -28,9 +30,31 @@ export default function ClientSettingsForm({
 }) {
   const [showKey, setShowKey] = useState(false);
   const [apiKey, setApiKey] = useState(data?.emailApiKey ?? "");
+  const [isSaving, setIsSaving] = useState(false);
 
   const toggleKeyVisibility = () => setShowKey((prev) => !prev);
   const domain = process.env.EMAIL_DOMAIN;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    const formData = new FormData();
+    formData.append("emailApiKey", apiKey);
+
+    try {
+      const result = await updateOrganization(formData, data.id, "emailApiKey");
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("API key updated successfully");
+      }
+    } catch {
+      toast.error("Failed to update API key");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="flex max-w-2xl flex-col space-y-6">
@@ -38,9 +62,9 @@ export default function ClientSettingsForm({
         <h2 className="mb-1 text-xl font-semibold dark:text-white">
           Email API Key
         </h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400">
+        <p className="text-base text-stone-600 dark:text-stone-400">
           Optional. Overrides the global{" "}
-          <code className="rounded bg-stone-100 px-1 text-xs dark:bg-stone-800">
+          <code className="rounded-sm bg-stone-100 px-1 text-xs dark:bg-stone-800">
             RESEND_API_KEY
           </code>
           .
@@ -49,7 +73,7 @@ export default function ClientSettingsForm({
           <a
             href="https://resend.com/api-keys"
             target="_blank"
-            className="text-sm text-blue-600 underline hover:text-blue-800"
+            className="text-base text-blue-600 underline hover:text-blue-800"
           >
             Create an API key
           </a>
@@ -57,35 +81,54 @@ export default function ClientSettingsForm({
           <a
             href="https://resend.com/docs/api-reference/api-keys/create-api-key"
             target="_blank"
-            className="text-sm text-blue-600 underline hover:text-blue-800"
+            className="text-base text-blue-600 underline hover:text-blue-800"
           >
             API docs
           </a>
         </div>
-        <form
-          action={async (formData) => {
-            await updateOrganization(formData, data.id, "emailApiKey");
-          }}
-          className="flex items-center space-x-2"
-        >
+        <form onSubmit={handleSubmit} className="flex items-center space-x-2">
           <input
             name="emailApiKey"
             type={showKey ? "text" : "password"}
-            defaultValue={apiKey}
+            value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="re_abc123..."
-            className="w-full max-w-md rounded-md border border-stone-300 text-sm text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:outline-none focus:ring-stone-500 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
+            disabled={isSaving}
+            className="w-full max-w-md rounded-md border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-600 dark:bg-black dark:text-white dark:placeholder-stone-700"
           />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={toggleKeyVisibility}
-            className="text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-white"
+            className="h-9 w-9"
+            aria-label={showKey ? "Hide API key" : "Show API key"}
+            disabled={isSaving}
           >
-            {showKey ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-          <button type="submit" className="btn text-sm">
-            Save
-          </button>
+            {showKey ? (
+              <EyeOff size={18} aria-hidden="true" />
+            ) : (
+              <Eye size={18} aria-hidden="true" />
+            )}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isSaving}
+            aria-label={isSaving ? "Saving" : "Save API key"}
+          >
+            {isSaving ? (
+              <>
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
+          </Button>
         </form>
       </div>
 

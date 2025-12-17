@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
 
 // GET: List contacts for a specific audience list owned by the user's org
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(contacts);
   } catch (error) {
-    console.error("Error fetching contacts:", error);
+    logError("Error fetching contacts", error);
     return NextResponse.json(
       { error: "Failed to fetch contacts" },
       { status: 500 },
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
-    console.error("Error creating contact:", error);
+    logError("Error creating contact", error);
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(

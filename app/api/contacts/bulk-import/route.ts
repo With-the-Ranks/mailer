@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
 
 const bulkImportSchema = z.object({
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, results });
   } catch (error) {
-    console.error("Error bulk importing contacts:", error);
+    logError("Error bulk importing contacts", error);
     if (error instanceof SyntaxError) {
       return NextResponse.json(
         { error: "Invalid JSON in request body" },

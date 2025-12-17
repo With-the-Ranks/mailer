@@ -5,9 +5,11 @@ import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import React from "react";
+import speakeasy from "speakeasy";
 
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
+import { logError, TOTP_TIME_WINDOW } from "@/lib/utils";
 
 import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
@@ -45,13 +47,14 @@ export const authOptions: NextAuthOptions = {
           placeholder: "you@example.com",
         },
         password: { label: "Password", type: "password" },
+        twoFactorToken: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials || !credentials.email || !credentials.password) {
           return null;
         }
 
-        const { email, password } = credentials;
+        const { email, password, twoFactorToken } = credentials;
 
         try {
           const user = await prisma.user.findUnique({
@@ -93,9 +96,28 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Password is incorrect");
           }
 
+          // Check if 2FA is enabled
+          if (user.twoFactorEnabled && user.twoFactorSecret) {
+            if (!twoFactorToken) {
+              throw new Error("2FA_REQUIRED");
+            }
+
+            // Verify 2FA token
+            const verified = speakeasy.totp.verify({
+              secret: user.twoFactorSecret,
+              encoding: "base32",
+              token: twoFactorToken,
+              window: TOTP_TIME_WINDOW,
+            });
+
+            if (!verified) {
+              throw new Error("Invalid 2FA token");
+            }
+          }
+
           return user;
         } catch (error: any) {
-          console.error("Login error:", error);
+          logError("Login error", error);
           throw new Error(error.message || "Login failed");
         }
       },
@@ -135,14 +157,21 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: async ({ session, token }) => {
+      // Fetch fresh user data to get currentOrganizationId
+      const user: any = token.sub
+        ? await prisma.user.findUnique({
+            where: { id: token.sub },
+          })
+        : null;
+
       session.user = {
         ...session.user,
-        // @ts-expect-error
+        // @ts-expect-error - NextAuth token.sub type doesn't match user.id
         id: token.sub,
-        // @ts-expect-error
+        // @ts-expect-error - NextAuth token user properties type mismatch
         username: token?.user?.username || token?.user?.gh_username,
-        // @ts-expect-error
-        organizationId: token?.user?.organizationId,
+        organizationId: user?.organizationId,
+        currentOrganizationId: user?.currentOrganizationId,
       };
       return session;
     },
@@ -232,11 +261,28 @@ export function getSession() {
       email: string;
       image: string;
       organizationId: string;
+      currentOrganizationId?: string;
     };
   } | null>;
 }
 
-export function withOrgAuth(action: any) {
+// Helper to get user's role in an organization
+export async function getUserOrgRole(userId: string, organizationId: string) {
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+    select: {
+      role: true,
+    },
+  });
+  return member?.role || null;
+}
+
+export function withOrgAuth(action: any, requiredRole?: "ADMIN" | "MANAGER") {
   return async (
     formData: FormData | null,
     organizationId: string,
@@ -248,26 +294,40 @@ export function withOrgAuth(action: any) {
         error: "Not authenticated",
       };
     }
-    const organization = await prisma.organization.findUnique({
+
+    // Check membership via OrganizationMember
+    const member = await (prisma as any).organizationMember.findUnique({
       where: {
-        id: organizationId,
-        users: {
-          some: {
-            id: {
-              in: [session.user.id as string],
-            },
-          },
+        userId_organizationId: {
+          userId: session.user.id as string,
+          organizationId,
         },
       },
+      include: {
+        organization: true,
+      },
     });
-    if (!organization) {
+
+    if (!member) {
       return {
         error: "Not authorized",
       };
     }
 
-    return action(formData, organization, key);
+    // Check role if required
+    if (requiredRole === "ADMIN" && member.role !== "ADMIN") {
+      return {
+        error: "Admin access required",
+      };
+    }
+
+    return action(formData, member.organization, key, member.role);
   };
+}
+
+// Convenience wrapper for admin-only actions
+export function withAdminAuth(action: any) {
+  return withOrgAuth(action, "ADMIN");
 }
 
 export function withEmailAuth(action: any) {
@@ -298,4 +358,17 @@ export function withEmailAuth(action: any) {
 
     return action(formData, email, key);
   };
+}
+
+export async function isOrgMember(userId: string, organizationId: string) {
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+    select: { userId: true },
+  });
+  return !!member;
 }

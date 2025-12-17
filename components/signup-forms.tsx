@@ -72,19 +72,19 @@ export default async function SignupForms({
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Form Name
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Submissions
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Created
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
               Actions
             </th>
           </tr>
