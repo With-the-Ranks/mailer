@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -13,8 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-import { Button } from "@/components/ui/button";
 
 type EmailStat = {
   emailId: string;
@@ -85,11 +82,6 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
             <p className="mt-2 text-lg text-stone-500 dark:text-stone-400">
               Send your first email to start seeing analytics and reports.
             </p>
-            <Button asChild variant="default" className="mt-6">
-              <Link href={`/organization/${organizationId}`}>
-                Create Your First Email
-              </Link>
-            </Button>
           </div>
         </div>
       </div>

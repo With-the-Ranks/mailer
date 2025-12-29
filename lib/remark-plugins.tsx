@@ -14,16 +14,9 @@ export function replaceLinks({
   // replaces internal links with <Link /> component
   // and external links with <a target="_blank" />
   return href?.startsWith("/") || href === "" ? (
-    <Link href={href} className="cursor-pointer">
-      {children}
-    </Link>
+    <Link href={href}>{children}</Link>
   ) : (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="cursor-pointer"
-    >
+    <a href={href} target="_blank" rel="noopener noreferrer">
       {children} ↗
     </a>
   );

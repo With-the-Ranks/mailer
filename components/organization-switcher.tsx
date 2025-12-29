@@ -114,7 +114,6 @@ export default function OrganizationSwitcher({
                     <span className="text-muted-foreground text-xs">
                       {org.role}
                     </span>
-                    <span className="text-xs text-gray-500">{org.role}</span>
                   </div>
                 </CommandItem>
               ))}
