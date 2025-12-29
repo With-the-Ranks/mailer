@@ -18,7 +18,12 @@ export function replaceLinks({
       {children}
     </Link>
   ) : (
-    <a href={href} target="_blank" rel="noopener noreferrer">
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="cursor-pointer"
+    >
       {children} ↗
     </a>
   );

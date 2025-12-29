@@ -84,6 +84,17 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Ensure buttons and links have pointer cursor */
+  button,
+  a {
+    cursor: pointer;
+  }
+  
+  /* Disabled buttons should have not-allowed cursor */
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @utility overflow-hidden {
