@@ -212,9 +212,11 @@ export function isSameOrigin(req: {
 }
 
 export function getBaseAppUrl() {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://app.localhost:3000";
+  const baseUrl = process.env.NEXTAUTH_URL
+    ? process.env.NEXTAUTH_URL
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://app.localhost:3000";
   return baseUrl;
 }
 

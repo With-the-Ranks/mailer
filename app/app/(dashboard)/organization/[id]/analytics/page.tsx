@@ -30,14 +30,5 @@ export default async function OrganizationAnalytics({
     notFound();
   }
 
-  // const url = `${data.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
-
-  return (
-    <>
-      <div className="flex items-center justify-center sm:justify-start">
-        <div className="flex flex-col items-center space-y-2 space-x-0 sm:flex-row sm:space-y-0 sm:space-x-4"></div>
-      </div>
-      <EmailStats organizationId={organizationId} />
-    </>
-  );
+  return <EmailStats organizationId={organizationId} />;
 }

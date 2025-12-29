@@ -8,6 +8,7 @@ import { sendEmail } from "@/lib/actions/send-email";
 import { getSession, getUserOrgRole, isOrgMember } from "@/lib/auth";
 import InvitationEmail from "@/lib/email-templates/invitation-email";
 import prisma from "@/lib/prisma";
+import { getBaseAppUrl } from "@/lib/utils";
 
 export type InvitationType = "email" | "link";
 
@@ -89,9 +90,7 @@ export async function createInvitation(
 
     // Send email invitation if email is provided
     if (email) {
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+      const baseUrl = getBaseAppUrl();
       const inviteUrl = `${baseUrl}/accept-invite?token=${token}`;
 
       const emailContent = React.createElement(InvitationEmail, {

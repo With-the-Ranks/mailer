@@ -2,12 +2,11 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { getBaseAppUrl } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://app.localhost:3000";
+  const baseUrl = getBaseAppUrl();
 
   if (!token) {
     return NextResponse.redirect(`${baseUrl}/login?verify=invalid`);

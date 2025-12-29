@@ -12,9 +12,9 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://app.localhost:3000";
+import { getBaseAppUrl } from "@/lib/utils";
+
+const baseUrl = getBaseAppUrl();
 
 export const WelcomeTemplate = () => (
   <Html>
