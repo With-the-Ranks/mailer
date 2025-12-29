@@ -89,17 +89,19 @@ export default function OrganizationSwitcher({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[250px] rounded-none p-0">
-        <Command>
+      <PopoverContent className="w-[250px] rounded-none bg-white p-0">
+        <Command className="bg-white">
           <CommandList>
-            <CommandEmpty>No organization found.</CommandEmpty>
+            <CommandEmpty className="text-gray-500">
+              No organization found.
+            </CommandEmpty>
             <CommandGroup heading="Organizations">
               {organizations.map((org) => (
                 <CommandItem
                   key={org.id}
                   value={org.id}
                   onSelect={() => switchOrganization(org.id)}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:bg-gray-100 data-[selected=true]:bg-gray-100 data-[selected=true]:text-gray-900"
                 >
                   <Check
                     className={cn(
@@ -112,6 +114,7 @@ export default function OrganizationSwitcher({
                     <span className="text-muted-foreground text-xs">
                       {org.role}
                     </span>
+                    <span className="text-xs text-gray-500">{org.role}</span>
                   </div>
                 </CommandItem>
               ))}
