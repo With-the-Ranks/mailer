@@ -9,7 +9,7 @@ import { createAudienceList } from "@/lib/actions/audience-list";
 import { sendEmail } from "@/lib/actions/send-email";
 import VerifyEmail from "@/lib/email-templates/verify-email";
 import prisma from "@/lib/prisma";
-import { logError } from "@/lib/utils";
+import { getBaseAppUrl, logError } from "@/lib/utils";
 
 export const registerUser = async (formData: FormData) => {
   try {
@@ -65,9 +65,7 @@ export const registerUser = async (formData: FormData) => {
       },
     });
 
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://app.localhost:3000";
+    const baseUrl = getBaseAppUrl();
     const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
 
     const content = React.createElement(VerifyEmail, {
