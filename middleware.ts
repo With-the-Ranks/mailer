@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 import { isSameOrigin } from "@/lib/utils";
 
 export const config = {
-  matcher: ["/((?!api/|_next/|_static/|_vercel|docs|[\\w-]+\\.\\w+).*)"],
+  matcher: ["/((?!api/|_next/|_static/|_vercel|docs|ingest|[\\w-]+\\.\\w+).*)"],
 };
 
 const PUBLIC_PATHS = [
@@ -21,6 +21,11 @@ const PUBLIC_PREFIXES = ["/app/signup-forms/", "/app/unsubscribe"];
 
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Let PostHog ingest routes pass through to Next.js rewrites
+  if (pathname.startsWith("/ingest/")) {
+    return NextResponse.next();
+  }
 
   // Handle API routes first
   if (pathname.startsWith("/api/")) {

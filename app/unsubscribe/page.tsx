@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Loader2, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import posthog from "posthog-js";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
 const DEFAULT_REASONS = [
@@ -209,6 +210,10 @@ function UnsubscribePageContent() {
         );
       }
 
+      posthog.capture("user_unsubscribed", {
+        reason: selectedReason,
+        has_custom_reason: !!customReason.trim(),
+      });
       setSubmitState({
         status: "success",
         message: payload?.message || "You have been unsubscribed.",
@@ -218,6 +223,7 @@ function UnsubscribePageContent() {
         status: "error",
         message: error?.message || "Failed to unsubscribe. Please try again.",
       });
+      posthog.captureException(error);
     }
   }, [
     customReason,

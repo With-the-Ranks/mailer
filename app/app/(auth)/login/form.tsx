@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -69,6 +70,15 @@ function SignInForm() {
       setIsSubmitting(false);
       return;
     }
+
+    // Identify user and capture login event in PostHog
+    posthog.identify(formData.email, {
+      email: formData.email,
+    });
+    posthog.capture("user_logged_in", {
+      email: formData.email,
+      has_2fa: step === "2fa",
+    });
 
     toast.success("Login Successful");
     const destination = isSafeCallbackPath(callbackUrl) ? callbackUrl! : "/";

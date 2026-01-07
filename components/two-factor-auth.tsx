@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -94,6 +95,7 @@ export default function TwoFactorAuth() {
         throw new Error(error.error || "Failed to verify code");
       }
 
+      posthog.capture("two_factor_enabled");
       toast.success("2FA enabled successfully!");
       setIsEnabled(true);
       setSetupDialog(false);
@@ -102,6 +104,7 @@ export default function TwoFactorAuth() {
       setSecret("");
     } catch (error: any) {
       toast.error(error.message || "Failed to enable 2FA");
+      posthog.captureException(error);
     } finally {
       setProcessing(false);
     }
@@ -126,12 +129,14 @@ export default function TwoFactorAuth() {
         throw new Error(error.error || "Failed to disable 2FA");
       }
 
+      posthog.capture("two_factor_disabled");
       toast.success("2FA disabled successfully");
       setIsEnabled(false);
       setDisableDialog(false);
       setPassword("");
     } catch (error: any) {
       toast.error(error.message || "Failed to disable 2FA");
+      posthog.captureException(error);
     } finally {
       setProcessing(false);
     }

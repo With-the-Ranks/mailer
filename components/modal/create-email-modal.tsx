@@ -2,6 +2,7 @@
 
 import { CreditCard, FileText, Loader2, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -73,13 +74,23 @@ export default function CreateEmailModal({
       );
       if ("error" in email) {
         toast.error(email.error);
+        posthog.capture("email_creation_failed", {
+          error: email.error,
+          template: data.template,
+        });
       } else {
+        posthog.capture("email_created", {
+          campaign_name: data.campaignName,
+          template: data.template,
+          organization_id: organizationId,
+        });
         toast.success("Successfully created email!");
         modal?.hide();
         router.push(`/email/${email.id}/editor`);
       }
-    } catch {
+    } catch (error) {
       toast.error("An error occurred while creating the email.");
+      posthog.captureException(error);
     } finally {
       setIsPending(false);
     }

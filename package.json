@@ -77,6 +77,8 @@
     "novel": "^1.0.2",
     "openai-edge": "^1.2.2",
     "papaparse": "^5.5.3",
+    "posthog-js": "^1.315.0",
+    "posthog-node": "^5.19.0",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-datetime": "^3.3.1",

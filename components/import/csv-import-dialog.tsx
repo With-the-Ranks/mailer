@@ -8,6 +8,7 @@ import {
   UploadIcon,
   UsersIcon,
 } from "lucide-react";
+import posthog from "posthog-js";
 import * as React from "react";
 
 import {
@@ -241,6 +242,12 @@ export function CsvImportDialog({
       }
       if (i % 10 === 0) await new Promise((resolve) => setTimeout(resolve, 10));
     }
+    posthog.capture("contacts_imported", {
+      total_contacts: importedContacts.length,
+      failed_contacts: errors.length,
+      audience_list_id: audienceListId,
+    });
+
     onImportComplete(importedContacts);
     setStep("complete");
   };
