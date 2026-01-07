@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -30,9 +31,20 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
 
     if (result?.error) {
       toast.error(`Register Failed: ${result.error}`);
+      posthog.capture("user_registration_failed", {
+        error: result.error,
+      });
       setIsSubmitting(false);
       return;
     }
+
+    // Identify user and capture registration event in PostHog
+    posthog.identify(formData.email, {
+      email: formData.email,
+    });
+    posthog.capture("user_registered", {
+      email: formData.email,
+    });
 
     toast.success(
       "Registration successful. Please check your email to verify.",
