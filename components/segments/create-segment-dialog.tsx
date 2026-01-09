@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
+import posthog from "posthog-js";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -102,6 +103,12 @@ export function CreateSegmentDialog({
       });
 
       if (response.ok) {
+        posthog.capture("segment_created", {
+          segment_name: name.trim(),
+          is_static: isStatic,
+          contact_count: contactsToUse.length,
+          list_id: listId,
+        });
         toast.success("Segment created successfully");
         setOpen(false);
         setName("");
@@ -110,10 +117,14 @@ export function CreateSegmentDialog({
       } else {
         const error = await response.json();
         toast.error(error.error || "Failed to create segment");
+        posthog.capture("segment_creation_failed", {
+          error: error.error || "Unknown error",
+        });
       }
     } catch (error) {
       console.error("Failed to create segment:", error);
       toast.error("Failed to create segment");
+      posthog.captureException(error);
     } finally {
       setIsLoading(false);
     }

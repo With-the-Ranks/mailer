@@ -2,6 +2,7 @@
 
 import { Check, Copy, Link2, Loader2, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -57,14 +58,24 @@ export default function InviteMemberModal({
 
       if (result.error) {
         toast.error(result.error);
+        posthog.capture("member_invitation_failed", {
+          error: result.error,
+          method: "email",
+        });
       } else if (result.success) {
+        posthog.capture("member_invited", {
+          role,
+          method: "email",
+          organization_id: organizationId,
+        });
         toast.success(`Invitation sent to ${email}`);
         setEmail("");
         router.refresh();
         onOpenChange(false);
       }
-    } catch {
+    } catch (error) {
       toast.error("Failed to send invitation");
+      posthog.captureException(error);
     } finally {
       setLoading(false);
     }
@@ -82,16 +93,27 @@ export default function InviteMemberModal({
 
       if (result.error) {
         toast.error(result.error);
+        posthog.capture("member_invitation_failed", {
+          error: result.error,
+          method: "link",
+        });
       } else if (result.success && result.invitation) {
         const baseUrl =
           process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         const link = `${baseUrl}/accept-invite?token=${result.invitation.token}`;
         setInviteLink(link);
+        posthog.capture("member_invited", {
+          role,
+          method: "link",
+          organization_id: organizationId,
+          link_expiry_days: linkDays === "0" ? "never" : linkDays,
+        });
         router.refresh();
         toast.success("Invite link generated");
       }
-    } catch {
+    } catch (error) {
       toast.error("Failed to generate invite link");
+      posthog.captureException(error);
     } finally {
       setLoading(false);
     }

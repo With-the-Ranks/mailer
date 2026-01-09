@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon, TagIcon, XIcon } from "lucide-react";
+import posthog from "posthog-js";
 import * as React from "react";
 
 import type { CustomFieldDefinition } from "@/components/custom-fields-manager";
@@ -80,6 +81,11 @@ export function AddContactSheet({
       createdAt: new Date().toISOString().split("T")[0],
       updatedAt: new Date().toISOString().split("T")[0],
     } as Contact;
+
+    posthog.capture("contact_added", {
+      has_custom_fields: Object.keys(formData.customFields || {}).length > 0,
+      has_tags: !!formData.tags,
+    });
 
     onAddContact(newContact);
     setFormData({

@@ -9,7 +9,7 @@ import speakeasy from "speakeasy";
 
 import { sendEmail } from "@/lib/actions/send-email";
 import prisma from "@/lib/prisma";
-import { logError, TOTP_TIME_WINDOW } from "@/lib/utils";
+import { getBaseAppUrl, logError, TOTP_TIME_WINDOW } from "@/lib/utils";
 
 import ResetPasswordEmail from "./email-templates/reset-email";
 import VerifyEmail from "./email-templates/verify-email";
@@ -202,7 +202,7 @@ export const resendVerificationEmail = async (email: string) => {
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+  const baseUrl = getBaseAppUrl();
   const verificationUrl = `${baseUrl}/api/verify-email?token=${token}`;
 
   const content = React.createElement(VerifyEmail, {
@@ -236,7 +236,7 @@ export const sendPasswordResetEmail = async (email: string) => {
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL || "http://app.localhost:3000";
+  const baseUrl = getBaseAppUrl();
   const resetUrl = `${baseUrl}/forgot-password?token=${token}`;
 
   const content = React.createElement(ResetPasswordEmail, { resetUrl });

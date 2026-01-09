@@ -3,12 +3,17 @@
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import posthog from "posthog-js";
 
 export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
+      // Capture logout event before resetting PostHog
+      posthog.capture("user_logged_out");
+      posthog.reset();
+
       await signOut({
         redirect: false,
         callbackUrl: "/login",

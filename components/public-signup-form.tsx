@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -142,12 +143,21 @@ export default function PublicSignupForm({
       );
 
       if (response.ok) {
+        posthog.capture("signup_form_submission", {
+          form_id: signupForm.id,
+          form_name: signupForm.name,
+          field_count: signupForm.fields.length,
+        });
         setIsSubmitted(true);
       } else {
         console.error("Error submitting form");
+        posthog.capture("signup_form_submission_failed", {
+          form_id: signupForm.id,
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
+      posthog.captureException(error);
     } finally {
       setIsSubmitting(false);
     }

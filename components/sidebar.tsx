@@ -162,7 +162,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         {
           name: "Dashboard",
           href: "/",
-          isActive: segments[0] === "organizations",
+          isActive: pathname === "/" || segments.length === 0,
           icon: LayoutDashboard,
         },
         {

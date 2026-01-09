@@ -4,6 +4,7 @@ import confetti from "canvas-confetti";
 import { Loader2 } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
+import posthog from "posthog-js";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -73,9 +74,14 @@ export function SendEmailModal({
         organizationId,
         audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
+      posthog.capture("test_email_sent", {
+        email_id: emailId,
+        organization_id: organizationId,
+      });
       toast.success("Test email sent");
-    } catch {
+    } catch (error) {
       toast.error("Failed to send test email");
+      posthog.captureException(error);
     }
     setIsSendingTest(false);
   };
@@ -110,6 +116,11 @@ export function SendEmailModal({
       });
       if (result.error) {
         toast.error(`Failed to send email: ${result.error}`);
+        posthog.capture("email_send_failed", {
+          error: result.error,
+          mode,
+          email_id: emailId,
+        });
       } else {
         confetti({
           particleCount: 200,
@@ -119,14 +130,31 @@ export function SendEmailModal({
           ticks: 100,
           origin: { y: 0.6 },
         });
+
+        if (mode === "now") {
+          posthog.capture("email_sent", {
+            email_id: emailId,
+            organization_id: organizationId,
+            has_segment: !!selectedSegment,
+          });
+        } else {
+          posthog.capture("email_scheduled", {
+            email_id: emailId,
+            organization_id: organizationId,
+            scheduled_time: when,
+            has_segment: !!selectedSegment,
+          });
+        }
+
         toast.success(
           mode === "now" ? "Emails sent successfully" : "Email scheduled",
         );
         onConfirm?.(when);
         modal?.hide();
       }
-    } catch {
+    } catch (error) {
       toast.error("Failed to send email");
+      posthog.captureException(error);
     } finally {
       setIsSubmitting(false);
     }
