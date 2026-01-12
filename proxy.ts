@@ -19,7 +19,7 @@ const PUBLIC_PATHS = [
 
 const PUBLIC_PREFIXES = ["/app/signup-forms/", "/app/unsubscribe"];
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Let PostHog ingest routes pass through to Next.js rewrites
