@@ -58,19 +58,27 @@ export async function GET(request: NextRequest) {
 
     // Dynamically count contacts for each segment
     const segmentsWithCounts = await Promise.all(
-      segments.map(async (segment) => {
-        const filterCriteria =
-          segment.filterCriteria &&
-          typeof segment.filterCriteria === "object" &&
-          !Array.isArray(segment.filterCriteria)
-            ? (segment.filterCriteria as Record<string, any>)
-            : {};
+      segments.map(
+        async (segment: {
+          id: string;
+          filterCriteria: any;
+          audienceListId: string;
+          audienceList: { id: string; name: string };
+          [key: string]: any;
+        }) => {
+          const filterCriteria =
+            segment.filterCriteria &&
+            typeof segment.filterCriteria === "object" &&
+            !Array.isArray(segment.filterCriteria)
+              ? (segment.filterCriteria as Record<string, any>)
+              : {};
 
-        const count = await prisma.audience.count({
-          where: buildAudienceWhere(segment.audienceListId, filterCriteria),
-        });
-        return { ...segment, contactCount: count };
-      }),
+          const count = await prisma.audience.count({
+            where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+          });
+          return { ...segment, contactCount: count };
+        },
+      ),
     );
 
     return NextResponse.json(segmentsWithCounts);

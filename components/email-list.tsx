@@ -1,6 +1,6 @@
 "use client";
 
-import type { Audience } from "@prisma/client";
+import type { Audience } from "@/prisma/generated/prisma/client";
 import { MoreVertical, PlusIcon, TrashIcon, UploadIcon } from "lucide-react";
 import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";

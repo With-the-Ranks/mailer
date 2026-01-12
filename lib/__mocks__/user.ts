@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { User } from "@prisma/client";
+import type { User } from "@/prisma/generated/prisma/client";
 
 const getMockUserDefaults = () => {
   const dateNow = new Date();

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Email } from "@prisma/client";
+import type { Email } from "@/prisma/generated/prisma/client";
 import type { MDXRemoteProps } from "next-mdx-remote";
 import { MDXRemote } from "next-mdx-remote";
 import { Tweet } from "react-tweet";

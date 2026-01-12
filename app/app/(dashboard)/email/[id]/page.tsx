@@ -88,10 +88,16 @@ export default async function EmailDetailPage({
       { label: "Clicks", value: clickedCount },
     ];
     recipients = Array.from(
-      new Set(sentEvents.map((e) => e.emailTo).filter((a): a is string => !!a)),
+      new Set(
+        sentEvents
+          .map((e: { emailTo: string | null }) => e.emailTo)
+          .filter((a: string | null): a is string => !!a),
+      ),
     );
   } else if (email.audienceList) {
-    recipients = email.audienceList.audiences.map((a) => a.email);
+    recipients = email.audienceList.audiences.map(
+      (a: { email: string }) => a.email,
+    );
   }
 
   return (

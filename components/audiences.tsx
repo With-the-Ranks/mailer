@@ -3,8 +3,20 @@ import { redirect } from "next/navigation";
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@/prisma/generated/prisma/client";
 
 import AudienceCard from "./audience-card";
+
+type AudienceListWithRelations = Prisma.AudienceListGetPayload<{
+  include: {
+    organization: true;
+    _count: {
+      select: {
+        audiences: true;
+      };
+    };
+  };
+}>;
 
 export default async function Audiences({
   organizationId,
@@ -38,7 +50,7 @@ export default async function Audiences({
 
   return audienceLists.length > 0 ? (
     <div className="justify-left flex">
-      {audienceLists.map((audienceList) => (
+      {audienceLists.map((audienceList: AudienceListWithRelations) => (
         <AudienceCard key={audienceList.id} data={audienceList} />
       ))}
     </div>

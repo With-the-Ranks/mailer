@@ -53,16 +53,27 @@ export async function generateStaticParams() {
   });
 
   const allPaths = allPosts
-    .flatMap(({ organization, slug }) => [
-      organization?.subdomain && {
-        domain: `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-        slug,
+    .flatMap(
+      (post: {
+        organization: {
+          subdomain: string | null;
+          customDomain: string | null;
+        } | null;
+        slug: string;
+      }) => {
+        const { organization, slug } = post;
+        return [
+          organization?.subdomain && {
+            domain: `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+            slug,
+          },
+          organization?.customDomain && {
+            domain: organization.customDomain,
+            slug,
+          },
+        ];
       },
-      organization?.customDomain && {
-        domain: organization.customDomain,
-        slug,
-      },
-    ])
+    )
     .filter(Boolean);
 
   return allPaths;

@@ -102,79 +102,84 @@ export async function PUT(
     }
 
     // Update fields in transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Get existing field IDs to preserve them
-      const existingFields = await tx.signupFormField.findMany({
-        where: {
-          signupFormId: id,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      const existingFieldIds = new Set(existingFields.map((f) => f.id));
-
-      // Separate fields into existing and new
-      const fieldsToUpdate = fields.filter(
-        (field: any) => field.id && existingFieldIds.has(field.id),
-      );
-      const fieldsToCreate = fields.filter(
-        (field: any) => !field.id || !existingFieldIds.has(field.id),
-      );
-
-      // Update existing fields
-      const updatePromises = fieldsToUpdate.map((field: any, index: number) =>
-        tx.signupFormField.update({
-          where: { id: field.id },
-          data: {
-            name: field.name,
-            label: field.label,
-            type: field.type,
-            required: field.required || false,
-            placeholder: field.placeholder,
-            options: field.options || [],
-            order: index,
-          },
-        }),
-      );
-
-      // Create new fields
-      const createPromises = fieldsToCreate.map((field: any, index: number) =>
-        tx.signupFormField.create({
-          data: {
-            name: field.name,
-            label: field.label,
-            type: field.type,
-            required: field.required || false,
-            placeholder: field.placeholder,
-            options: field.options || [],
-            order: fieldsToUpdate.length + index,
+    const result = await prisma.$transaction(
+      async (tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]) => {
+        // Get existing field IDs to preserve them
+        const existingFields = await tx.signupFormField.findMany({
+          where: {
             signupFormId: id,
           },
-        }),
-      );
+          select: {
+            id: true,
+          },
+        });
 
-      // Delete fields that are no longer in the form
-      const fieldsToDelete = existingFields.filter(
-        (existing) => !fields.some((field: any) => field.id === existing.id),
-      );
+        const existingFieldIds = new Set(
+          existingFields.map((f: { id: string }) => f.id),
+        );
 
-      const deletePromises = fieldsToDelete.map((field) =>
-        tx.signupFormField.delete({
-          where: { id: field.id },
-        }),
-      );
+        // Separate fields into existing and new
+        const fieldsToUpdate = fields.filter(
+          (field: any) => field.id && existingFieldIds.has(field.id),
+        );
+        const fieldsToCreate = fields.filter(
+          (field: any) => !field.id || !existingFieldIds.has(field.id),
+        );
 
-      // Execute all operations
-      const [updatedFields, createdFields] = await Promise.all([
-        Promise.all(updatePromises),
-        Promise.all(createPromises),
-        ...deletePromises,
-      ]);
+        // Update existing fields
+        const updatePromises = fieldsToUpdate.map((field: any, index: number) =>
+          tx.signupFormField.update({
+            where: { id: field.id },
+            data: {
+              name: field.name,
+              label: field.label,
+              type: field.type,
+              required: field.required || false,
+              placeholder: field.placeholder,
+              options: field.options || [],
+              order: index,
+            },
+          }),
+        );
 
-      return [...updatedFields, ...createdFields];
-    });
+        // Create new fields
+        const createPromises = fieldsToCreate.map((field: any, index: number) =>
+          tx.signupFormField.create({
+            data: {
+              name: field.name,
+              label: field.label,
+              type: field.type,
+              required: field.required || false,
+              placeholder: field.placeholder,
+              options: field.options || [],
+              order: fieldsToUpdate.length + index,
+              signupFormId: id,
+            },
+          }),
+        );
+
+        // Delete fields that are no longer in the form
+        const fieldsToDelete = existingFields.filter(
+          (existing: { id: string }) =>
+            !fields.some((field: any) => field.id === existing.id),
+        );
+
+        const deletePromises = fieldsToDelete.map((field: { id: string }) =>
+          tx.signupFormField.delete({
+            where: { id: field.id },
+          }),
+        );
+
+        // Execute all operations
+        const [updatedFields, createdFields] = await Promise.all([
+          Promise.all(updatePromises),
+          Promise.all(createPromises),
+          ...deletePromises,
+        ]);
+
+        return [...updatedFields, ...createdFields];
+      },
+    );
 
     // Revalidate the public signup form page
     await revalidatePath(`/signup-forms/${signupForm.slug}`);

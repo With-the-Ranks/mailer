@@ -1,4 +1,4 @@
-import type { Organization } from "@prisma/client";
+import type { Organization } from "@/prisma/generated/prisma/client";
 import { BarChart } from "lucide-react";
 import Link from "next/link";
 

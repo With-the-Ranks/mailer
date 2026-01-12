@@ -1,6 +1,6 @@
 "use server";
 
-import type { Email, Organization } from "@prisma/client";
+import type { Email, Organization } from "@/prisma/generated/prisma/client";
 import { put } from "@vercel/blob";
 import { customAlphabet } from "nanoid";
 import { revalidateTag } from "next/cache";
@@ -572,11 +572,13 @@ export const fetchAudienceLists = async (organizationId: string) => {
       },
     });
 
-    return audienceLists.map((list) => ({
-      id: list.id,
-      name: list.name,
-      contactCount: list.audiences.length,
-    }));
+    return audienceLists.map(
+      (list: { id: string; name: string; audiences: { id: string }[] }) => ({
+        id: list.id,
+        name: list.name,
+        contactCount: list.audiences.length,
+      }),
+    );
   } catch (error) {
     logError("Error fetching audience lists", error);
     throw new Error("Failed to fetch audience lists");

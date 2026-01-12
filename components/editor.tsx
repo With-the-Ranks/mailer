@@ -7,7 +7,7 @@ import {
   getVariableSuggestions,
   VariableExtension,
 } from "@maily-to/core/extensions";
-import type { Email } from "@prisma/client";
+import type { Email } from "@/prisma/generated/prisma/client";
 import { Loader2, X } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
