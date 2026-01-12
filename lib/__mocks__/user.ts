@@ -6,7 +6,7 @@ const getMockUserDefaults = () => {
   return {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
-    username: faker.internet.userName(),
+    username: faker.internet.username(),
     gh_username: null,
     email: faker.internet.email(),
     password: faker.internet.password(),
@@ -15,6 +15,9 @@ const getMockUserDefaults = () => {
     createdAt: dateNow,
     updatedAt: dateNow,
     organizationId: null,
+    currentOrganizationId: null,
+    twoFactorSecret: null,
+    twoFactorEnabled: false,
   };
 };
 

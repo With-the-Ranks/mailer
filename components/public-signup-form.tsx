@@ -294,7 +294,8 @@ export default function PublicSignupForm({
                     id={`${field.name}-${option}`}
                     value={option}
                     onCheckedChange={(checked) => {
-                      const currentValues = watch(field.name) || [];
+                      const currentValues =
+                        (watch(field.name) as string[]) || [];
                       if (checked) {
                         setValue(field.name, [...currentValues, option]);
                       } else {

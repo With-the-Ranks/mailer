@@ -25,7 +25,7 @@ export async function PUT(
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -53,7 +53,7 @@ export async function PUT(
 
     const updatedContact = await prisma.audience.update({
       where: { id },
-      data: validatedData,
+      data: validatedData as any,
     });
 
     return NextResponse.json(updatedContact);

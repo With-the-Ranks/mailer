@@ -258,11 +258,12 @@ export const updateOrganization = withAdminAuth(
         });
       }
       // Intentionally not logging details here in production
-      await revalidateTag(
+      revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
+        "page",
       );
       if (organization.customDomain) {
-        await revalidateTag(`${organization.customDomain}-metadata`);
+        revalidateTag(`${organization.customDomain}-metadata`, "page");
       }
 
       return response;
@@ -288,11 +289,12 @@ export const deleteOrganization = withAdminAuth(
           id: organization.id,
         },
       });
-      await revalidateTag(
+      revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
+        "page",
       );
       if (response.customDomain) {
-        await revalidateTag(`${response.customDomain}-metadata`);
+        revalidateTag(`${response.customDomain}-metadata`, "page");
       }
       return response;
     } catch (error: any) {
@@ -413,15 +415,17 @@ export const updateEmail = async (data: Email, scheduledTime?: Date | null) => {
       data: updateData,
     });
 
-    await revalidateTag(
+    revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
+      "page",
     );
-    await revalidateTag(
+    revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
+      "page",
     );
     if (email.organization?.customDomain) {
-      await revalidateTag(`${email.organization.customDomain}-emails`);
-      await revalidateTag(`${email.organization.customDomain}-${email.slug}`);
+      revalidateTag(`${email.organization.customDomain}-emails`, "page");
+      revalidateTag(`${email.organization.customDomain}-${email.slug}`, "page");
     }
 
     return response;
@@ -472,17 +476,22 @@ export const updatePostMetadata = withEmailAuth(
         });
       }
 
-      await revalidateTag(
+      revalidateTag(
         `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
+        "page",
       );
-      await revalidateTag(
+      revalidateTag(
         `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
+        "page",
       );
 
       // if the organization has a custom domain, we need to revalidate those tags too
       if (email.organization?.customDomain) {
-        await revalidateTag(`${email.organization.customDomain}-emails`);
-        await revalidateTag(`${email.organization.customDomain}-${email.slug}`);
+        revalidateTag(`${email.organization.customDomain}-emails`, "page");
+        revalidateTag(
+          `${email.organization.customDomain}-${email.slug}`,
+          "page",
+        );
       }
 
       return response;

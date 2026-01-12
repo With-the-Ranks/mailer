@@ -10,8 +10,10 @@ import { replaceLinks } from "@/lib/remark-plugins";
 
 import styles from "./mdx.module.css";
 
-interface ExampleCardProps
-  extends Pick<Email, "description" | "image" | "imageBlurhash"> {
+interface ExampleCardProps extends Pick<
+  Email,
+  "description" | "image" | "imageBlurhash"
+> {
   name: string | null;
   url: string | null;
 }
@@ -90,7 +92,6 @@ export default function MDX({ source }: { source: MDXRemoteProps }) {
       className={`prose-md prose prose-stone sm:prose-lg dark:prose-invert m-auto w-11/12 sm:w-3/4 ${styles.root}`}
       suppressHydrationWarning={true}
     >
-      {/* @ts-expect-error - MDXRemote types */}
       <MDXRemote {...source} components={components} />
     </article>
   );

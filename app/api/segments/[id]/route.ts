@@ -10,7 +10,7 @@ import { logError } from "@/lib/utils";
 const updateSegmentSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
   description: z.string().optional().nullable(),
-  filterCriteria: z.record(z.any()).optional(),
+  filterCriteria: z.record(z.string(), z.any()).optional(),
 });
 
 function safeFilterCriteria(filterCriteria: unknown): Record<string, any> {
@@ -110,7 +110,7 @@ export async function PUT(
       return NextResponse.json(
         {
           error: "Validation failed",
-          details: error.errors.map((err) => ({
+          details: error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),

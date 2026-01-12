@@ -15,7 +15,7 @@ export const contactSchema = z.object({
   defaultAddressCountryCode: z.string().optional().nullable(),
   defaultAddressZip: z.string().optional().nullable(),
   defaultAddressPhone: z.string().optional().nullable(),
-  customFields: z.record(z.any()).optional().default({}),
+  customFields: z.record(z.string(), z.any()).optional().default({}),
   audienceListId: z.string().min(1, "Audience list ID is required"),
   isUnsubscribed: z.boolean().optional(),
   unsubscribedAt: z.string().optional().nullable(),
@@ -30,7 +30,7 @@ export const segmentSchema = z.object({
   name: z.string().min(1, "Segment name is required").trim(),
   description: z.string().optional().nullable(),
   audienceListId: z.string().min(1, "Audience list ID is required"),
-  filterCriteria: z.record(z.any()).optional().default({}),
+  filterCriteria: z.record(z.string(), z.any()).optional().default({}),
   contactIds: z.array(z.string()).optional().default([]),
 });
 

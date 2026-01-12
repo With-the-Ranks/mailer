@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
         name: validatedData.name,
         description: validatedData.description,
         audienceListId: validatedData.audienceListId,
-        filterCriteria: validatedData.filterCriteria,
+        filterCriteria: validatedData.filterCriteria as any,
         organizationId: session.user.organizationId,
         contactCount, // store at creation, but always recalculate in GET
       },

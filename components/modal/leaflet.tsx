@@ -11,7 +11,11 @@ export default function Leaflet({
 }) {
   const leafletRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
-  const transitionProps = { type: "spring", stiffness: 500, damping: 30 };
+  const transitionProps = {
+    type: "spring" as const,
+    stiffness: 500,
+    damping: 30,
+  };
   useEffect(() => {
     controls.start({
       y: 20,
