@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/prisma/generated/prisma/client";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 

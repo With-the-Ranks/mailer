@@ -20,14 +20,19 @@ export async function generateStaticParams() {
   });
 
   const allPaths = allOrganizations
-    .flatMap(({ subdomain, customDomain }) => [
-      subdomain && {
-        domain: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    .flatMap(
+      (org: { subdomain: string | null; customDomain: string | null }) => {
+        const { subdomain, customDomain } = org;
+        return [
+          subdomain && {
+            domain: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+          },
+          customDomain && {
+            domain: customDomain,
+          },
+        ];
       },
-      customDomain && {
-        domain: customDomain,
-      },
-    ])
+    )
     .filter(Boolean);
 
   return allPaths;

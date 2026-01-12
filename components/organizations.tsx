@@ -1,4 +1,4 @@
-import type { Organization } from "@prisma/client";
+import type { Organization } from "@/prisma/generated/prisma/client";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 

@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     }
 
     const contact = await prisma.audience.create({
-      data: validatedData,
+      data: validatedData as any,
     });
 
     return NextResponse.json(contact, { status: 201 });

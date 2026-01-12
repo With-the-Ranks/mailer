@@ -1,4 +1,4 @@
-import type { Email } from "@prisma/client";
+import type { Email } from "@/prisma/generated/prisma/client";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
@@ -53,16 +53,16 @@ export default async function Emails({
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Email Campaign
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
               Time
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+            <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
               Actions
             </th>
           </tr>

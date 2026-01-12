@@ -1,6 +1,9 @@
 "use client";
 
-import type { AudienceList, Organization } from "@prisma/client";
+import type {
+  AudienceList,
+  Organization,
+} from "@/prisma/generated/prisma/client";
 import {
   Filter,
   FormInput,

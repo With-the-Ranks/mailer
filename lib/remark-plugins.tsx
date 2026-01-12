@@ -1,4 +1,4 @@
-import type { Example, PrismaClient } from "@prisma/client";
+import type { Example, PrismaClient } from "@/prisma/generated/prisma/client";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { visit } from "unist-util-visit";

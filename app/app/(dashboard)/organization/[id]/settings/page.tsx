@@ -23,10 +23,12 @@ export default async function OrganizationSettingsIndex({
     },
   });
 
-  const domainOptions = (data?.domains ?? []).map((d) => ({
-    value: d.id,
-    label: `${d.domain} — ${d.status}`,
-  }));
+  const domainOptions = (data?.domains ?? []).map(
+    (d: { id: string; domain: string; status: string | null }) => ({
+      value: d.id,
+      label: `${d.domain} — ${d.status ?? "Unknown"}`,
+    }),
+  );
 
   const selectOptions =
     domainOptions.length > 0

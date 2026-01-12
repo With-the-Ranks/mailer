@@ -58,19 +58,27 @@ export async function GET(request: NextRequest) {
 
     // Dynamically count contacts for each segment
     const segmentsWithCounts = await Promise.all(
-      segments.map(async (segment) => {
-        const filterCriteria =
-          segment.filterCriteria &&
-          typeof segment.filterCriteria === "object" &&
-          !Array.isArray(segment.filterCriteria)
-            ? (segment.filterCriteria as Record<string, any>)
-            : {};
+      segments.map(
+        async (segment: {
+          id: string;
+          filterCriteria: any;
+          audienceListId: string;
+          audienceList: { id: string; name: string };
+          [key: string]: any;
+        }) => {
+          const filterCriteria =
+            segment.filterCriteria &&
+            typeof segment.filterCriteria === "object" &&
+            !Array.isArray(segment.filterCriteria)
+              ? (segment.filterCriteria as Record<string, any>)
+              : {};
 
-        const count = await prisma.audience.count({
-          where: buildAudienceWhere(segment.audienceListId, filterCriteria),
-        });
-        return { ...segment, contactCount: count };
-      }),
+          const count = await prisma.audience.count({
+            where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+          });
+          return { ...segment, contactCount: count };
+        },
+      ),
     );
 
     return NextResponse.json(segmentsWithCounts);
@@ -98,7 +106,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -143,7 +151,7 @@ export async function POST(request: NextRequest) {
         name: validatedData.name,
         description: validatedData.description,
         audienceListId: validatedData.audienceListId,
-        filterCriteria: validatedData.filterCriteria,
+        filterCriteria: validatedData.filterCriteria as any,
         organizationId: session.user.organizationId,
         contactCount, // store at creation, but always recalculate in GET
       },

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Audience } from "@prisma/client";
+import type { Audience } from "@/prisma/generated/prisma/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";

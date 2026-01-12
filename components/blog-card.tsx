@@ -1,4 +1,4 @@
-import type { Email } from "@prisma/client";
+import type { Email } from "@/prisma/generated/prisma/client";
 import Link from "next/link";
 
 import { placeholderBlurhash, toDateString } from "@/lib/utils";

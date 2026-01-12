@@ -10,6 +10,7 @@ const gitignorePath = path.resolve(__dirname, ".gitignore");
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
+  resolvePluginsRelativeTo: __dirname,
 });
 
 export default [
@@ -18,7 +19,7 @@ export default [
     ignores: [
       "tailwind.config.js",
       "postcss.config.js",
-      "next.config.js",
+      "next.config.mjs",
       ".next/**",
       "node_modules/**",
       "next-env.d.ts",

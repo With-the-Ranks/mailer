@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -49,7 +49,14 @@ export async function POST(request: NextRequest) {
 
     // 2. Get all related audience lists and make sure they're all owned by the org
     const audienceListIds = Array.from(
-      new Set(contacts.map((c) => c.audienceListId)),
+      new Set(
+        contacts
+          .map(
+            (c: { id: string; audienceListId: string | null }) =>
+              c.audienceListId,
+          )
+          .filter((id: string | null): id is string => id !== null),
+      ),
     );
     const lists = await prisma.audienceList.findMany({
       where: {

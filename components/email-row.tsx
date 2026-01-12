@@ -1,6 +1,6 @@
 "use client";
 
-import type { Email, Organization } from "@prisma/client";
+import type { Email, Organization } from "@/prisma/generated/prisma/client";
 import { Clock, Edit3, Info, Send } from "lucide-react";
 import Link from "next/link";
 import React from "react";
