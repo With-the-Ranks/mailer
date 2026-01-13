@@ -278,7 +278,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="rounded-lg py-1.5 pr-4 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white [&>svg]:text-black hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:[&>svg]:text-white dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
+                                className="rounded-lg py-1.5 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white [&>svg]:text-black hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:[&>svg]:text-white dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
                               >
                                 <Link
                                   href={sub.href}
