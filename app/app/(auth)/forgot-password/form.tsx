@@ -66,7 +66,7 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
   };
 
   return (
-    <div className="mx-5 bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="mx-5 rounded-lg bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="flex items-center justify-center gap-2">
         <div className="relative h-4 w-4">
           <Image
@@ -102,7 +102,7 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
-              className="my-4 w-full rounded-none border border-white bg-white/10 px-3 py-2 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="my-4 w-full rounded-lg border border-white bg-white/10 px-3 py-2 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
             <FormButton isSubmitting={isSubmitting} label="Reset Password" />
           </form>
@@ -115,7 +115,7 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
-              className="my-4 w-full rounded-none border border-white bg-white/10 px-3 py-2 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="my-4 w-full rounded-lg border border-white bg-white/10 px-3 py-2 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
             <FormButton isSubmitting={isSubmitting} label="Send Reset Link" />
           </form>

@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 return {
                   ...option,
                   icon: (
-                    <div className="bg-fd-primary/10 rounded-md p-1 text-white">
+                    <div className="bg-fd-primary/10 rounded-lg p-1 text-white">
                       {icon}
                     </div>
                   ),

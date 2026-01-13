@@ -12,7 +12,7 @@ export default async function RegisterPage({
   const callbackUrl =
     typeof params.callbackUrl === "string" ? params.callbackUrl : null;
   return (
-    <div className="mx-5 bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="mx-5 rounded-lg bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="flex items-center justify-center gap-2">
         <div className="relative h-4 w-4">
           <Image

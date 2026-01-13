@@ -64,7 +64,7 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
         onChange={handleChange}
         placeholder="Email"
         disabled={isSubmitting}
-        className="mt-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-4 w-full max-w-md rounded-lg border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         required
       />
       <input
@@ -74,7 +74,7 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
         onChange={handleChange}
         placeholder="Password"
         disabled={isSubmitting}
-        className="my-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="my-4 w-full max-w-md rounded-lg border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         required
       />
       <FormButton isSubmitting={isSubmitting} label="Register" />
