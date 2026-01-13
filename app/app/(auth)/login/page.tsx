@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
+import Logo from "@/components/logo";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { isSafeCallbackPath } from "@/lib/utils";
 
@@ -22,14 +22,14 @@ export default async function LoginPage({
       ? {
           icon: <CheckCircle className="h-5 w-5 text-green-500" />,
           title: "Email verified",
-          description: "You can now log in.",
+          description: "You can now sign in.",
         }
       : verify === "expired"
         ? {
             icon: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
             title: "Link expired",
             description:
-              "Your verification link has expired. Try logging in again.",
+              "Your verification link has expired. Try signing in again.",
             variant: "destructive",
           }
         : verify === "invalid"
@@ -42,36 +42,20 @@ export default async function LoginPage({
           : null;
 
   return (
-    <div className="mx-5 rounded-lg bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="flex items-center justify-center gap-2">
-        <div className="relative h-4 w-4">
-          <Image
-            alt="Mailer"
-            width={16}
-            height={16}
-            className="h-4 w-4"
-            src="/mailer.svg"
-          />
-        </div>
-        <div className="flex h-7 w-20 justify-start text-3xl leading-8 font-bold text-white">
-          Mailer
-        </div>
+    <div className="mx-5 rounded-lg border border-gray-200 bg-white py-10 shadow-lg sm:mx-auto sm:w-full sm:max-w-md dark:border-neutral-700 dark:bg-[#2D2D2D]">
+      <div className="flex items-center justify-center">
+        <Logo />
       </div>
-      <p className="mt-2 text-center text-base text-white">
+      <p className="mt-2 text-center text-base text-gray-600 dark:text-gray-400">
         Easiest way to send organizing emails.
       </p>
 
       {alert && (
         <div className="mx-auto mt-6 w-11/12 max-w-xs">
-          <Alert
-            variant={"default"}
-            className="border-white/20 bg-white/10 text-white"
-          >
+          <Alert variant={"default"}>
             {alert.icon}
-            <AlertTitle className="text-white">{alert.title}</AlertTitle>
-            <AlertDescription className="text-white/90">
-              {alert.description}
-            </AlertDescription>
+            <AlertTitle>{alert.title}</AlertTitle>
+            <AlertDescription>{alert.description}</AlertDescription>
           </Alert>
         </div>
       )}
@@ -82,16 +66,16 @@ export default async function LoginPage({
       <div className="mt-2 text-center text-base">
         <Link
           href="/forgot-password"
-          className="text-white hover:text-gray-200 hover:underline"
+          className="text-gray-600 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
         >
           Forgot password?
         </Link>
       </div>
-      <div className="mt-5 text-center text-base text-white">
+      <div className="mt-5 text-center text-base text-gray-600 dark:text-gray-400">
         Don&apos;t have an account?{" "}
         <Link
           href={`/register${isSafeCallbackPath(callbackUrl) ? `?callbackUrl=${encodeURIComponent(callbackUrl as string)}` : ""}`}
-          className="p-2 underline hover:text-gray-200"
+          className="p-2 text-blue-700 underline hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
         >
           Sign up
         </Link>
