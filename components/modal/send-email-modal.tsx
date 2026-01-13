@@ -201,7 +201,7 @@ export function SendEmailModal({
             type="button"
             onClick={() => setMode(m)}
             variant={mode === m ? "default" : "ghost"}
-            className={`rounded-none px-4 py-1 text-base font-medium ${
+            className={`px-4 py-1 text-base font-medium ${
               mode === m ? "" : "hover:bg-gray-50"
             }`}
             aria-label={m === "now" ? "Send Now" : "Schedule"}

@@ -64,7 +64,7 @@ export default function CancelScheduleModal({
               e.preventDefault();
               handleUnschedule();
             }}
-            className="w-full rounded-md bg-white text-left md:max-w-md md:border md:border-stone-200 md:shadow-sm dark:bg-black dark:md:border-stone-700"
+            className="w-full rounded-lg bg-white text-left md:max-w-md md:border md:border-stone-200 md:shadow-sm dark:bg-black dark:md:border-stone-700"
           >
             <div className="relative flex flex-col space-y-4 p-5 md:p-10">
               <h2 className="text-2xl dark:text-white">
