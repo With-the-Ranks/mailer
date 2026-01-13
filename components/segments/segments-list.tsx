@@ -201,11 +201,13 @@ export function SegmentsList({
   }
   if (segments.length === 0) {
     return (
-      <Card>
+      <Card className="bg-white dark:bg-[#2D2D2D]">
         <CardContent className="flex flex-col items-center justify-center py-16">
-          <UsersIcon className="text-muted-foreground mb-4 h-16 w-16" />
-          <h3 className="mb-2 text-xl font-semibold">No segments yet</h3>
-          <p className="text-muted-foreground mb-6 max-w-md text-center">
+          <UsersIcon className="text-muted-foreground mb-4 h-16 w-16 dark:text-gray-400" />
+          <h3 className="mb-2 text-xl font-semibold dark:text-white">
+            No segments yet
+          </h3>
+          <p className="text-muted-foreground mb-6 max-w-md text-center dark:text-gray-400">
             Create segments by filtering your contacts in audience lists and
             clicking &quot;Create Segment&quot;
           </p>
