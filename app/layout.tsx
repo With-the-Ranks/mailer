@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 
 import { cn } from "@/lib/utils";
-import { leagueSpartan } from "@/styles/fonts";
+import { inter, leagueSpartan } from "@/styles/fonts";
 
 import { Providers } from "./providers";
 
@@ -39,8 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
-      <body className={cn(leagueSpartan.variable, "font-sans")}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(inter.variable, leagueSpartan.variable, "font-sans")}>
         <Providers>
           {children}
           <Analytics />

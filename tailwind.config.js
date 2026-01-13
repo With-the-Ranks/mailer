@@ -139,49 +139,50 @@ module.exports = {
         30: "7.5rem",
       },
       fontFamily: {
-        sans: ["var(--font-league-spartan)", "sans-serif"],
-        default: ["var(--font-league-spartan)", "sans-serif"],
-        cal: ["var(--font-league-spartan)", "sans-serif"],
-        title: ["var(--font-league-spartan)", "sans-serif"],
-        serif: ["var(--font-league-spartan)", "sans-serif"],
+        sans: ["var(--font-inter)", "sans-serif"],
+        default: ["var(--font-inter)", "sans-serif"],
+        cal: ["var(--font-inter)", "sans-serif"],
+        title: ["var(--font-inter)", "sans-serif"],
+        serif: ["var(--font-inter)", "sans-serif"],
+        logo: ["var(--font-league-spartan)", "sans-serif"],
         mono: ["Consolas", "Monaco", "Courier New", "monospace"],
       },
       typography: {
         DEFAULT: {
           css: {
-            fontFamily: "League Spartan, sans-serif",
+            fontFamily: "Inter, sans-serif",
             h1: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontWeight: "700",
             },
             h2: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontWeight: "700",
             },
             h3: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontWeight: "700",
             },
             h4: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontWeight: "700",
             },
             h5: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontWeight: "700",
             },
             h6: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontWeight: "700",
             },
             p: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
             },
             li: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
             },
             a: {
-              fontFamily: "League Spartan, sans-serif",
+              fontFamily: "Inter, sans-serif",
             },
             "blockquote p:first-of-type::before": {
               content: "none",
