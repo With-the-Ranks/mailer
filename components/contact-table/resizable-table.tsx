@@ -33,8 +33,11 @@ export function ResizableTable<T>({
   }, [columnSizing, table]);
 
   return (
-    <div className="overflow-auto rounded-md border">
-      <Table style={{ width: table.getCenterTotalSize() }}>
+    <div className="overflow-auto rounded-lg border bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]">
+      <Table
+        style={{ width: table.getCenterTotalSize() }}
+        className="bg-white dark:bg-[#2D2D2D]"
+      >
         <TableHeader>
           {table
             .getHeaderGroups()

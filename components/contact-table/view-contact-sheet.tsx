@@ -174,7 +174,7 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                 <Label className="text-muted-foreground text-base font-medium">
                   Note
                 </Label>
-                <p className="bg-muted mt-1 rounded-md p-3 text-base">
+                <p className="bg-muted mt-1 rounded-lg p-3 text-base">
                   {contact.note}
                 </p>
               </div>

@@ -42,7 +42,7 @@ export function ContactTable({
 }: ContactTableProps) {
   return (
     <div>
-      <div className="rounded-md border">
+      <div className="rounded-lg border">
         <ResizableTable table={table} data={contacts} columns={columns} />
       </div>
 
