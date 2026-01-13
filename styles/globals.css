@@ -14,7 +14,7 @@
   --fd-sidebar-width: 18rem;
 
   --color-fd-primary: hsl(226, 83%, 49%);
-  --color-fd-primary-foreground: hsl(0, 0%, 100%);
+  --color-fd-primary-foreground: hsl(100%, 100%, 100%);
   --color-fd-accent: hsla(226, 83%, 49%, 0.10);
   --color-fd-accent-foreground: hsl(226, 83%, 49%);
   --color-fd-ring: hsl(226, 83%, 49%);
@@ -312,10 +312,12 @@ select {
 .prose a {
   text-decoration: none !important;
   font-weight: 700;
+  color: var(--color-fd-primary-foreground, hsl(var(--foreground)));
 }
 
 .prose a:hover {
   text-decoration: underline !important;
+  color: var(--color-fd-primary, hsl(var(--foreground)));
 }
 
 .prose strong,
