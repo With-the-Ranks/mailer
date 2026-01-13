@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Logo from "@/components/logo";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import {
@@ -73,16 +73,10 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
         <div className="flex min-w-0 flex-col space-y-6">
           <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
           <div className="flex flex-col items-center justify-center py-20">
-            <Image
-              alt="No reports data"
-              src="/empty-state.png"
-              width={400}
-              height={400}
-            />
-            <p className="mt-6 text-xl font-semibold text-stone-700 dark:text-stone-200">
-              No email analytics yet
-            </p>
-            <p className="mt-2 text-lg text-stone-500 dark:text-stone-400">
+            <div className="scale-150">
+              <Logo showText={false} clickable={false} />
+            </div>
+            <p className="mt-6 text-lg text-stone-500 dark:text-stone-400">
               Send your first email to start seeing analytics and reports.
             </p>
           </div>
