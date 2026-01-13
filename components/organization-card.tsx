@@ -33,7 +33,7 @@ export default function OrganizationCard({ data }: { data: Organization }) {
       <div className="absolute bottom-4 flex w-full justify-between space-x-4 px-4">
         <Link
           href={`/organization/${data.id}/analytics`}
-          className="dark:bg-opacity-50 dark:hover:bg-opacity-50 flex items-center rounded-md bg-green-100 px-2 py-1 text-base font-medium text-green-600 transition-colors hover:bg-green-200 dark:bg-green-900 dark:text-green-400 dark:hover:bg-green-800"
+          className="dark:bg-opacity-50 dark:hover:bg-opacity-50 flex items-center rounded-lg bg-green-100 px-2 py-1 text-base font-medium text-green-600 transition-colors hover:bg-green-200 dark:bg-green-900 dark:text-green-400 dark:hover:bg-green-800"
         >
           <BarChart height={16} />
         </Link>

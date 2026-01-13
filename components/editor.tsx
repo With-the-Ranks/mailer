@@ -241,7 +241,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           Subject
         </span>
         <Input
-          className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-auto border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
           onChange={(e) => setData({ ...data, subject: e.target.value })}
           placeholder="Email Subject"
           type="text"
@@ -255,7 +255,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
             From Name
           </span>
           <Input
-            className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-auto border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
             onChange={(e) => {
               setFrom(e.target.value);
               setData({ ...data, from: e.target.value });
@@ -282,7 +282,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
           </span>
           <div className="align-content-stretch flex grow items-center">
             <Input
-              className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-auto border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
               onChange={(e) => setData({ ...data, replyTo: e.target.value })}
               placeholder="noreply@withtheranks.coop"
               type="text"
@@ -300,7 +300,7 @@ export default function Editor({ email }: { email: EmailWithSite }) {
       )}
       <div className="relative my-6">
         <Input
-          className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-2xl focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-auto border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-2xl focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
           onChange={(e) => setData({ ...data, previewText: e.target.value })}
           placeholder="Preview Text"
           type="text"

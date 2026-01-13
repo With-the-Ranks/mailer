@@ -29,7 +29,7 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center justify-start gap-[5px] text-sm font-normal text-white transition-opacity hover:opacity-80"
+      className="flex items-center justify-start gap-2 text-sm font-normal text-black transition-opacity hover:opacity-80 dark:text-white"
       aria-label="Logout"
     >
       <span>Logout</span>

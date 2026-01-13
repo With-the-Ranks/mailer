@@ -115,7 +115,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
       key={data.id}
       role="button"
       tabIndex={0}
-      className="cursor-pointer hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset dark:hover:bg-gray-800"
+      className="cursor-pointer hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset dark:hover:bg-neutral-800"
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
     >
