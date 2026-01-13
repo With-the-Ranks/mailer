@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 import { updateContactSchema } from "@/lib/validations";
@@ -46,9 +46,13 @@ export async function PUT(
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
 
-    // Verify the audience list belongs to the user's organization
-    if (contact.audienceList.organizationId !== session.user.organizationId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    // Check if user has access to the organization that owns this contact's audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      contact.audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const updatedContact = await prisma.audience.update({
@@ -96,9 +100,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
 
-    // Verify the audience list belongs to the user's organization
-    if (contact.audienceList.organizationId !== session.user.organizationId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    // Check if user has access to the organization that owns this contact's audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      contact.audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     await prisma.audience.delete({

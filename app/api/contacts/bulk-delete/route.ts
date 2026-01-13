@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Get all related audience lists and make sure they're all owned by the org
+    // 2. Get all related audience lists and verify user has access to all of them
     const audienceListIds = Array.from(
       new Set(
         contacts
@@ -61,13 +61,23 @@ export async function POST(request: NextRequest) {
     const lists = await prisma.audienceList.findMany({
       where: {
         id: { in: audienceListIds },
-        organizationId: session.user.organizationId,
       },
-      select: { id: true },
+      select: { id: true, organizationId: true },
     });
 
+    // Check if user has access to all organizations
+    for (const list of lists) {
+      const hasAccess = await isOrgMember(
+        session.user.id as string,
+        list.organizationId,
+      );
+      if (!hasAccess) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     if (lists.length !== audienceListIds.length) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const deleteResult = await prisma.audience.deleteMany({
