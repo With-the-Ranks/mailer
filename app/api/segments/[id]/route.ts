@@ -43,6 +43,10 @@ export async function GET(
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
     }
 
+    if (!segment.organizationId) {
+      return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
     // Check if user has access to the organization that owns this segment
     const hasAccess = await isOrgMember(
       session.user.id as string,
@@ -90,6 +94,10 @@ export async function PUT(
     });
 
     if (!segment) {
+      return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    if (!segment.organizationId) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
     }
 
@@ -162,6 +170,10 @@ export async function DELETE(
     });
 
     if (!segment) {
+      return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    if (!segment.organizationId) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
     }
 
