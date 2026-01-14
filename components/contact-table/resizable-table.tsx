@@ -46,12 +46,15 @@ export function ResizableTable<T>({
                 id: React.Key | null | undefined;
                 headers: any[];
               }) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow
+                  key={headerGroup.id}
+                  className="dark:bg-neutral-800/50"
+                >
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
                       style={{ width: header.getSize() }}
-                      className="relative"
+                      className="relative dark:text-gray-400"
                     >
                       {header.isPlaceholder
                         ? null
@@ -107,7 +110,10 @@ export function ResizableTable<T>({
               )
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center dark:text-white"
+              >
                 No contacts found.
               </TableCell>
             </TableRow>

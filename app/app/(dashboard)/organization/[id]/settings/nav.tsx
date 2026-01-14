@@ -33,7 +33,7 @@ export default function SiteSettingsNav() {
   ];
 
   return (
-    <div className="flex space-x-4 border-b border-stone-200 pt-2 pb-4 dark:border-stone-700">
+    <div className="flex space-x-4 rounded-lg border border-stone-200 bg-white px-4 pt-2 pb-4 dark:border-stone-700 dark:bg-[#2D2D2D]">
       {navItems.map((item) => (
         <Link
           key={item.name}
