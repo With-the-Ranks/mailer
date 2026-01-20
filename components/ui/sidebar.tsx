@@ -43,9 +43,7 @@ type SidebarContextProps = {
   toggleSidebar: () => void;
 };
 
-export const SidebarContext = React.createContext<SidebarContextProps | null>(
-  null,
-);
+const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
@@ -54,6 +52,10 @@ function useSidebar() {
   }
 
   return context;
+}
+
+function useSidebarOptional() {
+  return React.useContext(SidebarContext);
 }
 
 const SidebarProvider = React.forwardRef<
@@ -781,4 +783,5 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
+  useSidebarOptional,
 };

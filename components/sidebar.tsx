@@ -333,7 +333,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               <div className="px-0">
                 <Link href="?action=create-email" scroll={false}>
                   <Button
-                    className="w-full items-center justify-center gap-1 rounded-lg bg-linear-to-bl from-amber-200 to-amber-400 p-2 text-sm font-bold text-black transition-colors hover:from-amber-300 hover:to-amber-500"
+                    className="w-full items-center justify-center gap-1 rounded-lg bg-gradient-to-bl from-amber-200 to-amber-400 p-2 text-sm font-bold text-black transition-colors hover:from-amber-300 hover:to-amber-500"
                     size="default"
                   >
                     <BadgePlus className="h-6 w-6" />
