@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { fetchAudienceLists } from "@/lib/actions";
 
 import CreateAudienceModal from "./modal/create-audience-list";
-import CreateEmailModal from "./modal/create-email-modal";
 
 export default function CreateEmailButton({
   organizationId,
@@ -17,6 +17,7 @@ export default function CreateEmailButton({
   organizationId: string;
 }) {
   const modal = useModal();
+  const router = useRouter();
   const [isFetching, setIsFetching] = useState(false);
 
   const handleClick = async () => {
@@ -31,8 +32,8 @@ export default function CreateEmailButton({
       toast.error("You need to create an audience list first.");
       modal?.show(<CreateAudienceModal organizationId={organizationId} />);
     } else {
-      // Otherwise, show Create Email Modal
-      modal?.show(<CreateEmailModal organizationId={organizationId} />);
+      // Navigate to the new wizard
+      router.push(`/email/create?organizationId=${organizationId}`);
     }
   };
 
@@ -40,7 +41,7 @@ export default function CreateEmailButton({
     <Button
       onClick={handleClick}
       disabled={isFetching}
-      aria-label={isFetching ? "Loading" : "Create a new email"}
+      aria-label={isFetching ? "Loading" : "Create Email"}
     >
       {isFetching ? (
         <>
@@ -48,7 +49,7 @@ export default function CreateEmailButton({
           Loading...
         </>
       ) : (
-        "Create a new email"
+        "Create Email"
       )}
     </Button>
   );
