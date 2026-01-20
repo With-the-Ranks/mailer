@@ -528,10 +528,10 @@ export function ContactList({
 
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Link href="?action=custom-fields" scroll={false}>
-            <Button variant="outline" size="sm">
-              <Settings2Icon className="mr-2 h-4 w-4" />
-              Custom Fields
+          <Link href="?action=add-contact" scroll={false}>
+            <Button variant="default" size="sm">
+              <UserPlusIcon className="mr-2 h-4 w-4" />
+              Add Contact
             </Button>
           </Link>
           <Link href="?action=import" scroll={false}>
@@ -540,10 +540,10 @@ export function ContactList({
               Import Contacts
             </Button>
           </Link>
-          <Link href="?action=add-contact" scroll={false}>
-            <Button variant="default" size="sm">
-              <UserPlusIcon className="mr-2 h-4 w-4" />
-              Add Contact
+          <Link href="?action=custom-fields" scroll={false}>
+            <Button variant="outline" size="sm">
+              <Settings2Icon className="mr-2 h-4 w-4" />
+              Custom Fields
             </Button>
           </Link>
         </div>
