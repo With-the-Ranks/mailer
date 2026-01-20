@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import CreateSignupFormButton from "@/components/create-signup-form-button";
 import SignupForms from "@/components/signup-forms";
+import { Button } from "@/components/ui/button";
 import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -40,7 +41,11 @@ export default async function SignupFormsPage({
           Signup Forms
         </h1>
         <div className="py-4 md:py-6 lg:py-8">
-          <CreateSignupFormButton organizationId={decodeURIComponent(id)} />
+          <Button asChild>
+            <Link href={`/organization/${organizationId}/signup-forms/edit`}>
+              Create Form
+            </Link>
+          </Button>
         </div>
       </div>
       <SignupForms organizationId={decodeURIComponent(id)} />
