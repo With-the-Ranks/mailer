@@ -13,7 +13,7 @@
         "borderWidth": 0,
         "marginRight": 0,
         "paddingLeft": 8,
-        "borderRadius": 6,
+        "borderRadius": 8,
         "marginBottom": 0,
         "paddingRight": 8,
         "paddingBottom": 8,
@@ -21,41 +21,16 @@
       },
       "content": [
         {
-          "type": "paragraph",
-          "attrs": {
-            "showIfKey": null,
-            "textAlign": "left"
-          }
-        },
-        {
           "type": "logo",
           "attrs": {
             "alt": null,
-            "src": "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png",
-            "size": "sm",
+            "src": "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/logo.png",
+            "size": "lg",
             "title": null,
             "alignment": "center",
             "showIfKey": null,
             "isSrcVariable": false,
             "maily-component": "logo"
-          }
-        },
-        {
-          "type": "image",
-          "attrs": {
-            "alt": null,
-            "src": "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png",
-            "title": null,
-            "width": "80%",
-            "height": "auto",
-            "alignment": "center",
-            "showIfKey": null,
-            "aspectRatio": 1.904761904761905,
-            "borderRadius": 24,
-            "externalLink": null,
-            "isSrcVariable": false,
-            "lockAspectRatio": true,
-            "isExternalLinkVariable": false
           }
         },
         {
@@ -81,11 +56,11 @@
                     "showIfKey": null,
                     "marginLeft": 0,
                     "paddingTop": 0,
-                    "borderColor": "#e2e2e2",
+                    "borderColor": "#D4D4D4",
                     "borderWidth": 0,
                     "marginRight": 0,
                     "paddingLeft": 8,
-                    "borderRadius": 6,
+                    "borderRadius": 8,
                     "marginBottom": 0,
                     "paddingRight": 8,
                     "paddingBottom": 8,
@@ -210,11 +185,11 @@
                             "showIfKey": null,
                             "marginLeft": 0,
                             "paddingTop": 0,
-                            "borderColor": "#252753",
+                            "borderColor": "#D4D4D4",
                             "borderWidth": 2,
                             "marginRight": 0,
                             "paddingLeft": 16,
-                            "borderRadius": 20,
+                            "borderRadius": 8,
                             "marginBottom": 0,
                             "paddingRight": 16,
                             "paddingBottom": 16,
@@ -222,17 +197,11 @@
                           },
                           "content": [
                             {
-                              "type": "horizontalRule"
-                            },
-                            {
                               "type": "spacer",
                               "attrs": {
-                                "height": 8,
+                                "height": 12,
                                 "showIfKey": null
                               }
-                            },
-                            {
-                              "type": "horizontalRule"
                             },
                             {
                               "type": "heading",
@@ -273,9 +242,9 @@
                                 "showIfKey": null,
                                 "textColor": "#ffffff",
                                 "paddingTop": 10,
-                                "buttonColor": "#0F1538",
+                                "buttonColor": "#1547E6",
                                 "paddingLeft": 32,
-                                "borderRadius": "round",
+                                "borderRadius": "smooth",
                                 "paddingRight": 32,
                                 "isUrlVariable": false,
                                 "paddingBottom": 10,
@@ -292,9 +261,9 @@
                                 "showIfKey": null,
                                 "textColor": "#ffffff",
                                 "paddingTop": 10,
-                                "buttonColor": "#0F1538",
+                                "buttonColor": "#1547E6",
                                 "paddingLeft": 32,
-                                "borderRadius": "round",
+                                "borderRadius": "smooth",
                                 "paddingRight": 32,
                                 "isUrlVariable": false,
                                 "paddingBottom": 10,
@@ -311,9 +280,9 @@
                                 "showIfKey": null,
                                 "textColor": "#ffffff",
                                 "paddingTop": 10,
-                                "buttonColor": "#0F1538",
+                                "buttonColor": "#1547E6",
                                 "paddingLeft": 32,
-                                "borderRadius": "round",
+                                "borderRadius": "smooth",
                                 "paddingRight": 32,
                                 "isUrlVariable": false,
                                 "paddingBottom": 10,
@@ -379,11 +348,89 @@
                             {
                               "type": "textStyle",
                               "attrs": {
-                                "color": "#252753"
+                                "color": "#000000"
                               }
                             },
                             {
                               "type": "italic"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "section",
+                      "attrs": {
+                        "align": "center",
+                        "marginTop": 0,
+                        "showIfKey": null,
+                        "marginLeft": 0,
+                        "paddingTop": 16,
+                        "borderColor": "",
+                        "borderWidth": 0,
+                        "marginRight": 0,
+                        "paddingLeft": 16,
+                        "borderRadius": 0,
+                        "marginBottom": 0,
+                        "paddingRight": 16,
+                        "paddingBottom": 16,
+                        "backgroundColor": ""
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "attrs": {
+                            "showIfKey": null,
+                            "textAlign": "center"
+                          },
+                          "content": [
+                            {
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#6b7280",
+                                    "fontSize": "12px"
+                                  }
+                                }
+                              ],
+                              "text": "If you no longer wish to receive these emails, please "
+                            },
+                            {
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "link",
+                                  "attrs": {
+                                    "href": "{{unsubscribe_url}}",
+                                    "target": "_blank",
+                                    "rel": "noopener noreferrer nofollow"
+                                  }
+                                },
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#2563eb",
+                                    "fontSize": "12px",
+                                    "textDecoration": "underline"
+                                  }
+                                }
+                              ],
+                              "text": "unsubscribe here"
+                            },
+                            {
+                              "type": "text",
+                              "marks": [
+                                {
+                                  "type": "textStyle",
+                                  "attrs": {
+                                    "color": "#6b7280",
+                                    "fontSize": "12px"
+                                  }
+                                }
+                              ],
+                              "text": "."
                             }
                           ]
                         }
