@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useContext } from "react";
-import { SidebarContext } from "@/components/ui/sidebar";
+import { useSidebarOptional } from "@/components/ui/sidebar";
 
 interface LogoProps {
   showText?: boolean;
@@ -15,7 +14,7 @@ export default function Logo({
   clickable = true,
 }: LogoProps) {
   // Try to get sidebar context, but don't throw if it doesn't exist (for auth pages)
-  const sidebarContext = useContext(SidebarContext);
+  const sidebarContext = useSidebarOptional();
 
   // Default to expanded state when used outside sidebar context (auth pages)
   const state = sidebarContext?.state ?? "expanded";
@@ -77,6 +76,7 @@ export default function Logo({
   return (
     <Link
       href="/"
+      aria-label="Go to home"
       className={`inline-flex items-center gap-4 ${
         isCollapsed ? "w-full justify-center" : ""
       }`}

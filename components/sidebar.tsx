@@ -13,7 +13,6 @@ import {
   Newspaper,
   Settings,
   TableProperties,
-  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -29,7 +28,6 @@ import LogoutButton from "@/components/logout-button";
 import OrganizationSwitcher from "@/components/organization-switcher";
 import { SidebarCreateButtonGroup } from "@/components/sidebar-create-button-group";
 import ThemeSwitcher from "@/components/theme-switcher";
-import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
