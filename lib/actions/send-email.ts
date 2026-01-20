@@ -187,7 +187,21 @@ export const sendBulkEmail = async ({
     if (!audienceList) return { error: "Audience list not found" };
     recipients = audienceList.audiences;
   } else {
-    return { error: "Must provide either segmentId or audienceListId" };
+    // No segment and no audienceListId: use org's first audience list (all contacts)
+    const firstList = await prisma.audienceList.findFirst({
+      where: { organizationId },
+      include: {
+        audiences: {
+          where: { isUnsubscribed: false },
+        },
+      },
+    });
+    if (!firstList)
+      return {
+        error:
+          "No audience list found for this organization. Create an audience list first.",
+      };
+    recipients = firstList.audiences;
   }
 
   if (recipients.length === 0) return { error: "No recipients found" };
@@ -213,18 +227,17 @@ export const sendBulkEmail = async ({
         ? await parseContent(content, vars, previewText)
         : "";
 
-      const emailData = {
+      const emailData: CreateEmailOptions = {
         from: fromHeader,
         to: [audience.email],
         subject: subject || "No Subject",
         html: htmlContent || "",
         text: "",
-        scheduledAt: scheduledTime,
+        scheduledAt: scheduledTime || undefined,
         tags: [
           { name: "intrepidId", value: id },
           { name: "userId", value: session.user.id },
         ],
-        react: "",
       };
       const { data, error } = await resend.emails.send(emailData);
 
@@ -263,6 +276,16 @@ export const sendBulkEmail = async ({
         if (err.code !== "P2002") logError("Error logging email event", err);
       }
     }
+
+    // Mark email as published and set scheduledTime
+    await prisma.email.update({
+      where: { id },
+      data: {
+        published: true,
+        scheduledTime: scheduledTime ? new Date(scheduledTime) : new Date(),
+      },
+    });
+
     return { success: true };
   } catch (e) {
     logError("Error sending bulk email", e);
