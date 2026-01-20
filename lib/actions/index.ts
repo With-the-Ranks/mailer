@@ -408,6 +408,10 @@ export const updateEmail = async (data: Email, scheduledTime?: Date | null) => {
   if (scheduledTime !== undefined && scheduledTime !== null) {
     updateData.scheduledTime = scheduledTime;
   }
+  if ("template" in data) {
+    updateData.template =
+      (data as { template?: string | null }).template ?? null;
+  }
 
   try {
     const response = await prisma.email.update({

@@ -88,7 +88,7 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
     <div className="flex w-full min-w-0 flex-col space-y-12">
       <div className="flex min-w-0 flex-col space-y-6">
         <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
-        <div className="h-[400px] w-full rounded-lg bg-white py-6 dark:bg-[#2D2D2D]">
+        <div className="h-[400px] w-full rounded-lg border border-gray-200 bg-white py-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
