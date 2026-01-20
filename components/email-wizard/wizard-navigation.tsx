@@ -24,12 +24,10 @@ export function WizardNavigation({
     <div className="mx-6 mb-6 rounded-lg border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-900">
       <div className="flex items-center justify-end">
         {/* Auto-save indicator */}
-        {isSaving && (
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Saving...</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Saving...</span>
+        </div>
       </div>
     </div>
   );

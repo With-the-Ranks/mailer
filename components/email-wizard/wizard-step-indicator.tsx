@@ -10,6 +10,7 @@ interface WizardStepIndicatorProps {
   onNext?: () => void;
   onFinalSubmit?: () => Promise<void>;
   isFinalStep?: boolean;
+  isSending?: boolean;
   finalButtonLabel?: string;
 }
 
@@ -25,6 +26,7 @@ export function WizardStepIndicator({
   onNext,
   onFinalSubmit,
   isFinalStep = false,
+  isSending = false,
   finalButtonLabel = "Send Email",
 }: WizardStepIndicatorProps) {
   const { canProceedToNextStep, isSaving, goToPreviousStep, setCurrentStep } =
@@ -41,7 +43,7 @@ export function WizardStepIndicator({
   };
 
   const isStepClickable = (stepNumber: number): boolean => {
-    if (isSaving) return false;
+    if (isSaving || isSending) return false;
     // Can click on current step or any previous step
     if (stepNumber <= currentStep) return true;
     // Can click on next step if Next button is available
@@ -63,7 +65,7 @@ export function WizardStepIndicator({
           <Button
             variant="ghost"
             onClick={goToPreviousStep}
-            disabled={isSaving}
+            disabled={isSaving || isSending}
             className="flex items-center gap-1.5 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
             <span>&lt;</span> Back

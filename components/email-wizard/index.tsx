@@ -191,6 +191,7 @@ function EmailWizardContent({
             onNext={goToNextStep}
             onFinalSubmit={handleFinalSend}
             isFinalStep={currentStep === 4}
+            isSending={isSending}
             finalButtonLabel={
               formData.scheduledTime ? "Schedule Email" : "Send Email"
             }
