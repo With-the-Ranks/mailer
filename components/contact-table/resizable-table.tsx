@@ -3,7 +3,7 @@
 import { type ColumnDef, flexRender } from "@tanstack/react-table";
 import * as React from "react";
 
-import Logo from "@/components/logo";
+import { EmptyState } from "@/components/empty-state";
 import {
   Table,
   TableBody,
@@ -120,12 +120,11 @@ export function ResizableTable<T>({
             <TableRow>
               <TableCell colSpan={columns.length} className="w-full align-top">
                 <div className="flex min-h-120 max-w-1/2 flex-col items-center justify-center gap-4 px-8 py-12">
-                  <div className="scale-150">
-                    <Logo showText={false} clickable={false} />
-                  </div>
-                  <p className="text-base text-stone-500 dark:text-stone-400">
-                    No contacts in this list
-                  </p>
+                  <EmptyState
+                    icon="table-properties"
+                    message="No contacts in this list"
+                    compact
+                  />
                 </div>
               </TableCell>
             </TableRow>

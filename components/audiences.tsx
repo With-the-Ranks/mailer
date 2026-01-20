@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import Logo from "@/components/logo";
+import { EmptyState } from "@/components/empty-state";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import type { Prisma } from "@/prisma/generated/prisma/client";
@@ -56,12 +56,10 @@ export default async function Audiences({
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center space-y-6 py-20">
-      <div className="scale-150">
-        <Logo showText={false} clickable={false} />
-      </div>
-      <p className="text-lg text-stone-500 dark:text-stone-400">
-        You do not have any audience lists yet. Create one to get started.
-      </p>
+      <EmptyState
+        icon="table-properties"
+        message="You do not have any audience lists yet. Create one to get started."
+      />
     </div>
   );
 }

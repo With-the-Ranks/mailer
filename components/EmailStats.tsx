@@ -1,7 +1,8 @@
 "use client";
 
-import Logo from "@/components/logo";
 import { useTheme } from "next-themes";
+
+import { EmptyState } from "@/components/empty-state";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -72,13 +73,11 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
       <div className="flex w-full min-w-0 flex-col space-y-12">
         <div className="flex min-w-0 flex-col space-y-6">
           <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="scale-150">
-              <Logo showText={false} clickable={false} />
-            </div>
-            <p className="mt-6 text-lg text-stone-500 dark:text-stone-400">
-              Send your first email to start seeing analytics and reports.
-            </p>
+          <div className="flex flex-col items-center justify-center space-y-6 py-20">
+            <EmptyState
+              icon="chart-line"
+              message="Send your first email to start seeing analytics and reports."
+            />
           </div>
         </div>
       </div>

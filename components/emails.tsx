@@ -1,7 +1,7 @@
 import type { Email } from "@/prisma/generated/prisma/client";
 import { redirect } from "next/navigation";
 
-import Logo from "@/components/logo";
+import { EmptyState } from "@/components/empty-state";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -35,12 +35,10 @@ export default async function Emails({
   if (emails.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center space-y-6 py-20">
-        <div className="scale-150">
-          <Logo showText={false} clickable={false} />
-        </div>
-        <p className="text-lg text-stone-500 dark:text-stone-400">
-          You do not have any emails yet. Create one to get started.
-        </p>
+        <EmptyState
+          icon="mail-open"
+          message="You do not have any emails yet. Create one to get started."
+        />
       </div>
     );
   }
