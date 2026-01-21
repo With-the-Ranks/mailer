@@ -325,12 +325,12 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
                     }),
                     ImageUploadExtension.configure({
                       onImageUpload: async (file: Blob) => {
-                        const formData = new FormData();
-                        formData.append("file", file);
+                        const uploadFormData = new FormData();
+                        uploadFormData.append("file", file);
 
                         const response = await fetch("/api/upload", {
                           method: "POST",
-                          body: formData,
+                          body: uploadFormData,
                         });
 
                         if (!response.ok) {
