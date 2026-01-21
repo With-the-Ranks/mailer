@@ -6,6 +6,7 @@ import { Editor as MailyEditor } from "@maily-to/core";
 import {
   getVariableSuggestions,
   VariableExtension,
+  ImageUploadExtension,
 } from "@maily-to/core/extensions";
 import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -322,12 +323,27 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
                       suggestion: getVariableSuggestions("@"),
                       variables: editorVars,
                     }),
+                    ImageUploadExtension.configure({
+                      onImageUpload: async (file: Blob) => {
+                        const formData = new FormData();
+                        formData.append("file", file);
+
+                        const response = await fetch("/api/upload", {
+                          method: "POST",
+                          body: formData,
+                        });
+
+                        if (!response.ok) {
+                          throw new Error("Failed to upload image");
+                        }
+
+                        const blob = await response.json();
+                        return blob.url;
+                      },
+                    }),
                   ]}
                   key={`editor-${formData.template || "saved"}-${editorKey}`}
                   onCreate={() => {
-                    console.log(
-                      "Editor onCreate called - setting hydrated to true",
-                    );
                     setHydrated(true);
                   }}
                   onUpdate={(editor) => {

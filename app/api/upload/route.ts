@@ -14,13 +14,33 @@ export async function POST(req: Request) {
     );
   }
 
-  const file = req.body || "";
-  const contentType = req.headers.get("content-type") || "text/plain";
-  const filename = `${nanoid()}.${contentType.split("/")[1]}`;
-  const blob = await put(filename, file, {
-    contentType,
-    access: "public",
-  });
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File | Blob;
 
-  return NextResponse.json(blob);
+    if (!file) {
+      return new Response("No file provided", { status: 400 });
+    }
+
+    // Get file extension from name (if File) or content type
+    let fileExtension = "bin";
+    if (file instanceof File && file.name) {
+      const nameParts = file.name.split(".");
+      fileExtension = nameParts.length > 1 ? nameParts.pop()! : "bin";
+    } else if (file.type) {
+      fileExtension = file.type.split("/")[1] || "bin";
+    }
+
+    const filename = `${nanoid()}.${fileExtension}`;
+
+    const blob = await put(filename, file, {
+      contentType: file.type || "application/octet-stream",
+      access: "public",
+    });
+
+    return NextResponse.json(blob);
+  } catch (error) {
+    console.error("Upload error:", error);
+    return new Response("Failed to upload file", { status: 500 });
+  }
 }

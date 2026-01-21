@@ -143,15 +143,14 @@ export const createDefaultBlocks = (organization?: {
     description: "Add an image to your email.",
     searchTerms: ["image", "picture", "photo"],
     command: ({ editor, range }: { editor: any; range: any }) => {
-      const defaultImage = organization?.image || "{{app_url}}/placeholder.png";
       editor
         .chain()
         .deleteRange(range)
         .insertContent({
           type: "image",
           attrs: {
-            src: defaultImage,
-            alt: "Organization image",
+            src: "",
+            alt: "Upload an image",
           },
         })
         .run();
@@ -163,17 +162,14 @@ export const createDefaultBlocks = (organization?: {
     description: "Add your company logo.",
     searchTerms: ["logo", "brand"],
     command: ({ editor, range }: { editor: any; range: any }) => {
-      const defaultLogo =
-        organization?.logo ||
-        "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/logo.png";
       editor
         .chain()
         .deleteRange(range)
         .insertContent({
           type: "logo",
           attrs: {
-            src: defaultLogo,
-            alt: "Organization Logo",
+            src: "",
+            alt: "Upload your logo",
           },
         })
         .run();
@@ -185,15 +181,14 @@ export const createDefaultBlocks = (organization?: {
     description: "Add a small inline image.",
     searchTerms: ["inline", "image", "small"],
     command: ({ editor, range }: { editor: any; range: any }) => {
-      const defaultImage = organization?.image || "{{app_url}}/placeholder.png";
       editor
         .chain()
         .deleteRange(range)
         .insertContent({
           type: "inlineImage",
           attrs: {
-            src: defaultImage,
-            alt: "Organization image",
+            src: "",
+            alt: "Upload an image",
           },
         })
         .run();
