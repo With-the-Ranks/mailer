@@ -18,6 +18,9 @@ const ALLOWED_IMAGE_TYPES = [
   "image/svg+xml",
 ];
 
+// User-friendly list of allowed image formats
+const ALLOWED_FORMATS = "JPEG, PNG, GIF, WebP, SVG";
+
 export async function POST(req: NextRequest) {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return new Response(
@@ -53,7 +56,9 @@ export async function POST(req: NextRequest) {
 
     // Validate file type (only allow images)
     if (file.type && !ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      return new Response("Only image files are allowed", { status: 400 });
+      return new Response(`Only image files are allowed (${ALLOWED_FORMATS})`, {
+        status: 400,
+      });
     }
 
     // Get file extension from name (if File) or content type
