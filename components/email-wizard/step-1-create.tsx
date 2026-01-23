@@ -6,9 +6,11 @@ import { Editor as MailyEditor } from "@maily-to/core";
 import {
   getVariableSuggestions,
   VariableExtension,
+  ImageUploadExtension,
 } from "@maily-to/core/extensions";
 import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { createDefaultBlocks } from "@/lib/maily-blocks/default-blocks";
 import * as signupBlocks from "@/lib/maily-blocks/signup-block";
 import type { SignupForm } from "@/lib/maily-blocks/types";
@@ -322,12 +324,58 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
                       suggestion: getVariableSuggestions("@"),
                       variables: editorVars,
                     }),
+                    ImageUploadExtension.configure({
+                      onImageUpload: async (file: Blob) => {
+                        try {
+                          const uploadFormData = new FormData();
+                          uploadFormData.append("file", file);
+
+                          const response = await fetch("/api/upload", {
+                            method: "POST",
+                            body: uploadFormData,
+                          });
+
+                          if (!response.ok) {
+                            const errorText = await response.text();
+                            let errorMessage = "Failed to upload image";
+
+                            // Provide user-friendly error messages based on status code
+                            if (response.status === 413) {
+                              errorMessage = "File size exceeds 50MB limit";
+                            } else if (response.status === 400) {
+                              errorMessage =
+                                errorText ||
+                                "Invalid file type. Only images are allowed";
+                            } else if (response.status === 401) {
+                              errorMessage = "Please sign in to upload images";
+                            } else if (response.status === 500) {
+                              errorMessage =
+                                "An error occurred while uploading. Please try again";
+                            }
+
+                            toast.error(errorMessage);
+                            throw new Error(errorMessage);
+                          }
+
+                          const blob = await response.json();
+                          return blob.url;
+                        } catch (error) {
+                          // Only show toast if it's not already shown above
+                          if (
+                            error instanceof Error &&
+                            !error.message.includes("Failed to upload")
+                          ) {
+                            toast.error(
+                              "Failed to upload image. Please try again",
+                            );
+                          }
+                          throw error;
+                        }
+                      },
+                    }),
                   ]}
                   key={`editor-${formData.template || "saved"}-${editorKey}`}
                   onCreate={() => {
-                    console.log(
-                      "Editor onCreate called - setting hydrated to true",
-                    );
                     setHydrated(true);
                   }}
                   onUpdate={(editor) => {
