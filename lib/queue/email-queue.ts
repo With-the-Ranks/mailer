@@ -9,6 +9,11 @@ import { logError } from "@/lib/utils";
 // Queue name - use region-specific queues for rate limiting
 const QUEUE_NAME = "email-send";
 
+const EMAIL_SEND_TIMEOUT_MS = 30000;
+
+let queueConnection: Redis | null = null;
+let workerConnection: Redis | null = null;
+
 export interface EmailJobData {
   emailId: string;
   to: string;
@@ -48,13 +53,13 @@ export function getEmailQueue(): Queue<EmailJobData> {
     throw new Error("REDIS_URL environment variable is not set");
   }
 
-  const connection = new Redis(redisUrl, {
+  queueConnection = new Redis(redisUrl, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
   });
 
   emailQueue = new Queue<EmailJobData>(QUEUE_NAME, {
-    connection,
+    connection: queueConnection,
     defaultJobOptions: {
       attempts: 3,
       backoff: {
@@ -86,7 +91,7 @@ export async function queueEmail(
 
     const job = await queue.add(data.emailId, data, {
       delay: delay || 0,
-      jobId: `${data.emailId}-${data.to}-${Date.now()}`,
+      jobId: `${data.emailId}-${data.to}`,
     });
 
     return {
@@ -126,7 +131,7 @@ export async function queueBulkEmails(
           data: email,
           opts: {
             delay: delay || 0,
-            jobId: `${email.emailId}-${email.to}-${Date.now()}`,
+            jobId: `${email.emailId}-${email.to}`,
           },
         })),
       );
@@ -171,6 +176,28 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
       to,
       reason: suppressed.reason,
     });
+
+    try {
+      await prisma.emailEvent.create({
+        data: {
+          emailId,
+          userId: userId || null,
+          emailTo: to,
+          eventType: "suppressed",
+          timestamp: new Date(),
+        },
+      });
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code !== "P2002"
+      ) {
+        logError("Error creating suppression event", error);
+      }
+    }
+
     return;
   }
 
@@ -181,8 +208,7 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
     configurationSetName,
   });
 
-  // Send the email
-  const result = await client.sendEmail({
+  const sendPromise = client.sendEmail({
     from,
     to,
     subject,
@@ -191,6 +217,16 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
     replyTo,
     headers,
   });
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(
+        new Error(`Email send timed out after ${EMAIL_SEND_TIMEOUT_MS}ms`),
+      );
+    }, EMAIL_SEND_TIMEOUT_MS);
+  });
+
+  const result = await Promise.race([sendPromise, timeoutPromise]);
 
   if (result.error) {
     // Log the failure and throw to trigger retry
@@ -261,13 +297,13 @@ export function startEmailWorker(
     throw new Error("REDIS_URL environment variable is not set");
   }
 
-  const connection = new Redis(redisUrl, {
+  workerConnection = new Redis(redisUrl, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
   });
 
   emailWorker = new Worker<EmailJobData>(QUEUE_NAME, processEmailJob, {
-    connection,
+    connection: workerConnection,
     concurrency,
     limiter: {
       max: 14, // SES default rate limit per second
@@ -295,14 +331,31 @@ export function startEmailWorker(
   return emailWorker;
 }
 
-/**
- * Stop the email worker
- */
 export async function stopEmailWorker(): Promise<void> {
   if (emailWorker) {
     await emailWorker.close();
     emailWorker = null;
     console.log("[EmailQueue] Worker stopped");
+  }
+
+  if (workerConnection) {
+    await workerConnection.quit();
+    workerConnection = null;
+    console.log("[EmailQueue] Worker Redis connection closed");
+  }
+}
+
+export async function closeEmailQueue(): Promise<void> {
+  if (emailQueue) {
+    await emailQueue.close();
+    emailQueue = null;
+    console.log("[EmailQueue] Queue closed");
+  }
+
+  if (queueConnection) {
+    await queueConnection.quit();
+    queueConnection = null;
+    console.log("[EmailQueue] Queue Redis connection closed");
   }
 }
 
