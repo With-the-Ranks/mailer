@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface SuppressionEntry {
@@ -72,6 +72,55 @@ export default function SuppressionClient({
   const [isAdding, setIsAdding] = useState(false);
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
 
+  const modalTitleId = useId();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!showAddModal) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowAddModal(false);
+      }
+    };
+
+    previousActiveElement.current = document.activeElement as HTMLElement;
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previousActiveElement.current?.focus();
+    };
+  }, [showAddModal]);
+
+  useEffect(() => {
+    if (!showAddModal || !modalRef.current) return;
+
+    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement?.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleTabKey);
+    firstElement?.focus();
+
+    return () => document.removeEventListener("keydown", handleTabKey);
+  }, [showAddModal]);
+
   const filteredList = suppressionList.filter((entry) =>
     entry.email.toLowerCase().includes(search.toLowerCase()),
   );
@@ -81,14 +130,18 @@ export default function SuppressionClient({
 
     setIsAdding(true);
     try {
-      const response = await fetch("/api/suppression", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: newEmail.trim().toLowerCase(),
-          reason: "MANUAL",
-        }),
-      });
+      const response = await fetch(
+        `/api/suppression?organizationId=${encodeURIComponent(organizationId)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: newEmail.trim().toLowerCase(),
+            reason: "MANUAL",
+            organizationId,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -119,9 +172,12 @@ export default function SuppressionClient({
 
     setIsRemoving(id);
     try {
-      const response = await fetch(`/api/suppression?id=${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/suppression?id=${encodeURIComponent(id)}&organizationId=${encodeURIComponent(organizationId)}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -337,14 +393,26 @@ export default function SuppressionClient({
 
       {/* Add Email Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-[#2D2D2D]">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={modalTitleId}
+        >
+          <div
+            ref={modalRef}
+            className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-[#2D2D2D]"
+          >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-stone-900 dark:text-white">
+              <h2
+                id={modalTitleId}
+                className="text-lg font-semibold text-stone-900 dark:text-white"
+              >
                 Add to Suppression List
               </h2>
               <button
                 onClick={() => setShowAddModal(false)}
+                aria-label="Close modal"
                 className="rounded p-1 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-700"
               >
                 <X className="h-5 w-5" />

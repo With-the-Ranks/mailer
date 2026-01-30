@@ -38,7 +38,7 @@ export default async function OrganizationSettingsIndex({
         inputAttrs={{
           name: "logo",
           type: "file",
-          defaultValue: data?.logo ?? "",
+          defaultValue: "",
         }}
         handleSubmit={updateOrganization}
       />

@@ -32,6 +32,7 @@ export default function QueueClient({ organizationId }: QueueClientProps) {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchStats = async () => {
+    setLoading(true);
     try {
       setError(null);
       const response = await fetch("/api/queue-stats");
