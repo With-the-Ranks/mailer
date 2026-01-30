@@ -81,18 +81,16 @@ export async function setupSnsForSes(
   }
 }
 
-/**
- * Create a configuration set with SNS event destination
- */
+// Create configuration set with SNS event destination
 export async function createConfigurationSet(
   name: string,
   topicArn: string,
   region: string,
   eventTypes: EventType[] = GENERAL_EVENTS,
 ): Promise<ConfigSetResult> {
-  try {
-    const sesClient = getSesClient(region);
+  const sesClient = getSesClient(region);
 
+  try {
     // Create configuration set
     await sesClient.send(
       new CreateConfigurationSetCommand({
@@ -101,17 +99,39 @@ export async function createConfigurationSet(
     );
 
     // Add SNS destination for events
-    await sesClient.send(
-      new CreateConfigurationSetEventDestinationCommand({
-        ConfigurationSetName: name,
-        EventDestinationName: "sns_destination",
-        EventDestination: {
-          Enabled: true,
-          MatchingEventTypes: eventTypes,
-          SnsDestination: { TopicArn: topicArn },
-        },
-      }),
-    );
+    try {
+      await sesClient.send(
+        new CreateConfigurationSetEventDestinationCommand({
+          ConfigurationSetName: name,
+          EventDestinationName: "sns_destination",
+          EventDestination: {
+            Enabled: true,
+            MatchingEventTypes: eventTypes,
+            SnsDestination: { TopicArn: topicArn },
+          },
+        }),
+      );
+    } catch (eventDestError) {
+      console.error(
+        `Failed to create event destination for ${name}, rolling back configuration set`,
+        eventDestError,
+      );
+      try {
+        await sesClient.send(
+          new DeleteConfigurationSetCommand({
+            ConfigurationSetName: name,
+          }),
+        );
+        console.log(`Rollback successful: deleted configuration set ${name}`);
+      } catch (rollbackError) {
+        console.error(
+          `Rollback failed: could not delete configuration set ${name}`,
+          rollbackError,
+        );
+      }
+      // Re-throw the original error
+      throw eventDestError;
+    }
 
     return {
       success: true,

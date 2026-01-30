@@ -77,11 +77,10 @@ function generateDnsRecords(
       name: `mail.${domain}`,
       value: "v=spf1 include:amazonses.com ~all",
     },
-    // DKIM record
     {
       type: "TXT" as const,
       name: `${dkimSelector}._domainkey.${domain}`,
-      value: `p=${publicKey}`,
+      value: `v=DKIM1; p=${publicKey}`,
     },
     // DMARC record (recommended)
     {
@@ -102,11 +101,12 @@ export async function addSesDomain(
 ): Promise<DomainVerificationResult> {
   const awsRegion = region || process.env.AWS_DEFAULT_REGION || "us-east-1";
 
+  const sesClient = getSesClient(awsRegion);
+
   try {
-    const sesClient = getSesClient(awsRegion);
     const { privateKey, publicKey } = generateDkimKeyPair();
 
-    // Create email identity with DKIM
+    console.log(`Creating email identity for domain: ${domain}`);
     await sesClient.send(
       new CreateEmailIdentityCommand({
         EmailIdentity: domain,
@@ -117,13 +117,34 @@ export async function addSesDomain(
       }),
     );
 
-    // Set custom MailFrom domain for SPF
-    await sesClient.send(
-      new PutEmailIdentityMailFromAttributesCommand({
-        EmailIdentity: domain,
-        MailFromDomain: `mail.${domain}`,
-      }),
-    );
+    try {
+      console.log(`Setting MailFrom domain for: ${domain}`);
+      await sesClient.send(
+        new PutEmailIdentityMailFromAttributesCommand({
+          EmailIdentity: domain,
+          MailFromDomain: `mail.${domain}`,
+        }),
+      );
+    } catch (mailFromError) {
+      console.error(
+        `Failed to set MailFrom for ${domain}, rolling back email identity`,
+        mailFromError,
+      );
+      try {
+        await sesClient.send(
+          new DeleteEmailIdentityCommand({
+            EmailIdentity: domain,
+          }),
+        );
+        console.log(`Rollback successful: deleted email identity ${domain}`);
+      } catch (rollbackError) {
+        console.error(
+          `Rollback failed: could not delete email identity ${domain}`,
+          rollbackError,
+        );
+      }
+      throw mailFromError;
+    }
 
     const dnsRecords = generateDnsRecords(
       domain,

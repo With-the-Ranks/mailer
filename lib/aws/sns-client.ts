@@ -12,19 +12,35 @@ export function getSnsClient(region?: string): SNSClient {
     return cached;
   }
 
-  const client = new SNSClient({
+  // Use standard AWS credential env var names
+  const accessKeyId =
+    process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY;
+  const secretAccessKey =
+    process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY;
+
+  const clientOptions: ConstructorParameters<typeof SNSClient>[0] = {
     region: awsRegion,
     endpoint: process.env.AWS_SNS_ENDPOINT || undefined,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY!,
-      secretAccessKey: process.env.AWS_SECRET_KEY!,
-    },
-  });
+  };
+
+  if (accessKeyId && secretAccessKey) {
+    clientOptions.credentials = {
+      accessKeyId,
+      secretAccessKey,
+    };
+  }
+
+  const client = new SNSClient(clientOptions);
 
   clientCache.set(awsRegion, client);
   return client;
 }
 
 export function clearSnsClientCache(): void {
+  clientCache.forEach((client) => {
+    if (typeof client.destroy === "function") {
+      client.destroy();
+    }
+  });
   clientCache.clear();
 }
