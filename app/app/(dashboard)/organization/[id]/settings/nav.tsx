@@ -15,20 +15,20 @@ export default function SiteSettingsNav() {
       href: `/organization/${id}/settings`,
       segment: null,
     },
-    // {
-    //   name: "Domains",
-    //   href: `/organization/${id}/settings/domains`,
-    //   segment: "domains",
-    // },
     {
-      name: "Appearance",
-      href: `/organization/${id}/settings/appearance`,
-      segment: "appearance",
+      name: "Domains",
+      href: `/organization/${id}/settings/domains`,
+      segment: "domains",
     },
     {
       name: "Members",
       href: `/organization/${id}/settings/members`,
       segment: "members",
+    },
+    {
+      name: "Queue",
+      href: `/organization/${id}/settings/queue`,
+      segment: "queue",
     },
   ];
 
@@ -42,8 +42,8 @@ export default function SiteSettingsNav() {
           className={cn(
             "rounded-lg px-2 py-1 text-base font-medium transition-colors active:bg-stone-200 dark:active:bg-stone-600",
             segment === item.segment
-              ? "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400"
-              : "text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800",
+              ? "bg-stone-100 text-stone-600 dark:bg-[#2D2D2D] dark:text-stone-400"
+              : "text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-[#252525]",
           )}
         >
           {item.name}

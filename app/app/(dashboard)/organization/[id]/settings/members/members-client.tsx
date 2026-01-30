@@ -179,7 +179,7 @@ export default function MembersPageClient({
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={member.user.image || undefined} />
-                          <AvatarFallback className="bg-gray-200 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-200">
+                          <AvatarFallback className="bg-gray-200 text-xs font-semibold text-gray-700 dark:bg-[#252525] dark:text-gray-200">
                             {member.user.name?.[0]?.toUpperCase() ||
                               member.user.email?.[0]?.toUpperCase() ||
                               "U"}
