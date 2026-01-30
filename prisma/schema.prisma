@@ -404,7 +404,7 @@ model SesRegionSettings {
   configClick     String?
   configOpen      String?
   configFull      String?
-  emailRateLimit  Int      @default(1)
+  emailsPerSecond Int      @default(1) @map("emailRateLimit") // Emails per second limit
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -415,6 +415,4 @@ model EmailSuppression {
   reason      String
   sourceEmail String?
   createdAt   DateTime @default(now())
-
-  @@index([email])
 }

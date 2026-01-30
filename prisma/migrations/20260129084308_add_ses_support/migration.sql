@@ -46,7 +46,4 @@ CREATE UNIQUE INDEX "SesRegionSettings_region_key" ON "SesRegionSettings"("regio
 CREATE UNIQUE INDEX "EmailSuppression_email_key" ON "EmailSuppression"("email");
 
 -- CreateIndex
-CREATE INDEX "EmailSuppression_email_idx" ON "EmailSuppression"("email");
-
--- CreateIndex
 CREATE INDEX "Email_sesMessageId_idx" ON "Email"("sesMessageId");
