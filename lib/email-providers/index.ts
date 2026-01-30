@@ -24,10 +24,7 @@ export function isResendEnabled(): boolean {
   return getDefaultProvider() === "resend";
 }
 
-/**
- * Get the default email provider
- * Returns "ses" by default, or "resend" if SES is not configured and Resend is enabled
- */
+// Get default email provider from environment
 export function getDefaultProvider(): EmailProvider {
   const defaultProvider = process.env.DEFAULT_EMAIL_PROVIDER as
     | EmailProvider
@@ -61,11 +58,15 @@ export function createEmailProvider(
       });
 
     case "ses":
-    default:
       return createSesProvider({
         region: config.awsRegion,
         configurationSetName: config.configurationSetName,
       });
+
+    default:
+      throw new Error(
+        `Unknown email provider: "${config.provider}". Valid providers are: "ses", "resend".`,
+      );
   }
 }
 

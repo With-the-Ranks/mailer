@@ -320,7 +320,10 @@ export const sendBulkEmail = async ({
     };
   }
 
-  const fromHeader = `${from} <${domain}>`;
+  const displayName = from.includes("@")
+    ? from.split("@")[0]?.trim() || "Mailer"
+    : from.trim() || "Mailer";
+  const fromHeader = `${displayName} <${domain}>`;
 
   let recipients: {
     email: string;
@@ -515,9 +518,31 @@ export const unscheduleEmail = async ({
 }) => {
   // Currently only Resend supports unscheduling
   if (resendId && isResendEnabled()) {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.cancel(resendId);
-    return { success: true };
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const result = await resend.emails.cancel(resendId);
+
+      const error = (result as { error?: unknown })?.error;
+      if (error) {
+        const errorMsg =
+          typeof error === "string"
+            ? error
+            : (error as { message?: string })?.message || JSON.stringify(error);
+        logError("Failed to cancel Resend email", null, {
+          resendId,
+          error: errorMsg,
+        });
+        return { success: false, error: errorMsg };
+      }
+
+      return { success: true };
+    } catch (err) {
+      logError("Error canceling scheduled email", err, { resendId });
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to cancel email",
+      };
+    }
   }
 
   if (sesMessageId) {
