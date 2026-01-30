@@ -90,14 +90,20 @@ interface SnsMessage {
 
 const SNS_CONFIRM_TIMEOUT_MS = 5000;
 
-// Validate SigningCertURL is from AWS SNS
-function isValidSnsSigningCertUrl(url: string): boolean {
+// Validate URL is from AWS SNS
+function isValidAwsSnsUrl(url: string): boolean {
   try {
-    const parsedUrl = new URL(url);
-    return (
-      parsedUrl.protocol === "https:" &&
-      /^sns\.[a-z0-9-]+\.amazonaws\.com$/.test(parsedUrl.hostname)
-    );
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") {
+      return false;
+    }
+    const host = parsed.hostname.toLowerCase();
+    const isAmazonAws = host.endsWith(".amazonaws.com");
+    const looksLikeSns =
+      host === "sns.amazonaws.com" ||
+      host.startsWith("sns.") ||
+      host.includes(".sns.");
+    return isAmazonAws && looksLikeSns;
   } catch {
     return false;
   }
@@ -113,10 +119,7 @@ function validateSnsMessage(message: SnsMessage): boolean {
   }
 
   // Validate signing cert URL is from AWS
-  if (
-    !message.SigningCertURL ||
-    !isValidSnsSigningCertUrl(message.SigningCertURL)
-  ) {
+  if (!message.SigningCertURL || !isValidAwsSnsUrl(message.SigningCertURL)) {
     logError("Invalid SNS signing cert URL", null, {
       url: message.SigningCertURL,
     });
@@ -294,6 +297,16 @@ export async function POST(req: Request) {
       }
 
       if (data.SubscribeURL) {
+        if (!isValidAwsSnsUrl(data.SubscribeURL)) {
+          logError("SNS subscription URL failed validation", null, {
+            messageId: data.MessageId,
+          });
+          return NextResponse.json(
+            { error: "Invalid subscription URL" },
+            { status: 400 },
+          );
+        }
+
         const controller = new AbortController();
         const timeoutId = setTimeout(
           () => controller.abort(),

@@ -29,13 +29,10 @@ export interface DomainStatusResult {
   error?: string;
 }
 
-/**
- * Generate an RSA key pair for DKIM signing
- * Uses 1024-bit keys as required by SES
- */
+// Generate RSA key pair for DKIM signing
 function generateDkimKeyPair(): { privateKey: string; publicKey: string } {
   const { privateKey, publicKey } = generateKeyPairSync("rsa", {
-    modulusLength: 1024,
+    modulusLength: 2048,
     publicKeyEncoding: { type: "spki", format: "pem" },
     privateKeyEncoding: { type: "pkcs8", format: "pem" },
   });
@@ -106,7 +103,7 @@ export async function addSesDomain(
   try {
     const { privateKey, publicKey } = generateDkimKeyPair();
 
-    console.log(`Creating email identity for domain: ${domain}`);
+    console.log("Creating email identity for domain", { domain });
     await sesClient.send(
       new CreateEmailIdentityCommand({
         EmailIdentity: domain,
@@ -118,7 +115,7 @@ export async function addSesDomain(
     );
 
     try {
-      console.log(`Setting MailFrom domain for: ${domain}`);
+      console.log("Setting MailFrom domain", { domain });
       await sesClient.send(
         new PutEmailIdentityMailFromAttributesCommand({
           EmailIdentity: domain,
@@ -126,22 +123,22 @@ export async function addSesDomain(
         }),
       );
     } catch (mailFromError) {
-      console.error(
-        `Failed to set MailFrom for ${domain}, rolling back email identity`,
-        mailFromError,
-      );
+      console.error("Failed to set MailFrom, rolling back email identity", {
+        domain,
+        error: mailFromError,
+      });
       try {
         await sesClient.send(
           new DeleteEmailIdentityCommand({
             EmailIdentity: domain,
           }),
         );
-        console.log(`Rollback successful: deleted email identity ${domain}`);
+        console.log("Rollback successful: deleted email identity", { domain });
       } catch (rollbackError) {
-        console.error(
-          `Rollback failed: could not delete email identity ${domain}`,
-          rollbackError,
-        );
+        console.error("Rollback failed: could not delete email identity", {
+          domain,
+          error: rollbackError,
+        });
       }
       throw mailFromError;
     }
