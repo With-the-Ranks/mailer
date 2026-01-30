@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, LayoutList } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowRight, BarChart3, LayoutList, RefreshCw } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -61,19 +61,34 @@ export default function DashboardStats({
 }: DashboardStatsProps) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const gradientId = `colorCount-${React.useId().replace(/:/g, "")}`;
 
   useEffect(() => {
     const fetchStats = async () => {
       if (!organizationId) return;
 
+      setError(null);
       try {
         const response = await fetch(
-          `/api/dashboard-stats?organizationId=${organizationId}`,
+          `/api/dashboard-stats?organizationId=${encodeURIComponent(organizationId)}`,
         );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch stats: ${response.status}`);
+        }
+
         const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
         setStats(data);
-      } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
+      } catch (err) {
+        console.error("Failed to fetch dashboard stats:", err);
+        setError(err instanceof Error ? err.message : "Failed to load stats");
       } finally {
         setLoading(false);
       }
@@ -89,6 +104,28 @@ export default function DashboardStats({
           <p className="text-lg text-stone-500 dark:text-stone-400">
             Loading...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-900 dark:bg-red-900/20">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <p className="text-lg text-red-600 dark:text-red-400">
+              Failed to load dashboard stats
+            </p>
+            <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -287,7 +324,7 @@ export default function DashboardStats({
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={displayStats.listGrowth}>
                   <defs>
-                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="5%"
                         stopColor={CHART_PRIMARY}
@@ -326,7 +363,7 @@ export default function DashboardStats({
                     stroke={CHART_PRIMARY}
                     strokeWidth={2}
                     fillOpacity={1}
-                    fill="url(#colorCount)"
+                    fill={`url(#${gradientId})`}
                   />
                 </AreaChart>
               </ResponsiveContainer>

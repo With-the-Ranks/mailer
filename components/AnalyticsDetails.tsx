@@ -149,9 +149,22 @@ export default function AnalyticsDetails({
       if (!organizationId) return;
 
       try {
-        const response = await fetch(
-          `/api/analytics-details?organizationId=${organizationId}`,
-        );
+        const params = new URLSearchParams({
+          organizationId: organizationId,
+        });
+        if (selectedDomain && selectedDomain !== "all") {
+          params.set("domainId", selectedDomain);
+        }
+
+        const response = await fetch(`/api/analytics-details?${params}`);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            `Failed to fetch analytics: ${response.status} ${errorText}`,
+          );
+        }
+
         const data = await response.json();
         setAnalytics(data);
       } catch (error) {
@@ -162,7 +175,7 @@ export default function AnalyticsDetails({
     };
 
     fetchAnalytics();
-  }, [organizationId]);
+  }, [organizationId, selectedDomain]);
 
   if (loading) {
     return (
