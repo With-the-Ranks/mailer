@@ -26,12 +26,18 @@ export async function GET() {
     console.error("Error fetching queue stats:", error);
 
     // Return a meaningful error if Redis/queue is not configured
-    if (
+    // Check for Redis-specific error indicators
+    const isRedisError =
       error instanceof Error &&
       (error.message.includes("REDIS_URL") ||
-        error.message.includes("Redis") ||
-        error.message.includes("connect"))
-    ) {
+        error.name === "RedisError" ||
+        error.constructor?.name?.includes("Redis") ||
+        /(?:Redis(?:Error)?|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|ioredis)/i.test(
+          error.message,
+        ) ||
+        /Redis.*(connect|connection)/i.test(error.message));
+
+    if (isRedisError) {
       return NextResponse.json(
         {
           error: "Redis not configured. Set REDIS_URL environment variable.",

@@ -83,6 +83,47 @@ interface SnsMessage {
   Message: string;
   Timestamp: string;
   SubscribeURL?: string;
+  SignatureVersion?: string;
+  Signature?: string;
+  SigningCertURL?: string;
+}
+
+const SNS_CONFIRM_TIMEOUT_MS = 5000;
+
+// Validate SigningCertURL is from AWS SNS
+function isValidSnsSigningCertUrl(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    return (
+      parsedUrl.protocol === "https:" &&
+      /^sns\.[a-z0-9-]+\.amazonaws\.com$/.test(parsedUrl.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Basic SNS message signature validation
+function validateSnsMessage(message: SnsMessage): boolean {
+  if (message.SignatureVersion !== "1") {
+    logError("Invalid SNS signature version", null, {
+      version: message.SignatureVersion,
+    });
+    return false;
+  }
+
+  // Validate signing cert URL is from AWS
+  if (
+    !message.SigningCertURL ||
+    !isValidSnsSigningCertUrl(message.SigningCertURL)
+  ) {
+    logError("Invalid SNS signing cert URL", null, {
+      url: message.SigningCertURL,
+    });
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -178,6 +219,18 @@ async function processSesEvent(event: SesEvent) {
     emailTo = event.mail.destination[0];
   }
 
+  // Determine the actual event timestamp from the SES payload
+  // Use the specific event timestamp or fall back to mail timestamp, then server time
+  const eventTimestamp =
+    event.bounce?.timestamp ||
+    event.complaint?.timestamp ||
+    event.delivery?.timestamp ||
+    event.open?.timestamp ||
+    event.click?.timestamp ||
+    event.mail.timestamp;
+
+  const timestamp = eventTimestamp ? new Date(eventTimestamp) : new Date();
+
   // Store email event
   try {
     await prisma.emailEvent.create({
@@ -186,7 +239,7 @@ async function processSesEvent(event: SesEvent) {
         eventType,
         emailTo,
         link: event.click?.link,
-        timestamp: new Date(),
+        timestamp,
       },
     });
   } catch (error: unknown) {
@@ -225,11 +278,53 @@ export async function POST(req: Request) {
   try {
     const data = (await req.json()) as SnsMessage;
 
-    // Handle SNS subscription confirmation (one-time)
     if (data.Type === "SubscriptionConfirmation") {
+      if (!validateSnsMessage(data)) {
+        logError(
+          "SNS subscription confirmation failed signature validation",
+          null,
+          {
+            messageId: data.MessageId,
+          },
+        );
+        return NextResponse.json(
+          { error: "Invalid SNS message signature" },
+          { status: 403 },
+        );
+      }
+
       if (data.SubscribeURL) {
-        // Confirm the subscription by visiting the URL
-        await fetch(data.SubscribeURL);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          SNS_CONFIRM_TIMEOUT_MS,
+        );
+
+        try {
+          const response = await fetch(data.SubscribeURL, {
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            logError("SNS subscription confirmation failed", null, {
+              status: response.status,
+              statusText: response.statusText,
+            });
+            return NextResponse.json(
+              { error: "Failed to confirm subscription" },
+              { status: 500 },
+            );
+          }
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          const errorMessage =
+            fetchError instanceof Error && fetchError.name === "AbortError"
+              ? "Subscription confirmation timed out"
+              : "Failed to confirm subscription";
+          logError(errorMessage, fetchError, { messageId: data.MessageId });
+          return NextResponse.json({ error: errorMessage }, { status: 500 });
+        }
       }
       return NextResponse.json({
         success: true,

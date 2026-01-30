@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
@@ -17,6 +17,11 @@ export async function GET(req: NextRequest) {
       { error: "Organization ID required" },
       { status: 400 },
     );
+  }
+
+  const role = await getUserOrgRole(session.user.id, organizationId);
+  if (!role) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -48,15 +53,10 @@ export async function GET(req: NextRequest) {
 
     const emailIds = emails.map((e) => e.id);
 
-    // Get all events for these emails
-    const events = await prisma.emailEvent.findMany({
-      where: {
-        emailId: { in: emailIds },
-      },
-      select: {
-        emailId: true,
-        eventType: true,
-      },
+    const eventCounts = await prisma.emailEvent.groupBy({
+      by: ["emailId", "eventType"],
+      where: { emailId: { in: emailIds } },
+      _count: { eventType: true },
     });
 
     // Aggregate overall stats
@@ -94,35 +94,35 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Count events
-    events.forEach((event) => {
-      const emailStat = emailStatsMap[event.emailId];
+    eventCounts.forEach((item) => {
+      const emailStat = emailStatsMap[item.emailId];
+      const count = item._count.eventType;
       if (!emailStat) return;
 
-      switch (event.eventType) {
+      switch (item.eventType) {
         case "sent":
-          stats.total++;
-          emailStat.total++;
+          stats.total += count;
+          emailStat.total += count;
           break;
         case "delivered":
-          stats.delivered++;
-          emailStat.delivered++;
+          stats.delivered += count;
+          emailStat.delivered += count;
           break;
         case "bounced":
-          stats.bounced++;
-          emailStat.bounced++;
+          stats.bounced += count;
+          emailStat.bounced += count;
           break;
         case "complained":
-          stats.complained++;
-          emailStat.complained++;
+          stats.complained += count;
+          emailStat.complained += count;
           break;
         case "opened":
-          stats.opened++;
-          emailStat.opened++;
+          stats.opened += count;
+          emailStat.opened += count;
           break;
         case "clicked":
-          stats.clicked++;
-          emailStat.clicked++;
+          stats.clicked += count;
+          emailStat.clicked += count;
           break;
       }
     });
