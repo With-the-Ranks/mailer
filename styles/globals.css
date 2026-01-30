@@ -1,8 +1,8 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@config '../tailwind.config.js';
-@import 'fumadocs-ui/css/ocean.css';
-@import 'fumadocs-ui/css/preset.css';
+@config "../tailwind.config.js";
+@import "fumadocs-ui/css/ocean.css";
+@import "fumadocs-ui/css/preset.css";
 
 /* Fumadocs Theme Customization */
 @theme {
@@ -13,9 +13,11 @@
   /* Sidebar width - matches app sidebar */
   --fd-sidebar-width: 18rem;
 
+  --color-primary: #1d4ed8;
+  --color-chart-opened: #8b5cf6;
   --color-fd-primary: hsl(226, 83%, 49%);
   --color-fd-primary-foreground: hsl(0, 0%, 100%);
-  --color-fd-accent: hsla(226, 83%, 49%, 0.10);
+  --color-fd-accent: hsla(226, 83%, 49%, 0.1);
   --color-fd-accent-foreground: hsl(226, 83%, 49%);
   --color-fd-ring: hsl(226, 83%, 49%);
 }
@@ -23,7 +25,7 @@
 .dark {
   --color-fd-primary: hsl(226, 83%, 49%);
   --color-fd-primary-foreground: hsl(0, 0%, 100%);
-  --color-fd-accent: hsla(226, 83%, 49%, 0.10);
+  --color-fd-accent: hsla(226, 83%, 49%, 0.1);
   --color-fd-accent-foreground: hsl(0, 0%, 100%);
   --color-fd-ring: hsl(226, 83%, 49%);
 }
@@ -42,10 +44,12 @@
   }
 
   /* Override any serif fonts - ensure Inter is used everywhere except logo */
-  *:not(code):not(pre):not(.font-mono):not([class*="font-mono"]):not(.font-logo) {
+  *:not(code):not(pre):not(.font-mono):not([class*="font-mono"]):not(
+      .font-logo
+    ) {
     font-family: var(--font-inter), sans-serif;
   }
-  
+
   /* Ensure all headers have font-weight 700 */
   h1,
   h2,
@@ -55,7 +59,7 @@
   h6 {
     font-weight: 700;
   }
-  
+
   /* Ensure monospace elements use proper monospace font */
   code,
   pre,
@@ -66,13 +70,13 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Ensure buttons and links have pointer cursor */
   button,
   a {
     cursor: pointer;
   }
-  
+
   /* Disabled buttons should have not-allowed cursor */
   button:disabled {
     cursor: not-allowed;
@@ -85,11 +89,7 @@
 
 /* Components */
 @utility btn {
-  @apply inline-flex justify-center items-center gap-3 px-4 py-2.5 rounded-[28px]
-      bg-primary text-white
-      hover:bg-accent hover:shadow-xl hover:translate-y-0.5
-      transition duration-300 ease-in-out
-      text-center font-semibold uppercase text-sm tracking-[0.08em] no-underline;
+  @apply bg-primary hover:bg-accent inline-flex items-center justify-center gap-3 rounded-[28px] px-4 py-2.5 text-center text-sm font-semibold tracking-[0.08em] text-white uppercase no-underline transition duration-300 ease-in-out hover:translate-y-0.5 hover:shadow-xl;
 }
 
 /* Color variables and theme */
@@ -182,15 +182,23 @@
 @layer utilities {
   /* Dotted background pattern - optimized with CSS */
   .bg-dotted {
-    background-image: radial-gradient(circle, rgb(0 0 0 / 0.05) 1px, transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      rgb(0 0 0 / 0.05) 1px,
+      transparent 1px
+    );
     background-size: 10px 10px;
     background-position: 0 0;
     background-color: #fafafa;
   }
-  
+
   .dark .bg-dotted {
-    background-image: radial-gradient(circle, rgb(255 255 255 / 0.05) 1px, transparent 1px);
-    background-color: #0D0D0D;
+    background-image: radial-gradient(
+      circle,
+      rgb(255 255 255 / 0.05) 1px,
+      transparent 1px
+    );
+    background-color: #0d0d0d;
   }
 }
 
@@ -331,7 +339,9 @@ select {
   color: var(--color-fd-foreground, hsl(var(--foreground)));
 }
 
-.prose code, .prose figure, .prose pre {
+.prose code,
+.prose figure,
+.prose pre {
   color: var(--color-fd-foreground, hsl(var(--foreground)));
   background-color: transparent;
 }

@@ -49,20 +49,20 @@ export const InvitationEmail = ({
         {`
             @media only screen and (max-width: 600px) {
               .heading {
-                font-size: 22px !important;
-                line-height: 1.2 !important;
+                font-size: 18px !important;
+                line-height: 1.25 !important;
               }
               .sub-heading {
-                font-size: 16px !important;
-                line-height: 1.2 !important;
+                font-size: 14px !important;
+                line-height: 1.25 !important;
               }
               .body-text {
-                font-size: 14px !important;
+                font-size: 13px !important;
                 line-height: 1.4 !important;
               }
               .button-text {
-                font-size: 16px !important;
-                padding: 10px 32px !important;
+                font-size: 14px !important;
+                padding: 10px 24px !important;
                 line-height: 1.4 !important;
               }
               .pb-12-responsive {

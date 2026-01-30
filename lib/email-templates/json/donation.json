@@ -12,10 +12,10 @@
         "borderColor": "#e2e2e2",
         "borderWidth": 0,
         "marginRight": 0,
-        "paddingLeft": 8,
+        "paddingLeft": 16,
         "borderRadius": 8,
         "marginBottom": 0,
-        "paddingRight": 8,
+        "paddingRight": 16,
         "paddingBottom": 8,
         "backgroundColor": "#ffffff"
       },
@@ -59,10 +59,10 @@
                     "borderColor": "#D4D4D4",
                     "borderWidth": 0,
                     "marginRight": 0,
-                    "paddingLeft": 8,
+                    "paddingLeft": 0,
                     "borderRadius": 8,
                     "marginBottom": 0,
-                    "paddingRight": 8,
+                    "paddingRight": 0,
                     "paddingBottom": 8,
                     "backgroundColor": "#ffffff"
                   },
@@ -78,10 +78,10 @@
                         "borderColor": "",
                         "borderWidth": 0,
                         "marginRight": 0,
-                        "paddingLeft": 16,
+                        "paddingLeft": 0,
                         "borderRadius": 0,
                         "marginBottom": 0,
-                        "paddingRight": 16,
+                        "paddingRight": 0,
                         "paddingBottom": 16,
                         "backgroundColor": ""
                       },
@@ -95,7 +95,7 @@
                           },
                           "content": [
                             {
-                              "text": "Join the movement — power this campaign",
+                              "text": "Help power this campaign",
                               "type": "text",
                               "marks": [
                                 {
@@ -243,9 +243,9 @@
                                 "textColor": "#ffffff",
                                 "paddingTop": 10,
                                 "buttonColor": "#1547E6",
-                                "paddingLeft": 32,
+                                "paddingLeft": 24,
                                 "borderRadius": "smooth",
-                                "paddingRight": 32,
+                                "paddingRight": 24,
                                 "isUrlVariable": false,
                                 "paddingBottom": 10,
                                 "isTextVariable": false
@@ -262,9 +262,9 @@
                                 "textColor": "#ffffff",
                                 "paddingTop": 10,
                                 "buttonColor": "#1547E6",
-                                "paddingLeft": 32,
+                                "paddingLeft": 24,
                                 "borderRadius": "smooth",
-                                "paddingRight": 32,
+                                "paddingRight": 24,
                                 "isUrlVariable": false,
                                 "paddingBottom": 10,
                                 "isTextVariable": false
@@ -281,9 +281,9 @@
                                 "textColor": "#ffffff",
                                 "paddingTop": 10,
                                 "buttonColor": "#1547E6",
-                                "paddingLeft": 32,
+                                "paddingLeft": 24,
                                 "borderRadius": "smooth",
-                                "paddingRight": 32,
+                                "paddingRight": 24,
                                 "isUrlVariable": false,
                                 "paddingBottom": 10,
                                 "isTextVariable": false
@@ -369,10 +369,10 @@
                         "borderColor": "",
                         "borderWidth": 0,
                         "marginRight": 0,
-                        "paddingLeft": 16,
+                        "paddingLeft": 0,
                         "borderRadius": 0,
                         "marginBottom": 0,
-                        "paddingRight": 16,
+                        "paddingRight": 0,
                         "paddingBottom": 16,
                         "backgroundColor": ""
                       },

@@ -65,7 +65,7 @@ export const VerifyEmail = ({ verificationUrl }: VerifyEmailProps) => (
           `}
       </style>
     </Head>
-    <Preview>Welcome to Mailer — verify your email</Preview>
+    <Preview>Welcome to Mailer. Verify your email.</Preview>
     <Tailwind
       config={
         {
@@ -95,7 +95,7 @@ export const VerifyEmail = ({ verificationUrl }: VerifyEmailProps) => (
               className="heading mt-2 text-3xl font-bold"
               style={{ fontFamily, color: "#000000", textAlign: "center" }}
             >
-              Hey there, welcome to Mailer!
+              Welcome to Mailer!
             </Text>
             <Text
               className="body-text mt-4 text-lg"
