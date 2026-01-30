@@ -177,7 +177,7 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
       {/* Main Content Area */}
       <div className="px-6 pb-6">
         {/* Email Details Section - Separated with border-radius-lg */}
-        <div className="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
           {/* Email Name */}
           <div className="flex items-center gap-4">
             <label
@@ -281,7 +281,7 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
 
         {/* Template Selector Section */}
         {!formData.template && !isNonEmptyContent(formData.content) && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
             <TemplateSelector
               selectedTemplate={formData.template}
               onTemplateSelect={handleTemplateSelect}
@@ -291,14 +291,14 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
 
         {/* Email Content Editor - when template is set OR we have saved content (reopening a draft) */}
         {(formData.template || isNonEmptyContent(formData.content)) && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email Content
               </label>
-              <div className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <div className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
                 {!hydrated && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-gray-800/80">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-[#2D2D2D]/80">
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                       <span className="text-sm text-gray-500">

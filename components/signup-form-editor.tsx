@@ -632,7 +632,7 @@ export default function SignupFormEditor({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Column - Form Fields */}
         <div className="lg:col-span-2">
-          <Card className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <Card className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Form Fields</span>
@@ -684,7 +684,7 @@ export default function SignupFormEditor({
         {/* Right Column - Form Settings */}
         <div className="lg:col-span-1">
           <div className="sticky top-6 space-y-6">
-            <Card className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <Card className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
@@ -752,7 +752,7 @@ export default function SignupFormEditor({
                 )}
 
                 {formData.isActive && !isCreateMode && (
-                  <div className="space-y-4 rounded-lg border bg-gray-50 p-4 dark:bg-gray-900">
+                  <div className="space-y-4 rounded-lg border bg-gray-50 p-4 dark:bg-[#2D2D2D]">
                     <div>
                       <Label className="text-sm font-semibold">
                         Public Form Link
@@ -765,7 +765,7 @@ export default function SignupFormEditor({
                               : "Loading..."
                           }
                           readOnly
-                          className="bg-white text-sm dark:bg-gray-800"
+                          className="bg-white text-sm dark:bg-[#2D2D2D]"
                         />
                         <Button
                           variant="outline"
@@ -843,7 +843,7 @@ export default function SignupFormEditor({
             </Card>
 
             {/* Actions */}
-            <Card className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <Card className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   <Button
@@ -880,7 +880,7 @@ export default function SignupFormEditor({
         open={!!leavePrompt}
         onOpenChange={(o) => !o && setLeavePrompt(null)}
       >
-        <AlertDialogContent className="rounded-lg border-gray-200 bg-white shadow-lg sm:max-w-xl dark:border-gray-700 dark:bg-gray-800">
+        <AlertDialogContent className="rounded-lg border-gray-200 bg-white shadow-lg sm:max-w-xl dark:border-gray-700 dark:bg-[#2D2D2D]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-gray-900 dark:text-white">
               Unsaved changes

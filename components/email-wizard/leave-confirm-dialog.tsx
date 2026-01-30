@@ -34,7 +34,7 @@ export function LeaveConfirmDialog() {
 
   return (
     <AlertDialog open={open} onOpenChange={(o) => !o && setLeavePrompt(null)}>
-      <AlertDialogContent className="rounded-lg border-gray-200 bg-white shadow-lg sm:max-w-xl dark:border-gray-700 dark:bg-gray-800">
+      <AlertDialogContent className="rounded-lg border-gray-200 bg-white shadow-lg sm:max-w-xl dark:border-gray-700 dark:bg-[#2D2D2D]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-gray-900 dark:text-white">
             Unsaved changes

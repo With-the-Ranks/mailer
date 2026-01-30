@@ -58,7 +58,7 @@ export function WizardStepIndicator({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-[#2D2D2D]">
       <div className="flex w-full items-center justify-between gap-4">
         {/* Back Button */}
         {showBackButton && (

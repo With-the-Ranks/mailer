@@ -28,7 +28,7 @@ export default function EmailPreview({ html }: PreviewEmailProps) {
           Email Snapshot
         </h2>
         {/* Device Toggle - same as Step 3 preview */}
-        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-[#2D2D2D]">
           <button
             type="button"
             onClick={() => setDeviceView("desktop")}
@@ -74,7 +74,7 @@ export default function EmailPreview({ html }: PreviewEmailProps) {
       {/* Snapshot: full width, rounded-lg, device width applied like Step 3 */}
       <div
         className={cn(
-          "mx-auto overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-all dark:border-gray-700 dark:bg-gray-800",
+          "mx-auto overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-all dark:border-gray-700 dark:bg-[#2D2D2D]",
           deviceWidths[deviceView],
         )}
       >

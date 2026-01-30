@@ -65,7 +65,7 @@ export default async function SignupForms({
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-neutral-800/50">
+        <thead className="bg-gray-50 dark:bg-[#252525]">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
               Form Name

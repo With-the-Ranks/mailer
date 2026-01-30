@@ -65,7 +65,7 @@ export function SendEmailModal({
     if (!testEmail) return;
     setIsSendingTest(true);
     try {
-      await sendEmail({
+      const result = await sendEmail({
         to: testEmail,
         from,
         subject,
@@ -74,16 +74,22 @@ export function SendEmailModal({
         organizationId,
         audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
-      posthog.capture("test_email_sent", {
-        email_id: emailId,
-        organization_id: organizationId,
-      });
-      toast.success("Test email sent");
+      if (result?.error) {
+        toast.error(result.error);
+        posthog.captureException(new Error(result.error));
+      } else {
+        posthog.capture("test_email_sent", {
+          email_id: emailId,
+          organization_id: organizationId,
+        });
+        toast.success("Test email sent");
+      }
     } catch (error) {
       toast.error("Failed to send test email");
       posthog.captureException(error);
+    } finally {
+      setIsSendingTest(false);
     }
-    setIsSendingTest(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -80,7 +80,7 @@ export default function DeleteOrganizationForm({
         />
       </div>
 
-      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10 dark:border-stone-700 dark:bg-stone-800">
+      <div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-10 dark:border-stone-700 dark:bg-[#2D2D2D]">
         <p className="text-center text-base text-stone-500 dark:text-stone-400">
           This action is irreversible. Please proceed with caution.
         </p>

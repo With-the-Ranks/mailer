@@ -64,7 +64,7 @@ export default function ClientSettingsForm({
         </h2>
         <p className="text-base text-stone-600 dark:text-stone-400">
           Optional. Overrides the global{" "}
-          <code className="rounded-sm bg-stone-100 px-1 text-xs dark:bg-stone-800">
+          <code className="rounded-sm bg-stone-100 px-1 text-xs dark:bg-[#252525]">
             RESEND_API_KEY
           </code>
           .

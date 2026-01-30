@@ -53,7 +53,7 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
 
     setIsSendingTest(true);
     try {
-      await sendEmail({
+      const result = await sendEmail({
         to: testEmail,
         from: formData.from,
         subject: formData.subject,
@@ -62,7 +62,11 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
         organizationId,
         audienceListId: formData.audienceListId || undefined,
       });
-      toast.success("Test email sent successfully!");
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Test email sent successfully!");
+      }
     } catch (error) {
       toast.error("Failed to send test email");
       console.error("Test email error:", error);
@@ -78,7 +82,7 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
   return (
     <div className="flex h-full flex-col items-center justify-center bg-transparent">
       <div className="w-full max-w-6xl p-6">
-        <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
           {/* Header */}
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -201,7 +205,7 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
           </div>
 
           {/* Summary */}
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
             <h3 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">
               Email Summary
             </h3>

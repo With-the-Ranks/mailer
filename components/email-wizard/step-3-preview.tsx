@@ -72,7 +72,7 @@ export function Step3Preview() {
           {/* Header */}
           <div className="flex items-center justify-start">
             {/* Device Toggle */}
-            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-[#2D2D2D]">
               <button
                 type="button"
                 onClick={() => setDeviceView("desktop")}
@@ -116,9 +116,9 @@ export function Step3Preview() {
           </div>
 
           {/* Email Preview Card (sender info) */}
-          <div className="shrink-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="shrink-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-[#2D2D2D] dark:text-gray-300">
                 {formData.from?.[0]?.toUpperCase() || "W"}
               </div>
               <div className="flex-1 space-y-1">
@@ -147,7 +147,7 @@ export function Step3Preview() {
           <div
             className={cn("mx-auto transition-all", deviceWidths[deviceView])}
           >
-            <div className="h-full rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div className="h-full rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
               {loading ? (
                 <div className="flex min-h-[600px] items-center justify-center">
                   <div className="text-center">

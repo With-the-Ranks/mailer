@@ -65,7 +65,7 @@ export function Step2Target() {
   return (
     <div className="flex flex-col">
       <div className="px-6 pb-6">
-        <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
           {/* Description */}
           <div className="space-y-2">
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -107,7 +107,7 @@ export function Step2Target() {
           )}
 
           {loading && (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Loading contact count...
               </p>

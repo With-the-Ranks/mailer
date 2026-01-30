@@ -78,7 +78,7 @@ export default function CancelScheduleModal({
                 . Are you sure you want to move it back to draft?
               </p>
             </div>
-            <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-stone-800">
+            <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-[#2D2D2D]">
               <Button
                 type="button"
                 variant="outline"
