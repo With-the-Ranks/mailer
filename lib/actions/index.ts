@@ -729,9 +729,8 @@ export const addSesDomain = async (
     return { error: "Not authenticated" };
   }
 
-  // Verify user has access to the organization
   const role = await getUserOrgRole(session.user.id, organizationId);
-  if (!role) {
+  if (!role || role !== "ADMIN") {
     return { error: "Not authorized" };
   }
 
@@ -940,9 +939,8 @@ export const setActiveDomain = async (
     return { error: "Not authenticated" };
   }
 
-  // Verify user has access to the organization
   const role = await getUserOrgRole(session.user.id, organizationId);
-  if (!role) {
+  if (!role || role !== "ADMIN") {
     return { error: "Not authorized" };
   }
 
@@ -998,6 +996,17 @@ export const initializeSesRegion = async (
   const session = await getSession();
   if (!session?.user.id) {
     return { error: "Not authenticated" };
+  }
+
+  const userWithOrgs = await prisma.organizationMember.findFirst({
+    where: {
+      userId: session.user.id,
+      role: "ADMIN",
+    },
+  });
+
+  if (!userWithOrgs) {
+    return { error: "Not authorized" };
   }
 
   try {
@@ -1062,6 +1071,11 @@ export const initializeSesRegion = async (
  * Get SES region settings
  */
 export const getSesRegionSettings = async (region: string) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
   try {
     const settings = await prisma.sesRegionSettings.findUnique({
       where: { region },
