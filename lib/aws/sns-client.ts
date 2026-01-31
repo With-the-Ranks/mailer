@@ -12,11 +12,13 @@ export function getSnsClient(region?: string): SNSClient {
     return cached;
   }
 
-  // Use standard AWS credential env var names
+  // AWS_SES_* preferred (Vercel-safe); AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY as fallback
   const accessKeyId =
-    process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY;
+    process.env.AWS_SES_ACCESS_KEY_ID ||
+    process.env.AWS_ACCESS_KEY_ID ||
+    process.env.AWS_ACCESS_KEY;
   const secretAccessKey =
-    process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY;
+    process.env.AWS_SES_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
 
   const clientOptions: ConstructorParameters<typeof SNSClient>[0] = {
     region: awsRegion,

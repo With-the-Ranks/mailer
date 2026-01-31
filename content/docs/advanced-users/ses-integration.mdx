@@ -39,9 +39,8 @@ Before setting up SES, you'll need:
 Add these to your environment:
 
 ```bash
-# AWS Credentials
-AWS_ACCESS_KEY=your-access-key
-AWS_SECRET_KEY=your-secret-key
+AWS_SES_ACCESS_KEY_ID=your-access-key
+AWS_SES_SECRET_ACCESS_KEY=your-secret-key
 AWS_DEFAULT_REGION=us-east-1
 
 # Redis for email queue
@@ -63,12 +62,12 @@ PUBLIC_APP_URL=https://your-app.vercel.app
 
 After adding a domain, you'll see required DNS records:
 
-| Type | Purpose |
-|------|---------|
-| **MX** | Bounce handling |
-| **TXT (SPF)** | Email authentication |
-| **TXT (DKIM)** | Email signing |
-| **TXT (DMARC)** | Domain policy |
+| Type            | Purpose              |
+| --------------- | -------------------- |
+| **MX**          | Bounce handling      |
+| **TXT (SPF)**   | Email authentication |
+| **TXT (DKIM)**  | Email signing        |
+| **TXT (DMARC)** | Domain policy        |
 
 Add these records to your DNS provider (Cloudflare, Route53, etc.).
 
@@ -82,14 +81,14 @@ Add these records to your DNS provider (Cloudflare, Route53, etc.).
 
 SES automatically tracks email events through webhooks:
 
-| Event | Description |
-|-------|-------------|
-| **Sent** | Email accepted by SES |
-| **Delivered** | Email delivered to recipient's server |
-| **Opened** | Recipient opened the email |
-| **Clicked** | Recipient clicked a link |
-| **Bounced** | Email couldn't be delivered |
-| **Complained** | Recipient marked as spam |
+| Event          | Description                           |
+| -------------- | ------------------------------------- |
+| **Sent**       | Email accepted by SES                 |
+| **Delivered**  | Email delivered to recipient's server |
+| **Opened**     | Recipient opened the email            |
+| **Clicked**    | Recipient clicked a link              |
+| **Bounced**    | Email couldn't be delivered           |
+| **Complained** | Recipient marked as spam              |
 
 These events appear in your email analytics and update in real-time.
 

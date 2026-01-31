@@ -14,9 +14,11 @@ export function getSesClient(region?: string): SESv2Client {
 
   // Use standard AWS credential env var names
   const accessKeyId =
-    process.env.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY;
+    process.env.AWS_SES_ACCESS_KEY_ID ||
+    process.env.AWS_ACCESS_KEY_ID ||
+    process.env.AWS_ACCESS_KEY;
   const secretAccessKey =
-    process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_KEY;
+    process.env.AWS_SES_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
 
   const clientOptions: ConstructorParameters<typeof SESv2Client>[0] = {
     region: awsRegion,
