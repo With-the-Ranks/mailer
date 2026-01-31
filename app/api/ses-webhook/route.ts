@@ -129,9 +129,7 @@ function validateSnsMessage(message: SnsMessage): boolean {
   return true;
 }
 
-/**
- * Add emails to suppression list (for hard bounces and complaints)
- */
+// Add emails to suppression list (hard bounces and complaints)
 async function addToSuppressionList(
   emails: string[],
   reason: string,
@@ -157,9 +155,7 @@ async function addToSuppressionList(
   }
 }
 
-/**
- * Process SES event and update database
- */
+// Process SES event and update database
 async function processSesEvent(event: SesEvent) {
   const sesMessageId = event.mail.messageId;
   const eventType = EVENT_TYPE_MAP[event.eventType] || "unknown";
