@@ -1,0 +1,169 @@
+---
+title: Managing Domains
+description: Add, verify, and manage your email sending domains
+---
+
+# Managing Domains
+
+Domains allow you to send emails from your own custom addresses like `hello@yourcompany.com` instead of a shared domain.
+
+## Why Add a Custom Domain?
+
+- **Professional appearance** - Emails come from your brand
+- **Better deliverability** - Build your own sender reputation
+- **Full control** - Manage your email authentication settings
+
+## Accessing Domain Settings
+
+1. Go to **Organization Settings** (gear icon in sidebar)
+2. Click **Domains** tab
+
+## Adding a Domain
+
+### Step 1: Add the Domain
+
+1. Click **Add Domain**
+2. Enter your domain name (e.g., `yourcompany.com`)
+3. Select your preferred AWS region
+4. Click **Add Domain**
+
+### Step 2: Configure DNS Records
+
+After adding a domain, you'll see a list of required DNS records. Add these to your DNS provider (Cloudflare, Route53, GoDaddy, Namecheap, etc.).
+
+#### Required Records
+
+| Record Type | Purpose |
+|-------------|---------|
+| **MX** | Handles bounce notifications |
+| **TXT (SPF)** | Authorizes Mailer to send on your behalf |
+| **CNAME (DKIM)** | Cryptographically signs your emails |
+| **TXT (DMARC)** | Sets your domain's email policy |
+
+#### Adding DNS Records
+
+The exact steps vary by DNS provider, but generally:
+
+1. Log into your DNS provider's dashboard
+2. Find the DNS or Records section
+3. Add each record with the exact values shown
+4. Save your changes
+
+> **Important**: Copy the values exactly as shown. Extra spaces or incorrect formatting will cause verification to fail.
+
+### Step 3: Wait for Verification
+
+DNS changes can take up to 48 hours to propagate worldwide. During this time:
+
+- The domain status will show as "Pending"
+- You cannot send emails from this domain yet
+- Check back periodically to see the updated status
+
+### Step 4: Check Verification Status
+
+1. Return to **Organization Settings → Domains**
+2. Click **Check Status** next to your domain
+3. The system will verify each DNS record
+
+Once all records are verified, the status changes to "Verified".
+
+## Setting an Active Domain
+
+After verification, set the domain as your active sending domain:
+
+1. Find your verified domain in the list
+2. Click **Set Active**
+3. All emails from your organization will now use this domain
+
+## Viewing DNS Records
+
+To view the required DNS records for a domain:
+
+1. Go to **Organization Settings → Domains**
+2. Click on the domain name
+3. View the full list of DNS records and their status
+
+Each record shows:
+- Record type and name
+- Required value
+- Current verification status
+
+## Troubleshooting Verification
+
+### Domain Stuck on "Pending"
+
+- DNS propagation can take up to 48 hours
+- Verify records are added to the correct domain
+- Check for typos in the record values
+- Use [MXToolbox](https://mxtoolbox.com) to verify your DNS records
+
+### SPF Record Failed
+
+- Ensure only one SPF record exists for your domain
+- If you have existing SPF records, merge them instead of adding a new one
+- Example merged SPF: `v=spf1 include:amazonses.com include:other.com ~all`
+
+### DKIM Record Failed
+
+- CNAME records must not have a trailing dot in some DNS providers
+- Ensure the full selector name is used (e.g., `mailer._domainkey.yourcompany.com`)
+- Check that the value points to the correct AWS endpoint
+
+### DMARC Record Failed
+
+- DMARC records go on `_dmarc.yourcompany.com`
+- Start with a relaxed policy: `v=DMARC1; p=none;`
+- You can strengthen the policy later after monitoring
+
+## Removing a Domain
+
+To remove a domain:
+
+1. Go to **Organization Settings → Domains**
+2. Find the domain you want to remove
+3. Click the delete icon
+4. Confirm removal
+
+> **Warning**: Removing a domain will prevent sending emails from that domain. Make sure to set a different active domain first.
+
+## Multiple Domains
+
+You can add multiple domains to your organization:
+
+- Each domain must be verified separately
+- Only one domain can be active at a time
+- Switch between domains by clicking **Set Active**
+
+Use cases for multiple domains:
+- Different brands or products
+- Separating transactional and marketing emails
+- Testing new domains before going live
+
+## Best Practices
+
+### Use a Subdomain for Email
+
+Consider using a subdomain like `mail.yourcompany.com` instead of your root domain:
+
+- Protects your main domain's reputation
+- Easier to manage email-specific DNS records
+- Allows different settings for email vs. website
+
+### Set Up DMARC Monitoring
+
+Start with `p=none` to monitor without affecting delivery:
+
+```
+v=DMARC1; p=none; rua=mailto:dmarc@yourcompany.com
+```
+
+This sends reports to your email so you can monitor authentication results.
+
+### Warm Up New Domains
+
+When using a new domain:
+
+1. Start with small batches (100-500 emails)
+2. Gradually increase volume over 2-4 weeks
+3. Monitor bounce and complaint rates
+4. Only scale up if metrics stay healthy
