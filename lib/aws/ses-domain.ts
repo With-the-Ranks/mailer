@@ -51,9 +51,7 @@ function generateDkimKeyPair(): { privateKey: string; publicKey: string } {
   return { privateKey: base64PrivateKey, publicKey: base64PublicKey };
 }
 
-/**
- * Generate DNS records needed for domain verification
- */
+// Generate DNS records needed for domain verification
 function generateDnsRecords(
   domain: string,
   publicKey: string,
@@ -88,9 +86,7 @@ function generateDnsRecords(
   ];
 }
 
-/**
- * Add a domain to SES with DKIM signing
- */
+// Add a domain to SES with DKIM signing
 export async function addSesDomain(
   domain: string,
   region?: string,
@@ -165,9 +161,7 @@ export async function addSesDomain(
   }
 }
 
-/**
- * Check domain verification status in SES
- */
+// Check domain verification status in SES
 export async function verifySesDomain(
   domain: string,
   region?: string,
@@ -197,9 +191,7 @@ export async function verifySesDomain(
   }
 }
 
-/**
- * Delete a domain from SES
- */
+// Delete a domain from SES
 export async function deleteSesDomain(
   domain: string,
   region?: string,

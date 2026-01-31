@@ -32,9 +32,7 @@ export interface SnsTopicResult {
   error?: string;
 }
 
-/**
- * Create an SNS topic for SES events and subscribe the webhook endpoint
- */
+// Create an SNS topic for SES events and subscribe the webhook endpoint
 export async function setupSnsForSes(
   region: string,
   callbackUrl: string,
@@ -149,9 +147,7 @@ export async function createConfigurationSet(
   }
 }
 
-/**
- * Delete a configuration set
- */
+// Delete a configuration set
 export async function deleteConfigurationSet(
   name: string,
   region: string,
@@ -178,9 +174,7 @@ export async function deleteConfigurationSet(
   }
 }
 
-/**
- * Set up all four configuration sets for different tracking levels
- */
+// Set up all four configuration sets for different tracking levels
 export async function setupAllConfigurationSets(
   topicArn: string,
   region: string,
@@ -255,9 +249,7 @@ export async function setupAllConfigurationSets(
   return { ...results, errors };
 }
 
-/**
- * Get the appropriate configuration set name based on tracking settings
- */
+// Get the appropriate configuration set name based on tracking settings
 export function getConfigurationSetName(
   clickTracking: boolean,
   openTracking: boolean,
