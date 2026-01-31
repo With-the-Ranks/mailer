@@ -21,7 +21,7 @@ CREATE TABLE "SesRegionSettings" (
     "configClick" TEXT,
     "configOpen" TEXT,
     "configFull" TEXT,
-    "emailRateLimit" INTEGER NOT NULL DEFAULT 1,
+    "emailRateLimit" INTEGER NOT NULL DEFAULT 14,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
