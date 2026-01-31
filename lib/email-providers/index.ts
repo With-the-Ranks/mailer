@@ -1,5 +1,5 @@
-import { createResendProvider, ResendProvider } from "./resend";
-import { createSesProvider, SesProvider } from "./ses";
+import { createResendProvider } from "./resend";
+import { createSesProvider } from "./ses";
 import type {
   EmailProvider,
   EmailProviderClient,
@@ -17,9 +17,7 @@ export type {
   CancelEmailResult,
 } from "./types";
 
-/**
- * Check if Resend is the active email provider
- */
+// Check if Resend is the active email provider
 export function isResendEnabled(): boolean {
   return getDefaultProvider() === "resend";
 }
@@ -38,9 +36,7 @@ export function getDefaultProvider(): EmailProvider {
   return "ses";
 }
 
-/**
- * Create an email provider client based on configuration
- */
+// Create an email provider client based on configuration
 export function createEmailProvider(
   config: ProviderConfig,
 ): EmailProviderClient {
@@ -48,11 +44,6 @@ export function createEmailProvider(
 
   switch (provider) {
     case "resend":
-      if (!isResendEnabled()) {
-        throw new Error(
-          "Resend is not the active email provider. Set DEFAULT_EMAIL_PROVIDER=resend to use Resend.",
-        );
-      }
       return createResendProvider({
         apiKey: config.apiKey,
       });
@@ -70,9 +61,7 @@ export function createEmailProvider(
   }
 }
 
-/**
- * Create the default email provider based on environment configuration
- */
+// Create the default email provider based on environment configuration
 export function createDefaultProvider(): EmailProviderClient {
   const provider = getDefaultProvider();
   return createEmailProvider({ provider });

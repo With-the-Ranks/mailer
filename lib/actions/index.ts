@@ -985,10 +985,7 @@ import {
   setupAllConfigurationSets,
 } from "@/lib/aws/ses-config";
 
-/**
- * Initialize SES infrastructure for a region (admin only)
- * This sets up SNS topic and configuration sets for event tracking
- */
+// Initialize SES infrastructure for a region (admin only)
 export const initializeSesRegion = async (
   region: string,
   callbackUrl: string,
@@ -1067,9 +1064,7 @@ export const initializeSesRegion = async (
   }
 };
 
-/**
- * Get SES region settings
- */
+// Get SES region settings
 export const getSesRegionSettings = async (region: string) => {
   const session = await getSession();
   if (!session?.user.id) {

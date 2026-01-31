@@ -32,8 +32,6 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
   let provider: EmailProvider = getDefaultProvider();
   let apiKey: string | undefined;
   let awsRegion: string | undefined;
-  let clickTracking = false;
-  let openTracking = false;
   let isVerified = false;
   let error: string | undefined;
 
@@ -63,14 +61,12 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
         // Use the domain's provider setting (defaults to "ses")
         provider = (org.activeDomain.provider as EmailProvider) || "ses";
         awsRegion = org.activeDomain.awsRegion || undefined;
-        clickTracking = org.activeDomain.clickTracking;
-        openTracking = org.activeDomain.openTracking;
       } else {
         // No active domain configured - do not send; require domain management setup
         error =
           "No sending domain configured. Add and verify a domain in Settings → Domains, then set it as Active.";
       }
-    } else if (orgId) {
+    } else {
       // Organization not found
       error = "Organization not found.";
     }
@@ -99,9 +95,7 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
   return { client, domain, provider, configurationSetName, isVerified, error };
 }
 
-/**
- * Check if an email is in the suppression list (for SES compliance)
- */
+// Check if an email is in the suppression list (SES compliance)
 async function isEmailSuppressed(email: string): Promise<boolean> {
   const suppressed = await prisma.emailSuppression.findUnique({
     where: { email },
@@ -109,9 +103,7 @@ async function isEmailSuppressed(email: string): Promise<boolean> {
   return !!suppressed;
 }
 
-/**
- * Filter out suppressed emails from a list of recipients
- */
+// Filter out suppressed emails from a list of recipients
 async function filterSuppressedRecipients(emails: string[]): Promise<string[]> {
   const suppressedRecords = await prisma.emailSuppression.findMany({
     where: { email: { in: emails } },
