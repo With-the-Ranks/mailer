@@ -22,7 +22,8 @@ export function getRedisClient(): Redis {
     enableReadyCheck: false,
     retryStrategy: (times) => {
       if (times > 3) {
-        return null; // Stop retrying
+        console.error("[Redis] Max retry attempts reached, giving up");
+        return null;
       }
       return Math.min(times * 200, 2000);
     },

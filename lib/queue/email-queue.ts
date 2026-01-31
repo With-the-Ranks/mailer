@@ -1,7 +1,6 @@
 import { Queue, Worker, Job } from "bullmq";
 import Redis from "ioredis";
 
-import { getConfigurationSetName } from "@/lib/aws/ses-config";
 import { createEmailProvider, type EmailProvider } from "@/lib/email-providers";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
@@ -40,9 +39,7 @@ export interface QueueEmailResult {
 let emailQueue: Queue<EmailJobData> | null = null;
 let emailWorker: Worker<EmailJobData> | null = null;
 
-/**
- * Get or create the email queue
- */
+// Get or create the email queue
 export function getEmailQueue(): Queue<EmailJobData> {
   if (emailQueue) {
     return emailQueue;
@@ -79,9 +76,7 @@ export function getEmailQueue(): Queue<EmailJobData> {
   return emailQueue;
 }
 
-/**
- * Add an email to the queue
- */
+// Add an email to the queue
 export async function queueEmail(
   data: EmailJobData,
   delay?: number,
@@ -107,9 +102,7 @@ export async function queueEmail(
   }
 }
 
-/**
- * Queue multiple emails (bulk send)
- */
+// Queue multiple emails (bulk send)
 export async function queueBulkEmails(
   emails: EmailJobData[],
   delay?: number,
@@ -146,9 +139,7 @@ export async function queueBulkEmails(
   return { success, failed, errors };
 }
 
-/**
- * Process email jobs from the queue
- */
+// Process email jobs from the queue
 async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
   const {
     emailId,
@@ -249,7 +240,7 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
 
   if (provider === "resend" && result.messageId) {
     updateData.resendId = result.messageId;
-  } else if (result.messageId) {
+  } else if (provider === "ses" && result.messageId) {
     updateData.sesMessageId = result.messageId;
   }
 
@@ -282,9 +273,7 @@ async function processEmailJob(job: Job<EmailJobData>): Promise<void> {
   }
 }
 
-/**
- * Start the email worker
- */
+// Start the email worker
 export function startEmailWorker(
   concurrency: number = 10,
 ): Worker<EmailJobData> {
@@ -359,9 +348,7 @@ export async function closeEmailQueue(): Promise<void> {
   }
 }
 
-/**
- * Get queue statistics
- */
+// Get queue statistics
 export async function getQueueStats(): Promise<{
   waiting: number;
   active: number;
@@ -382,9 +369,7 @@ export async function getQueueStats(): Promise<{
   return { waiting, active, completed, failed, delayed };
 }
 
-/**
- * Clean old jobs from the queue
- */
+// Clean old jobs from the queue
 export async function cleanOldJobs(
   olderThanMs: number = 7 * 24 * 3600 * 1000,
 ): Promise<void> {
