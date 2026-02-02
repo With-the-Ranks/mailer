@@ -81,9 +81,8 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
     provider = "ses";
   }
 
-  // Omit configuration set so sends work without creating a set in AWS.
-  // Set AWS_SES_CONFIG_SET only if you have created that configuration set in SES (e.g. via initializeSesRegion).
-  const configurationSetName = undefined;
+  // Use configuration set for event tracking (SNS webhooks). Set AWS_SES_CONFIG_SET in env to your SES configuration set name (e.g. mailer-events).
+  const configurationSetName = process.env.AWS_SES_CONFIG_SET || undefined;
 
   const client = createEmailProvider({
     provider,
