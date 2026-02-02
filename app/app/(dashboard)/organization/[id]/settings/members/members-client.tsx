@@ -152,10 +152,12 @@ export default function MembersPageClient({
         )}
       </div>
 
-      <Card>
+      <Card className="bg-white dark:bg-[#2D2D2D]">
         <CardHeader>
-          <CardTitle>Members ({members.length})</CardTitle>
-          <CardDescription>
+          <CardTitle className="dark:text-white">
+            Members ({members.length})
+          </CardTitle>
+          <CardDescription className="dark:text-gray-400">
             Current members of your organization
           </CardDescription>
         </CardHeader>
@@ -163,9 +165,9 @@ export default function MembersPageClient({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
+                <TableHead className="dark:text-gray-400">Member</TableHead>
+                <TableHead className="dark:text-gray-400">Role</TableHead>
+                <TableHead className="w-[100px] dark:text-gray-400"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -184,7 +186,7 @@ export default function MembersPageClient({
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium dark:text-white">
                             {member.user.name || "Unnamed User"}
                             {isCurrentUser && (
                               <Badge variant="outline" className="ml-2">
@@ -192,7 +194,7 @@ export default function MembersPageClient({
                               </Badge>
                             )}
                           </div>
-                          <div className="text-muted-foreground text-sm">
+                          <div className="text-muted-foreground text-sm dark:text-gray-400">
                             {member.user.email}
                           </div>
                         </div>
@@ -298,10 +300,12 @@ export default function MembersPageClient({
       </Card>
 
       {invitations.length > 0 && (
-        <Card>
+        <Card className="bg-white dark:bg-[#2D2D2D]">
           <CardHeader>
-            <CardTitle>Pending Invitations ({invitations.length})</CardTitle>
-            <CardDescription>
+            <CardTitle className="dark:text-white">
+              Pending Invitations ({invitations.length})
+            </CardTitle>
+            <CardDescription className="dark:text-gray-400">
               Invitations that haven&apos;t been accepted yet
             </CardDescription>
           </CardHeader>
@@ -309,10 +313,12 @@ export default function MembersPageClient({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Invited</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Invited By</TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
+                  <TableHead className="dark:text-gray-400">Invited</TableHead>
+                  <TableHead className="dark:text-gray-400">Role</TableHead>
+                  <TableHead className="dark:text-gray-400">
+                    Invited By
+                  </TableHead>
+                  <TableHead className="w-[100px] dark:text-gray-400"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -320,11 +326,11 @@ export default function MembersPageClient({
                   <TableRow key={invitation.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">
+                        <div className="font-medium dark:text-white">
                           {invitation.email || "Shareable Link"}
                         </div>
                         {invitation.expiresAt && (
-                          <div className="text-muted-foreground text-sm">
+                          <div className="text-muted-foreground text-sm dark:text-gray-400">
                             Expires{" "}
                             {new Date(
                               invitation.expiresAt,
@@ -352,7 +358,7 @@ export default function MembersPageClient({
                         </Badge>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="dark:text-white">
                       {invitation.invitedBy.name || invitation.invitedBy.email}
                     </TableCell>
                     <TableCell>

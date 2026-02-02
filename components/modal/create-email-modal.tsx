@@ -121,7 +121,7 @@ export default function CreateEmailModal({
             placeholder="Campaign Name"
             value={data.campaignName}
             onChange={(e) => setData({ ...data, campaignName: e.target.value })}
-            className="rounded-md"
+            className="rounded-lg"
             required
           />
         </div>

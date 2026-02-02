@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
@@ -37,10 +37,9 @@ export async function POST(request: NextRequest) {
 
     const { contacts, audienceListId, skipDuplicates } = result.data;
 
-    const audienceList = await prisma.audienceList.findFirst({
+    const audienceList = await prisma.audienceList.findUnique({
       where: {
         id: audienceListId,
-        organizationId: session.user.organizationId,
       },
     });
 
@@ -49,6 +48,15 @@ export async function POST(request: NextRequest) {
         { error: "Audience list not found" },
         { status: 404 },
       );
+    }
+
+    // Check if user is a member of the organization that owns this audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const results = {

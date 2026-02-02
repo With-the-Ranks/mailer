@@ -45,7 +45,7 @@ export default function EmailRow({
 
   return (
     <>
-      <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
+      <tr className="hover:bg-gray-50 dark:hover:bg-neutral-800">
         <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
           <Link href={`/email/${data.id}${published ? "" : "/editor"}`}>
             {data.title || "No Subject"}

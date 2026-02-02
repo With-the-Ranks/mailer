@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -20,14 +20,9 @@ export default function NotFound() {
         </div>
 
         <div className="flex justify-center">
-          <Image
-            alt="404 illustration"
-            src="/empty-state.png"
-            width={400}
-            height={400}
-            className="rounded-lg"
-            priority
-          />
+          <div className="scale-150">
+            <Logo showText={false} clickable={false} />
+          </div>
         </div>
 
         <div className="flex flex-col items-center gap-4">

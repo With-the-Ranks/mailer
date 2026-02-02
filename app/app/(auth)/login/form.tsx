@@ -96,7 +96,7 @@ function SignInForm() {
             onChange={handleChange}
             placeholder="Email"
             disabled={isSubmitting}
-            className="mt-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
             required
             autoFocus
           />
@@ -107,17 +107,19 @@ function SignInForm() {
             onChange={handleChange}
             placeholder="Password"
             disabled={isSubmitting}
-            className="my-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="my-4 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
             required
           />
-          <FormButton isSubmitting={isSubmitting} label="Login" />
+          <FormButton isSubmitting={isSubmitting} label="Sign in" />
         </>
       ) : (
         <>
           <div className="mb-4 text-center">
-            <p className="text-sm text-white">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Logged in as{" "}
-              <strong className="font-semibold">{formData.email}</strong>
+              <strong className="font-semibold text-gray-900 dark:text-white">
+                {formData.email}
+              </strong>
             </p>
             <button
               type="button"
@@ -125,7 +127,7 @@ function SignInForm() {
                 setStep("credentials");
                 setFormData((prev) => ({ ...prev, twoFactorToken: "" }));
               }}
-              className="mt-1 text-xs text-white/80 hover:text-white hover:underline"
+              className="mt-1 text-xs text-gray-500 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
             >
               Use a different account
             </button>
@@ -137,18 +139,18 @@ function SignInForm() {
             onChange={handleChange}
             placeholder={`Enter ${TOTP_CODE_LENGTH}-digit code`}
             disabled={isSubmitting}
-            className="mt-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
             maxLength={TOTP_CODE_LENGTH}
             pattern={`[0-9]{${TOTP_CODE_LENGTH}}`}
             required
             autoFocus
             autoComplete="one-time-code"
           />
-          <p className="mt-2 text-xs text-white/80">
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             Enter the {TOTP_CODE_LENGTH}-digit code from your authenticator app
           </p>
           <div className="mt-4">
-            <FormButton isSubmitting={isSubmitting} label="Verify & Login" />
+            <FormButton isSubmitting={isSubmitting} label="Verify & Sign in" />
           </div>
         </>
       )}

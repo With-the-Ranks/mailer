@@ -21,7 +21,7 @@ export default async function DashboardLayout({
       <Nav>
         <Profile />
       </Nav>
-      <div className="min-h-screen w-full overflow-x-hidden pt-5 dark:bg-black">
+      <div className="bg-dotted min-h-screen w-full overflow-x-hidden pt-5 dark:bg-[#0D0D0D]">
         <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
         {children}
       </div>

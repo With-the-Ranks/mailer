@@ -4,10 +4,10 @@ import Link, { type LinkProps } from "next/link";
 export default function DocsPage() {
   return (
     <main className="z-2 container flex flex-1 flex-col items-center justify-center py-16 text-center">
-      <h1 className="mb-4 text-3xl font-semibold md:text-4xl">
+      <h1 className="text-fd-foreground mb-4 text-3xl font-semibold md:text-4xl">
         Mailer Documentation
       </h1>
-      <p className="mb-2 text-lg font-medium">
+      <p className="text-fd-foreground mb-2 text-lg font-medium">
         Mailer is the easiest way to send organizing emails.
       </p>
       <p className="text-fd-muted-foreground mb-8">
@@ -37,7 +37,7 @@ export default function DocsPage() {
         ].map((item) => (
           <Item key={item.name} href={item.href}>
             <Icon>{item.icon}</Icon>
-            <h2 className="text-fd-muted-foreground mb-2 text-lg font-semibold">
+            <h2 className="text-fd-foreground mb-2 text-lg font-semibold">
               {item.name}
             </h2>
             <p className="text-fd-muted-foreground text-sm leading-relaxed">
@@ -52,7 +52,7 @@ export default function DocsPage() {
 
 function Icon({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-fd-muted text-fd-muted-foreground mb-4 size-10 border p-2">
+    <div className="bg-fd-accent text-fd-primary mb-4 size-10 rounded-lg p-2">
       {children}
     </div>
   );
@@ -62,7 +62,7 @@ function Item(props: LinkProps & { children: React.ReactNode }) {
   return (
     <Link
       {...props}
-      className="group bg-fd-card hover:bg-fd-card/90 border p-6 transition-colors duration-200"
+      className="group border-fd-border bg-fd-card hover:bg-fd-accent rounded-lg border p-6 transition-all duration-200 hover:shadow-md"
     >
       {props.children}
     </Link>

@@ -24,28 +24,28 @@ export default function Profile() {
   }
 
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className="flex w-full flex-col gap-2">
+      {/* Row 1: Profile picture and name - full width, left aligned */}
       <Link
         href="/settings"
-        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex w-full flex-1 items-center space-x-3 rounded-lg px-2 py-1.5 transition-all duration-200"
+        className="flex w-full items-center space-x-3 rounded-lg px-2 py-1.5 transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
       >
         <Image
           src={
             session.user.image ??
             `https://avatar.vercel.sh/${session.user.email}`
           }
-          width={40}
-          height={40}
+          width={24}
+          height={24}
           alt={session.user.name ?? "User avatar"}
           className="h-6 w-6 rounded-full"
         />
         {state === "expanded" && (
-          <span className="truncate text-base font-medium">
+          <span className="truncate text-sm font-medium text-black dark:text-white">
             {session.user.name}
           </span>
         )}
       </Link>
-      {state === "expanded" && <LogoutButton />}
     </div>
   );
 }

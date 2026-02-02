@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import BlurImage from "@/components/blur-image";
+import Logo from "@/components/logo";
 import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
 import prisma from "@/lib/prisma";
 import { placeholderBlurhash, toDateString } from "@/lib/utils";
@@ -109,20 +109,9 @@ export default async function OrganizationHomePage({
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20">
-          <Image
-            alt="missing email"
-            src="/empty-state.png"
-            width={400}
-            height={400}
-            className="dark:hidden"
-          />
-          <Image
-            alt="missing email"
-            src="/empty-state.png"
-            width={400}
-            height={400}
-            className="hidden dark:block"
-          />
+          <div className="scale-150">
+            <Logo showText={false} clickable={false} />
+          </div>
           <p className="mt-6 text-2xl text-stone-600 dark:text-stone-400">
             No emails yet.
           </p>

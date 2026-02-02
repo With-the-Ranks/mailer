@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
@@ -23,18 +23,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Make sure the audience list belongs to the user's org
+    // Make sure the audience list exists and user has access to the organization
     const audienceList = await prisma.audienceList.findUnique({
       where: { id: audienceListId },
     });
-    if (
-      !audienceList ||
-      audienceList.organizationId !== session.user.organizationId
-    ) {
+    if (!audienceList) {
       return NextResponse.json(
         { error: "Audience list not found" },
         { status: 404 },
       );
+    }
+
+    // Check if user is a member of the organization that owns this audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Fetch contacts for that list
@@ -80,18 +86,24 @@ export async function POST(request: NextRequest) {
 
     const validatedData = result.data;
 
-    // Verify the audience list belongs to the user's organization
+    // Verify the audience list exists and user has access to the organization
     const audienceList = await prisma.audienceList.findUnique({
       where: { id: validatedData.audienceListId },
     });
-    if (
-      !audienceList ||
-      audienceList.organizationId !== session.user.organizationId
-    ) {
+    if (!audienceList) {
       return NextResponse.json(
         { error: "Audience list not found" },
         { status: 404 },
       );
+    }
+
+    // Check if user is a member of the organization that owns this audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Check if contact with this email already exists in the list

@@ -101,7 +101,7 @@ export function ScrollableTemplateSelect({
         value={selectedTemplateId || ""}
         onValueChange={handleSelectTemplate}
       >
-        <SelectTrigger className="h-auto w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-base shadow-xs transition-colors hover:bg-gray-50 focus:ring-1 focus:ring-gray-400 focus:outline-hidden">
+        <SelectTrigger className="h-auto w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-base shadow-xs transition-colors hover:bg-gray-50 focus:ring-1 focus:ring-gray-400 focus:outline-hidden">
           <div className="flex w-full items-center justify-between">
             <SelectValue placeholder="Select a template…" />
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import Logo from "@/components/logo";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -28,6 +29,8 @@ interface EmailStatsProps {
 export default function EmailStats({ organizationId }: EmailStatsProps) {
   const [data, setData] = useState<EmailStat[]>([]);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,16 +73,10 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
         <div className="flex min-w-0 flex-col space-y-6">
           <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
           <div className="flex flex-col items-center justify-center py-20">
-            <Image
-              alt="No reports data"
-              src="/empty-state.png"
-              width={400}
-              height={400}
-            />
-            <p className="mt-6 text-xl font-semibold text-stone-700 dark:text-stone-200">
-              No email analytics yet
-            </p>
-            <p className="mt-2 text-lg text-stone-500 dark:text-stone-400">
+            <div className="scale-150">
+              <Logo showText={false} clickable={false} />
+            </div>
+            <p className="mt-6 text-lg text-stone-500 dark:text-stone-400">
               Send your first email to start seeing analytics and reports.
             </p>
           </div>
@@ -91,13 +88,16 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
     <div className="flex w-full min-w-0 flex-col space-y-12">
       <div className="flex min-w-0 flex-col space-y-6">
         <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
-        <div className="h-[400px] w-full">
+        <div className="h-[400px] w-full rounded-lg bg-white py-6 dark:bg-[#2D2D2D]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={isDark ? "#374151" : "#e5e7eb"}
+              />
               <XAxis
                 dataKey="subject"
                 interval={0}
@@ -105,13 +105,28 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
                 textAnchor="end"
                 height={120}
                 dy={10}
+                stroke={isDark ? "#9ca3af" : "#6b7280"}
+                tick={{ fill: isDark ? "#ffffff" : "#6b7280" }}
               />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
+              <YAxis
+                allowDecimals={false}
+                stroke={isDark ? "#9ca3af" : "#6b7280"}
+                tick={{ fill: isDark ? "#ffffff" : "#6b7280" }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: isDark ? "#2D2D2D" : "white",
+                  border: isDark ? "1px solid #4b5563" : "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  color: isDark ? "#ffffff" : "#1f2937",
+                }}
+              />
+              <Legend
+                wrapperStyle={{ color: isDark ? "#ffffff" : "#6b7280" }}
+              />
               <Bar
                 dataKey="sent"
-                fill="#252753"
+                fill={isDark ? "#3b82f6" : "#252753"}
                 name="Sent"
                 isAnimationActive={true}
               />

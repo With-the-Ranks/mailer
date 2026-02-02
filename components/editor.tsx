@@ -194,120 +194,143 @@ export default function Editor({ email }: { email: EmailWithSite }) {
   };
 
   return (
-    <div className="relative mx-auto min-h-[500px] w-full max-w-(--breakpoint-lg) border-stone-200 p-12 px-8 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg dark:border-stone-700">
-      <div className="absolute top-5 right-5 mb-5 flex flex-wrap items-center gap-3">
-        <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-base text-stone-400 dark:bg-stone-800 dark:text-stone-500">
-          {isPendingSaving ? "Saving..." : "Saved"}
-        </div>
-        <EmailPreviewButton
-          editor={contentObj}
-          subject={data.subject || ""}
-          previewText={data.previewText || ""}
-          fromName={from || ""}
-          audienceListId={data.audienceListId}
-          organizationId={data.organizationId}
-        />
-        <SendEmailButton
-          isSending={isPendingPublishing}
-          getButtonLabel={getButtonLabel}
-          onConfirm={handleClickPublish}
-          selectedAudienceList={selectedAudienceList}
-          setSelectedAudienceList={setSelectedAudienceList}
-          organizationId={data.organizationId!}
-          scheduledTimeValue={scheduledDate}
-          isValidTime={(current) => current.isSameOrAfter(new Date(), "day")}
-          setScheduledTimeValue={setScheduledDate}
-          isScheduleDisabled={data.published && scheduledDate > moment()}
-          subject={data.subject || ""}
-          previewText={data.previewText || ""}
-          from={from}
-          content={data.content || ""}
-          emailId={data.id}
-        />
-      </div>
-      <div className="mb-5 flex flex-col space-y-3 border-b border-stone-200 pb-5 dark:border-stone-700">
-        <input
-          type="text"
-          placeholder="Campaign Name"
-          defaultValue={email?.title || ""}
-          autoFocus
-          onChange={(e) => setData({ ...data, title: e.target.value })}
-          className="dark:placeholder-text-600 border-none px-0 text-3xl placeholder:text-stone-400 focus:ring-0 focus:outline-hidden dark:bg-black dark:text-white"
-          required
-        />
-      </div>
-      <Label className="flex items-center font-normal">
-        <span className="w-40 shrink-0 font-normal text-gray-600 after:ml-0.5 after:text-red-400 after:content-['*']">
-          Subject
-        </span>
-        <Input
-          className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => setData({ ...data, subject: e.target.value })}
-          placeholder="Email Subject"
-          type="text"
-          value={data.subject || ""}
-          required
-        />
-      </Label>
-      <div className="flex items-center gap-1.5">
-        <Label className="flex grow items-center font-normal">
-          <span className="w-40 shrink-0 font-normal text-gray-600">
-            From Name
-          </span>
-          <Input
-            className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-            onChange={(e) => {
-              setFrom(e.target.value);
-              setData({ ...data, from: e.target.value });
-            }}
-            placeholder="With The Ranks"
-            type="text"
-            value={from}
-          />
-        </Label>
-        {!showReplyTo ? (
-          <button
-            className="inline-block h-full shrink-0 bg-transparent px-1 text-base text-gray-500 hover:text-gray-700"
-            onClick={() => setShowReplyTo(true)}
-            type="button"
-          >
-            Reply-To
-          </button>
-        ) : null}
-      </div>
-      {showReplyTo && (
-        <Label className="flex items-center font-normal">
-          <span className="w-40 shrink-0 font-normal text-gray-600">
-            Reply-To
-          </span>
-          <div className="align-content-stretch flex grow items-center">
-            <Input
-              className="h-auto rounded-none border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
-              onChange={(e) => setData({ ...data, replyTo: e.target.value })}
-              placeholder="noreply@withtheranks.coop"
-              type="text"
-              value={data.replyTo || ""}
-            />
-            <button
-              className="flex h-10 shrink-0 items-center bg-transparent px-1 text-gray-500 hover:text-gray-700"
-              onClick={() => setShowReplyTo(false)}
-              type="button"
-            >
-              <X className="inline-block" size={16} />
-            </button>
+    <div className="relative mx-auto min-h-[500px] w-full max-w-(--breakpoint-lg) overflow-hidden rounded-lg border border-stone-200 bg-white sm:mb-[calc(20vh)] sm:shadow-lg dark:border-stone-700 dark:bg-[#2D2D2D]">
+      {/* Header Section */}
+      <div className="flex items-center justify-between border-b border-stone-200 bg-white px-6 py-4 dark:border-stone-700 dark:bg-black">
+        <h1 className="text-xl font-semibold text-black dark:text-white">
+          New Email
+        </h1>
+        <div className="flex items-center gap-3">
+          <div className="rounded-[28px] bg-stone-100 px-4 py-2.5 text-base text-stone-400 dark:bg-stone-800 dark:text-stone-500">
+            {isPendingSaving ? "Saving..." : "Saved"}
           </div>
-        </Label>
-      )}
-      <div className="relative my-6">
-        <Input
-          className="h-auto rounded-none border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-2xl focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-          onChange={(e) => setData({ ...data, previewText: e.target.value })}
-          placeholder="Preview Text"
-          type="text"
-          value={data.previewText || ""}
-        />
+          <EmailPreviewButton
+            editor={contentObj}
+            subject={data.subject || ""}
+            previewText={data.previewText || ""}
+            fromName={from || ""}
+            audienceListId={data.audienceListId}
+            organizationId={data.organizationId}
+          />
+          <SendEmailButton
+            isSending={isPendingPublishing}
+            getButtonLabel={getButtonLabel}
+            onConfirm={handleClickPublish}
+            selectedAudienceList={selectedAudienceList}
+            setSelectedAudienceList={setSelectedAudienceList}
+            organizationId={data.organizationId!}
+            scheduledTimeValue={scheduledDate}
+            isValidTime={(current) => current.isSameOrAfter(new Date(), "day")}
+            setScheduledTimeValue={setScheduledDate}
+            isScheduleDisabled={data.published && scheduledDate > moment()}
+            subject={data.subject || ""}
+            previewText={data.previewText || ""}
+            from={from}
+            content={data.content || ""}
+            emailId={data.id}
+          />
+        </div>
       </div>
-      <div>
+
+      {/* Form Section */}
+      <div className="px-6 py-6">
+        <div className="mb-6 flex flex-col space-y-3 border-b border-stone-200 pb-6 dark:border-stone-700">
+          <input
+            type="text"
+            placeholder="Campaign Name"
+            defaultValue={email?.title || ""}
+            autoFocus
+            onChange={(e) => setData({ ...data, title: e.target.value })}
+            className="border-none bg-transparent px-0 text-3xl placeholder:text-stone-400 focus:ring-0 focus:outline-hidden dark:text-white dark:placeholder:text-stone-500"
+            required
+          />
+        </div>
+
+        <div className="space-y-4">
+          <Label className="flex items-center font-normal">
+            <span className="w-40 shrink-0 font-normal text-gray-600 after:ml-0.5 after:text-red-400 after:content-['*'] dark:text-gray-400">
+              Subject
+            </span>
+            <Input
+              className="h-auto border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-[#2D2D2D] dark:text-white dark:placeholder:text-gray-400"
+              onChange={(e) => setData({ ...data, subject: e.target.value })}
+              placeholder="Email Subject"
+              type="text"
+              value={data.subject || ""}
+              required
+            />
+          </Label>
+
+          <div className="flex items-center gap-4">
+            <Label className="flex grow items-center font-normal">
+              <span className="w-40 shrink-0 font-normal text-gray-600 dark:text-gray-400">
+                From Name
+              </span>
+              <Input
+                className="h-auto border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-[#2D2D2D] dark:text-white dark:placeholder:text-gray-400"
+                onChange={(e) => {
+                  setFrom(e.target.value);
+                  setData({ ...data, from: e.target.value });
+                }}
+                placeholder="With The Ranks"
+                type="text"
+                value={from}
+              />
+            </Label>
+            {!showReplyTo ? (
+              <button
+                className="inline-block h-full shrink-0 bg-transparent px-2 text-base text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                onClick={() => setShowReplyTo(true)}
+                type="button"
+              >
+                Reply-To
+              </button>
+            ) : null}
+          </div>
+
+          {showReplyTo && (
+            <Label className="flex items-center font-normal">
+              <span className="w-40 shrink-0 font-normal text-gray-600 dark:text-gray-400">
+                Reply-To
+              </span>
+              <div className="flex grow items-center gap-2">
+                <Input
+                  className="h-auto border-none py-2.5 font-normal focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-[#2D2D2D] dark:text-white dark:placeholder:text-gray-400"
+                  onChange={(e) =>
+                    setData({ ...data, replyTo: e.target.value })
+                  }
+                  placeholder="noreply@withtheranks.coop"
+                  type="text"
+                  value={data.replyTo || ""}
+                />
+                <button
+                  className="flex h-10 shrink-0 items-center justify-center bg-transparent px-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  onClick={() => setShowReplyTo(false)}
+                  type="button"
+                >
+                  <X className="inline-block" size={16} />
+                </button>
+              </div>
+            </Label>
+          )}
+
+          <div className="pt-2">
+            <Label className="mb-2 block font-normal text-gray-600 dark:text-gray-400">
+              Preview Text
+            </Label>
+            <Input
+              className="h-auto border-x-0 border-gray-300 px-0 py-2.5 pr-5 text-2xl focus-visible:border-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder:text-gray-400 dark:focus-visible:border-gray-500"
+              onChange={(e) =>
+                setData({ ...data, previewText: e.target.value })
+              }
+              placeholder="Preview Text"
+              type="text"
+              value={data.previewText || ""}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="px-6 pb-6">
         {!hydrated ? (
           <div className="flex items-center justify-center">
             <Loader2 className="animate-spin text-gray-400" />

@@ -189,7 +189,10 @@ export function ContactList({
         setContacts(data.map(convertAudienceToContact));
       } else {
         const error = await parseResponse(response);
-        toast.error(error.error || "Failed to load contacts");
+        // Don't show error toast for 403/404 - these are handled by the page
+        if (response.status !== 403 && response.status !== 404) {
+          toast.error(error.error || "Failed to load contacts");
+        }
       }
     } catch (error) {
       console.error("Failed to load contacts:", error);
