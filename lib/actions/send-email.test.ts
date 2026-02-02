@@ -1,75 +1,262 @@
-import { faker } from "@faker-js/faker";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
-vi.mock("resend", () => {
-  return {
-    Resend: vi.fn().mockImplementation(() => ({
-      emails: {
-        send: ({ to }: { to: string[] }) => {
-          if (to[0] === "fail@example.com") {
-            return Promise.resolve({
-              data: null,
-              error: "Something went wrong",
-            });
-          }
-          return Promise.resolve({
-            data: { message: "Email sent successfully" },
-            error: null,
-          });
-        },
-      },
-    })),
-  };
-});
+// Unit tests for sendEmail functionality
+
+const mockSendEmail = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  default: {
+    organization: { findUnique: vi.fn() },
+    emailSuppression: { findUnique: vi.fn(), findMany: vi.fn() },
+    audience: { findMany: vi.fn() },
+    audienceList: { findUnique: vi.fn(), findFirst: vi.fn() },
+    segment: { findUnique: vi.fn() },
+    email: { update: vi.fn() },
+    emailEvent: { create: vi.fn() },
+  },
+}));
+
+vi.mock("@/lib/auth", () => ({
+  getSession: vi.fn().mockResolvedValue({
+    user: { id: "test-user-id", email: "test@example.com" },
+  }),
+}));
+
+vi.mock("@react-email/render", () => ({
+  render: vi.fn().mockResolvedValue("<html>Rendered</html>"),
+}));
 
 vi.mock("@maily-to/render", () => {
-  return {
-    Maily: vi.fn().mockImplementation(() => ({
-      setPreviewText: vi.fn(),
-      render: vi.fn().mockResolvedValue("<html>Email content</html>"),
-      setVariableValues: vi.fn(),
-    })),
-  };
+  class MockMaily {
+    setPreviewText = vi.fn();
+    render = vi.fn().mockResolvedValue("<html>Content</html>");
+    setVariableValues = vi.fn();
+  }
+  return { Maily: MockMaily };
 });
 
-describe("sendEmail Functionality", () => {
-  test("sendEmail should successfully send an email", async () => {
-    vi.resetModules();
-    const { sendEmail } = await import("@/lib/actions/send-email");
+vi.mock("@/lib/email-providers", () => ({
+  createEmailProvider: vi.fn(() => ({ sendEmail: mockSendEmail })),
+  getDefaultProvider: vi.fn().mockReturnValue("ses"),
+  isResendEnabled: vi.fn().mockReturnValue(false),
+}));
 
-    const to = faker.internet.email();
-    const from = faker.internet.email();
-    const subject = "Welcome!";
-    const content = JSON.stringify({
-      type: "doc",
-      content: [
-        { type: "paragraph", content: [{ type: "text", text: "Hello World" }] },
-      ],
-    });
-    const previewText = "Hello World Preview";
+vi.mock("resend", () => ({
+  Resend: vi.fn(() => ({
+    emails: {
+      send: vi
+        .fn()
+        .mockResolvedValue({ data: { id: "resend-id" }, error: null }),
+      cancel: vi.fn().mockResolvedValue({ data: {}, error: null }),
+    },
+  })),
+}));
 
-    const result = await sendEmail({ to, from, subject, content, previewText });
-    expect(result.error).toBeUndefined();
-    expect(result.data).toEqual({ message: "Email sent successfully" });
+describe("sendEmail", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSendEmail.mockResolvedValue({ messageId: "msg-123", error: null });
   });
 
-  test("sendEmail should handle failure in sending email", async () => {
-    vi.resetModules();
-    const { sendEmail } = await import("@/lib/actions/send-email");
+  describe("success paths", () => {
+    test("returns message ID when sending HTML email", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { sendEmail } = await import("@/lib/actions/send-email");
 
-    const to = "fail@example.com";
-    const from = faker.internet.email();
-    const subject = "Welcome!";
-    const content = JSON.stringify({
-      type: "doc",
-      content: [
-        { type: "paragraph", content: [{ type: "text", text: "Hello World" }] },
-      ],
+      const result = await sendEmail({
+        to: "recipient@example.com",
+        from: "Sender",
+        subject: "Test",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(result.data).toBeDefined();
+      expect(result.error).toBeUndefined();
     });
-    const previewText = "Hello World Preview";
 
-    const result = await sendEmail({ to, from, subject, content, previewText });
-    expect(result.data).toBeUndefined();
-    expect(result.error).toBe("Something went wrong");
+    test("calls provider sendEmail with correct parameters", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { sendEmail } = await import("@/lib/actions/send-email");
+
+      await sendEmail({
+        to: "recipient@example.com",
+        from: "Sender",
+        subject: "Test Subject",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(mockSendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "recipient@example.com",
+          subject: "Test Subject",
+        }),
+      );
+    });
+
+    test("renders Maily content to HTML before sending", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { sendEmail } = await import("@/lib/actions/send-email");
+      const content = JSON.stringify({
+        type: "doc",
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: "Hi" }] },
+        ],
+      });
+
+      const result = await sendEmail({
+        to: "recipient@example.com",
+        from: "Sender",
+        subject: "Test",
+        content,
+        previewText: "Preview",
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(mockSendEmail).toHaveBeenCalled();
+    });
+
+    test("renders React component to HTML for SES provider", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { render } = await import("@react-email/render");
+      const { sendEmail } = await import("@/lib/actions/send-email");
+      const React = await import("react");
+      const component = React.createElement("div", null, "Test");
+
+      const result = await sendEmail({
+        to: "recipient@example.com",
+        from: "Sender",
+        subject: "Test",
+        react: component,
+        previewText: "Preview",
+      });
+
+      expect(render).toHaveBeenCalled();
+      expect(result.error).toBeUndefined();
+    });
+  });
+
+  describe("error handling", () => {
+    test("returns error when provider fails to send", async () => {
+      mockSendEmail.mockResolvedValue({
+        messageId: null,
+        error: "SMTP connection failed",
+      });
+      const { sendEmail } = await import("@/lib/actions/send-email");
+
+      const result = await sendEmail({
+        to: "recipient@example.com",
+        from: "Sender",
+        subject: "Test",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(result.error).toBe("SMTP connection failed");
+      expect(result.data).toBeUndefined();
+    });
+  });
+
+  describe("suppression list", () => {
+    test("blocks sending to suppressed email addresses", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue({
+        id: "sup-1",
+        email: "bounced@example.com",
+        reason: "HARD_BOUNCE",
+      });
+      const { sendEmail } = await import("@/lib/actions/send-email");
+
+      const result = await sendEmail({
+        to: "bounced@example.com",
+        from: "Sender",
+        subject: "Test",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(result.error).toContain("suppression list");
+      expect(mockSendEmail).not.toHaveBeenCalled();
+    });
+
+    test("allows sending to non-suppressed email addresses", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { sendEmail } = await import("@/lib/actions/send-email");
+
+      const result = await sendEmail({
+        to: "valid@example.com",
+        from: "Sender",
+        subject: "Test",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(mockSendEmail).toHaveBeenCalled();
+    });
+  });
+
+  describe("from header formatting", () => {
+    test("uses display name in from header", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { sendEmail } = await import("@/lib/actions/send-email");
+
+      await sendEmail({
+        to: "recipient@example.com",
+        from: "Acme Corp",
+        subject: "Test",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(mockSendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: expect.stringContaining("Acme Corp"),
+        }),
+      );
+    });
+
+    test("extracts display name from email-like from field", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (
+        prisma.emailSuppression.findUnique as ReturnType<typeof vi.fn>
+      ).mockResolvedValue(null);
+      const { sendEmail } = await import("@/lib/actions/send-email");
+
+      await sendEmail({
+        to: "recipient@example.com",
+        from: "newsletter@company.com",
+        subject: "Test",
+        html: "<p>Hello</p>",
+        previewText: "Preview",
+      });
+
+      expect(mockSendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: expect.stringContaining("newsletter"),
+        }),
+      );
+    });
   });
 });

@@ -17,8 +17,15 @@ export default async function QueueMonitorPage({
     notFound();
   }
 
-  const organization = await prisma.organization.findUnique({
-    where: { id: decodeURIComponent(organizationId) },
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: decodeURIComponent(organizationId),
+      members: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
     select: {
       id: true,
       name: true,

@@ -101,6 +101,7 @@ interface DomainsClientProps {
   activeDomainId: string | null;
   emailApiKey: string;
   domainOptionsForResend: { value: string; label: string }[];
+  defaultEmailDomain?: string;
 }
 
 const MAX_DOMAINS = 3;
@@ -166,9 +167,16 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 function DnsRecordsTable({ records }: { records: DnsRecord[] }) {
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard");
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      toast.error(
+        "Failed to copy to clipboard. Your browser may not support this feature.",
+      );
+    }
   };
 
   return (
@@ -221,6 +229,7 @@ export default function DomainsClient({
   activeDomainId,
   emailApiKey,
   domainOptionsForResend,
+  defaultEmailDomain,
 }: DomainsClientProps) {
   const router = useRouter();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -282,17 +291,20 @@ export default function DomainsClient({
     setVerifyingDomainId(domainId);
 
     const VERIFY_TIMEOUT_MS = 20_000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), VERIFY_TIMEOUT_MS);
 
     try {
       const result = await Promise.race([
         verifySesDomain(domainId),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Verification check timed out. Try again.")),
-            VERIFY_TIMEOUT_MS,
-          ),
-        ),
+        new Promise<never>((_, reject) => {
+          controller.signal.addEventListener("abort", () => {
+            reject(new Error("Verification check timed out. Try again."));
+          });
+        }),
       ]);
+
+      clearTimeout(timeoutId);
 
       if (result.error) {
         toast.error(result.error);
@@ -309,8 +321,15 @@ export default function DomainsClient({
 
       router.refresh();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to verify domain";
+      clearTimeout(timeoutId);
+      const isAbortError =
+        error instanceof Error &&
+        (error.name === "AbortError" || error.message.includes("timed out"));
+      const message = isAbortError
+        ? "Verification check timed out. Try again."
+        : error instanceof Error
+          ? error.message
+          : "Failed to verify domain";
       toast.error(message);
     } finally {
       setVerifyingDomainId(null);
@@ -392,7 +411,7 @@ export default function DomainsClient({
         </div>
         <Form
           title="Active Sending Domain"
-          description={`Pick which verified domain Resend should use. Defaults to ${process.env.EMAIL_DOMAIN ?? "your default domain"}.`}
+          description={`Pick which verified domain Resend should use. Defaults to ${defaultEmailDomain ?? "your default domain"}.`}
           helpText={
             domainOptionsForResend.length <= 1
               ? "No domains on this API key yet."

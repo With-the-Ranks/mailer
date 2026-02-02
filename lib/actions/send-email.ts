@@ -32,8 +32,6 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
   let provider: EmailProvider = getDefaultProvider();
   let apiKey: string | undefined;
   let awsRegion: string | undefined;
-  let clickTracking = false;
-  let openTracking = false;
   let isVerified = false;
   let error: string | undefined;
 
@@ -63,14 +61,12 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
         // Use the domain's provider setting (defaults to "ses")
         provider = (org.activeDomain.provider as EmailProvider) || "ses";
         awsRegion = org.activeDomain.awsRegion || undefined;
-        clickTracking = org.activeDomain.clickTracking;
-        openTracking = org.activeDomain.openTracking;
       } else {
         // No active domain configured - do not send; require domain management setup
         error =
           "No sending domain configured. Add and verify a domain in Settings → Domains, then set it as Active.";
       }
-    } else if (orgId) {
+    } else {
       // Organization not found
       error = "Organization not found.";
     }
@@ -85,9 +81,8 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
     provider = "ses";
   }
 
-  // Omit configuration set so sends work without creating a set in AWS.
-  // Set AWS_SES_CONFIG_SET only if you have created that configuration set in SES (e.g. via initializeSesRegion).
-  const configurationSetName = undefined;
+  // Use configuration set for event tracking (SNS webhooks). Set AWS_SES_CONFIG_SET in env to your SES configuration set name (e.g. mailer-events).
+  const configurationSetName = process.env.AWS_SES_CONFIG_SET || undefined;
 
   const client = createEmailProvider({
     provider,
@@ -99,9 +94,7 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
   return { client, domain, provider, configurationSetName, isVerified, error };
 }
 
-/**
- * Check if an email is in the suppression list (for SES compliance)
- */
+// Check if an email is in the suppression list (SES compliance)
 async function isEmailSuppressed(email: string): Promise<boolean> {
   const suppressed = await prisma.emailSuppression.findUnique({
     where: { email },
@@ -109,9 +102,7 @@ async function isEmailSuppressed(email: string): Promise<boolean> {
   return !!suppressed;
 }
 
-/**
- * Filter out suppressed emails from a list of recipients
- */
+// Filter out suppressed emails from a list of recipients
 async function filterSuppressedRecipients(emails: string[]): Promise<string[]> {
   const suppressedRecords = await prisma.emailSuppression.findMany({
     where: { email: { in: emails } },
@@ -320,7 +311,10 @@ export const sendBulkEmail = async ({
     };
   }
 
-  const fromHeader = `${from} <${domain}>`;
+  const displayName = from.includes("@")
+    ? from.split("@")[0]?.trim() || "Mailer"
+    : from.trim() || "Mailer";
+  const fromHeader = `${displayName} <${domain}>`;
 
   let recipients: {
     email: string;
@@ -515,9 +509,31 @@ export const unscheduleEmail = async ({
 }) => {
   // Currently only Resend supports unscheduling
   if (resendId && isResendEnabled()) {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.cancel(resendId);
-    return { success: true };
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const result = await resend.emails.cancel(resendId);
+
+      const error = (result as { error?: unknown })?.error;
+      if (error) {
+        const errorMsg =
+          typeof error === "string"
+            ? error
+            : (error as { message?: string })?.message || JSON.stringify(error);
+        logError("Failed to cancel Resend email", null, {
+          resendId,
+          error: errorMsg,
+        });
+        return { success: false, error: errorMsg };
+      }
+
+      return { success: true };
+    } catch (err) {
+      logError("Error canceling scheduled email", err, { resendId });
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to cancel email",
+      };
+    }
   }
 
   if (sesMessageId) {

@@ -1,4 +1,5 @@
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
+import crypto from "crypto";
 import nodemailer from "nodemailer";
 
 import { getSesClient } from "@/lib/aws/ses-client";

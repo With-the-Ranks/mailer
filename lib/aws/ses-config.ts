@@ -32,9 +32,7 @@ export interface SnsTopicResult {
   error?: string;
 }
 
-/**
- * Create an SNS topic for SES events and subscribe the webhook endpoint
- */
+// Create an SNS topic for SES events and subscribe the webhook endpoint
 export async function setupSnsForSes(
   region: string,
   callbackUrl: string,
@@ -81,18 +79,16 @@ export async function setupSnsForSes(
   }
 }
 
-/**
- * Create a configuration set with SNS event destination
- */
+// Create configuration set with SNS event destination
 export async function createConfigurationSet(
   name: string,
   topicArn: string,
   region: string,
   eventTypes: EventType[] = GENERAL_EVENTS,
 ): Promise<ConfigSetResult> {
-  try {
-    const sesClient = getSesClient(region);
+  const sesClient = getSesClient(region);
 
+  try {
     // Create configuration set
     await sesClient.send(
       new CreateConfigurationSetCommand({
@@ -101,17 +97,39 @@ export async function createConfigurationSet(
     );
 
     // Add SNS destination for events
-    await sesClient.send(
-      new CreateConfigurationSetEventDestinationCommand({
-        ConfigurationSetName: name,
-        EventDestinationName: "sns_destination",
-        EventDestination: {
-          Enabled: true,
-          MatchingEventTypes: eventTypes,
-          SnsDestination: { TopicArn: topicArn },
-        },
-      }),
-    );
+    try {
+      await sesClient.send(
+        new CreateConfigurationSetEventDestinationCommand({
+          ConfigurationSetName: name,
+          EventDestinationName: "sns_destination",
+          EventDestination: {
+            Enabled: true,
+            MatchingEventTypes: eventTypes,
+            SnsDestination: { TopicArn: topicArn },
+          },
+        }),
+      );
+    } catch (eventDestError) {
+      console.error(
+        `Failed to create event destination for ${name}, rolling back configuration set`,
+        eventDestError,
+      );
+      try {
+        await sesClient.send(
+          new DeleteConfigurationSetCommand({
+            ConfigurationSetName: name,
+          }),
+        );
+        console.log(`Rollback successful: deleted configuration set ${name}`);
+      } catch (rollbackError) {
+        console.error(
+          `Rollback failed: could not delete configuration set ${name}`,
+          rollbackError,
+        );
+      }
+      // Re-throw the original error
+      throw eventDestError;
+    }
 
     return {
       success: true,
@@ -129,9 +147,7 @@ export async function createConfigurationSet(
   }
 }
 
-/**
- * Delete a configuration set
- */
+// Delete a configuration set
 export async function deleteConfigurationSet(
   name: string,
   region: string,
@@ -158,9 +174,7 @@ export async function deleteConfigurationSet(
   }
 }
 
-/**
- * Set up all four configuration sets for different tracking levels
- */
+// Set up all four configuration sets for different tracking levels
 export async function setupAllConfigurationSets(
   topicArn: string,
   region: string,
@@ -235,9 +249,7 @@ export async function setupAllConfigurationSets(
   return { ...results, errors };
 }
 
-/**
- * Get the appropriate configuration set name based on tracking settings
- */
+// Get the appropriate configuration set name based on tracking settings
 export function getConfigurationSetName(
   clickTracking: boolean,
   openTracking: boolean,

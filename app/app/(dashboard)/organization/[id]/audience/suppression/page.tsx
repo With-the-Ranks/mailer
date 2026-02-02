@@ -17,8 +17,15 @@ export default async function SuppressionListPage({
     notFound();
   }
 
-  const organization = await prisma.organization.findUnique({
-    where: { id: decodeURIComponent(organizationId) },
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: decodeURIComponent(organizationId),
+      members: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
     select: {
       id: true,
       name: true,
@@ -29,22 +36,35 @@ export default async function SuppressionListPage({
     notFound();
   }
 
-  // Get suppression list
   const suppressionList = await prisma.emailSuppression.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,
   });
 
-  // Get stats
-  const totalSuppressed = await prisma.emailSuppression.count();
-  const bouncedCount = await prisma.emailSuppression.count({
-    where: { reason: "HARD_BOUNCE" },
+  const reasonCounts = await prisma.emailSuppression.groupBy({
+    by: ["reason"],
+    _count: true,
   });
-  const complainedCount = await prisma.emailSuppression.count({
-    where: { reason: "COMPLAINT" },
-  });
-  const manualCount = await prisma.emailSuppression.count({
-    where: { reason: "MANUAL" },
+
+  let totalSuppressed = 0;
+  let bouncedCount = 0;
+  let complainedCount = 0;
+  let manualCount = 0;
+
+  reasonCounts.forEach((item) => {
+    const count = item._count;
+    totalSuppressed += count;
+    switch (item.reason) {
+      case "HARD_BOUNCE":
+        bouncedCount = count;
+        break;
+      case "COMPLAINT":
+        complainedCount = count;
+        break;
+      case "MANUAL":
+        manualCount = count;
+        break;
+    }
   });
 
   return (

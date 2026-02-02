@@ -29,13 +29,10 @@ export interface DomainStatusResult {
   error?: string;
 }
 
-/**
- * Generate an RSA key pair for DKIM signing
- * Uses 1024-bit keys as required by SES
- */
+// Generate RSA key pair for DKIM signing
 function generateDkimKeyPair(): { privateKey: string; publicKey: string } {
   const { privateKey, publicKey } = generateKeyPairSync("rsa", {
-    modulusLength: 1024,
+    modulusLength: 2048,
     publicKeyEncoding: { type: "spki", format: "pem" },
     privateKeyEncoding: { type: "pkcs8", format: "pem" },
   });
@@ -54,9 +51,7 @@ function generateDkimKeyPair(): { privateKey: string; publicKey: string } {
   return { privateKey: base64PrivateKey, publicKey: base64PublicKey };
 }
 
-/**
- * Generate DNS records needed for domain verification
- */
+// Generate DNS records needed for domain verification
 function generateDnsRecords(
   domain: string,
   publicKey: string,
@@ -77,11 +72,10 @@ function generateDnsRecords(
       name: `mail.${domain}`,
       value: "v=spf1 include:amazonses.com ~all",
     },
-    // DKIM record
     {
       type: "TXT" as const,
       name: `${dkimSelector}._domainkey.${domain}`,
-      value: `p=${publicKey}`,
+      value: `v=DKIM1; p=${publicKey}`,
     },
     // DMARC record (recommended)
     {
@@ -92,9 +86,7 @@ function generateDnsRecords(
   ];
 }
 
-/**
- * Add a domain to SES with DKIM signing
- */
+// Add a domain to SES with DKIM signing
 export async function addSesDomain(
   domain: string,
   region?: string,
@@ -102,11 +94,12 @@ export async function addSesDomain(
 ): Promise<DomainVerificationResult> {
   const awsRegion = region || process.env.AWS_DEFAULT_REGION || "us-east-1";
 
+  const sesClient = getSesClient(awsRegion);
+
   try {
-    const sesClient = getSesClient(awsRegion);
     const { privateKey, publicKey } = generateDkimKeyPair();
 
-    // Create email identity with DKIM
+    console.log("Creating email identity for domain", { domain });
     await sesClient.send(
       new CreateEmailIdentityCommand({
         EmailIdentity: domain,
@@ -117,13 +110,34 @@ export async function addSesDomain(
       }),
     );
 
-    // Set custom MailFrom domain for SPF
-    await sesClient.send(
-      new PutEmailIdentityMailFromAttributesCommand({
-        EmailIdentity: domain,
-        MailFromDomain: `mail.${domain}`,
-      }),
-    );
+    try {
+      console.log("Setting MailFrom domain", { domain });
+      await sesClient.send(
+        new PutEmailIdentityMailFromAttributesCommand({
+          EmailIdentity: domain,
+          MailFromDomain: `mail.${domain}`,
+        }),
+      );
+    } catch (mailFromError) {
+      console.error("Failed to set MailFrom, rolling back email identity", {
+        domain,
+        error: mailFromError,
+      });
+      try {
+        await sesClient.send(
+          new DeleteEmailIdentityCommand({
+            EmailIdentity: domain,
+          }),
+        );
+        console.log("Rollback successful: deleted email identity", { domain });
+      } catch (rollbackError) {
+        console.error("Rollback failed: could not delete email identity", {
+          domain,
+          error: rollbackError,
+        });
+      }
+      throw mailFromError;
+    }
 
     const dnsRecords = generateDnsRecords(
       domain,
@@ -147,9 +161,7 @@ export async function addSesDomain(
   }
 }
 
-/**
- * Check domain verification status in SES
- */
+// Check domain verification status in SES
 export async function verifySesDomain(
   domain: string,
   region?: string,
@@ -179,9 +191,7 @@ export async function verifySesDomain(
   }
 }
 
-/**
- * Delete a domain from SES
- */
+// Delete a domain from SES
 export async function deleteSesDomain(
   domain: string,
   region?: string,

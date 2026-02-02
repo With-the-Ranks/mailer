@@ -9,7 +9,7 @@ export interface SendEmailParams {
   to: string | string[];
   from: string;
   subject: string;
-  html?: string;
+  html?: string; // At least one of html or text required
   text?: string;
   replyTo?: string | string[];
   cc?: string | string[];

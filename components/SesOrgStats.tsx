@@ -104,23 +104,31 @@ export default function SesOrgStats({ organizationId }: SesOrgStatsProps) {
   });
   const [emailStats, setEmailStats] = useState<EmailStat[]>([]);
   const [loading, setLoading] = useState(true);
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { theme, resolvedTheme } = useTheme();
+  const isDark = (resolvedTheme ?? theme) === "dark";
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!organizationId) return;
+      if (!organizationId) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const response = await fetch(
-          `/api/ses-stats?organizationId=${organizationId}`,
+          `/api/ses-stats?organizationId=${encodeURIComponent(organizationId)}`,
         );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch stats: ${response.status}`);
+        }
+
         const data = await response.json();
 
-        if (data.stats) {
+        if (data.stats && typeof data.stats === "object") {
           setStats(data.stats);
         }
-        if (data.emailStats) {
+        if (Array.isArray(data.emailStats)) {
           setEmailStats(data.emailStats);
         }
       } catch (error) {

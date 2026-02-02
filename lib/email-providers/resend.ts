@@ -90,7 +90,24 @@ export class ResendProvider implements EmailProviderClient {
 
   async cancelScheduledEmail(messageId: string): Promise<CancelEmailResult> {
     try {
-      await this.client.emails.cancel(messageId);
+      const result = await this.client.emails.cancel(messageId);
+
+      const error = (result as { error?: unknown })?.error;
+      if (error) {
+        const errorMessage =
+          typeof error === "string"
+            ? error
+            : (error as { message?: string })?.message || JSON.stringify(error);
+        logError("Resend cancelScheduledEmail error", null, {
+          messageId,
+          error: errorMessage,
+        });
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
+
       return { success: true };
     } catch (error) {
       logError("Resend cancelScheduledEmail error", error);

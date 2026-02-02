@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+
+// Format date as ISO YYYY-MM-DD
+function formatDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+// Format date for display
+function formatDateDisplay(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -17,6 +30,12 @@ export async function GET(req: NextRequest) {
       { error: "Organization ID required" },
       { status: 400 },
     );
+  }
+
+  // Verify user is a member of the organization
+  const role = await getUserOrgRole(session.user.id, organizationId);
+  if (!role) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -238,32 +257,32 @@ export async function GET(req: NextRequest) {
     });
 
     const baseCount = subscribedEmails - audienceGrowth.length;
-    const growthByDate: Record<string, number> = {};
+    const growthByDate: Record<
+      string,
+      { isoKey: string; displayDate: string; count: number }
+    > = {};
 
     for (let i = 29; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      growthByDate[dateStr] = 0;
+      const isoKey = formatDateKey(date);
+      const displayDate = formatDateDisplay(date);
+      growthByDate[isoKey] = { isoKey, displayDate, count: 0 };
     }
 
     audienceGrowth.forEach((a) => {
-      const dateStr = a.createdAt.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      if (growthByDate[dateStr] !== undefined) {
-        growthByDate[dateStr]++;
+      const isoKey = formatDateKey(a.createdAt);
+      if (growthByDate[isoKey] !== undefined) {
+        growthByDate[isoKey].count++;
       }
     });
 
     let cumulative = baseCount;
-    const listGrowth = Object.entries(growthByDate).map(([date, count]) => {
-      cumulative += count;
-      return { date, count: cumulative };
-    });
+    const listGrowth = Object.values(growthByDate).map(
+      ({ displayDate, count }) => {
+        cumulative += count;
+        return { date: displayDate, count: cumulative };
+      },
+    );
 
     // Campaign stats
     const campaigns = emails.slice(0, 10).map((email) => ({
@@ -324,145 +343,100 @@ export async function GET(req: NextRequest) {
     });
     emailStats.complained = complainedCount;
 
-    // Email timeline - 7 days
-    const emailEvents7 = await prisma.emailEvent.findMany({
-      where: {
-        emailId: { in: emailIds },
-        timestamp: { gte: oneWeekAgo },
-      },
-      select: {
-        eventType: true,
-        timestamp: true,
-      },
-    });
-
-    // Initialize 7-day timeline
-    const timeline7ByDate: Record<
-      string,
-      {
-        date: string;
-        delivered: number;
-        bounced: number;
-        complained: number;
-        clicked: number;
-        opened: number;
-      }
-    > = {};
-
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      timeline7ByDate[dateStr] = {
-        date: dateStr,
-        delivered: 0,
-        bounced: 0,
-        complained: 0,
-        clicked: 0,
-        opened: 0,
-      };
-    }
-
-    emailEvents7.forEach((event) => {
-      const dateStr = event.timestamp.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      const dayData = timeline7ByDate[dateStr];
-      if (dayData) {
-        switch (event.eventType) {
-          case "delivered":
-            dayData.delivered++;
-            break;
-          case "bounced":
-            dayData.bounced++;
-            break;
-          case "complained":
-            dayData.complained++;
-            break;
-          case "clicked":
-            dayData.clicked++;
-            break;
-          case "opened":
-            dayData.opened++;
-            break;
+    // Build email timeline grouped by date
+    const buildEmailTimeline = (
+      events: { eventType: string; timestamp: Date }[],
+      days: number,
+    ) => {
+      const timelineByDate: Record<
+        string,
+        {
+          isoKey: string;
+          displayDate: string;
+          delivered: number;
+          bounced: number;
+          complained: number;
+          clicked: number;
+          opened: number;
         }
+      > = {};
+
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const isoKey = formatDateKey(date);
+        const displayDate = formatDateDisplay(date);
+        timelineByDate[isoKey] = {
+          isoKey,
+          displayDate,
+          delivered: 0,
+          bounced: 0,
+          complained: 0,
+          clicked: 0,
+          opened: 0,
+        };
       }
-    });
 
-    const emailTimeline7 = Object.values(timeline7ByDate);
-
-    // Email timeline - 30 days
-    const emailEvents30 = await prisma.emailEvent.findMany({
-      where: {
-        emailId: { in: emailIds },
-        timestamp: { gte: thirtyDaysAgo },
-      },
-      select: {
-        eventType: true,
-        timestamp: true,
-      },
-    });
-
-    // Initialize 30-day timeline
-    const timeline30ByDate: Record<
-      string,
-      {
-        date: string;
-        delivered: number;
-        bounced: number;
-        complained: number;
-        clicked: number;
-        opened: number;
-      }
-    > = {};
-
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      timeline30ByDate[dateStr] = {
-        date: dateStr,
-        delivered: 0,
-        bounced: 0,
-        complained: 0,
-        clicked: 0,
-        opened: 0,
-      };
-    }
-
-    emailEvents30.forEach((event) => {
-      const dateStr = event.timestamp.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      const dayData = timeline30ByDate[dateStr];
-      if (dayData) {
-        switch (event.eventType) {
-          case "delivered":
-            dayData.delivered++;
-            break;
-          case "bounced":
-            dayData.bounced++;
-            break;
-          case "complained":
-            dayData.complained++;
-            break;
-          case "clicked":
-            dayData.clicked++;
-            break;
-          case "opened":
-            dayData.opened++;
-            break;
+      events.forEach((event) => {
+        const isoKey = formatDateKey(event.timestamp);
+        const dayData = timelineByDate[isoKey];
+        if (dayData) {
+          switch (event.eventType) {
+            case "delivered":
+              dayData.delivered++;
+              break;
+            case "bounced":
+              dayData.bounced++;
+              break;
+            case "complained":
+              dayData.complained++;
+              break;
+            case "clicked":
+              dayData.clicked++;
+              break;
+            case "opened":
+              dayData.opened++;
+              break;
+          }
         }
-      }
-    });
+      });
 
-    const emailTimeline30 = Object.values(timeline30ByDate);
+      return Object.values(timelineByDate).map(
+        ({ displayDate, delivered, bounced, complained, clicked, opened }) => ({
+          date: displayDate,
+          delivered,
+          bounced,
+          complained,
+          clicked,
+          opened,
+        }),
+      );
+    };
+
+    const [emailEvents7, emailEvents30] = await Promise.all([
+      prisma.emailEvent.findMany({
+        where: {
+          emailId: { in: emailIds },
+          timestamp: { gte: oneWeekAgo },
+        },
+        select: {
+          eventType: true,
+          timestamp: true,
+        },
+      }),
+      prisma.emailEvent.findMany({
+        where: {
+          emailId: { in: emailIds },
+          timestamp: { gte: thirtyDaysAgo },
+        },
+        select: {
+          eventType: true,
+          timestamp: true,
+        },
+      }),
+    ]);
+
+    const emailTimeline7 = buildEmailTimeline(emailEvents7, 7);
+    const emailTimeline30 = buildEmailTimeline(emailEvents30, 30);
 
     // Get domains for filter
     const domains = await prisma.emailDomain.findMany({

@@ -106,7 +106,14 @@ export default function SesEmailStats({ emailId }: SesEmailStatsProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/api/email-events?emailId=${emailId}`);
+        const response = await fetch(
+          `/api/email-events?emailId=${encodeURIComponent(emailId)}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch events: ${response.status}`);
+        }
+
         const events = await response.json();
 
         // Aggregate stats
@@ -119,7 +126,9 @@ export default function SesEmailStats({ emailId }: SesEmailStatsProps) {
           opened: 0,
         };
 
-        const grouped: Record<string, AggregatedData> = {};
+        // Use ISO date keys for proper chronological sorting
+        const grouped: Record<string, AggregatedData & { isoDate: string }> =
+          {};
 
         events.forEach(
           (event: {
@@ -127,10 +136,16 @@ export default function SesEmailStats({ emailId }: SesEmailStatsProps) {
             timestamp: string;
             emailTo: string;
           }) => {
-            const date = new Date(event.timestamp).toLocaleDateString();
-            if (!grouped[date]) {
-              grouped[date] = {
-                date,
+            // Use ISO date string for consistent sorting
+            const isoDate = new Date(event.timestamp)
+              .toISOString()
+              .slice(0, 10);
+            const displayDate = new Date(event.timestamp).toLocaleDateString();
+
+            if (!grouped[isoDate]) {
+              grouped[isoDate] = {
+                date: displayDate,
+                isoDate,
                 delivered: 0,
                 bounced: 0,
                 complained: 0,
@@ -145,23 +160,23 @@ export default function SesEmailStats({ emailId }: SesEmailStatsProps) {
                 break;
               case "delivered":
                 newStats.delivered++;
-                grouped[date].delivered++;
+                grouped[isoDate].delivered++;
                 break;
               case "bounced":
                 newStats.bounced++;
-                grouped[date].bounced++;
+                grouped[isoDate].bounced++;
                 break;
               case "complained":
                 newStats.complained++;
-                grouped[date].complained++;
+                grouped[isoDate].complained++;
                 break;
               case "opened":
                 newStats.opened++;
-                grouped[date].opened++;
+                grouped[isoDate].opened++;
                 break;
               case "clicked":
                 newStats.clicked++;
-                grouped[date].clicked++;
+                grouped[isoDate].clicked++;
                 break;
             }
           },
@@ -169,7 +184,18 @@ export default function SesEmailStats({ emailId }: SesEmailStatsProps) {
 
         setStats(newStats);
         setChartData(
-          Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date)),
+          Object.values(grouped)
+            .sort((a, b) => a.isoDate.localeCompare(b.isoDate))
+            .map(
+              ({ date, delivered, bounced, complained, opened, clicked }) => ({
+                date,
+                delivered,
+                bounced,
+                complained,
+                opened,
+                clicked,
+              }),
+            ),
         );
       } catch (error) {
         console.error("Failed to fetch SES email stats:", error);

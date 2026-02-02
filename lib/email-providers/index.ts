@@ -1,5 +1,5 @@
-import { createResendProvider, ResendProvider } from "./resend";
-import { createSesProvider, SesProvider } from "./ses";
+import { createResendProvider } from "./resend";
+import { createSesProvider } from "./ses";
 import type {
   EmailProvider,
   EmailProviderClient,
@@ -17,17 +17,12 @@ export type {
   CancelEmailResult,
 } from "./types";
 
-/**
- * Check if Resend is the active email provider
- */
+// Check if Resend is the active email provider
 export function isResendEnabled(): boolean {
   return getDefaultProvider() === "resend";
 }
 
-/**
- * Get the default email provider
- * Returns "ses" by default, or "resend" if SES is not configured and Resend is enabled
- */
+// Get default email provider from environment
 export function getDefaultProvider(): EmailProvider {
   const defaultProvider = process.env.DEFAULT_EMAIL_PROVIDER as
     | EmailProvider
@@ -41,9 +36,7 @@ export function getDefaultProvider(): EmailProvider {
   return "ses";
 }
 
-/**
- * Create an email provider client based on configuration
- */
+// Create an email provider client based on configuration
 export function createEmailProvider(
   config: ProviderConfig,
 ): EmailProviderClient {
@@ -51,27 +44,24 @@ export function createEmailProvider(
 
   switch (provider) {
     case "resend":
-      if (!isResendEnabled()) {
-        throw new Error(
-          "Resend is not the active email provider. Set DEFAULT_EMAIL_PROVIDER=resend to use Resend.",
-        );
-      }
       return createResendProvider({
         apiKey: config.apiKey,
       });
 
     case "ses":
-    default:
       return createSesProvider({
         region: config.awsRegion,
         configurationSetName: config.configurationSetName,
       });
+
+    default:
+      throw new Error(
+        `Unknown email provider: "${config.provider}". Valid providers are: "ses", "resend".`,
+      );
   }
 }
 
-/**
- * Create the default email provider based on environment configuration
- */
+// Create the default email provider based on environment configuration
 export function createDefaultProvider(): EmailProviderClient {
   const provider = getDefaultProvider();
   return createEmailProvider({ provider });

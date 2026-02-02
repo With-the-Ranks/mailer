@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, getUserOrgRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+
+// Format date as ISO YYYY-MM-DD
+function formatDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+// Format date for display
+function formatDateDisplay(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -17,6 +30,11 @@ export async function GET(req: NextRequest) {
       { error: "Organization ID required" },
       { status: 400 },
     );
+  }
+
+  const role = await getUserOrgRole(session.user.id, organizationId);
+  if (!role) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -136,37 +154,37 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "asc" },
     });
 
-    // Group by date and calculate cumulative count
+    // Group by date and calculate cumulative count using ISO date keys for deterministic matching
     const baseCount = subscribedEmails - audienceGrowth.length;
-    const growthByDate: Record<string, number> = {};
+    const growthByDate: Record<
+      string,
+      { isoKey: string; displayDate: string; count: number }
+    > = {};
 
-    // Initialize with dates
+    // Initialize with ISO date keys (deterministic)
     for (let i = 29; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      growthByDate[dateStr] = 0;
+      const isoKey = formatDateKey(date);
+      const displayDate = formatDateDisplay(date);
+      growthByDate[isoKey] = { isoKey, displayDate, count: 0 };
     }
 
-    // Count signups per day
+    // Count signups per day using ISO date keys
     audienceGrowth.forEach((a) => {
-      const dateStr = a.createdAt.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      if (growthByDate[dateStr] !== undefined) {
-        growthByDate[dateStr]++;
+      const isoKey = formatDateKey(a.createdAt);
+      if (growthByDate[isoKey] !== undefined) {
+        growthByDate[isoKey].count++;
       }
     });
 
-    // Convert to cumulative
+    // Convert to cumulative with display-friendly dates
     let cumulative = baseCount;
-    const listGrowth = Object.entries(growthByDate).map(([date, count]) => {
-      cumulative += count;
-      return { date, count: cumulative };
-    });
+    const listGrowth = Object.values(growthByDate).map(
+      ({ displayDate, count }) => {
+        cumulative += count;
+        return { date: displayDate, count: cumulative };
+      },
+    );
 
     // Email stats - all time totals
     const emailStatsResults = await prisma.emailEvent.groupBy({
@@ -219,11 +237,12 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Initialize timeline with last 7 days
+    // Initialize timeline with ISO date keys (deterministic, timezone-agnostic)
     const timelineByDate: Record<
       string,
       {
-        date: string;
+        isoKey: string;
+        displayDate: string;
         delivered: number;
         bounced: number;
         complained: number;
@@ -234,12 +253,11 @@ export async function GET(req: NextRequest) {
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      timelineByDate[dateStr] = {
-        date: dateStr,
+      const isoKey = formatDateKey(date);
+      const displayDate = formatDateDisplay(date);
+      timelineByDate[isoKey] = {
+        isoKey,
+        displayDate,
         delivered: 0,
         bounced: 0,
         complained: 0,
@@ -248,13 +266,10 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    // Aggregate events by date
+    // Aggregate events by date using ISO keys
     emailEvents.forEach((event) => {
-      const dateStr = event.timestamp.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-      const dayData = timelineByDate[dateStr];
+      const isoKey = formatDateKey(event.timestamp);
+      const dayData = timelineByDate[isoKey];
       if (dayData) {
         switch (event.eventType) {
           case "delivered":
@@ -276,7 +291,17 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const emailTimeline = Object.values(timelineByDate);
+    // Convert to display format
+    const emailTimeline = Object.values(timelineByDate).map(
+      ({ displayDate, delivered, bounced, complained, clicked, opened }) => ({
+        date: displayDate,
+        delivered,
+        bounced,
+        complained,
+        clicked,
+        opened,
+      }),
+    );
 
     return NextResponse.json({
       subscribedEmails,

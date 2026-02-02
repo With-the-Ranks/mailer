@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 1000;
+
 // GET - List suppression entries with optional search
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -12,8 +15,19 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search");
-  const limit = parseInt(searchParams.get("limit") || "100", 10);
-  const offset = parseInt(searchParams.get("offset") || "0", 10);
+
+  let limit = parseInt(searchParams.get("limit") || String(DEFAULT_LIMIT), 10);
+  let offset = parseInt(searchParams.get("offset") || "0", 10);
+
+  if (isNaN(limit) || limit < 1) {
+    limit = DEFAULT_LIMIT;
+  } else if (limit > MAX_LIMIT) {
+    limit = MAX_LIMIT;
+  }
+
+  if (isNaN(offset) || offset < 0) {
+    offset = 0;
+  }
 
   try {
     const where = search
@@ -60,35 +74,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Validate email format with a safe regex that avoids ReDoS
+    const emailRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!emailRegex.test(email) || email.length > 254) {
       return NextResponse.json(
         { error: "Invalid email format" },
         { status: 400 },
       );
     }
 
-    // Check if already exists
-    const existing = await prisma.emailSuppression.findUnique({
-      where: { email: email.toLowerCase() },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        { error: "Email is already in the suppression list" },
-        { status: 409 },
-      );
+    // Use upsert to handle race conditions atomically
+    // If the email already exists, we return a 409 conflict
+    try {
+      const entry = await prisma.emailSuppression.create({
+        data: {
+          email: email.toLowerCase(),
+          reason,
+        },
+      });
+      return NextResponse.json(entry, { status: 201 });
+    } catch (createError: unknown) {
+      if (
+        createError &&
+        typeof createError === "object" &&
+        "code" in createError &&
+        createError.code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "Email is already in the suppression list" },
+          { status: 409 },
+        );
+      }
+      throw createError;
     }
-
-    const entry = await prisma.emailSuppression.create({
-      data: {
-        email: email.toLowerCase(),
-        reason,
-      },
-    });
-
-    return NextResponse.json(entry, { status: 201 });
   } catch (error) {
     console.error("Error adding to suppression list:", error);
     return NextResponse.json(
@@ -128,7 +147,16 @@ export async function DELETE(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     console.error("Error removing from suppression list:", error);
     return NextResponse.json(
       { error: "Failed to remove email from suppression list" },

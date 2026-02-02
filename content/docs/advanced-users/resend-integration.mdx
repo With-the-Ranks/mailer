@@ -1,19 +1,21 @@
 ---
 title: Resend Integration
-description: Set up your own Resend account and custom sending domain
+description: Set up Resend as an alternative email provider
 ---
 
 # Resend Integration
 
-Mailer uses Resend as the email provider. You can set up your own Resend account for full control over your email sending.
+Resend is an alternative email provider you can use with Mailer. While AWS SES is the default provider, Resend offers a simpler setup process with a developer-friendly API.
 
-## Why Use Your Own Resend Account?
+> **Note**: Resend is not the default provider. You'll need to configure it explicitly to use it.
 
-- Custom domains - Send from your own verified domain
-- Better deliverability - Control your own sender reputation
-- Advanced tracking - Access to Resend's analytics dashboard
+## Why Use Resend?
 
-## Getting Started
+- **Simple setup** - Get started in minutes with minimal configuration
+- **Developer-friendly** - Clean API and excellent documentation
+- **Built-in analytics** - Access delivery metrics in the Resend dashboard
+
+## Setup Guide
 
 ### 1. Create a Resend Account
 
@@ -21,57 +23,85 @@ Go to [resend.com](https://resend.com) and sign up for an account.
 
 ### 2. Get Your API Key
 
-Navigate to [API Keys](https://resend.com/api-keys) in your Resend dashboard and create a new API key.
+1. Navigate to [API Keys](https://resend.com/api-keys) in your Resend dashboard
+2. Create a new API key
+3. Copy the key (starts with `re_`)
 
-> Security Tip: Create a key with only "Send emails" permissions.
+> **Security Tip**: Create a key with only "Send emails" permissions for production use.
 
-### 3. Add Your API Key to Mailer
+### 3. Configure Environment Variables
 
-1. Go to your Organization Settings
+Add Resend as your email provider:
+
+```bash
+# Set Resend as the default provider
+DEFAULT_EMAIL_PROVIDER=resend
+
+# Your Resend API key
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+```
+
+### 4. Add Your API Key to Mailer (Optional)
+
+For per-organization API keys:
+
+1. Go to your **Organization Settings**
 2. Find the "Email API Key" section
 3. Paste your Resend API key
-4. Click "Save"
+4. Click **Save**
 
-Your organization will now use your Resend account for all email sending.
+This allows different organizations to use different Resend accounts.
 
 ## Setting Up Custom Domains
 
 ### Add Domain to Resend
 
 1. Go to [resend.com/domains](https://resend.com/domains)
-2. Click "Add Domain"
-3. Enter your domain
+2. Click **Add Domain**
+3. Enter your domain name
 4. Add the DNS records provided by Resend
 
-### DNS Records
+### Required DNS Records
 
-Resend will provide you with specific DNS records to add. These include:
+Resend will provide you with:
 
-- SPF records
-- DKIM records
-- DMARC records (recommended)
+| Type | Purpose |
+|------|---------|
+| **TXT (SPF)** | Email authentication |
+| **TXT (DKIM)** | Email signing |
+| **TXT (DMARC)** | Domain policy (recommended) |
+
+Add these records to your DNS provider (Cloudflare, Route53, Namecheap, etc.).
 
 ### Verify Domain
 
 1. Return to [resend.com/domains](https://resend.com/domains)
-2. Wait for DNS verification (usually 24-48 hours)
+2. Wait for DNS propagation (usually 24-48 hours)
 3. Status will change to "Verified" when ready
 
 ### Use Custom Domain in Mailer
 
-Once verified, your domain will appear in your organization's domain list:
+Once verified:
 
-1. Go to Organization Settings
-2. In the "Active Sending Domain" section
-3. Select your verified domain from the dropdown
+1. Go to **Organization Settings → Domains**
+2. Add your verified domain
+3. Select "resend" as the provider
+4. Click **Set Active**
 
-All emails from this organization will now be sent from your custom domain.
+## Switching Between Providers
 
-## Custom Send-From Address
+You can use both SES and Resend in the same Mailer installation:
 
-With a verified domain, you can send from any address on that domain.
+- Set different providers per domain
+- Use SES as default, Resend for specific organizations
+- Migrate gradually by switching domains one at a time
 
-Simply update the "from" field when creating emails in Mailer.
+To switch a domain's provider:
+
+1. Go to **Organization Settings → Domains**
+2. Edit the domain
+3. Change the provider setting
+4. Save changes
 
 ## Troubleshooting
 
@@ -80,19 +110,28 @@ Simply update the "from" field when creating emails in Mailer.
 - Check DNS records are correctly added
 - Wait 24-48 hours for propagation
 - Verify TXT record format is correct
+- Use [MXToolbox](https://mxtoolbox.com) to check DNS
+
+### API Key Not Working
+
+- Verify the key is correctly pasted (no extra spaces)
+- Check key has "Send emails" permission
+- Ensure key hasn't been revoked in Resend dashboard
+- Confirm `DEFAULT_EMAIL_PROVIDER=resend` is set
+
+### Emails Not Sending
+
+- Check the Resend dashboard for error logs
+- Verify domain is verified in Resend
+- Ensure recipient email is valid
+- Check application logs for detailed errors
 
 ### Low Deliverability
 
 - Ensure SPF, DKIM, DMARC are all configured
-- Clean your email lists
+- Clean your email lists regularly
 - Warm up new domains gradually
 - Monitor and remove hard bounces
-
-### API Key Not Working
-
-- Verify the key is correctly pasted
-- Check key has "Send emails" permission
-- Ensure key hasn't been revoked in Resend dashboard
 
 ## Resources
 
