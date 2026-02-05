@@ -161,11 +161,11 @@ export default function DashboardStats({
 
   return (
     <div className="space-y-8">
-      {/* Email Performance Section */}
+      {/* Performance Section */}
       <section>
         <div className="mb-6 flex flex-nowrap items-center justify-between gap-3">
           <h1 className="min-w-0 shrink text-xl font-bold text-stone-900 sm:text-2xl md:text-3xl dark:text-white">
-            Email Performance
+            Performance
           </h1>
           <Link
             href={`/organization/${organizationId}/analytics`}
@@ -182,7 +182,7 @@ export default function DashboardStats({
           {emailStatCards.map(({ label, value }) => (
             <div
               key={label}
-              className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]"
+              className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]"
             >
               <p className="text-xs font-bold text-black sm:text-sm dark:text-white">
                 {label}
@@ -195,7 +195,7 @@ export default function DashboardStats({
         </div>
 
         {/* Email Timeline Chart */}
-        <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+        <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
           <p className="mb-4 text-xs font-medium text-stone-500 sm:text-sm dark:text-stone-400">
             Email Events (Last 7 Days)
           </p>
@@ -271,7 +271,7 @@ export default function DashboardStats({
 
         {/* People Stats Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+          <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
             <p className="text-xs font-bold text-black sm:text-sm dark:text-white">
               Subscribed Emails
             </p>
@@ -285,7 +285,7 @@ export default function DashboardStats({
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+          <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
             <p className="text-xs font-bold text-black sm:text-sm dark:text-white">
               Open Rate
             </p>
@@ -299,7 +299,7 @@ export default function DashboardStats({
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+          <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
             <p className="text-xs font-bold text-black sm:text-sm dark:text-white">
               Conversion Rate
             </p>
@@ -315,7 +315,7 @@ export default function DashboardStats({
         </div>
 
         {/* List Growth Chart */}
-        <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+        <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
           <p className="mb-4 text-xs font-medium text-stone-500 sm:text-sm dark:text-stone-400">
             List Growth Over Time
           </p>
