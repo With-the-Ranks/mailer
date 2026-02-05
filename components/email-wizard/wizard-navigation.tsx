@@ -21,7 +21,7 @@ export function WizardNavigation({
   }
 
   return (
-    <div className="mx-6 mb-6 rounded-lg border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
+    <div className="mx-4 mb-6 rounded-lg border-t border-gray-200 bg-white px-4 py-4 sm:mx-6 sm:px-6 dark:border-gray-700 dark:bg-[#2D2D2D]">
       <div className="flex items-center justify-end">
         {/* Auto-save indicator */}
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">

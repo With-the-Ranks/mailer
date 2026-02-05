@@ -119,30 +119,28 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
     >
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center">
-          <div>
-            <div className="text-base font-medium text-gray-900 dark:text-white">
-              {data.name}
-            </div>
-            <div className="text-base text-gray-500 dark:text-gray-400">
-              /{data.slug}
-            </div>
+      <td className="min-w-0 px-3 py-3 sm:px-6 sm:py-4">
+        <div className="min-w-0">
+          <div className="truncate text-base font-medium text-gray-900 dark:text-white">
+            {data.name}
+          </div>
+          <div className="truncate text-sm text-gray-500 dark:text-gray-400">
+            /{data.slug}
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-3 text-center whitespace-nowrap sm:px-6 sm:py-4">
         {getStatusBadge(data.isActive)}
       </td>
-      <td className="px-6 py-4 text-base whitespace-nowrap text-gray-900 dark:text-white">
+      <td className="px-3 py-3 text-center text-base whitespace-nowrap text-gray-900 sm:px-6 sm:py-4 dark:text-white">
         {data._count?.submissions || 0}
       </td>
-      <td className="px-6 py-4 text-base whitespace-nowrap text-gray-500 dark:text-gray-400">
+      <td className="px-3 py-3 text-center text-base whitespace-nowrap text-gray-500 sm:px-6 sm:py-4 dark:text-gray-400">
         {formatDate(data.createdAt)}
       </td>
-      <td className="px-6 py-4 text-right text-base font-medium whitespace-nowrap">
+      <td className="px-3 py-3 text-right text-base font-medium sm:px-6 sm:py-4">
         <div
-          className="flex items-center justify-center space-x-2"
+          className="flex flex-wrap items-center justify-end gap-1 sm:gap-2"
           onClick={(e) => e.stopPropagation()}
         >
           <Button variant="ghost" size="sm" asChild>

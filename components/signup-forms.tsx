@@ -63,33 +63,53 @@ export default async function SignupForms({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-[#252525]">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-              Form Name
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-              Submissions
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-              Created
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-[#2D2D2D]">
-          {signupForms.map((signupForm) => (
-            <SignupFormRow key={signupForm.id} data={signupForm} />
-          ))}
-        </tbody>
-      </table>
+    <div className="min-w-0 overflow-x-auto">
+      <div className="min-w-[520px]">
+        <table className="min-w-full table-fixed border-separate border-spacing-0">
+          <colgroup>
+            <col className="w-[28%]" />
+            <col className="w-[14%]" />
+            <col className="w-[14%]" />
+            <col className="w-[18%]" />
+            <col className="w-[26%]" />
+          </colgroup>
+          <thead className="bg-transparent">
+            <tr>
+              <th className="px-3 py-2 text-left text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
+                Form Name
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
+                Status
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
+                Submissions
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
+                Created
+              </th>
+              <th className="px-3 py-2 text-right text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
+                Actions
+              </th>
+            </tr>
+          </thead>
+        </table>
+        <div className="rounded-lg border border-[#D3D3D3]">
+          <table className="min-w-full table-fixed border-separate border-spacing-0">
+            <colgroup>
+              <col className="w-[28%]" />
+              <col className="w-[14%]" />
+              <col className="w-[14%]" />
+              <col className="w-[18%]" />
+              <col className="w-[26%]" />
+            </colgroup>
+            <tbody className="bg-white dark:bg-[#2D2D2D] [&>tr:first-child>td:first-child]:rounded-tl-lg [&>tr:first-child>td:last-child]:rounded-tr-lg [&>tr:last-child>td:first-child]:rounded-bl-lg [&>tr:last-child>td:last-child]:rounded-br-lg [&>tr:not(:last-child)>td]:border-b [&>tr:not(:last-child)>td]:border-[#D3D3D3]">
+              {signupForms.map((signupForm) => (
+                <SignupFormRow key={signupForm.id} data={signupForm} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

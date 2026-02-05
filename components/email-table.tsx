@@ -25,11 +25,14 @@ interface EmailTableProps {
   emails: EmailWithOrg[];
   /** When true, hide pagination (e.g. for "Recent Emails" with a small limit) */
   hidePagination?: boolean;
+  /** First column header (default: "Email Campaign"). Use "Name" for dashboard recent table. */
+  firstColumnLabel?: string;
 }
 
 export function EmailTable({
   emails,
   hidePagination = false,
+  firstColumnLabel = "Email Campaign",
 }: EmailTableProps) {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -51,42 +54,58 @@ export function EmailTable({
   const showingEnd = Math.min(start + pagination.pageSize, emails.length);
 
   return (
-    <div>
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-[#252525]">
+    <div className="overflow-x-auto">
+      <div className="min-w-[320px] sm:min-w-0">
+        <table className="min-w-full table-fixed border-separate border-spacing-0">
+          <colgroup>
+            <col className="w-[28%]" />
+            <col className="w-[14%]" />
+            <col className="w-[30%]" />
+            <col className="w-[28%]" />
+          </colgroup>
+          <thead className="bg-transparent">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                Email Campaign
+              <th className="px-3 py-2 text-left text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
+                {firstColumnLabel}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-3 py-2 text-center text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-3 py-2 text-left text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
                 Time
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+              <th className="px-3 py-2 text-right text-xs font-bold tracking-wider text-gray-900 uppercase sm:px-6 sm:py-3 dark:text-white">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-[#2D2D2D]">
-            {pageEmails.map((email) => (
-              <EmailRow key={email.id} data={email} />
-            ))}
-          </tbody>
         </table>
+        <div className="overflow-hidden rounded-lg border border-[#D3D3D3]">
+          <table className="min-w-full table-fixed border-separate border-spacing-0">
+            <colgroup>
+              <col className="w-[28%]" />
+              <col className="w-[14%]" />
+              <col className="w-[30%]" />
+              <col className="w-[28%]" />
+            </colgroup>
+            <tbody className="bg-white dark:bg-[#2D2D2D] [&>tr:first-child>td:first-child]:rounded-tl-lg [&>tr:first-child>td:last-child]:rounded-tr-lg [&>tr:last-child>td:first-child]:rounded-bl-lg [&>tr:last-child>td:last-child]:rounded-br-lg [&>tr:not(:last-child)>td]:border-b [&>tr:not(:last-child)>td]:border-[#D3D3D3]">
+              {pageEmails.map((email) => (
+                <EmailRow key={email.id} data={email} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {!hidePagination && emails.length > 0 && (
-        <div className="flex flex-nowrap items-center justify-between gap-4 py-4">
-          <div className="text-muted-foreground min-w-0 flex-1 shrink text-base">
+        <div className="flex flex-col gap-4 py-4 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between">
+          <div className="text-muted-foreground order-1 shrink-0 text-sm sm:min-w-0 sm:flex-1 sm:text-base">
             Showing {showingStart}–{showingEnd} of {emails.length} campaign
             {emails.length === 1 ? "" : "s"}
           </div>
-          <div className="flex shrink-0 flex-nowrap items-center gap-4 lg:gap-6">
+          <div className="order-2 flex flex-wrap items-center gap-3 sm:shrink-0 sm:gap-4 lg:gap-6">
             <div className="flex shrink-0 items-center gap-2">
-              <p className="text-base font-medium whitespace-nowrap">
+              <p className="text-sm font-medium whitespace-nowrap sm:text-base">
                 Rows per page
               </p>
               <Select
@@ -111,10 +130,10 @@ export function EmailTable({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex min-w-36 shrink-0 items-center justify-center text-base font-medium whitespace-nowrap">
+            <div className="flex shrink-0 items-center text-sm font-medium whitespace-nowrap sm:text-base">
               Page {pagination.pageIndex + 1} of {pageCount}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
               <Button
                 variant="outline"
                 className="hidden h-8 w-8 p-0 lg:flex"

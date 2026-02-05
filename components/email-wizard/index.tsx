@@ -24,6 +24,7 @@ interface EmailWizardContainerProps {
     subdomain: string | null;
     logo: string | null;
     image: string | null;
+    timezone: string | null;
   } | null;
 }
 
@@ -40,10 +41,20 @@ function EmailWizardContent({
     isDirty,
     isSaving,
     saveEmail,
+    goToNextStep,
     requestLeave,
   } = useWizard();
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
+
+  const handleNextStep = async () => {
+    if (currentStep === 1) {
+      const saved = await saveEmail();
+      if (saved) goToNextStep();
+    } else {
+      goToNextStep();
+    }
+  };
 
   // Block tab close/refresh when there are unsaved changes
   useEffect(() => {
@@ -158,16 +169,14 @@ function EmailWizardContent({
     }
   };
 
-  const { goToNextStep } = useWizard();
-
   return (
     <div className="flex min-h-screen flex-col">
       <LeaveConfirmDialog />
       {/* Centered Container */}
       <div className="mx-auto w-full max-w-4xl">
         {/* Title and Save bar */}
-        <div className="flex flex-wrap items-start justify-between gap-4 px-6 pt-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="flex flex-wrap items-start justify-between gap-4 px-4 pt-4 sm:px-6 sm:pt-6">
+          <h1 className="min-w-0 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
             {currentStep === 1 && "Create Email"}
             {currentStep === 2 && "Choose your target audience"}
             {currentStep === 3 && "Preview"}
@@ -185,10 +194,10 @@ function EmailWizardContent({
         </div>
 
         {/* Step Indicator */}
-        <div className="mx-6 mt-4 mb-4">
+        <div className="mx-4 mt-4 mb-4 sm:mx-6">
           <WizardStepIndicator
             currentStep={currentStep}
-            onNext={goToNextStep}
+            onNext={handleNextStep}
             onFinalSubmit={handleFinalSend}
             isFinalStep={currentStep === 4}
             isSending={isSending}
@@ -206,7 +215,10 @@ function EmailWizardContent({
           {currentStep === 2 && <Step2Target />}
           {currentStep === 3 && <Step3Preview />}
           {currentStep === 4 && (
-            <Step4ScheduleSend onFinalSend={handleFinalSend} />
+            <Step4ScheduleSend
+              onFinalSend={handleFinalSend}
+              timezone={organizationData?.timezone ?? "America/New_York"}
+            />
           )}
         </div>
 

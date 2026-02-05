@@ -1,7 +1,7 @@
 "use client";
 
 import type { Email, Organization } from "@/prisma/generated/prisma/client";
-import { Clock, Edit3, Info, Send, Trash2 } from "lucide-react";
+import { Clock, Edit3, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -119,22 +119,26 @@ export default function EmailRow({
       </AlertDialog>
 
       <tr className="hover:bg-gray-50 dark:hover:bg-neutral-800">
-        <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
-          <Link href={emailLink}>{data.title || "Untitled Campaign"}</Link>
+        <td className="min-w-0 px-3 py-3 font-medium text-gray-900 sm:px-6 sm:py-4 dark:text-gray-100">
+          <Link href={emailLink} className="block wrap-break-word">
+            {data.title || "Untitled Campaign"}
+          </Link>
         </td>
 
-        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-          <Link href={emailLink}>{statusText}</Link>
+        <td className="px-3 py-3 text-center text-gray-500 sm:px-6 sm:py-4 dark:text-gray-400">
+          <Link href={emailLink} className="block">
+            {statusText}
+          </Link>
         </td>
 
-        <td className="px-6 py-4">
+        <td className="px-3 py-3 sm:px-6 sm:py-4">
           <Link href={emailLink} className="flex items-center space-x-2">
             <StatusIcon size={16} />
-            <div className="flex flex-col leading-tight">
+            <div className="flex min-w-0 flex-col leading-tight">
               <span className="text-xs text-gray-400 uppercase dark:text-gray-500">
                 {timeLabel}
               </span>
-              <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              <span className="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
                 {fmtDate(timestamp)}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -144,13 +148,12 @@ export default function EmailRow({
           </Link>
         </td>
 
-        <td className="space-x-2 px-6 py-4">
-          <div className="flex items-center justify-center gap-2">
+        <td className="space-x-2 px-3 py-3 text-right sm:px-6 sm:py-4">
+          <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
             {scheduled && (
               <>
                 <Link href={`/email/${data.id}`}>
                   <Button variant="default" size="sm">
-                    <Info className="mr-2 h-4 w-4" />
                     View
                   </Button>
                 </Link>
