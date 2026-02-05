@@ -55,6 +55,7 @@ export default async function EmailCreatePage({
           subdomain: true,
           logo: true,
           image: true,
+          timezone: true,
         },
       },
     },
