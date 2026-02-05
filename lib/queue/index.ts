@@ -8,6 +8,7 @@ export {
   getEmailQueue,
   queueEmail,
   queueBulkEmails,
+  removeJobs,
   startEmailWorker,
   stopEmailWorker,
   getQueueStats,

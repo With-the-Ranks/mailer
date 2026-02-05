@@ -102,15 +102,21 @@ export async function queueEmail(
   }
 }
 
-// Queue multiple emails (bulk send)
+// Queue multiple emails (bulk send). Returns job IDs when opts use custom jobId.
 export async function queueBulkEmails(
   emails: EmailJobData[],
   delay?: number,
-): Promise<{ success: number; failed: number; errors: string[] }> {
+): Promise<{
+  success: number;
+  failed: number;
+  errors: string[];
+  jobIds: string[];
+}> {
   const queue = getEmailQueue();
   let success = 0;
   let failed = 0;
   const errors: string[] = [];
+  const jobIds: string[] = [];
 
   // Add emails in batches of 100
   const batchSize = 100;
@@ -118,7 +124,7 @@ export async function queueBulkEmails(
     const batch = emails.slice(i, i + batchSize);
 
     try {
-      await queue.addBulk(
+      const jobs = await queue.addBulk(
         batch.map((email) => ({
           name: email.emailId,
           data: email,
@@ -129,6 +135,7 @@ export async function queueBulkEmails(
         })),
       );
       success += batch.length;
+      jobIds.push(...jobs.map((j) => j.id ?? ""));
     } catch (error) {
       failed += batch.length;
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
@@ -136,7 +143,31 @@ export async function queueBulkEmails(
     }
   }
 
-  return { success, failed, errors };
+  return { success, failed, errors, jobIds };
+}
+
+// Remove jobs by ID (for unscheduling SES sends). Job IDs are `${emailId}-${to}`.
+export async function removeJobs(
+  jobIds: string[],
+): Promise<{ removed: number; errors: string[] }> {
+  if (jobIds.length === 0) return { removed: 0, errors: [] };
+  const queue = getEmailQueue();
+  let removed = 0;
+  const errors: string[] = [];
+  for (const jobId of jobIds) {
+    try {
+      const job = await queue.getJob(jobId);
+      if (job) {
+        await job.remove();
+        removed++;
+      }
+    } catch (error) {
+      errors.push(
+        `${jobId}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  }
+  return { removed, errors };
 }
 
 // Process email jobs from the queue

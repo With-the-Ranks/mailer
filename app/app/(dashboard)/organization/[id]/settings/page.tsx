@@ -2,6 +2,16 @@ import Form from "@/components/form";
 import { updateOrganization } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 
+const TIMEZONE_OPTIONS = [
+  { value: "America/New_York", label: "US Eastern (America/New_York)" },
+  { value: "America/Chicago", label: "US Central (America/Chicago)" },
+  { value: "America/Denver", label: "US Mountain (America/Denver)" },
+  { value: "America/Los_Angeles", label: "US Pacific (America/Los_Angeles)" },
+  { value: "UTC", label: "UTC" },
+  { value: "Europe/London", label: "Europe/London" },
+  { value: "Europe/Paris", label: "Europe/Paris" },
+];
+
 export default async function OrganizationSettingsIndex({
   params,
 }: {
@@ -13,6 +23,7 @@ export default async function OrganizationSettingsIndex({
     select: {
       name: true,
       logo: true,
+      timezone: true,
     },
   });
 
@@ -39,6 +50,19 @@ export default async function OrganizationSettingsIndex({
           name: "logo",
           type: "file",
           defaultValue: "",
+        }}
+        handleSubmit={updateOrganization}
+      />
+      <Form
+        title="Timezone"
+        description="Timezone used for scheduling emails and displaying times in the dashboard."
+        helpText="Default is US Eastern. Used for schedule picker and upcoming emails."
+        inputAttrs={{
+          name: "timezone",
+          type: "text",
+          defaultValue: data?.timezone ?? "America/New_York",
+          placeholder: "America/New_York",
+          options: TIMEZONE_OPTIONS,
         }}
         handleSubmit={updateOrganization}
       />

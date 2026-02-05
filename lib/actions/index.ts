@@ -221,6 +221,25 @@ export const updateOrganization = withAdminAuth(
           
           */
         }
+      } else if (key === "timezone") {
+        const allowedTimezones = new Set([
+          "America/New_York",
+          "America/Chicago",
+          "America/Denver",
+          "America/Los_Angeles",
+          "UTC",
+          "Europe/London",
+          "Europe/Paris",
+        ]);
+        const tz = (value || "America/New_York").trim();
+        if (!allowedTimezones.has(tz)) {
+          return { error: "Invalid timezone" };
+        }
+        response = await prisma.organization.update({
+          where: { id: organization.id },
+          data: { timezone: tz },
+        });
+        revalidatePath(`/organization/${organization.id}/settings`);
       } else if (key === "image" || key === "logo") {
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
           return {
@@ -705,6 +724,28 @@ export const getOrgAndAudienceList = async () => {
     userOrgs,
     userRole: currentRole || null,
   };
+};
+
+export const getOrganizationTimezone = async (
+  organizationId: string,
+): Promise<string | null> => {
+  const session = await getSession();
+  if (!session?.user.id) return null;
+  const member = await (prisma as any).organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: session.user.id,
+        organizationId,
+      },
+    },
+    select: { organizationId: true },
+  });
+  if (!member) return null;
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { timezone: true },
+  });
+  return org?.timezone ?? null;
 };
 
 // SES Domain Management Actions
