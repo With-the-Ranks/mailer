@@ -52,6 +52,17 @@ vi.mock("resend", () => ({
   })),
 }));
 
+const mockRemoveJobs = vi.fn();
+vi.mock("@/lib/queue", () => ({
+  queueBulkEmails: vi.fn(),
+  removeJobs: (...args: unknown[]) => mockRemoveJobs(...args),
+}));
+
+vi.mock("@/lib/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/utils")>();
+  return { ...actual, logError: vi.fn() };
+});
+
 describe("sendEmail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -257,6 +268,144 @@ describe("sendEmail", () => {
           from: expect.stringContaining("newsletter"),
         }),
       );
+    });
+  });
+});
+
+describe("unscheduleEmail", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRemoveJobs.mockResolvedValue(undefined);
+  });
+
+  describe("SES scheduled jobs (queue)", () => {
+    test("removes jobs and marks email as draft when scheduledJobIds and emailId provided", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (prisma.email.update as ReturnType<typeof vi.fn>).mockResolvedValue({});
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({
+        emailId: "email-123",
+        scheduledJobIds: ["job-1", "job-2"],
+      });
+
+      expect(result).toEqual({ success: true });
+      expect(mockRemoveJobs).toHaveBeenCalledWith(["job-1", "job-2"]);
+      expect(prisma.email.update).toHaveBeenCalledWith({
+        where: { id: "email-123" },
+        data: {
+          published: false,
+          scheduledJobIds: expect.anything(),
+        },
+      });
+    });
+
+    test("returns error when removeJobs throws", async () => {
+      mockRemoveJobs.mockRejectedValue(new Error("Redis unavailable"));
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({
+        emailId: "email-123",
+        scheduledJobIds: ["job-1"],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Redis unavailable");
+    });
+
+    test("returns error when prisma.email.update throws", async () => {
+      const { default: prisma } = await import("@/lib/prisma");
+      (prisma.email.update as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error("DB error"),
+      );
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({
+        emailId: "email-123",
+        scheduledJobIds: ["job-1"],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    test("does not call removeJobs when scheduledJobIds is empty", async () => {
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({
+        emailId: "email-123",
+        scheduledJobIds: [],
+      });
+
+      expect(mockRemoveJobs).not.toHaveBeenCalled();
+      expect(result.error).toBeDefined();
+    });
+  });
+
+  describe("Resend scheduled emails", () => {
+    test("cancels via Resend API when resendId provided and Resend enabled", async () => {
+      const { isResendEnabled } = await import("@/lib/email-providers");
+      vi.mocked(isResendEnabled).mockReturnValue(true);
+      const { Resend } = await import("resend");
+      const mockCancel = vi.fn().mockResolvedValue({ data: {}, error: null });
+      vi.mocked(Resend).mockImplementation(function (this: unknown) {
+        return { emails: { cancel: mockCancel } };
+      });
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({ resendId: "re_123" });
+
+      expect(result).toEqual({ success: true });
+      expect(mockCancel).toHaveBeenCalledWith("re_123");
+    });
+
+    test("returns error when Resend cancel returns error", async () => {
+      const { isResendEnabled } = await import("@/lib/email-providers");
+      vi.mocked(isResendEnabled).mockReturnValue(true);
+      const { Resend } = await import("resend");
+      const mockCancel = vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: "Scheduled send not found" },
+      });
+      vi.mocked(Resend).mockImplementation(function (this: unknown) {
+        return { emails: { cancel: mockCancel } };
+      });
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({ resendId: "re_123" });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Scheduled send not found");
+    });
+
+    test("does not call Resend when isResendEnabled is false", async () => {
+      const { isResendEnabled } = await import("@/lib/email-providers");
+      vi.mocked(isResendEnabled).mockReturnValue(false);
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({ resendId: "re_123" });
+
+      expect(result.error).toBeDefined();
+    });
+  });
+
+  describe("fallbacks", () => {
+    test("returns error when only sesMessageId provided (SES cannot cancel)", async () => {
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({
+        sesMessageId: "ses-msg-123",
+      });
+
+      expect(result.error).toContain("SES does not support canceling");
+    });
+
+    test("returns error when no valid message ID or scheduled jobs provided", async () => {
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({});
+
+      expect(result.error).toContain("No valid message ID or scheduled jobs");
     });
   });
 });
