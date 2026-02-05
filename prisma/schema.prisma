@@ -101,6 +101,7 @@ model Email {
   resendId       String?       @db.Text
   sesMessageId   String?       @db.Text
   providerUsed   String?       @default("ses")
+  scheduledJobIds Json?        // BullMQ job IDs for SES scheduled sends (unschedule = remove from queue)
 
   audienceListId String?
   audienceList   AudienceList? @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
@@ -141,6 +142,7 @@ model Organization {
   subdomain     String?  @unique
   customDomain  String?  @unique
   message404    String?  @default("Blimey! You've found a page that doesn't exist.") @db.Text
+  timezone      String?  @default("America/New_York")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   users         User[] @relation("UserOrganization")  // Legacy - will be removed after migration
