@@ -1,16 +1,7 @@
 import Form from "@/components/form";
 import { updateOrganization } from "@/lib/actions";
 import prisma from "@/lib/prisma";
-
-const TIMEZONE_OPTIONS = [
-  { value: "America/New_York", label: "US Eastern (America/New_York)" },
-  { value: "America/Chicago", label: "US Central (America/Chicago)" },
-  { value: "America/Denver", label: "US Mountain (America/Denver)" },
-  { value: "America/Los_Angeles", label: "US Pacific (America/Los_Angeles)" },
-  { value: "UTC", label: "UTC" },
-  { value: "Europe/London", label: "Europe/London" },
-  { value: "Europe/Paris", label: "Europe/Paris" },
-];
+import { getTimezoneOptions } from "@/lib/timezones";
 
 export default async function OrganizationSettingsIndex({
   params,
@@ -18,6 +9,7 @@ export default async function OrganizationSettingsIndex({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const timezoneOptions = getTimezoneOptions();
   const data = await prisma.organization.findUnique({
     where: { id: decodeURIComponent(id) },
     select: {
@@ -54,6 +46,7 @@ export default async function OrganizationSettingsIndex({
         handleSubmit={updateOrganization}
       />
       <Form
+        key={`timezone-${data?.timezone ?? "default"}`}
         title="Timezone"
         description="Timezone used for scheduling emails and displaying times in the dashboard."
         helpText="Default is US Eastern. Used for schedule picker and upcoming emails."
@@ -62,7 +55,7 @@ export default async function OrganizationSettingsIndex({
           type: "text",
           defaultValue: data?.timezone ?? "America/New_York",
           placeholder: "America/New_York",
-          options: TIMEZONE_OPTIONS,
+          options: timezoneOptions,
         }}
         handleSubmit={updateOrganization}
       />

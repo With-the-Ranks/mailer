@@ -43,8 +43,11 @@ function RegisterForm({
     posthog.identify(formData.email, { email: formData.email });
     posthog.capture("user_registered", { email: formData.email });
 
-    onSuccess?.(formData.email);
-    setIsSubmitting(false);
+    try {
+      onSuccess?.(formData.email);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

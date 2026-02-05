@@ -28,6 +28,7 @@ export interface EmailJobData {
   headers?: Record<string, string>;
   userId?: string;
   scheduledAt?: string;
+  jobIdSuffix?: string;
 }
 
 export interface QueueEmailResult {
@@ -130,12 +131,15 @@ export async function queueBulkEmails(
           data: email,
           opts: {
             delay: delay || 0,
-            jobId: `${email.emailId}-${email.to}`,
+            jobId: `${email.emailId}-${email.to}${email.jobIdSuffix ?? ""}`,
           },
         })),
       );
       success += batch.length;
-      jobIds.push(...jobs.map((j) => j.id ?? ""));
+      const ids = jobs
+        .map((j) => j.id)
+        .filter((id): id is string => id != null && id !== "");
+      jobIds.push(...ids);
     } catch (error) {
       failed += batch.length;
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
@@ -160,6 +164,8 @@ export async function removeJobs(
       if (job) {
         await job.remove();
         removed++;
+      } else {
+        logError("removeJobs: job not found", null, { jobId });
       }
     } catch (error) {
       errors.push(

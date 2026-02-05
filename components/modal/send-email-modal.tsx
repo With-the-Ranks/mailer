@@ -80,6 +80,7 @@ export function SendEmailModal({
     e.preventDefault();
     if (!testEmail) return;
     setIsSendingTest(true);
+    let errorMessage: string | null = null;
     try {
       const result = await sendEmail({
         to: testEmail,
@@ -90,9 +91,15 @@ export function SendEmailModal({
         organizationId,
         audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
-      if (result?.error) {
-        toast.error(result.error);
-        posthog.captureException(new Error(result.error));
+      if (result?.error) errorMessage = result.error;
+    } catch (error) {
+      errorMessage = "Failed to send test email";
+      posthog.captureException(error);
+    } finally {
+      setIsSendingTest(false);
+      if (errorMessage) {
+        toast.error(errorMessage);
+        posthog.captureException(new Error(errorMessage));
       } else {
         posthog.capture("test_email_sent", {
           email_id: emailId,
@@ -100,11 +107,6 @@ export function SendEmailModal({
         });
         toast.success("Test email sent");
       }
-    } catch (error) {
-      toast.error("Failed to send test email");
-      posthog.captureException(error);
-    } finally {
-      setIsSendingTest(false);
     }
   };
 

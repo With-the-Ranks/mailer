@@ -53,8 +53,9 @@ vi.mock("resend", () => ({
 }));
 
 const mockRemoveJobs = vi.fn();
+const mockQueueBulkEmails = vi.fn();
 vi.mock("@/lib/queue", () => ({
-  queueBulkEmails: vi.fn(),
+  queueBulkEmails: (...args: unknown[]) => mockQueueBulkEmails(...args),
   removeJobs: (...args: unknown[]) => mockRemoveJobs(...args),
 }));
 
@@ -272,16 +273,171 @@ describe("sendEmail", () => {
   });
 });
 
+describe("sendBulkEmail SES scheduling", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { default: prisma } = await import("@/lib/prisma");
+    (
+      prisma.organization.findUnique as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({
+      id: "org-1",
+      activeDomain: {
+        domain: "example.com",
+        provider: "ses",
+        status: "success",
+        awsRegion: "us-east-1",
+      },
+    });
+    (
+      prisma.audienceList.findFirst as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({
+      id: "list-1",
+      audiences: [
+        {
+          email: "a@example.com",
+          firstName: "A",
+          lastName: "User",
+          customFields: {},
+          audienceListId: "list-1",
+        },
+        {
+          email: "b@example.com",
+          firstName: "B",
+          lastName: "User",
+          customFields: {},
+          audienceListId: "list-1",
+        },
+      ],
+    });
+    (
+      prisma.emailSuppression.findMany as ReturnType<typeof vi.fn>
+    ).mockResolvedValue([]);
+    (prisma.email.update as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    mockQueueBulkEmails.mockResolvedValue({
+      success: 2,
+      failed: 0,
+      errors: [],
+      jobIds: ["email-1-a@example.com-0", "email-1-b@example.com-1"],
+    });
+  });
+
+  test("calls queueBulkEmails with correct job data and delay when scheduling in future", async () => {
+    const { sendBulkEmail } = await import("@/lib/actions/send-email");
+    const scheduledTime = new Date(
+      Date.now() + 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const result = await sendBulkEmail({
+      id: "email-1",
+      organizationId: "org-1",
+      from: "Sender",
+      subject: "Subject",
+      content: null,
+      previewText: null,
+      scheduledTime,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
+    expect(mockQueueBulkEmails).toHaveBeenCalledTimes(1);
+    const [jobs, delayMs] = mockQueueBulkEmails.mock.calls[0];
+    expect(jobs).toHaveLength(2);
+    expect(jobs[0]).toMatchObject({
+      emailId: "email-1",
+      to: "a@example.com",
+      subject: "Subject",
+      organizationId: "org-1",
+      provider: "ses",
+      jobIdSuffix: "-0",
+    });
+    expect(jobs[1].jobIdSuffix).toBe("-1");
+    expect(delayMs).toBeGreaterThan(0);
+    expect(delayMs).toBeLessThanOrEqual(24 * 60 * 60 * 1000 + 5000);
+  });
+
+  test("saves scheduledJobIds to database when all jobs queued", async () => {
+    const { default: prisma } = await import("@/lib/prisma");
+    const { sendBulkEmail } = await import("@/lib/actions/send-email");
+    const scheduledTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+    await sendBulkEmail({
+      id: "email-1",
+      organizationId: "org-1",
+      from: "Sender",
+      subject: "Subject",
+      content: null,
+      previewText: null,
+      scheduledTime,
+    });
+
+    expect(prisma.email.update).toHaveBeenCalledWith({
+      where: { id: "email-1" },
+      data: expect.objectContaining({
+        published: true,
+        scheduledTime: expect.any(Date),
+        providerUsed: "ses",
+        scheduledJobIds: ["email-1-a@example.com-0", "email-1-b@example.com-1"],
+      }),
+    });
+  });
+
+  test("returns error when queueBulkEmails has failures", async () => {
+    mockQueueBulkEmails.mockResolvedValue({
+      success: 1,
+      failed: 1,
+      errors: ["Batch 0: Redis error"],
+      jobIds: ["email-1-a@example.com-0"],
+    });
+
+    const { sendBulkEmail } = await import("@/lib/actions/send-email");
+    const scheduledTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+    const result = await sendBulkEmail({
+      id: "email-1",
+      organizationId: "org-1",
+      from: "Sender",
+      subject: "Subject",
+      content: null,
+      previewText: null,
+      scheduledTime,
+    });
+
+    expect(result.success).toBeUndefined();
+    expect(result.error).toContain("Failed to queue");
+  });
+
+  test("returns error when scheduled time is more than 365 days in future", async () => {
+    const { sendBulkEmail } = await import("@/lib/actions/send-email");
+    const scheduledTime = new Date(
+      Date.now() + 366 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const result = await sendBulkEmail({
+      id: "email-1",
+      organizationId: "org-1",
+      from: "Sender",
+      subject: "Subject",
+      content: null,
+      previewText: null,
+      scheduledTime,
+    });
+
+    expect(result.error).toContain("365 days");
+    expect(mockQueueBulkEmails).not.toHaveBeenCalled();
+  });
+});
+
 describe("unscheduleEmail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRemoveJobs.mockResolvedValue(undefined);
+    mockRemoveJobs.mockResolvedValue({ removed: 0, errors: [] });
   });
 
   describe("SES scheduled jobs (queue)", () => {
     test("removes jobs and marks email as draft when scheduledJobIds and emailId provided", async () => {
       const { default: prisma } = await import("@/lib/prisma");
       (prisma.email.update as ReturnType<typeof vi.fn>).mockResolvedValue({});
+      mockRemoveJobs.mockResolvedValue({ removed: 2, errors: [] });
       const { unscheduleEmail } = await import("@/lib/actions/send-email");
 
       const result = await unscheduleEmail({
@@ -298,6 +454,22 @@ describe("unscheduleEmail", () => {
           scheduledJobIds: expect.anything(),
         },
       });
+    });
+
+    test("returns error when not all jobs could be removed", async () => {
+      mockRemoveJobs.mockResolvedValue({
+        removed: 1,
+        errors: ["job-2: not found"],
+      });
+      const { unscheduleEmail } = await import("@/lib/actions/send-email");
+
+      const result = await unscheduleEmail({
+        emailId: "email-123",
+        scheduledJobIds: ["job-1", "job-2"],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Could not remove");
     });
 
     test("returns error when removeJobs throws", async () => {

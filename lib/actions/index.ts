@@ -17,6 +17,7 @@ import {
 } from "@/lib/domains";
 import prisma from "@/lib/prisma";
 // import { seedOrgTemplates } from "@/lib/seedTemplates";
+import { isValidTimezone } from "@/lib/timezones";
 import { getBlurDataURL, logError } from "@/lib/utils";
 
 import { withAdminAuth, withEmailAuth } from "../auth";
@@ -222,17 +223,8 @@ export const updateOrganization = withAdminAuth(
           */
         }
       } else if (key === "timezone") {
-        const allowedTimezones = new Set([
-          "America/New_York",
-          "America/Chicago",
-          "America/Denver",
-          "America/Los_Angeles",
-          "UTC",
-          "Europe/London",
-          "Europe/Paris",
-        ]);
         const tz = (value || "America/New_York").trim();
-        if (!allowedTimezones.has(tz)) {
+        if (!isValidTimezone(tz)) {
           return { error: "Invalid timezone" };
         }
         response = await prisma.organization.update({
@@ -279,10 +271,10 @@ export const updateOrganization = withAdminAuth(
       // Intentionally not logging details here in production
       revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-        "page",
+        "max",
       );
       if (organization.customDomain) {
-        revalidateTag(`${organization.customDomain}-metadata`, "page");
+        revalidateTag(`${organization.customDomain}-metadata`, "max");
       }
 
       return response;
@@ -310,10 +302,10 @@ export const deleteOrganization = withAdminAuth(
       });
       revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-        "page",
+        "max",
       );
       if (response.customDomain) {
-        revalidateTag(`${response.customDomain}-metadata`, "page");
+        revalidateTag(`${response.customDomain}-metadata`, "max");
       }
       return response;
     } catch (error: any) {
@@ -440,15 +432,15 @@ export const updateEmail = async (data: Email, scheduledTime?: Date | null) => {
 
     revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-      "page",
+      "max",
     );
     revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
-      "page",
+      "max",
     );
     if (email.organization?.customDomain) {
-      revalidateTag(`${email.organization.customDomain}-emails`, "page");
-      revalidateTag(`${email.organization.customDomain}-${email.slug}`, "page");
+      revalidateTag(`${email.organization.customDomain}-emails`, "max");
+      revalidateTag(`${email.organization.customDomain}-${email.slug}`, "max");
     }
 
     return response;
@@ -501,19 +493,19 @@ export const updatePostMetadata = withEmailAuth(
 
       revalidateTag(
         `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-        "page",
+        "max",
       );
       revalidateTag(
         `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
-        "page",
+        "max",
       );
 
       // if the organization has a custom domain, we need to revalidate those tags too
       if (email.organization?.customDomain) {
-        revalidateTag(`${email.organization.customDomain}-emails`, "page");
+        revalidateTag(`${email.organization.customDomain}-emails`, "max");
         revalidateTag(
           `${email.organization.customDomain}-${email.slug}`,
-          "page",
+          "max",
         );
       }
 
@@ -731,7 +723,7 @@ export const getOrganizationTimezone = async (
 ): Promise<string | null> => {
   const session = await getSession();
   if (!session?.user.id) return null;
-  const member = await (prisma as any).organizationMember.findUnique({
+  const member = await prisma.organizationMember.findUnique({
     where: {
       userId_organizationId: {
         userId: session.user.id,

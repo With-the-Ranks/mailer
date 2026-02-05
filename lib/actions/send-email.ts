@@ -405,9 +405,17 @@ export const sendBulkEmail = async ({
   }
 
   // SES: schedule for future via queue (SES has no native scheduling)
+  const MAX_SCHEDULE_DAYS = 365;
   const scheduledAt = scheduledTime ? new Date(scheduledTime) : null;
   if (provider === "ses" && scheduledAt && scheduledAt.getTime() > Date.now()) {
+    const maxScheduleMs = MAX_SCHEDULE_DAYS * 24 * 60 * 60 * 1000;
+    if (scheduledAt.getTime() - Date.now() > maxScheduleMs) {
+      return {
+        error: `Scheduled time cannot be more than ${MAX_SCHEDULE_DAYS} days in the future`,
+      };
+    }
     const jobs: EmailJobData[] = [];
+    let index = 0;
     for (const audience of recipients) {
       const customVars =
         typeof audience.customFields === "string"
@@ -443,16 +451,28 @@ export const sendBulkEmail = async ({
           "X-Intrepid-ID": id,
         },
         userId: session.user.id,
+        jobIdSuffix: `-${index}`,
       });
+      index++;
     }
     const delayMs = scheduledAt.getTime() - Date.now();
     const result = await queueBulkEmails(jobs, delayMs);
-    if (result.failed > 0) {
-      logError("Some scheduled jobs failed to queue", null, {
-        emailId: id,
-        failed: result.failed,
-        errors: result.errors,
-      });
+    const allQueued =
+      result.failed === 0 && result.jobIds.length === recipients.length;
+    if (!allQueued) {
+      if (result.failed > 0) {
+        logError("Some scheduled jobs failed to queue", null, {
+          emailId: id,
+          failed: result.failed,
+          errors: result.errors,
+        });
+      }
+      return {
+        error:
+          result.failed > 0
+            ? `Failed to queue ${result.failed} of ${recipients.length} scheduled emails. Please try again.`
+            : "Failed to queue all scheduled emails. Please try again.",
+      };
     }
     await prisma.email.update({
       where: { id },
@@ -589,7 +609,21 @@ export const unscheduleEmail = async ({
   // SES: remove queued jobs and mark email as draft
   if (scheduledJobIds && scheduledJobIds.length > 0 && emailId) {
     try {
-      await removeJobs(scheduledJobIds);
+      const { removed, errors: removeErrors } =
+        await removeJobs(scheduledJobIds);
+      const allRemoved = removed === scheduledJobIds.length;
+      if (!allRemoved) {
+        logError("Some scheduled jobs could not be removed", null, {
+          emailId,
+          removed,
+          total: scheduledJobIds.length,
+          errors: removeErrors,
+        });
+        return {
+          success: false,
+          error: `Could not remove ${scheduledJobIds.length - removed} of ${scheduledJobIds.length} scheduled jobs. They may have already been sent.`,
+        };
+      }
       await prisma.email.update({
         where: { id: emailId },
         data: { published: false, scheduledJobIds: Prisma.JsonNull },

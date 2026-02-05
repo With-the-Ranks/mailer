@@ -43,6 +43,7 @@ export async function POST(
   }
 
   try {
+    // Handle both providers when both are present
     if (isSesScheduled) {
       const result = await unscheduleEmail({
         emailId,
@@ -51,13 +52,19 @@ export async function POST(
       if (result.error) {
         return NextResponse.json({ error: result.error }, { status: 500 });
       }
-    } else {
-      await unscheduleEmail({ resendId: email.resendId! });
-      await prisma.email.update({
-        where: { id: emailId },
-        data: { published: false },
-      });
     }
+    if (isResendScheduled) {
+      const result = await unscheduleEmail({
+        resendId: email.resendId!,
+      });
+      if (result.error) {
+        return NextResponse.json({ error: result.error }, { status: 500 });
+      }
+    }
+    await prisma.email.update({
+      where: { id: emailId },
+      data: { published: false },
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -50,7 +50,10 @@ export default async function Overview() {
         where: {
           organizationId: currentOrgId,
           published: true,
-          scheduledTime: { gt: new Date() },
+          scheduledTime: {
+            gt: new Date(),
+            lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          },
         },
         select: {
           id: true,

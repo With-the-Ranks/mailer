@@ -7,11 +7,10 @@ function getDateInTimezone(d: Date, tz: string): string {
   return d.toLocaleDateString("en-CA", { timeZone: tz });
 }
 
-// Add n days in UTC so date strings are consistent regardless of server TZ
-function addDays(dateStr: string, n: number): string {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const next = new Date(Date.UTC(y, m - 1, d + n, 12, 0, 0));
-  return next.toISOString().slice(0, 10);
+// Add n calendar days in org timezone so "today" and the week grid stay consistent
+function addDaysInTimezone(today: Date, n: number, tz: string): string {
+  const d = new Date(today.getTime() + n * 24 * 60 * 60 * 1000);
+  return getDateInTimezone(d, tz);
 }
 
 // Weekday and day number for a date string, interpreted in org timezone
@@ -57,8 +56,11 @@ export function UpcomingScheduleTable({
   organizationId,
 }: UpcomingScheduleTableProps) {
   const tz = timezone ?? DEFAULT_TIMEZONE;
-  const todayStr = getDateInTimezone(new Date(), tz);
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(todayStr, i));
+  const now = new Date();
+  const todayStr = getDateInTimezone(now, tz);
+  const weekDays = Array.from({ length: 7 }, (_, i) =>
+    addDaysInTimezone(now, i, tz),
+  );
 
   const emailsByDay = weekDays.reduce<Record<string, UpcomingEmail[]>>(
     (acc, dayStr) => {

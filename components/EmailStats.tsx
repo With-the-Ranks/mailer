@@ -131,7 +131,7 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
               />
               <Bar
                 dataKey="opened"
-                fill="#8b5cf6"
+                fill={isDark ? "#a78bfa" : "#8b5cf6"}
                 name="Opened"
                 isAnimationActive={true}
               />

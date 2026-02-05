@@ -12,7 +12,7 @@ export function getSnsClient(region?: string): SNSClient {
     return cached;
   }
 
-  // AWS_SES_* preferred (Vercel-safe); AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY as fallback
+  // Precedence: AWS_SES_* (Vercel-safe) > AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY > AWS_ACCESS_KEY/AWS_SECRET_KEY
   const accessKeyId =
     process.env.AWS_SES_ACCESS_KEY_ID ||
     process.env.AWS_ACCESS_KEY_ID ||
