@@ -99,8 +99,10 @@ model Email {
   published      Boolean       @default(false)
   scheduledTime  DateTime      @default(now())
   resendId       String?       @db.Text
+  sesMessageId   String?       @db.Text
+  providerUsed   String?       @default("ses")
 
-  audienceListId String?       
+  audienceListId String?
   audienceList   AudienceList? @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
 
   segmentId      String?
@@ -114,6 +116,7 @@ model Email {
   @@unique([slug, organizationId])
   @@index([organizationId])
   @@index([userId])
+  @@index([sesMessageId])
 }
 
 model EmailEvent {
@@ -162,11 +165,20 @@ model EmailDomain {
   domain         String        @unique
   providerId     String
   status         String?
-  provider       String        @default("resend")
+  provider       String        @default("ses")
   organization   Organization  @relation(fields: [organizationId], references: [id])
   organizationId String
 
   activeFor      Organization? @relation("ActiveDomain")
+
+  // SES-specific fields
+  awsRegion      String?       @default("us-east-1")
+  dkimPublicKey  String?       @db.Text
+  dkimSelector   String?       @default("mailer")
+  dkimStatus     String?
+  spfStatus      String?
+  clickTracking  Boolean       @default(false)
+  openTracking   Boolean       @default(false)
 
   createdAt      DateTime      @default(now())
 }
@@ -378,8 +390,29 @@ model OrganizationInvitation {
   organizationId String
   invitedBy      User             @relation("InvitationSender", fields: [invitedById], references: [id])
   invitedById    String
-  
+
   @@index([organizationId])
   @@index([token])
   @@index([email])
+}
+
+model SesRegionSettings {
+  id              String   @id @default(cuid())
+  region          String   @unique
+  topicArn        String?
+  configGeneral   String?
+  configClick     String?
+  configOpen      String?
+  configFull      String?
+  emailsPerSecond Int      @default(14) @map("emailRateLimit")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EmailSuppression {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  reason      String
+  sourceEmail String?
+  createdAt   DateTime @default(now())
 }

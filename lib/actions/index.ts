@@ -706,3 +706,381 @@ export const getOrgAndAudienceList = async () => {
     userRole: currentRole || null,
   };
 };
+
+// SES Domain Management Actions
+
+import {
+  addSesDomain as addSesDomainToAws,
+  verifySesDomain as verifySesDomainInAws,
+  deleteSesDomain as deleteSesDomainFromAws,
+} from "@/lib/aws/ses-domain";
+
+const MAX_DOMAINS_PER_ORG = 3;
+
+//Add a domain to SES and get DNS records for verification
+
+export const addSesDomain = async (
+  domain: string,
+  organizationId: string,
+  awsRegion?: string,
+) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const role = await getUserOrgRole(session.user.id, organizationId);
+  if (!role || role !== "ADMIN") {
+    return { error: "Not authorized" };
+  }
+
+  try {
+    // Check domain limit for organization
+    const domainCount = await prisma.emailDomain.count({
+      where: { organizationId },
+    });
+
+    if (domainCount >= MAX_DOMAINS_PER_ORG) {
+      return {
+        error: `Maximum of ${MAX_DOMAINS_PER_ORG} domains allowed per organization. Delete an existing domain to add a new one.`,
+      };
+    }
+
+    // Check if domain already exists
+    const existingDomain = await prisma.emailDomain.findUnique({
+      where: { domain },
+    });
+
+    if (existingDomain) {
+      return { error: "Domain already exists" };
+    }
+
+    // Add domain to SES
+    const result = await addSesDomainToAws(domain, awsRegion);
+
+    if (!result.success) {
+      return { error: result.error || "Failed to add domain to SES" };
+    }
+
+    // Create domain record in database
+    const emailDomain = await prisma.emailDomain.create({
+      data: {
+        domain,
+        providerId: domain, // Use domain as providerId for SES
+        provider: "ses",
+        status: "PENDING",
+        organizationId,
+        awsRegion: awsRegion || "us-east-1",
+        dkimPublicKey: result.publicKey,
+        dkimSelector: "mailer",
+      },
+    });
+
+    return {
+      success: true,
+      domain: emailDomain,
+      dnsRecords: result.dnsRecords,
+    };
+  } catch (error: unknown) {
+    logError("Error adding SES domain", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
+  }
+};
+
+// Verify a domain's status in SES
+
+export const verifySesDomain = async (domainId: string) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    // Get domain from database
+    const emailDomain = await prisma.emailDomain.findUnique({
+      where: { id: domainId },
+      include: { organization: true },
+    });
+
+    if (!emailDomain) {
+      return { error: "Domain not found" };
+    }
+
+    // Verify user has access to the organization
+    const role = await getUserOrgRole(
+      session.user.id,
+      emailDomain.organizationId,
+    );
+    if (!role) {
+      return { error: "Not authorized" };
+    }
+
+    // Check verification status in SES
+    const result = await verifySesDomainInAws(
+      emailDomain.domain,
+      emailDomain.awsRegion || undefined,
+    );
+
+    if (result.error) {
+      return { error: result.error };
+    }
+
+    // Update domain status in database
+    const newStatus = result.verified ? "SUCCESS" : "PENDING";
+    await prisma.emailDomain.update({
+      where: { id: domainId },
+      data: {
+        status: newStatus,
+        dkimStatus: result.dkimStatus,
+        spfStatus: result.spfStatus,
+      },
+    });
+
+    // Return only serializable data (Prisma objects can break server action serialization)
+    return {
+      success: true,
+      verified: result.verified,
+      dkimStatus: result.dkimStatus ?? undefined,
+      spfStatus: result.spfStatus ?? undefined,
+    };
+  } catch (error: unknown) {
+    logError("Error verifying SES domain", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
+  }
+};
+
+// Delete a domain from SES
+
+export const deleteSesDomain = async (domainId: string) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    // Get domain from database
+    const emailDomain = await prisma.emailDomain.findUnique({
+      where: { id: domainId },
+    });
+
+    if (!emailDomain) {
+      return { error: "Domain not found" };
+    }
+
+    // Verify user has access to the organization
+    const role = await getUserOrgRole(
+      session.user.id,
+      emailDomain.organizationId,
+    );
+    if (!role || role !== "ADMIN") {
+      return { error: "Not authorized - admin access required" };
+    }
+
+    // Only delete from SES if it's an SES domain
+    if (emailDomain.provider === "ses") {
+      const result = await deleteSesDomainFromAws(
+        emailDomain.domain,
+        emailDomain.awsRegion || undefined,
+      );
+
+      if (!result.success) {
+        // Log but don't fail - continue with database deletion
+        logError("Failed to delete domain from SES", null, {
+          domain: emailDomain.domain,
+          error: result.error,
+        });
+      }
+    }
+
+    // Check if this domain is the active domain for the organization
+    const org = await prisma.organization.findFirst({
+      where: { activeDomainId: domainId },
+    });
+
+    if (org) {
+      // Clear the active domain
+      await prisma.organization.update({
+        where: { id: org.id },
+        data: { activeDomainId: null },
+      });
+    }
+
+    // Delete domain from database
+    await prisma.emailDomain.delete({
+      where: { id: domainId },
+    });
+
+    revalidatePath(`/organization/${emailDomain.organizationId}/settings`);
+    revalidatePath(
+      `/organization/${emailDomain.organizationId}/settings/domains`,
+    );
+
+    return { success: true };
+  } catch (error: unknown) {
+    logError("Error deleting SES domain", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
+  }
+};
+
+// Set the active email domain for an organization
+
+export const setActiveDomain = async (
+  organizationId: string,
+  domainId: string | null,
+) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const role = await getUserOrgRole(session.user.id, organizationId);
+  if (!role || role !== "ADMIN") {
+    return { error: "Not authorized" };
+  }
+
+  try {
+    // If setting a domain, verify it belongs to the organization
+    if (domainId) {
+      const domain = await prisma.emailDomain.findFirst({
+        where: {
+          id: domainId,
+          organizationId,
+        },
+      });
+
+      if (!domain) {
+        return {
+          error: "Domain not found or does not belong to this organization",
+        };
+      }
+    }
+
+    const updatedOrg = await prisma.organization.update({
+      where: { id: organizationId },
+      data: { activeDomainId: domainId },
+      include: { activeDomain: true },
+    });
+
+    revalidatePath(`/organization/${organizationId}/settings`);
+
+    return { success: true, organization: updatedOrg };
+  } catch (error: unknown) {
+    logError("Error setting active domain", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
+  }
+};
+
+// SNS & SES Configuration Actions
+
+import {
+  setupSnsForSes,
+  setupAllConfigurationSets,
+} from "@/lib/aws/ses-config";
+
+// Initialize SES infrastructure for a region (admin only)
+export const initializeSesRegion = async (
+  region: string,
+  callbackUrl: string,
+) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const userWithOrgs = await prisma.organizationMember.findFirst({
+    where: {
+      userId: session.user.id,
+      role: "ADMIN",
+    },
+  });
+
+  if (!userWithOrgs) {
+    return { error: "Not authorized" };
+  }
+
+  try {
+    // Check if region already initialized
+    const existing = await prisma.sesRegionSettings.findUnique({
+      where: { region },
+    });
+
+    if (existing) {
+      return {
+        success: true,
+        message: "Region already initialized",
+        settings: existing,
+      };
+    }
+
+    // Setup SNS topic
+    const snsResult = await setupSnsForSes(region, callbackUrl);
+    if (!snsResult.success || !snsResult.topicArn) {
+      return { error: snsResult.error || "Failed to create SNS topic" };
+    }
+
+    // Setup configuration sets
+    const configResult = await setupAllConfigurationSets(
+      snsResult.topicArn,
+      region,
+    );
+
+    if (configResult.errors.length > 0) {
+      logError("Some config sets failed to create", null, {
+        errors: configResult.errors,
+      });
+    }
+
+    // Save region settings
+    const settings = await prisma.sesRegionSettings.create({
+      data: {
+        region,
+        topicArn: snsResult.topicArn,
+        configGeneral: configResult.configGeneral,
+        configClick: configResult.configClick,
+        configOpen: configResult.configOpen,
+        configFull: configResult.configFull,
+      },
+    });
+
+    return {
+      success: true,
+      settings,
+      warnings:
+        configResult.errors.length > 0 ? configResult.errors : undefined,
+    };
+  } catch (error: unknown) {
+    logError("Error initializing SES region", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
+  }
+};
+
+// Get SES region settings
+export const getSesRegionSettings = async (region: string) => {
+  const session = await getSession();
+  if (!session?.user.id) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    const settings = await prisma.sesRegionSettings.findUnique({
+      where: { region },
+    });
+
+    return { success: true, settings };
+  } catch (error: unknown) {
+    logError("Error fetching SES region settings", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
+  }
+};

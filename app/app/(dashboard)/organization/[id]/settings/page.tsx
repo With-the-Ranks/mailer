@@ -1,7 +1,4 @@
-import Link from "next/link";
-
 import Form from "@/components/form";
-import { Button } from "@/components/ui/button";
 import { updateOrganization } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 
@@ -15,28 +12,10 @@ export default async function OrganizationSettingsIndex({
     where: { id: decodeURIComponent(id) },
     select: {
       name: true,
-      emailApiKey: true,
-      activeDomainId: true,
-      domains: {
-        select: { id: true, domain: true, status: true },
-      },
+      logo: true,
     },
   });
 
-  const domainOptions = (data?.domains ?? []).map(
-    (d: { id: string; domain: string; status: string | null }) => ({
-      value: d.id,
-      label: `${d.domain} — ${d.status ?? "Unknown"}`,
-    }),
-  );
-
-  const selectOptions =
-    domainOptions.length > 0
-      ? domainOptions
-      : [
-          { value: "", label: `Default (${process.env.EMAIL_DOMAIN})` },
-          ...domainOptions,
-        ];
   return (
     <div className="flex flex-col space-y-6">
       <Form
@@ -52,57 +31,16 @@ export default async function OrganizationSettingsIndex({
         }}
         handleSubmit={updateOrganization}
       />
-      <div className="flex justify-end gap-2">
-        <Link
-          href="/docs/advanced-users/resend-integration"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button variant="outline" size="sm">
-            View Docs
-          </Button>
-        </Link>
-      </div>
-
       <Form
-        title="Email API Key"
-        description="Set a custom Resend API key for this organization."
-        helpText="Optional. Overrides the email provider Resend API key."
+        title="Logo"
+        description="The logo for your organization. Accepted formats: .png, .jpg, .jpeg"
+        helpText="Max file size 50MB. Recommended size 400x400."
         inputAttrs={{
-          name: "emailApiKey",
-          type: "password",
-          defaultValue: data?.emailApiKey ?? "",
-          placeholder: "re_abc123...",
+          name: "logo",
+          type: "file",
+          defaultValue: "",
         }}
         handleSubmit={updateOrganization}
-      />
-      <div className="flex justify-end gap-2">
-        <Link
-          href="/docs/advanced-users/resend-integration"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button variant="outline" size="sm">
-            View Docs
-          </Button>
-        </Link>
-      </div>
-      <Form
-        title="Active Sending Domain"
-        description={`Pick which verified domain Resend should use. Defaults to ${process.env.EMAIL_DOMAIN}`}
-        helpText={
-          domainOptions.length === 0
-            ? "No domains on this API key yet."
-            : "Choose a domain (or leave blank for default)."
-        }
-        inputAttrs={{
-          name: "activeDomainId",
-          type: "select",
-          defaultValue: data?.activeDomainId || "",
-          options: selectOptions,
-        }}
-        handleSubmit={updateOrganization}
-        disabled={domainOptions.length === 0}
       />
     </div>
   );

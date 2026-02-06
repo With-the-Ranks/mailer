@@ -1,48 +1,79 @@
-import Form from "@/components/form";
-import { updateOrganization } from "@/lib/actions";
+import { notFound } from "next/navigation";
+
+import { getDefaultProvider } from "@/lib/email-providers";
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export default async function OrganizationSettingsDomains({
+import DomainsClient from "./domains-client";
+
+export default async function DomainsSettingsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const data = await prisma.organization.findUnique({
-    where: {
-      id: decodeURIComponent(id),
+  const { id: organizationId } = await params;
+  const session = await getSession();
+
+  if (!session?.user.id) {
+    notFound();
+  }
+
+  const emailProvider = getDefaultProvider();
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: decodeURIComponent(organizationId) },
+    select: {
+      id: true,
+      name: true,
+      activeDomainId: true,
+      emailApiKey: true,
+      domains: {
+        select: {
+          id: true,
+          domain: true,
+          provider: true,
+          status: true,
+          awsRegion: true,
+          dkimPublicKey: true,
+          dkimSelector: true,
+          dkimStatus: true,
+          spfStatus: true,
+          clickTracking: true,
+          openTracking: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
+  if (!organization) {
+    notFound();
+  }
+
+  const domainOptionsForResend = (organization.domains ?? []).map(
+    (d: { id: string; domain: string; status: string | null }) => ({
+      value: d.id,
+      label: `${d.domain} — ${d.status ?? "Unknown"}`,
+    }),
+  );
+  const selectOptionsForResend =
+    domainOptionsForResend.length > 0
+      ? domainOptionsForResend
+      : [
+          { value: "", label: `Default (${process.env.EMAIL_DOMAIN ?? ""})` },
+          ...domainOptionsForResend,
+        ];
+
   return (
-    <div className="flex flex-col space-y-6">
-      <Form
-        title="Subdomain"
-        description="The subdomain for your organization."
-        helpText="Please use 32 characters maximum."
-        inputAttrs={{
-          name: "subdomain",
-          type: "text",
-          defaultValue: data?.subdomain ?? "",
-          placeholder: "subdomain",
-          maxLength: 32,
-        }}
-        handleSubmit={updateOrganization}
-      />
-      <Form
-        title="Custom Domain"
-        description="The custom domain for your organization."
-        helpText="Please enter a valid domain."
-        inputAttrs={{
-          name: "customDomain",
-          type: "text",
-          defaultValue: data?.customDomain ?? "",
-          placeholder: "yourdomain.com",
-          maxLength: 64,
-          pattern: "^[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}$",
-        }}
-        handleSubmit={updateOrganization}
-      />
-    </div>
+    <DomainsClient
+      emailProvider={emailProvider}
+      organizationId={organization.id}
+      organizationName={organization.name || "Organization"}
+      domains={organization.domains}
+      activeDomainId={organization.activeDomainId}
+      emailApiKey={organization.emailApiKey ?? ""}
+      domainOptionsForResend={selectOptionsForResend}
+    />
   );
 }
