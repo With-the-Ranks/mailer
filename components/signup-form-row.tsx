@@ -142,7 +142,7 @@ export default function SignupFormRow({ data }: SignupFormRowProps) {
       </td>
       <td className="px-6 py-4 text-right text-base font-medium whitespace-nowrap">
         <div
-          className="flex items-center justify-end space-x-2"
+          className="flex items-center justify-center space-x-2"
           onClick={(e) => e.stopPropagation()}
         >
           <Button variant="ghost" size="sm" asChild>

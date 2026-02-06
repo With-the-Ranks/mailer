@@ -12,6 +12,7 @@ import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/empty-state";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -203,25 +204,23 @@ export function SegmentsList({
     return (
       <Card className="bg-white dark:bg-[#2D2D2D]">
         <CardContent className="flex flex-col items-center justify-center py-16">
-          <UsersIcon className="text-muted-foreground mb-4 h-16 w-16 dark:text-gray-400" />
-          <h3 className="mb-2 text-xl font-semibold dark:text-white">
-            No segments yet
-          </h3>
-          <p className="text-muted-foreground mb-6 max-w-md text-center dark:text-gray-400">
-            Create segments by filtering your contacts in audience lists and
-            clicking &quot;Create Segment&quot;
-          </p>
-          <Button asChild>
-            <Link
-              href={
-                audienceListId ? `/audience/${audienceListId}` : "/audience"
-              }
-            >
-              {" "}
-              <PlusIcon className="mr-2 h-4 w-4" />
-              Create Your First Segment
-            </Link>
-          </Button>
+          <div className="flex flex-col items-center space-y-6">
+            <EmptyState icon="filter" message="No segments yet" />
+            <p className="text-muted-foreground max-w-md text-center dark:text-gray-400">
+              Create segments by filtering your contacts in audience lists and
+              clicking &quot;Create Segment&quot;
+            </p>
+            <Button asChild>
+              <Link
+                href={
+                  audienceListId ? `/audience/${audienceListId}` : "/audience"
+                }
+              >
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Create Your First Segment
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

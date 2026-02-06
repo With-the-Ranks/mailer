@@ -3,6 +3,7 @@
 import { type ColumnDef, flexRender } from "@tanstack/react-table";
 import * as React from "react";
 
+import { EmptyState } from "@/components/empty-state";
 import {
   Table,
   TableBody,
@@ -32,8 +33,13 @@ export function ResizableTable<T>({
     table.setColumnSizing(columnSizing);
   }, [columnSizing, table]);
 
+  const rowCount = table.getRowModel().rows?.length ?? 0;
+  const isEmpty = rowCount === 0;
+
   return (
-    <div className="overflow-auto rounded-lg border bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]">
+    <div
+      className={`overflow-auto rounded-lg border bg-white dark:border-neutral-700 dark:bg-[#2D2D2D] ${isEmpty ? "min-h-128" : ""}`}
+    >
       <Table
         style={{ width: table.getCenterTotalSize() }}
         className="bg-white dark:bg-[#2D2D2D]"
@@ -54,14 +60,16 @@ export function ResizableTable<T>({
                     <TableHead
                       key={header.id}
                       style={{ width: header.getSize() }}
-                      className="relative dark:text-gray-400"
+                      className="relative whitespace-nowrap dark:text-gray-400"
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+                      {header.isPlaceholder ? null : (
+                        <span className="whitespace-nowrap">
+                          {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
+                        </span>
+                      )}
                       {header.column.getCanResize() && (
                         <div
                           onMouseDown={header.getResizeHandler()}
@@ -81,7 +89,7 @@ export function ResizableTable<T>({
             )}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {rowCount ? (
             table
               .getRowModel()
               .rows.map(
@@ -110,11 +118,14 @@ export function ResizableTable<T>({
               )
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center dark:text-white"
-              >
-                No contacts found.
+              <TableCell colSpan={columns.length} className="w-full align-top">
+                <div className="flex min-h-120 max-w-1/2 flex-col items-center justify-center gap-4 px-8 py-12">
+                  <EmptyState
+                    icon="table-properties"
+                    message="No contacts in this list"
+                    compact
+                  />
+                </div>
               </TableCell>
             </TableRow>
           )}

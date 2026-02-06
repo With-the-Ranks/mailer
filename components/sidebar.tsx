@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BadgePlus,
   ChartLine,
   ChevronRight,
   CornerDownRight,
@@ -11,7 +10,6 @@ import {
   Form,
   Info,
   LayoutDashboard,
-  List,
   Newspaper,
   Settings,
   TableProperties,
@@ -28,8 +26,8 @@ import useSWR from "swr";
 import Logo from "@/components/logo";
 import LogoutButton from "@/components/logout-button";
 import OrganizationSwitcher from "@/components/organization-switcher";
+import { SidebarCreateButtonGroup } from "@/components/sidebar-create-button-group";
 import ThemeSwitcher from "@/components/theme-switcher";
-import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -90,11 +88,24 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     // Main org nav - always show these core items
     if (organizationFound) {
       const isOnEmailPage = segments[0] === "email" && id;
+      const isOnCreateEmailPage =
+        pathname === `/email/create` ||
+        (segments[0] === "email" && segments[1] === "create");
       const isOnAudiencePage = segments[0] === "audience";
       const isOnSegmentsPage = segments.includes("segments");
+      const isOnPeopleIndex =
+        segments[0] === "organization" &&
+        segments[2] === "audience" &&
+        segments.length === 3;
+      const isOnPeopleSection =
+        isOnAudiencePage || isOnSegmentsPage || isOnPeopleIndex;
       const isPublished = emailData?.published;
       const isOnEmailsListPage =
         segments[0] === "organization" && segments.length === 2;
+      const signupFormsIdx = segments.indexOf("signup-forms");
+      const isOnCreateSignupFormPage =
+        signupFormsIdx >= 0 && segments[signupFormsIdx + 1] === "edit";
+      const isOnSignupFormsSection = segments.includes("signup-forms");
 
       return [
         {
@@ -108,34 +119,45 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           href: audienceListId
             ? `/audience/${audienceListId}`
             : `/organization/${siteId}/audience`,
-          isActive: false, // Parent never gets highlighted when submenu is showing
+          isActive: isOnPeopleSection,
           icon: TableProperties,
-          submenu:
-            isOnAudiencePage || isOnSegmentsPage
-              ? [
-                  {
-                    name: "Contacts",
-                    href: audienceListId
-                      ? `/audience/${audienceListId}`
-                      : `/organization/${siteId}/audience`,
-                    isActive:
-                      segments[0] === "audience" && segments.length === 2,
-                    icon: List,
-                  },
-                  {
-                    name: "Segments",
-                    href: `/organization/${siteId}/segments`,
-                    isActive: segments.includes("segments"),
-                    icon: Filter,
-                  },
-                ]
-              : undefined,
+          submenu: isOnPeopleSection
+            ? [
+                ...(audienceListId
+                  ? [
+                      {
+                        name: "Create Contact",
+                        href: `/audience/${audienceListId}?action=add-contact`,
+                        isActive: false,
+                        icon: CornerDownRight,
+                      },
+                    ]
+                  : []),
+                {
+                  name: "Segments",
+                  href: `/organization/${siteId}/segments`,
+                  isActive: segments.includes("segments"),
+                  icon: Filter,
+                },
+              ]
+            : undefined,
         },
         {
           name: "Signup Forms",
           href: `/organization/${siteId}/signup-forms`,
-          isActive: segments.includes("signup-forms"),
+          isActive:
+            segments.includes("signup-forms") && !isOnCreateSignupFormPage,
           icon: Form,
+          submenu: isOnSignupFormsSection
+            ? [
+                {
+                  name: "Create Form",
+                  href: `/organization/${siteId}/signup-forms/edit`,
+                  isActive: isOnCreateSignupFormPage,
+                  icon: CornerDownRight,
+                },
+              ]
+            : undefined,
         },
         {
           name: "Emails",
@@ -157,12 +179,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                   icon: Edit3,
                 },
               ].filter(Boolean)
-            : isOnEmailsListPage
+            : isOnEmailsListPage || isOnCreateEmailPage
               ? [
                   {
                     name: "Create Email",
-                    href: "?action=create-email",
-                    isActive: false,
+                    href: `/email/create?organizationId=${siteId}`,
+                    isActive: isOnCreateEmailPage,
                     icon: CornerDownRight,
                   },
                 ]
@@ -278,14 +300,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="rounded-lg py-1.5 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white [&>svg]:text-black hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:[&>svg]:text-white dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
+                                className="min-w-fit overflow-visible rounded-lg py-1.5 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white [&>span:last-child]:overflow-visible [&>span:last-child]:whitespace-nowrap [&>svg]:text-black hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:[&>svg]:text-white dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
                               >
                                 <Link
                                   href={sub.href}
                                   className="flex items-center gap-1"
+                                  scroll={
+                                    sub.href?.includes?.("action=add-contact")
+                                      ? false
+                                      : undefined
+                                  }
                                 >
                                   <sub.icon
-                                    className="mr-0 text-black dark:text-white"
+                                    className="mr-0 shrink-0 text-black dark:text-white"
                                     size={16}
                                   />
                                   <span className="whitespace-nowrap">
@@ -331,15 +358,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           <SidebarGroup>
             <SidebarGroupContent>
               <div className="px-0">
-                <Link href="?action=create-email" scroll={false}>
-                  <Button
-                    className="w-full items-center justify-center gap-1 rounded-lg bg-gradient-to-bl from-amber-200 to-amber-400 p-2 text-sm font-bold text-black transition-colors hover:from-amber-300 hover:to-amber-500"
-                    size="default"
-                  >
-                    <BadgePlus className="h-6 w-6" />
-                    Create
-                  </Button>
-                </Link>
+                <SidebarCreateButtonGroup
+                  siteId={siteId}
+                  audienceListId={audienceListId}
+                />
               </div>
             </SidebarGroupContent>
           </SidebarGroup>

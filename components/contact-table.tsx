@@ -46,13 +46,15 @@ export function ContactTable({
         <ResizableTable table={table} data={contacts} columns={columns} />
       </div>
 
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-base">
+      <div className="flex flex-nowrap items-center justify-between gap-4 py-4">
+        <div className="text-muted-foreground min-w-0 flex-1 shrink text-base">
           {selectedRowCount} of {contacts.length} contact(s) selected.
         </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-base font-medium">Rows per page</p>
+        <div className="flex shrink-0 flex-nowrap items-center gap-4 lg:gap-6">
+          <div className="flex shrink-0 items-center gap-2">
+            <p className="text-base font-medium whitespace-nowrap">
+              Rows per page
+            </p>
             <Select
               value={`${pagination.pageSize}`}
               onValueChange={(value) => {
@@ -74,11 +76,11 @@ export function ContactTable({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-[100px] items-center justify-center text-base font-medium">
+          <div className="flex min-w-36 shrink-0 items-center justify-center text-base font-medium whitespace-nowrap">
             Page {pagination.pageIndex + 1} of{" "}
             {Math.ceil(contacts.length / pagination.pageSize)}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               variant="outline"
               className="hidden h-8 w-8 p-0 lg:flex"
