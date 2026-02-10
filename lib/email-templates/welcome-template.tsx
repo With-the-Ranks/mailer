@@ -104,7 +104,7 @@ export const WelcomeTemplate = () => (
               style={{ fontFamily, color: "#000000", textAlign: "left" }}
             >
               Mailer is an open source tool by With The Ranks, built to make
-              sending beautiful, effective emails simple — especially for
+              sending beautiful, effective emails simple, especially for
               organizers with limited time or technical resources.
             </Text>
             <Text
@@ -139,7 +139,7 @@ export const WelcomeTemplate = () => (
                   }}
                 >
                   Mailer makes it easy to send emails that look great and drive
-                  action — without needing a design team or complex tools.
+                  action without needing a design team or complex tools.
                 </Text>
 
                 <ul className="pl-6 text-left" style={{ margin: "0 0 8px 0" }}>
@@ -148,7 +148,7 @@ export const WelcomeTemplate = () => (
                       className="ml-2"
                       style={{ fontFamily, color: "#000000" }}
                     >
-                      Intuitive editor built for organizers — no design
+                      Intuitive editor built for organizers, no design
                       experience required
                     </Text>
                   </li>
@@ -176,7 +176,7 @@ export const WelcomeTemplate = () => (
                     margin: "0 0 16px 0",
                   }}
                 >
-                  Mailer is currently in pre‑alpha. Things may change — and your
+                  Mailer is currently in pre‑alpha. Things may change, and your
                   feedback helps shape what’s next.
                 </Text>
                 <Container style={{ textAlign: "center" }}>
@@ -206,7 +206,7 @@ export const WelcomeTemplate = () => (
                 className="font-bold"
                 style={{ fontFamily, color: "#000000" }}
               >
-                – The Mailer Team
+                - The Mailer Team
               </Text>
             </Container>
           </Container>

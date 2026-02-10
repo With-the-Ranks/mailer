@@ -1,5 +1,6 @@
 import Form from "@/components/form";
 import { updateOrganization } from "@/lib/actions";
+import { getOrganizationBrandColors } from "@/lib/organization-branding";
 import prisma from "@/lib/prisma";
 import { getTimezoneOptions } from "@/lib/timezones";
 
@@ -10,14 +11,18 @@ export default async function OrganizationSettingsIndex({
 }) {
   const { id } = await params;
   const timezoneOptions = getTimezoneOptions();
-  const data = await prisma.organization.findUnique({
-    where: { id: decodeURIComponent(id) },
-    select: {
-      name: true,
-      logo: true,
-      timezone: true,
-    },
-  });
+  const decodedId = decodeURIComponent(id);
+  const [data, brandColors] = await Promise.all([
+    prisma.organization.findUnique({
+      where: { id: decodedId },
+      select: {
+        name: true,
+        logo: true,
+        timezone: true,
+      },
+    }),
+    getOrganizationBrandColors(decodedId),
+  ]);
 
   return (
     <div className="flex flex-col space-y-6">
@@ -35,17 +40,6 @@ export default async function OrganizationSettingsIndex({
         handleSubmit={updateOrganization}
       />
       <Form
-        title="Logo"
-        description="The logo for your organization. Accepted formats: .png, .jpg, .jpeg"
-        helpText="Max file size 50MB. Recommended size 400x400."
-        inputAttrs={{
-          name: "logo",
-          type: "file",
-          defaultValue: "",
-        }}
-        handleSubmit={updateOrganization}
-      />
-      <Form
         key={`timezone-${data?.timezone ?? "default"}`}
         title="Timezone"
         description="Timezone used for scheduling emails and displaying times in the dashboard."
@@ -56,6 +50,41 @@ export default async function OrganizationSettingsIndex({
           defaultValue: data?.timezone ?? "America/New_York",
           placeholder: "America/New_York",
           options: timezoneOptions,
+        }}
+        handleSubmit={updateOrganization}
+      />
+      <Form
+        title="Logo"
+        description="The logo for your organization. Accepted formats: .png, .jpg, .jpeg"
+        helpText="Max file size 50MB. Recommended size 400x400."
+        inputAttrs={{
+          name: "logo",
+          type: "file",
+          defaultValue: data?.logo ?? "",
+        }}
+        handleSubmit={updateOrganization}
+      />
+      <Form
+        key={`backgroundColor-${brandColors.backgroundColor}`}
+        title="Background color"
+        description="Default background color for email templates."
+        helpText="Pick a hex color used for template section backgrounds."
+        inputAttrs={{
+          name: "backgroundColor",
+          type: "color",
+          defaultValue: brandColors.backgroundColor,
+        }}
+        handleSubmit={updateOrganization}
+      />
+      <Form
+        key={`buttonColor-${brandColors.buttonColor}`}
+        title="Button color"
+        description="Default button color for email templates."
+        helpText="Pick a hex color used for call-to-action buttons."
+        inputAttrs={{
+          name: "buttonColor",
+          type: "color",
+          defaultValue: brandColors.buttonColor,
         }}
         handleSubmit={updateOrganization}
       />

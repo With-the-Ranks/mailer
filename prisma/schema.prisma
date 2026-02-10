@@ -143,6 +143,8 @@ model Organization {
   customDomain  String?  @unique
   message404    String?  @default("Blimey! You've found a page that doesn't exist.") @db.Text
   timezone      String?  @default("America/New_York") // Validated in app: IANA names via lib/timezones (moment.tz.names())
+  backgroundColor String? @default("#ffffff")
+  buttonColor     String? @default("#1547E6")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   users         User[] @relation("UserOrganization")  // Legacy - will be removed after migration

@@ -25,11 +25,6 @@ export default function SiteSettingsNav() {
       href: `/organization/${id}/settings/members`,
       segment: "members",
     },
-    {
-      name: "Queue",
-      href: `/organization/${id}/settings/queue`,
-      segment: "queue",
-    },
   ];
 
   return (
