@@ -94,7 +94,7 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
           typeof formData.content === "string"
             ? JSON.parse(formData.content)
             : formData.content;
-        const parsedWithOrganizationLogo =
+        const parsedWithOrganizationBranding =
           applyOrganizationBrandingToEmailContent(
             parsed,
             organizationData || undefined,
@@ -102,10 +102,10 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
 
         // Only update contentObj if it's different (but keep hydrated true)
         const currentStr = JSON.stringify(contentObj);
-        const newStr = JSON.stringify(parsedWithOrganizationLogo);
+        const newStr = JSON.stringify(parsedWithOrganizationBranding);
 
         if (currentStr !== newStr) {
-          setContentObj(parsedWithOrganizationLogo);
+          setContentObj(parsedWithOrganizationBranding);
         }
       } catch (error) {
         console.error("Failed to parse content:", error);
@@ -149,7 +149,7 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
         typeof templateContent === "string"
           ? JSON.parse(templateContent)
           : templateContent;
-      const parsedWithOrganizationLogo =
+      const parsedWithOrganizationBranding =
         applyOrganizationBrandingToEmailContent(
           parsed,
           organizationData || undefined,
@@ -157,8 +157,8 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
 
       // Validate parsed content
       if (
-        !parsedWithOrganizationLogo ||
-        typeof parsedWithOrganizationLogo !== "object"
+        !parsedWithOrganizationBranding ||
+        typeof parsedWithOrganizationBranding !== "object"
       ) {
         throw new Error("Invalid template content");
       }
@@ -166,11 +166,11 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
       // Update form data first (this triggers the useEffect)
       updateFormData({
         template: templateId,
-        content: JSON.stringify(parsedWithOrganizationLogo),
+        content: JSON.stringify(parsedWithOrganizationBranding),
       });
 
       // Then update local state
-      setContentObj(parsedWithOrganizationLogo);
+      setContentObj(parsedWithOrganizationBranding);
       setHydrated(false);
       setEditorKey((prev) => prev + 1);
 

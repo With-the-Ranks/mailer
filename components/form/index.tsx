@@ -60,25 +60,36 @@ export default function Form({
   const { id } = useParams() as { id?: string };
   const router = useRouter();
   const { update } = useSession();
-  const initialColorValue = useMemo(() => {
-    if (inputAttrs.type !== "color") return "#1547E6";
-    const raw = (inputAttrs.defaultValue || "").trim();
-    if (/^#?[0-9a-fA-F]{6}$/.test(raw)) {
-      return raw.startsWith("#") ? raw : `#${raw}`;
-    }
-    return "#1547E6";
-  }, [inputAttrs.defaultValue, inputAttrs.type]);
-  const [colorValue, setColorValue] = useState(initialColorValue);
-
-  useEffect(() => {
-    setColorValue(initialColorValue);
-  }, [initialColorValue]);
-
   const normalizeHex = (value: string): string => {
     const trimmed = value.trim();
     if (!trimmed) return "";
     return trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
   };
+
+  const normalizeHexOrNull = (
+    value: string | null | undefined,
+  ): string | null => {
+    if (typeof value !== "string") return null;
+    const normalized = normalizeHex(value);
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return null;
+    return normalized.toLowerCase();
+  };
+
+  const colorFallback = useMemo(() => {
+    if (/button/i.test(inputAttrs.name)) return "#1547e6";
+    return "#ffffff";
+  }, [inputAttrs.name]);
+
+  const initialColorValue = useMemo(() => {
+    if (inputAttrs.type !== "color") return "";
+    return normalizeHexOrNull(inputAttrs.defaultValue) ?? colorFallback;
+  }, [inputAttrs.defaultValue, inputAttrs.type, colorFallback]);
+
+  const [colorValue, setColorValue] = useState(initialColorValue);
+
+  useEffect(() => {
+    setColorValue(initialColorValue);
+  }, [initialColorValue]);
 
   const handleHexChange = (value: string) => {
     const normalized = normalizeHex(value);
@@ -167,9 +178,7 @@ export default function Form({
           <div className="flex w-full max-w-md items-center gap-3">
             <input
               type="color"
-              value={
-                /^#[0-9a-fA-F]{6}$/.test(colorValue) ? colorValue : "#1547E6"
-              }
+              value={normalizeHexOrNull(colorValue) ?? initialColorValue}
               onChange={(e) => setColorValue(e.target.value)}
               className="h-10 w-10 cursor-pointer rounded-full border border-stone-300 bg-white p-1 dark:border-stone-600 dark:bg-[#2D2D2D]"
               aria-label={`${title} color picker`}

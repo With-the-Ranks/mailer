@@ -27,7 +27,7 @@ describe("getPreferredOrganizationLogoSrc", () => {
   });
 });
 
-describe("applyOrganizationLogoToEmailContent", () => {
+describe("applyOrganizationBrandingToEmailContent", () => {
   test("replaces template default logo src with organization logo", () => {
     const content = {
       type: "doc",

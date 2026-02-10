@@ -20,7 +20,16 @@ function normalizeHexOrDefault(
   if (!value) return fallback;
   const trimmed = value.trim();
   if (!trimmed) return fallback;
-  return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : fallback;
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) {
+    return trimmed.toLowerCase();
+  }
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    const r = trimmed[1];
+    const g = trimmed[2];
+    const b = trimmed[3];
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  return fallback;
 }
 
 export async function getOrganizationBrandColors(

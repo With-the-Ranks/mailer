@@ -37,6 +37,33 @@ function normalizeHexColorWithHash(value: string): string | null {
   return `#${withoutHash.toLowerCase()}`;
 }
 
+type BrandingColumnsResult = {
+  hasBackgroundColor: boolean;
+  hasButtonColor: boolean;
+};
+
+async function hasOrganizationBrandColorColumns(): Promise<boolean> {
+  const columns = await prisma.$queryRaw<BrandingColumnsResult[]>`
+    SELECT
+      EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Organization'
+          AND column_name = 'backgroundColor'
+      ) AS "hasBackgroundColor",
+      EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Organization'
+          AND column_name = 'buttonColor'
+      ) AS "hasButtonColor"
+  `;
+
+  return Boolean(columns[0]?.hasBackgroundColor && columns[0]?.hasButtonColor);
+}
+
 export const createOrganization = async (
   formData: FormData,
   userId?: string,
@@ -249,6 +276,15 @@ export const updateOrganization = withAdminAuth(
             error: `${key === "backgroundColor" ? "Background color" : "Button color"} must be a valid hex color`,
           };
         }
+
+        const hasColorColumns = await hasOrganizationBrandColorColumns();
+        if (!hasColorColumns) {
+          return {
+            error:
+              "Organization brand colors are not available yet. Please run the latest database migration and try again.",
+          };
+        }
+
         if (key === "backgroundColor") {
           await prisma.$executeRaw`
             UPDATE "Organization"

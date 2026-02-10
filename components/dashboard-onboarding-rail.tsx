@@ -46,7 +46,7 @@ export default function DashboardOnboardingRail({
     (url: string) => fetch(url).then((res) => res.json()),
     {
       fallbackData: fallbackState,
-      refreshInterval: (latest) => (latest?.onboarding?.shouldShow ? 2500 : 0),
+      refreshInterval: (latest) => (latest?.onboarding?.shouldShow ? 15000 : 0),
       revalidateOnFocus: true,
     },
   );
