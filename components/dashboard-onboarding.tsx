@@ -279,18 +279,9 @@ export default function DashboardOnboarding({
               size="sm"
               variant="outline"
               className="border-[#D3D3D3] bg-white text-black hover:bg-stone-100 dark:border-[#D3D3D3] dark:bg-[#2D2D2D] dark:text-white dark:hover:bg-[#252525]"
-              onClick={hideForToday}
-            >
-              Hide today
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="border-[#D3D3D3] bg-white text-black hover:bg-stone-100 dark:border-[#D3D3D3] dark:bg-[#2D2D2D] dark:text-white dark:hover:bg-[#252525]"
               onClick={dismissForever}
             >
-              Dismiss forever
+              Dismiss
             </Button>
           </div>
         </div>
@@ -299,8 +290,8 @@ export default function DashboardOnboarding({
           size="icon"
           variant="outline"
           className="h-8 w-8 border-[#D3D3D3] bg-white text-black hover:bg-stone-100 dark:border-[#D3D3D3] dark:bg-[#2D2D2D] dark:text-white dark:hover:bg-[#252525]"
-          onClick={dismissForever}
-          aria-label="Dismiss onboarding success"
+          onClick={hideForToday}
+          aria-label="Hide onboarding success today"
         >
           <X className="h-4 w-4" />
         </Button>
