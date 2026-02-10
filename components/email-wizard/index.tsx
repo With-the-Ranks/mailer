@@ -24,6 +24,8 @@ interface EmailWizardContainerProps {
     subdomain: string | null;
     logo: string | null;
     image: string | null;
+    backgroundColor: string | null;
+    buttonColor: string | null;
     timezone: string | null;
   } | null;
 }

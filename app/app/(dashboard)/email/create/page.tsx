@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { applyOrganizationBrandingToEmailContent } from "@/lib/maily-blocks/logo-utils";
+import { getOrganizationBrandColors } from "@/lib/organization-branding";
 import prisma from "@/lib/prisma";
 import { EmailWizard } from "@/components/email-wizard";
 import type { WizardState } from "@/components/email-wizard/types";
@@ -42,28 +44,39 @@ export default async function EmailCreatePage({
   }
 
   // Check if user is a member of this organization
-  const membership = await prisma.organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: session.user.id,
-        organizationId,
-      },
-    },
-    include: {
-      organization: {
-        select: {
-          subdomain: true,
-          logo: true,
-          image: true,
-          timezone: true,
+  const [membership, brandColors] = await Promise.all([
+    prisma.organizationMember.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: session.user.id,
+          organizationId,
         },
       },
-    },
-  });
+      include: {
+        organization: {
+          select: {
+            subdomain: true,
+            logo: true,
+            image: true,
+            timezone: true,
+          },
+        },
+      },
+    }),
+    getOrganizationBrandColors(organizationId),
+  ]);
 
   if (!membership) {
     notFound();
   }
+
+  const organizationData = membership.organization
+    ? {
+        ...membership.organization,
+        backgroundColor: brandColors.backgroundColor,
+        buttonColor: brandColors.buttonColor,
+      }
+    : null;
 
   let emailId: string | null = null;
   let existingEmail: any = null;
@@ -94,6 +107,24 @@ export default async function EmailCreatePage({
     }
   }
 
+  let initialContent = existingEmail?.content;
+  if (initialContent) {
+    try {
+      const parsedContent =
+        typeof initialContent === "string"
+          ? JSON.parse(initialContent)
+          : initialContent;
+      initialContent = JSON.stringify(
+        applyOrganizationBrandingToEmailContent(
+          parsedContent,
+          organizationData,
+        ),
+      );
+    } catch {
+      // Keep original content when parsing fails.
+    }
+  }
+
   // Build initial wizard state - don't create email yet, wait for campaign name
   const initialState: WizardState = {
     emailId,
@@ -105,8 +136,7 @@ export default async function EmailCreatePage({
       from: existingEmail?.from || "With The Ranks",
       replyTo: existingEmail?.replyTo || "",
       previewText: existingEmail?.previewText || "",
-      content:
-        existingEmail?.content || JSON.stringify({ type: "doc", content: [] }),
+      content: initialContent || JSON.stringify({ type: "doc", content: [] }),
       template: existingEmail?.template || null,
       selectedSegment: existingEmail?.segmentId || null,
       audienceListId: existingEmail?.audienceListId || null,
@@ -120,7 +150,7 @@ export default async function EmailCreatePage({
   return (
     <EmailWizard
       initialState={initialState}
-      organizationData={membership.organization}
+      organizationData={organizationData}
     />
   );
 }
