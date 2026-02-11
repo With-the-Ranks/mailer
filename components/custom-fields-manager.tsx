@@ -2,6 +2,7 @@
 
 import { PlusIcon, TrashIcon, XIcon } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,35 @@ export function CustomFieldsManager({
     options: [],
   });
   const [newOption, setNewOption] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const toInternalFieldName = (value: string) => {
+    const words = value
+      .trim()
+      .replace(/[^a-zA-Z0-9]+/g, " ")
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (words.length === 0) return "";
+
+    return words
+      .map((word, index) => {
+        const normalized = word.toLowerCase();
+        if (index === 0) return normalized;
+        return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+      })
+      .join("");
+  };
+
+  const parseErrorMessage = async (response: Response) => {
+    try {
+      const data = await response.json();
+      if (data?.error) return data.error as string;
+    } catch {
+      // Ignore JSON parse errors and use fallback message
+    }
+    return "Something went wrong. Please try again.";
+  };
 
   const resetForm = () => {
     setFormData({
@@ -80,34 +110,80 @@ export function CustomFieldsManager({
     setNewOption("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.label) {
-      alert("Please fill in required fields");
+    const normalizedLabel = formData.label?.trim() || "";
+    const normalizedName =
+      formData.name?.trim() ||
+      editingField?.name ||
+      toInternalFieldName(normalizedLabel);
+
+    if (!normalizedLabel) {
+      toast.error("Display label is required");
       return;
     }
 
-    const fieldData: CustomFieldDefinition = {
-      id: editingField?.id || Date.now().toString(),
-      name: formData.name!,
-      label: formData.label!,
+    if (!normalizedName) {
+      toast.error("Unable to generate a valid internal name");
+      return;
+    }
+
+    if (
+      formData.type === "select" &&
+      (!formData.options || !formData.options.length)
+    ) {
+      toast.error("Please add at least one dropdown option");
+      return;
+    }
+
+    const payload = {
+      name: normalizedName,
+      label: normalizedLabel,
       type: formData.type || "text",
       required: formData.required || false,
       description: formData.description,
       options: formData.type === "select" ? formData.options : undefined,
     };
 
-    if (editingField) {
-      onCustomFieldsChange(
-        customFields.map((field) =>
-          field.id === editingField.id ? fieldData : field,
-        ),
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        editingField
+          ? `/api/custom-fields/${editingField.id}`
+          : "/api/custom-fields",
+        {
+          method: editingField ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
       );
-    } else {
-      onCustomFieldsChange([...customFields, fieldData]);
-    }
 
-    resetForm();
+      if (!response.ok) {
+        const message = await parseErrorMessage(response);
+        toast.error(message);
+        return;
+      }
+
+      const savedField = (await response.json()) as CustomFieldDefinition;
+      if (editingField) {
+        onCustomFieldsChange(
+          customFields.map((field) =>
+            field.id === editingField.id ? savedField : field,
+          ),
+        );
+        toast.success("Custom field updated");
+      } else {
+        onCustomFieldsChange([...customFields, savedField]);
+        toast.success("Custom field created");
+      }
+
+      resetForm();
+    } catch (error) {
+      console.error("Failed to save custom field:", error);
+      toast.error("Failed to save custom field");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEdit = (field: CustomFieldDefinition) => {
@@ -115,15 +191,29 @@ export function CustomFieldsManager({
     setFormData(field);
   };
 
-  const handleDelete = (fieldId: string) => {
+  const handleDelete = async (fieldId: string) => {
     if (
       confirm(
         "Are you sure you want to delete this custom field? This will remove it from all contacts.",
       )
     ) {
-      onCustomFieldsChange(
-        customFields.filter((field) => field.id !== fieldId),
-      );
+      try {
+        const response = await fetch(`/api/custom-fields/${fieldId}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          const message = await parseErrorMessage(response);
+          toast.error(message);
+          return;
+        }
+        onCustomFieldsChange(
+          customFields.filter((field) => field.id !== fieldId),
+        );
+        toast.success("Custom field deleted");
+      } catch (error) {
+        console.error("Failed to delete custom field:", error);
+        toast.error("Failed to delete custom field");
+      }
     }
   };
 
@@ -144,9 +234,14 @@ export function CustomFieldsManager({
     }));
   };
 
+  const generatedName = React.useMemo(
+    () => toInternalFieldName(formData.label || ""),
+    [formData.label],
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden">
+      <DialogContent className="flex max-h-[92vh] w-[calc(100vw-2rem)] max-w-4xl flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Custom Fields Manager</DialogTitle>
           <DialogDescription>
@@ -155,7 +250,7 @@ export function CustomFieldsManager({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 space-y-6 overflow-auto">
+        <div className="min-h-0 flex-1 space-y-6 overflow-auto p-2">
           {/* Existing Fields */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Existing Custom Fields</h3>
@@ -230,23 +325,7 @@ export function CustomFieldsManager({
               {editingField ? "Edit" : "Add New"} Custom Field
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fieldName">Field Name *</Label>
-                  <Input
-                    id="fieldName"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    placeholder="e.g., voterStatus, phonePreference"
-                    required
-                  />
-                  <p className="text-muted-foreground text-xs">
-                    Used internally. Use camelCase, no spaces or special
-                    characters.
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="fieldLabel">Display Label *</Label>
                   <Input
@@ -262,12 +341,26 @@ export function CustomFieldsManager({
                     required
                   />
                   <p className="text-muted-foreground text-xs">
-                    What users will see in forms and tables.
+                    What users will see in records and forms.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fieldName">Internal Name (Optional)</Label>
+                  <Input
+                    id="fieldName"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    placeholder={generatedName || "auto-generated from label"}
+                  />
+                  <p className="text-muted-foreground text-xs">
+                    Auto-generated if left blank.
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="fieldType">Field Type</Label>
                   <Select
@@ -276,10 +369,10 @@ export function CustomFieldsManager({
                       setFormData((prev) => ({ ...prev, type: value }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-lg border-[#D3D3D3] bg-white focus:ring-blue-500 dark:bg-[#2D2D2D]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg border border-[#D3D3D3] bg-white p-1.5 dark:bg-[#2D2D2D]">
                       <SelectItem value="text">Text</SelectItem>
                       <SelectItem value="number">Number</SelectItem>
                       <SelectItem value="date">Date</SelectItem>
@@ -364,7 +457,7 @@ export function CustomFieldsManager({
               )}
 
               <div className="flex gap-2">
-                <Button type="submit">
+                <Button type="submit" disabled={isSubmitting}>
                   {editingField ? "Update" : "Add"} Field
                 </Button>
                 {editingField && (

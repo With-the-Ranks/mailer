@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDownIcon } from "lucide-react";
 
+import type { CustomFieldDefinition } from "@/components/custom-fields-manager";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,7 @@ import { ContactActions } from "./contact-actions";
 interface CreateColumnsProps {
   onUpdateContact?: (contact: Contact) => void;
   onDeleteContact?: (id: string) => void;
+  customFields?: CustomFieldDefinition[];
   viewOnly?: boolean;
 }
 
@@ -43,6 +45,7 @@ function _customFieldsFilter(
 export function createColumns({
   onUpdateContact,
   onDeleteContact,
+  customFields = [],
   viewOnly = false,
 }: CreateColumnsProps): ColumnDef<Contact>[] {
   const columns: ColumnDef<Contact>[] = [];
@@ -76,19 +79,24 @@ export function createColumns({
 
   columns.push({
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => (
-      <ContactActions
-        contact={row.original}
-        onUpdateContact={onUpdateContact}
-        onDeleteContact={onDeleteContact}
-        viewOnly={viewOnly}
-      />
+      <div data-no-row-click="true">
+        <ContactActions
+          contact={row.original}
+          onUpdateContact={onUpdateContact}
+          onDeleteContact={onDeleteContact}
+          customFields={customFields}
+          viewOnly={viewOnly}
+        />
+      </div>
     ),
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 120,
+    size: 124,
+    minSize: 108,
+    maxSize: 136,
   });
 
   columns.push(
@@ -97,6 +105,7 @@ export function createColumns({
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="bg-transparent text-inherit hover:bg-transparent dark:bg-transparent dark:text-white dark:hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Email
@@ -104,7 +113,9 @@ export function createColumns({
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="font-medium text-blue-600">{row.getValue("email")}</div>
+        <div className="font-medium text-blue-600">
+          {(row.getValue("email") as string) || "—"}
+        </div>
       ),
       size: 250,
     },
@@ -113,12 +124,14 @@ export function createColumns({
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="bg-transparent text-inherit hover:bg-transparent dark:bg-transparent dark:text-white dark:hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           First Name
           <ArrowUpDownIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
+      cell: ({ row }) => row.getValue("firstName") || "—",
       size: 150,
     },
     {
@@ -126,12 +139,14 @@ export function createColumns({
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="bg-transparent text-inherit hover:bg-transparent dark:bg-transparent dark:text-white dark:hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Last Name
           <ArrowUpDownIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
+      cell: ({ row }) => row.getValue("lastName") || "—",
       size: 150,
     },
     {
@@ -288,6 +303,7 @@ export function createColumns({
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="bg-transparent text-inherit hover:bg-transparent dark:bg-transparent dark:text-white dark:hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Created
@@ -312,6 +328,7 @@ export function createColumns({
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="bg-transparent text-inherit hover:bg-transparent dark:bg-transparent dark:text-white dark:hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Updated

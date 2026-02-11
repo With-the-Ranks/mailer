@@ -65,9 +65,28 @@ export default function PublicSignupForm({
 
       switch (field.type) {
         case "email":
+          fieldSchema = field.required
+            ? z.string().email("Please enter a valid email address")
+            : z
+                .union([
+                  z.string().email("Please enter a valid email address"),
+                  z.literal(""),
+                ])
+                .optional();
+          break;
+        case "phone":
+          fieldSchema = field.required
+            ? z.string().min(10, "Please enter a valid phone number")
+            : z
+                .union([
+                  z.string().min(10, "Please enter a valid phone number"),
+                  z.literal(""),
+                ])
+                .optional();
+          break;
+        case "name":
         case "firstName":
         case "lastName":
-        case "phone":
         case "defaultAddressZip":
         case "defaultAddressCity":
         case "defaultAddressProvinceCode":
@@ -75,41 +94,35 @@ export default function PublicSignupForm({
         case "defaultAddressAddress1":
         case "defaultAddressAddress2":
         case "defaultAddressCompany":
-        case "note":
         case "tags":
-          if (field.type === "email") {
-            fieldSchema = z
-              .string()
-              .email("Please enter a valid email address");
-          } else if (field.type === "phone") {
-            fieldSchema = z
-              .string()
-              .min(10, "Please enter a valid phone number");
-          } else {
-            fieldSchema = z.string().min(1, "This field is required");
-          }
+          fieldSchema = field.required
+            ? z.string().min(1, "This field is required")
+            : z.string().optional();
           break;
+        case "note":
         case "textarea":
-          fieldSchema = z.string().min(1, "This field is required");
+          fieldSchema = field.required
+            ? z.string().min(1, "This field is required")
+            : z.string().optional();
           break;
         case "select":
         case "radio":
-          fieldSchema = z.string().min(1, "Please select an option");
+          fieldSchema = field.required
+            ? z.string().min(1, "Please select an option")
+            : z.string().optional();
           break;
         case "checkbox":
-          fieldSchema = z
-            .array(z.string())
-            .min(1, "Please select at least one option");
+          fieldSchema = field.required
+            ? z.array(z.string()).min(1, "Please select at least one option")
+            : z.array(z.string()).optional();
           break;
         default:
-          fieldSchema = z.string().min(1, "This field is required");
+          fieldSchema = field.required
+            ? z.string().min(1, "This field is required")
+            : z.string().optional();
       }
 
-      if (field.required) {
-        schemaFields[field.name] = fieldSchema;
-      } else {
-        schemaFields[field.name] = fieldSchema.optional();
-      }
+      schemaFields[field.name] = fieldSchema;
     });
 
     return z.object(schemaFields);
@@ -201,6 +214,7 @@ export default function PublicSignupForm({
 
           {field.type === "text" ||
           field.type === "email" ||
+          field.type === "name" ||
           field.type === "firstName" ||
           field.type === "lastName" ||
           field.type === "phone" ||
@@ -211,7 +225,6 @@ export default function PublicSignupForm({
           field.type === "defaultAddressAddress1" ||
           field.type === "defaultAddressAddress2" ||
           field.type === "defaultAddressCompany" ||
-          field.type === "note" ||
           field.type === "tags" ? (
             <Input
               id={field.name}
@@ -238,7 +251,7 @@ export default function PublicSignupForm({
                   : undefined
               }
             />
-          ) : field.type === "textarea" ? (
+          ) : field.type === "note" || field.type === "textarea" ? (
             <Textarea
               id={field.name}
               placeholder={field.placeholder || undefined}

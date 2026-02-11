@@ -19,5 +19,10 @@ export async function POST(request: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(contacts);
+  return NextResponse.json(
+    contacts.map((contact) => ({
+      ...contact,
+      email: contact.email || "",
+    })),
+  );
 }

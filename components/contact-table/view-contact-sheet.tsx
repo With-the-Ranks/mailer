@@ -1,4 +1,6 @@
 import { EyeIcon } from "lucide-react";
+import * as React from "react";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,21 +20,41 @@ import type { Contact } from "@/lib/types";
 
 interface ViewContactSheetProps {
   contact: Contact;
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function ViewContactSheet({ contact }: ViewContactSheetProps) {
+export function ViewContactSheet({
+  contact,
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}: ViewContactSheetProps) {
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
+
+  const displayName =
+    `${contact.firstName || ""} ${contact.lastName || ""}`.trim() ||
+    contact.email ||
+    contact.phone ||
+    "Contact";
+
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <EyeIcon className="h-4 w-4" />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={setOpen}>
+      {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
+      {!trigger && !isControlled && (
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <EyeIcon className="h-4 w-4" />
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent className="w-[600px] overflow-y-auto sm:max-w-[600px]">
         <SheetHeader>
-          <SheetTitle>
-            {contact.firstName} {contact.lastName}
-          </SheetTitle>
+          <SheetTitle>{displayName}</SheetTitle>
           <SheetDescription>Contact details and information</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-6">
@@ -44,20 +66,20 @@ export function ViewContactSheet({ contact }: ViewContactSheetProps) {
                 <Label className="text-muted-foreground text-base font-medium">
                   First Name
                 </Label>
-                <p className="text-base">{contact.firstName}</p>
+                <p className="text-base">{contact.firstName || "—"}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground text-base font-medium">
                   Last Name
                 </Label>
-                <p className="text-base">{contact.lastName}</p>
+                <p className="text-base">{contact.lastName || "—"}</p>
               </div>
             </div>
             <div>
               <Label className="text-muted-foreground text-base font-medium">
                 Email
               </Label>
-              <p className="text-base text-blue-600">{contact.email}</p>
+              <p className="text-base text-blue-600">{contact.email || "—"}</p>
             </div>
             {contact.phone && (
               <div>

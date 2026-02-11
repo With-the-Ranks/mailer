@@ -5,6 +5,16 @@ import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
 
+const normalizeText = (value: string | null | undefined) => value?.trim() || "";
+const normalizeEmail = (value: string | null | undefined) => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+};
+const serializeContact = <T extends { email: string | null }>(contact: T) => ({
+  ...contact,
+  email: contact.email || "",
+});
+
 // GET: List contacts for a specific audience list owned by the user's org
 export async function GET(request: NextRequest) {
   try {
@@ -49,7 +59,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(contacts);
+    return NextResponse.json(contacts.map(serializeContact));
   } catch (error) {
     logError("Error fetching contacts", error);
     return NextResponse.json(
@@ -85,6 +95,10 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = result.data;
+    const normalizedEmail = normalizeEmail(validatedData.email);
+    const normalizedFirstName = normalizeText(validatedData.firstName);
+    const normalizedLastName = normalizeText(validatedData.lastName);
+    const normalizedPhone = validatedData.phone?.trim() || null;
 
     // Verify the audience list exists and user has access to the organization
     const audienceList = await prisma.audienceList.findUnique({
@@ -107,27 +121,35 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if contact with this email already exists in the list
-    const existingContact = await prisma.audience.findUnique({
-      where: {
-        audienceListId_email: {
-          audienceListId: validatedData.audienceListId,
-          email: validatedData.email,
+    if (normalizedEmail) {
+      const existingContact = await prisma.audience.findUnique({
+        where: {
+          audienceListId_email: {
+            audienceListId: validatedData.audienceListId,
+            email: normalizedEmail,
+          },
         },
-      },
-    });
+      });
 
-    if (existingContact) {
-      return NextResponse.json(
-        { error: "Contact with this email already exists" },
-        { status: 409 },
-      );
+      if (existingContact) {
+        return NextResponse.json(
+          { error: "Contact with this email already exists" },
+          { status: 409 },
+        );
+      }
     }
 
     const contact = await prisma.audience.create({
-      data: validatedData as any,
+      data: {
+        ...validatedData,
+        email: normalizedEmail,
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
+        phone: normalizedPhone,
+      } as any,
     });
 
-    return NextResponse.json(contact, { status: 201 });
+    return NextResponse.json(serializeContact(contact), { status: 201 });
   } catch (error) {
     logError("Error creating contact", error);
 
@@ -135,6 +157,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Invalid JSON in request body" },
         { status: 400 },
+      );
+    }
+    if (
+      typeof error === "object" &&
+      error &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "Contact with this email already exists" },
+        { status: 409 },
       );
     }
 

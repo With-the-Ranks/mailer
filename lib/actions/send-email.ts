@@ -336,6 +336,22 @@ export const sendBulkEmail = async ({
     customFields: unknown;
     audienceListId: string;
   }[] = [];
+  const toRecipients = <
+    T extends {
+      email: string | null;
+      firstName: string;
+      lastName: string;
+      customFields: unknown;
+      audienceListId: string;
+    },
+  >(
+    items: T[],
+  ) =>
+    items.flatMap((item) => {
+      const normalizedEmail = item.email?.trim();
+      if (!normalizedEmail) return [];
+      return [{ ...item, email: normalizedEmail }];
+    });
 
   if (segmentId) {
     const segment = await prisma.segment.findUnique({
@@ -353,12 +369,14 @@ export const sendBulkEmail = async ({
       filterCriteria,
     );
     // Add filter to exclude unsubscribed contacts
-    recipients = await prisma.audience.findMany({
-      where: {
-        ...whereClause,
-        isUnsubscribed: false,
-      },
-    });
+    recipients = toRecipients(
+      await prisma.audience.findMany({
+        where: {
+          ...whereClause,
+          isUnsubscribed: false,
+        },
+      }),
+    );
   } else if (audienceListId) {
     const audienceList = await prisma.audienceList.findUnique({
       where: { id: audienceListId },
@@ -371,7 +389,7 @@ export const sendBulkEmail = async ({
       },
     });
     if (!audienceList) return { error: "Audience list not found" };
-    recipients = audienceList.audiences;
+    recipients = toRecipients(audienceList.audiences);
   } else {
     // No segment and no audienceListId: use org's first audience list (all contacts)
     const firstList = await prisma.audienceList.findFirst({
@@ -387,7 +405,7 @@ export const sendBulkEmail = async ({
         error:
           "No audience list found for this organization. Create an audience list first.",
       };
-    recipients = firstList.audiences;
+    recipients = toRecipients(firstList.audiences);
   }
 
   if (recipients.length === 0) return { error: "No recipients found" };

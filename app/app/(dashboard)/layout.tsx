@@ -29,7 +29,7 @@ export default async function DashboardLayout({
       <div className="bg-dotted min-h-screen w-full overflow-x-hidden pt-5 dark:bg-[#0D0D0D]">
         <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
         {organizationId && onboarding && (
-          <div className="fixed top-24 right-6 z-40 hidden w-[26rem] justify-end xl:flex">
+          <div className="fixed top-24 right-6 z-30 hidden w-[26rem] justify-end xl:flex">
             <DashboardOnboardingRail
               organizationId={organizationId}
               userId={userId}
@@ -47,6 +47,7 @@ export default async function DashboardLayout({
                 userRole={userRole}
                 onboarding={onboarding}
                 className="mb-6"
+                collapsedClassName="fixed top-4 right-4 z-30"
               />
             </div>
           )}

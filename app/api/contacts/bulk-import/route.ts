@@ -6,6 +6,12 @@ import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
 
+const normalizeText = (value: string | null | undefined) => value?.trim() || "";
+const normalizeEmail = (value: string | null | undefined) => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+};
+
 const bulkImportSchema = z.object({
   contacts: z.array(contactSchema),
   audienceListId: z.string().min(1, "Audience list ID is required"),
@@ -68,12 +74,17 @@ export async function POST(request: NextRequest) {
 
     for (const contactData of contacts) {
       try {
-        if (skipDuplicates) {
+        const normalizedEmail = normalizeEmail(contactData.email);
+        const normalizedFirstName = normalizeText(contactData.firstName);
+        const normalizedLastName = normalizeText(contactData.lastName);
+        const normalizedPhone = contactData.phone?.trim() || null;
+
+        if (skipDuplicates && normalizedEmail) {
           const existingContact = await prisma.audience.findUnique({
             where: {
               audienceListId_email: {
                 audienceListId,
-                email: contactData.email,
+                email: normalizedEmail,
               },
             },
           });
@@ -83,7 +94,14 @@ export async function POST(request: NextRequest) {
           }
         }
         await prisma.audience.create({
-          data: { ...contactData, audienceListId } as any,
+          data: {
+            ...contactData,
+            email: normalizedEmail,
+            firstName: normalizedFirstName,
+            lastName: normalizedLastName,
+            phone: normalizedPhone,
+            audienceListId,
+          } as any,
         });
         results.successful++;
       } catch (error) {

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 
 import type { OnboardingState } from "@/lib/onboarding";
+import { cn } from "@/lib/utils";
 
 import DashboardOnboarding from "./dashboard-onboarding";
 import { Button } from "./ui/button";
@@ -15,6 +16,7 @@ type DashboardOnboardingRailProps = {
   userRole: "ADMIN" | "MANAGER" | null;
   onboarding: OnboardingState;
   className?: string;
+  collapsedClassName?: string;
 };
 
 type OnboardingStateResponse = {
@@ -33,6 +35,7 @@ export default function DashboardOnboardingRail({
   userRole,
   onboarding,
   className,
+  collapsedClassName,
 }: DashboardOnboardingRailProps) {
   const [collapsed, setCollapsed] = useState(false);
   const fallbackState: OnboardingStateResponse = {
@@ -91,7 +94,7 @@ export default function DashboardOnboardingRail({
 
   if (collapsed && activeOnboarding.shouldShow) {
     return (
-      <div className={className}>
+      <div className={cn(className, collapsedClassName)}>
         <Button
           type="button"
           size="icon"

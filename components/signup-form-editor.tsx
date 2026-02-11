@@ -87,8 +87,9 @@ interface SignupFormEditorProps {
 // Field types that match existing contact fields
 const FIELD_TYPES = [
   { value: "email", label: "Email Address", required: true },
-  { value: "firstName", label: "First Name", required: true },
-  { value: "lastName", label: "Last Name", required: true },
+  { value: "name", label: "Full Name", required: false },
+  { value: "firstName", label: "First Name", required: false },
+  { value: "lastName", label: "Last Name", required: false },
   { value: "phone", label: "Phone Number", required: false },
   { value: "defaultAddressZip", label: "Zip Code", required: false },
   { value: "defaultAddressCity", label: "City", required: false },
@@ -101,7 +102,8 @@ const FIELD_TYPES = [
   { value: "defaultAddressAddress1", label: "Street Address", required: false },
   { value: "defaultAddressAddress2", label: "Address Line 2", required: false },
   { value: "defaultAddressCompany", label: "Company", required: false },
-  { value: "note", label: "Notes", required: false },
+  { value: "note", label: "Comments", required: false },
+  { value: "textarea", label: "Long Text", required: false },
   { value: "tags", label: "Tags", required: false },
 ];
 
@@ -382,22 +384,13 @@ export default function SignupFormEditor({
       order: 0,
     },
     {
-      name: "firstName",
-      label: "First Name",
-      type: "firstName",
-      required: true,
-      placeholder: "Enter your first name",
+      name: "name",
+      label: "Full Name",
+      type: "name",
+      required: false,
+      placeholder: "Enter your full name",
       options: [],
       order: 1,
-    },
-    {
-      name: "lastName",
-      label: "Last Name",
-      type: "lastName",
-      required: true,
-      placeholder: "Enter your last name",
-      options: [],
-      order: 2,
     },
   ];
   const [fields, setFields] = useState<SignupFormField[]>(

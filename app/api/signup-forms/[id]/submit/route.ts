@@ -4,6 +4,19 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 
+function splitFullName(name: string | undefined) {
+  const trimmed = name?.trim() || "";
+  if (!trimmed) return { firstName: "", lastName: "" };
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" };
+  }
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -42,16 +55,31 @@ export async function POST(
       );
     }
 
+    const normalizedEmail = formData.email?.trim() || "";
+    if (!normalizedEmail) {
+      return NextResponse.json(
+        { error: "Email is required for signup submissions" },
+        { status: 400 },
+      );
+    }
+
     // Create or update audience member
+    const parsedName = splitFullName(formData.name);
     const audienceData: any = {
-      email: formData.email || "",
-      firstName: formData.firstName || "",
-      lastName: formData.lastName || "",
+      email: normalizedEmail,
+      firstName: formData.firstName?.trim() || parsedName.firstName,
+      lastName: formData.lastName?.trim() || parsedName.lastName,
+      customFields: {},
     };
 
     // Map form data to audience fields
     Object.keys(formData).forEach((key) => {
-      if (key !== "email" && key !== "firstName" && key !== "lastName") {
+      if (
+        key !== "email" &&
+        key !== "name" &&
+        key !== "firstName" &&
+        key !== "lastName"
+      ) {
         // Map to corresponding audience field
         const fieldMapping: Record<string, string> = {
           phone: "phone",
@@ -66,12 +94,32 @@ export async function POST(
           tags: "tags",
         };
 
+        if (key === "textarea" && formData[key]) {
+          audienceData.customFields = {
+            ...(audienceData.customFields || {}),
+            [key]: formData[key],
+          };
+          return;
+        }
+
         const audienceField = fieldMapping[key];
         if (audienceField && formData[key]) {
           audienceData[audienceField] = formData[key];
+          return;
+        }
+
+        if (formData[key]) {
+          audienceData.customFields = {
+            ...(audienceData.customFields || {}),
+            [key]: formData[key],
+          };
         }
       }
     });
+
+    if (!Object.keys(audienceData.customFields || {}).length) {
+      delete audienceData.customFields;
+    }
 
     // Upsert audience member
     const audience = await prisma.audience.upsert({

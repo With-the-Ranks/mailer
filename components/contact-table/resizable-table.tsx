@@ -17,12 +17,14 @@ interface ResizableTableProps<T> {
   table: any;
   data: T[];
   columns: ColumnDef<T>[];
+  onRowClick?: (row: T) => void;
 }
 
 export function ResizableTable<T>({
   table,
   data: _data,
   columns,
+  onRowClick,
 }: ResizableTableProps<T>) {
   const [columnSizing, _setColumnSizing] = React.useState<
     Record<string, number>
@@ -35,27 +37,42 @@ export function ResizableTable<T>({
 
   const rowCount = table.getRowModel().rows?.length ?? 0;
   const isEmpty = rowCount === 0;
+  const hasRowClick = Boolean(onRowClick);
+  const isInteractiveTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false;
+    return Boolean(
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest("input") ||
+      target.closest("textarea") ||
+      target.closest("[role='menuitem']") ||
+      target.closest("[role='checkbox']") ||
+      target.closest("[data-no-row-click='true']"),
+    );
+  };
 
   const tableMinHeight = "min-h-[20rem] sm:min-h-[30rem]";
+  const tableBodyMinHeight = "min-h-[17rem] sm:min-h-[27rem]";
   const tableWidth = isEmpty ? "100%" : table.getCenterTotalSize();
+  const tableStyle = {
+    width: tableWidth,
+    minWidth: isEmpty ? undefined : "100%",
+  } as const;
 
   return (
     <div
       className={cn(
-        "relative overflow-x-auto overflow-y-hidden rounded-lg border bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]",
+        "relative overflow-x-auto overflow-y-hidden",
         tableMinHeight,
       )}
     >
       <table
-        style={{
-          width: tableWidth,
-          minWidth: isEmpty ? undefined : "100%",
-        }}
+        style={tableStyle}
         className={cn(
-          "w-full caption-bottom bg-white text-base dark:bg-[#2D2D2D]",
+          "w-full table-fixed caption-bottom bg-transparent text-base",
         )}
       >
-        <TableHeader>
+        <TableHeader className="bg-transparent [&_tr]:border-b-0">
           {table
             .getHeaderGroups()
             .map(
@@ -63,12 +80,22 @@ export function ResizableTable<T>({
                 id: React.Key | null | undefined;
                 headers: any[];
               }) => (
-                <TableRow key={headerGroup.id} className="dark:bg-[#252525]">
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-0 bg-transparent hover:bg-transparent"
+                >
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
                       style={{ width: header.getSize() }}
-                      className="relative whitespace-nowrap dark:text-gray-400"
+                      className={cn(
+                        "relative py-2 text-left text-xs font-bold tracking-wider whitespace-nowrap uppercase sm:py-3 dark:text-white [&_button]:h-auto [&_button]:px-0 [&_button]:py-0 [&_button]:text-xs [&_button]:font-bold [&_button]:tracking-wider [&_button]:uppercase [&_button:hover]:bg-transparent",
+                        header.column.id === "select"
+                          ? "px-2 sm:px-3"
+                          : header.column.id === "actions"
+                            ? "px-2 sm:px-3"
+                            : "px-3 sm:px-6",
+                      )}
                     >
                       {header.isPlaceholder ? null : (
                         <span className="whitespace-nowrap">
@@ -96,62 +123,103 @@ export function ResizableTable<T>({
               ),
             )}
         </TableHeader>
-        <TableBody>
-          {rowCount ? (
-            table
-              .getRowModel()
-              .rows.map(
-                (row: {
-                  id: React.Key | null | undefined;
-                  getIsSelected: () => any;
-                  getVisibleCells: () => any[];
-                }) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        style={{ width: cell.column.getSize() }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ),
-              )
-          ) : (
-            <>
-              <TableRow className="h-full [&>td]:border-0 [&>td]:p-0">
+      </table>
+      <div
+        style={tableStyle}
+        className={cn(
+          "relative overflow-hidden rounded-lg bg-white ring-1 ring-[#D3D3D3] dark:bg-[#2D2D2D]",
+          tableBodyMinHeight,
+        )}
+      >
+        <table
+          style={tableStyle}
+          className={cn(
+            "w-full table-fixed caption-bottom bg-transparent text-base",
+          )}
+        >
+          <TableBody className="bg-transparent">
+            {rowCount ? (
+              table
+                .getRowModel()
+                .rows.map(
+                  (row: {
+                    id: React.Key | null | undefined;
+                    getIsSelected: () => any;
+                    original: T;
+                    getVisibleCells: () => any[];
+                  }) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      role={hasRowClick ? "button" : undefined}
+                      tabIndex={hasRowClick ? 0 : undefined}
+                      className={cn(
+                        "border-[#D3D3D3] dark:hover:bg-neutral-800",
+                        hasRowClick &&
+                          "cursor-pointer hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset",
+                      )}
+                      onClick={(event) => {
+                        if (!onRowClick) return;
+                        if (isInteractiveTarget(event.target)) return;
+                        onRowClick(row.original);
+                      }}
+                      onKeyDown={(event) => {
+                        if (!onRowClick) return;
+                        if (isInteractiveTarget(event.target)) return;
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        onRowClick(row.original);
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          style={{ width: cell.column.getSize() }}
+                          className={cn(
+                            "py-3 sm:py-4",
+                            cell.column.id === "select"
+                              ? "px-2 sm:px-3"
+                              : cell.column.id === "actions"
+                                ? "px-2 sm:px-3"
+                                : "px-3 sm:px-6",
+                          )}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ),
+                )
+            ) : (
+              <TableRow className="[&>td]:border-0 [&>td]:p-0">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-full min-h-68 w-full sm:min-h-108"
+                  className="h-[17rem] w-full sm:h-[27rem]"
                   style={{ verticalAlign: "top" }}
                 />
               </TableRow>
-            </>
-          )}
-        </TableBody>
-      </table>
-      {isEmpty && (
-        <div
-          className="pointer-events-none absolute right-0 bottom-0 left-0 flex flex-col items-center justify-center px-3 py-6 sm:px-4 sm:py-8"
-          style={{ top: "3rem" }}
-          aria-hidden
-        >
-          <div className="flex min-h-68 flex-1 flex-col items-center justify-center gap-3 text-center sm:min-h-108 sm:gap-4">
-            <EmptyState
-              icon="table-properties"
-              message="No contacts in this list"
-              compact
-            />
+            )}
+          </TableBody>
+        </table>
+
+        {isEmpty && (
+          <div
+            className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-3 py-6 sm:px-4 sm:py-8"
+            aria-hidden
+          >
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-center sm:gap-4">
+              <EmptyState
+                icon="table-properties"
+                message="No contacts in this list"
+                compact
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -29,6 +29,7 @@ import { ContactTable } from "./contact-table";
 import { AddContactSheet } from "./contact-table/add-contact-sheet";
 import { ColumnVisibility } from "./contact-table/column-visibility";
 import { createColumns } from "./contact-table/table-columns";
+import { ViewContactSheet } from "./contact-table/view-contact-sheet";
 import { TableFilters } from "./contact-table/table-filters";
 import {
   type CustomFieldDefinition,
@@ -57,7 +58,7 @@ interface ContactListProps {
 function convertAudienceToContact(audience: any): Contact {
   return {
     id: audience.id,
-    email: audience.email,
+    email: audience.email || "",
     firstName: audience.firstName,
     lastName: audience.lastName,
     phone: audience.phone,
@@ -162,6 +163,10 @@ export function ContactList({
 
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [contactToDelete, setContactToDelete] = React.useState<string | null>(
+    null,
+  );
+  const [viewContactOpen, setViewContactOpen] = React.useState(false);
+  const [selectedContact, setSelectedContact] = React.useState<Contact | null>(
     null,
   );
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = React.useState(false);
@@ -361,17 +366,23 @@ export function ContactList({
   };
   const customFieldKeys = React.useMemo(() => {
     const keys = new Set<string>();
+    customFields.forEach((field) => {
+      if (field.name?.trim()) {
+        keys.add(field.name.trim());
+      }
+    });
     contacts.forEach((contact) => {
       if (contact.customFields) {
         Object.keys(contact.customFields).forEach((key) => keys.add(key));
       }
     });
     return Array.from(keys);
-  }, [contacts]);
+  }, [contacts, customFields]);
   const columns = React.useMemo(() => {
     const realColumns = createColumns({
       onUpdateContact: handleUpdateContact,
       onDeleteContact: handleDeleteContact,
+      customFields,
     });
 
     const hiddenCustomFieldColumns = customFieldKeys.map((key) => ({
@@ -385,7 +396,7 @@ export function ContactList({
     }));
 
     return [...realColumns, ...hiddenCustomFieldColumns];
-  }, [handleUpdateContact, handleDeleteContact, customFieldKeys]);
+  }, [handleUpdateContact, handleDeleteContact, customFieldKeys, customFields]);
 
   // Create filter functions for each custom field key
   const filterFns = React.useMemo(() => {
@@ -513,6 +524,10 @@ export function ContactList({
     Object.values(activeFilters).some((v) =>
       Array.isArray(v) ? v.length > 0 : !!v,
     );
+  const handleRowClick = React.useCallback((contact: Contact) => {
+    setSelectedContact(contact);
+    setViewContactOpen(true);
+  }, []);
 
   return (
     <div className="flex h-full w-full max-w-full flex-col space-y-4 px-0 py-4 sm:px-4">
@@ -609,10 +624,18 @@ export function ContactList({
         table={table}
         columns={columns}
         contacts={contacts}
+        onRowClick={handleRowClick}
         pagination={pagination}
         setPagination={setPagination}
         selectedRowCount={selectedRowCount}
       />
+      {selectedContact && (
+        <ViewContactSheet
+          contact={selectedContact}
+          open={viewContactOpen}
+          onOpenChange={setViewContactOpen}
+        />
+      )}
       {/* Delete Confirmation Dialogs */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
