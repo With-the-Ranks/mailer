@@ -41,6 +41,10 @@ interface SignupForm {
 
 interface PublicSignupFormProps {
   signupForm: SignupForm;
+  attribution?: {
+    source?: string;
+    sourceCode?: string;
+  };
   theme?: {
     buttonBg?: string;
     buttonText?: string;
@@ -51,10 +55,13 @@ interface PublicSignupFormProps {
 
 export default function PublicSignupForm({
   signupForm,
+  attribution,
   theme,
 }: PublicSignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+  const [submittedAt] = useState(() => Date.now());
 
   // Create validation schema based on form fields
   const createValidationSchema = (fields: SignupFormField[]) => {
@@ -144,6 +151,17 @@ export default function PublicSignupForm({
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      const payload = {
+        ...data,
+        _hp: honeypot,
+        _submittedAt: submittedAt,
+        _source: attribution?.source || "",
+        _sourceCode: attribution?.sourceCode || "",
+        _pageUrl:
+          typeof window !== "undefined" ? window.location.href : undefined,
+        _referrer:
+          typeof document !== "undefined" ? document.referrer : undefined,
+      };
       const response = await fetch(
         `/api/signup-forms/${signupForm.id}/submit`,
         {
@@ -151,7 +169,7 @@ export default function PublicSignupForm({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -204,7 +222,20 @@ export default function PublicSignupForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="relative space-y-6">
+      <div className="pointer-events-none absolute -top-[9999px] -left-[9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="company-field">Company</label>
+        <input
+          id="company-field"
+          name="company"
+          type="text"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
+      </div>
       {signupForm.fields.map((field) => (
         <div key={field.id} className="space-y-2">
           <Label htmlFor={field.name}>

@@ -35,7 +35,7 @@ const getColumnGroups = (customFields: string[]) => ({
   "Organizing Data": ["tags"],
   "Custom Fields": customFields,
   Additional: ["note"],
-  Metadata: ["createdAt", "updatedAt"],
+  Metadata: ["createdAt", "updatedAt", "signupFormName", "signupSource"],
 });
 
 export function ColumnVisibility({
@@ -49,6 +49,8 @@ export function ColumnVisibility({
       select: "Select",
       actions: "Actions",
       email: "Email",
+      signupFormName: "Signup Form",
+      signupSource: "Source",
       firstName: "First Name",
       lastName: "Last Name",
       phone: "Phone",

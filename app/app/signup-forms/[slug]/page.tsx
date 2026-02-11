@@ -5,6 +5,15 @@ import PublicSignupForm from "@/components/public-signup-form";
 import { isValidHexColor } from "@/lib/color-validation";
 import prisma from "@/lib/prisma";
 
+function getQueryValue(
+  search: { [key: string]: string | string[] | undefined },
+  key: string,
+) {
+  const value = search[key];
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+}
+
 export default async function PublicSignupFormPage({
   params,
   searchParams,
@@ -40,6 +49,14 @@ export default async function PublicSignupFormPage({
   const bgColor = search.bg as string | undefined;
   const embed = search.embed === "true";
   const hideTitle = search.hideTitle === "true" || search.notitle === "true";
+  const sourceCode =
+    getQueryValue(search, "sourceCode") ||
+    getQueryValue(search, "source_code") ||
+    getQueryValue(search, "sc");
+  const source =
+    getQueryValue(search, "source") ||
+    getQueryValue(search, "utm_source") ||
+    (embed ? "embed" : "direct");
 
   // Apply custom theme styles
   const getContainerStyle = () => {
@@ -78,6 +95,10 @@ export default async function PublicSignupFormPage({
             )}
             <PublicSignupForm
               signupForm={signupForm}
+              attribution={{
+                source,
+                sourceCode,
+              }}
               theme={{
                 buttonBg: (() => {
                   const btnBg = search.buttonBg as string | undefined;

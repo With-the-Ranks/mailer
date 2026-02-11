@@ -10,10 +10,30 @@ const normalizeEmail = (value: string | null | undefined) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
 };
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+const readString = (value: unknown) =>
+  typeof value === "string" ? value.trim() : "";
 const serializeContact = <T extends { email: string | null }>(contact: T) => ({
   ...contact,
   email: contact.email || "",
 });
+const extractSubmissionSource = (formData: unknown) => {
+  if (!isRecord(formData)) return { source: "", sourceCode: "" };
+
+  const meta = isRecord(formData._meta) ? formData._meta : {};
+  const sourceCode =
+    readString(meta.sourceCode) ||
+    readString(formData.sourceCode) ||
+    readString(formData.source_code);
+  const source =
+    sourceCode ||
+    readString(meta.source) ||
+    readString(formData.source) ||
+    readString(formData.utm_source);
+
+  return { source, sourceCode };
+};
 
 // GET: List contacts for a specific audience list owned by the user's org
 export async function GET(request: NextRequest) {
@@ -57,9 +77,41 @@ export async function GET(request: NextRequest) {
     const contacts = await prisma.audience.findMany({
       where: { audienceListId },
       orderBy: { createdAt: "desc" },
+      include: {
+        signupSubmissions: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          include: {
+            signupForm: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    return NextResponse.json(contacts.map(serializeContact));
+    const contactsWithAttribution = contacts.map((contact) => {
+      const { signupSubmissions, ...contactWithoutSubmissions } = contact;
+      const latestSubmission = contact.signupSubmissions[0];
+      const { source, sourceCode } = extractSubmissionSource(
+        latestSubmission?.formData,
+      );
+
+      return serializeContact({
+        ...contactWithoutSubmissions,
+        signupFormId: latestSubmission?.signupForm?.id || "",
+        signupFormName: latestSubmission?.signupForm?.name || "Dashboard",
+        signupFormSlug: latestSubmission?.signupForm?.slug || "",
+        signupSource: source || "",
+        signupSourceCode: sourceCode,
+      });
+    });
+
+    return NextResponse.json(contactsWithAttribution);
   } catch (error) {
     logError("Error fetching contacts", error);
     return NextResponse.json(

@@ -276,6 +276,28 @@ export function ViewContactSheet({
           <Separator />
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Metadata</h3>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground text-base font-medium">
+                Signup Form
+              </Label>
+              <p className="text-base">
+                {contact.signupFormName || "Dashboard"}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground text-base font-medium">
+                Source
+              </Label>
+              <p className="text-base">{contact.signupSource || "—"}</p>
+            </div>
+            {contact.signupSourceCode && (
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-base font-medium">
+                  Source Code
+                </Label>
+                <p className="text-base">{contact.signupSourceCode}</p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               {contact.createdAt && (
                 <div>

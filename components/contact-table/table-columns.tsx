@@ -348,6 +348,18 @@ export function createColumns({
       },
       size: 180,
     },
+    {
+      accessorKey: "signupFormName",
+      header: "Signup Form",
+      cell: ({ row }) => row.getValue("signupFormName") || "—",
+      size: 180,
+    },
+    {
+      accessorKey: "signupSource",
+      header: "Source",
+      cell: ({ row }) => row.getValue("signupSource") || "—",
+      size: 150,
+    },
   );
 
   return columns;
