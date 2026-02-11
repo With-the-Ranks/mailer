@@ -9,6 +9,9 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      # Needed for prisma.config + runtime imports during tests
+      DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock"
     steps:
       - uses: actions/checkout@v4
 
@@ -26,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Run Vitest tests
         run: pnpm test
-        env:
-          # Unit tests mock prisma, but some imports may check for this
-          DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock"
