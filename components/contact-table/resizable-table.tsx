@@ -127,7 +127,7 @@ export function ResizableTable<T>({
       <div
         style={tableStyle}
         className={cn(
-          "relative overflow-hidden rounded-lg bg-white ring-1 ring-[#D3D3D3] dark:bg-[#2D2D2D]",
+          "relative overflow-hidden rounded-lg bg-white shadow-[inset_0_0_0_1px_#D3D3D3] dark:bg-[#2D2D2D] dark:shadow-[inset_0_0_0_1px_#4A4A4A]",
           tableBodyMinHeight,
         )}
       >

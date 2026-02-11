@@ -532,7 +532,7 @@ export function EditContactSheet({
 
           <SheetFooter className="flex-row items-center justify-between border-t bg-white px-6 py-4 dark:bg-[#2D2D2D]">
             <p className="text-muted-foreground text-xs">
-              Changes are saved when you click Update Contact.
+              Custom field changes are saved when you click Update Record.
             </p>
             <div className="flex gap-2">
               <SheetClose asChild>
@@ -540,7 +540,7 @@ export function EditContactSheet({
                   Cancel
                 </Button>
               </SheetClose>
-              <Button type="submit">Update Contact</Button>
+              <Button type="submit">Update Record</Button>
             </div>
           </SheetFooter>
         </form>
