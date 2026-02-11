@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment-timezone";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ export function Step4ScheduleSend({
 }: Step4ScheduleSendProps) {
   const { formData, organizationId, updateFormData } = useWizard();
   const [mode, setMode] = useState<SendMode>("now");
+  const didInitMode = useRef(false);
   const [testEmail, setTestEmail] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [localScheduledDate, setLocalScheduledDate] = useState<Moment>(() =>
@@ -35,6 +36,16 @@ export function Step4ScheduleSend({
       ? moment(formData.scheduledTime)
       : moment().tz(timezone).add(1, "hour"),
   );
+
+  // Default to "Send Now" each time user enters this step and clear stale schedule state.
+  useEffect(() => {
+    if (didInitMode.current) return;
+    didInitMode.current = true;
+    setMode("now");
+    if (formData.scheduledTime) {
+      updateFormData({ scheduledTime: null });
+    }
+  }, [formData.scheduledTime, updateFormData]);
 
   // Sync mode and localScheduledDate to formData.scheduledTime
   const setModeAndSync = (m: SendMode) => {

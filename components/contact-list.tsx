@@ -569,6 +569,9 @@ export function ContactList({
   const selectedRowCount = Object.keys(rowSelection).filter(
     (key) => (rowSelection as any)[key],
   ).length;
+  const selectedContacts = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
   const filteredContacts = table
     .getFilteredRowModel()
     .rows.map((row) => row.original);
@@ -635,9 +638,12 @@ export function ContactList({
           customFields={customFields}
           onAddContact={handleAddContact}
         />
-        {hasActiveFilters && (
+        {(hasActiveFilters || selectedContacts.length > 0) && (
           <CreateSegmentDialog
             listId={listId}
+            selectedContacts={
+              selectedContacts.length > 0 ? selectedContacts : undefined
+            }
             filteredContacts={filteredContacts}
             activeFilters={activeFilters}
             searchValue={searchValue}

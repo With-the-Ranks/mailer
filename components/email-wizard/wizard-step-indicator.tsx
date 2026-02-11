@@ -121,9 +121,7 @@ export function WizardStepIndicator({
           className="flex shrink-0 items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-2 text-sm text-white hover:bg-blue-800 sm:px-4 sm:text-base dark:bg-blue-600 dark:hover:bg-blue-700"
         >
           {isFinalStep ? (
-            <>
-              {finalButtonLabel} <span>&gt;</span>
-            </>
+            <>{finalButtonLabel}</>
           ) : (
             <>
               Next <span>&gt;</span>

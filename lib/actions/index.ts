@@ -87,6 +87,7 @@ export const createOrganization = async (
       data: {
         name,
         description,
+        logo: null,
       },
     });
 

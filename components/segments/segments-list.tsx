@@ -55,6 +55,39 @@ interface Segment {
   organizationId: string;
 }
 
+const FILTER_LABELS: Record<string, string> = {
+  tags: "Tags",
+  defaultAddressCompany: "Organization",
+  defaultAddressCountryCode: "Country",
+  defaultAddressProvinceCode: "Precinct",
+  defaultAddressCity: "City",
+  defaultAddressZip: "Zip Code",
+  defaultAddressPhone: "Phone",
+  defaultAddressAddress1: "Address",
+  defaultAddressAddress2: "Address 2",
+};
+
+function formatFilterLabel(key: string) {
+  if (FILTER_LABELS[key]) return FILTER_LABELS[key];
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function summarizeFilterValue(value: unknown) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "";
+    const values = value.map((v) => String(v));
+    const preview = values.slice(0, 2).join(", ");
+    return values.length > 2 ? `${preview} +${values.length - 2}` : preview;
+  }
+  if (value == null) return "";
+  const text = String(value).trim();
+  return text;
+}
+
 export function SegmentsList({
   orgId,
   audienceListId,
@@ -150,29 +183,37 @@ export function SegmentsList({
   };
 
   const getFilterSummary = (filterCriteria: Record<string, any>) => {
-    const summary = [];
-
-    if (filterCriteria.searchValue) {
-      summary.push(`Search: "${filterCriteria.searchValue}"`);
+    const summary: string[] = [];
+    if (
+      Array.isArray(filterCriteria.contactIds) &&
+      filterCriteria.contactIds.length > 0
+    ) {
+      summary.push(`Manual selection (${filterCriteria.contactIds.length})`);
+      return summary;
     }
 
-    if (filterCriteria.tags?.length > 0) {
-      summary.push(`Tags: ${filterCriteria.tags.join(", ")}`);
-    }
+    const searchValue = summarizeFilterValue(filterCriteria.searchValue);
+    if (searchValue) summary.push(`Search: "${searchValue}"`);
 
-    if (filterCriteria.countries?.length > 0) {
-      summary.push(`Countries: ${filterCriteria.countries.join(", ")}`);
-    }
+    Object.entries(filterCriteria).forEach(([key, value]) => {
+      if (
+        key === "searchValue" ||
+        key === "contactIds" ||
+        key === "segmentType" ||
+        key === "dateRange"
+      ) {
+        return;
+      }
 
-    if (filterCriteria.organizations?.length > 0) {
-      summary.push(`Organizations: ${filterCriteria.organizations.join(", ")}`);
-    }
+      const summaryValue = summarizeFilterValue(value);
+      if (!summaryValue) return;
+      summary.push(`${formatFilterLabel(key)}: ${summaryValue}`);
+    });
 
-    if (filterCriteria.precincts?.length > 0) {
-      summary.push(`Precincts: ${filterCriteria.precincts.join(", ")}`);
-    }
-
-    if (filterCriteria.dateRange && filterCriteria.dateRange !== "all") {
+    if (
+      filterCriteria.dateRange &&
+      String(filterCriteria.dateRange) !== "all"
+    ) {
       summary.push(`Date Range: ${filterCriteria.dateRange}`);
     }
 

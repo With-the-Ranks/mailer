@@ -1,4 +1,4 @@
-const DEFAULT_TEMPLATE_LOGO_URL =
+export const DEFAULT_TEMPLATE_LOGO_URL =
   "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/logo.png";
 const DEFAULT_TEMPLATE_BACKGROUND_COLOR = "#ffffff";
 const DEFAULT_TEMPLATE_BUTTON_COLOR = "#1547E6";
@@ -130,9 +130,17 @@ function isNumericButtonRadius(value: unknown): boolean {
 export function getPreferredOrganizationLogoSrc(
   organization?: OrganizationBranding,
 ): string | null {
+  const ignoredDefaultAssets = new Set([
+    "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png",
+    "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/xWeI0TM-GpziuotvjNV9MZnAaazSEJdQvKvsHP.png",
+  ]);
   const logo = normalizeString(organization?.logo);
-  if (logo) return logo;
-  return normalizeString(organization?.image);
+  if (logo && !ignoredDefaultAssets.has(logo)) return logo;
+
+  const image = normalizeString(organization?.image);
+  if (image && !ignoredDefaultAssets.has(image)) return image;
+
+  return null;
 }
 
 export function getPreferredOrganizationBackgroundColor(
@@ -165,22 +173,14 @@ export function applyOrganizationBrandingToEmailContent<T>(
   content: T,
   organization?: OrganizationBranding,
 ): T {
-  const preferredLogoSrc = getPreferredOrganizationLogoSrc(organization);
+  const preferredLogoSrc =
+    getPreferredOrganizationLogoSrc(organization) ?? DEFAULT_TEMPLATE_LOGO_URL;
   const preferredBackgroundColor =
     getPreferredOrganizationBackgroundColor(organization);
   const preferredButtonColor =
     getPreferredOrganizationButtonColor(organization);
   const preferredBorderColor =
     getPreferredOrganizationBorderColor(organization);
-
-  if (
-    !preferredLogoSrc &&
-    !preferredBackgroundColor &&
-    !preferredButtonColor &&
-    !preferredBorderColor
-  ) {
-    return content;
-  }
 
   const replaceLogoNodes = (value: unknown): unknown => {
     if (Array.isArray(value)) {

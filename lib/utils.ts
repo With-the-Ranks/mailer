@@ -83,6 +83,18 @@ export function buildAudienceWhere(
   filterCriteria: Record<string, any>,
 ) {
   const where: any = { audienceListId, isUnsubscribed: false }; // Exclude unsubscribed contacts by default
+  const manualContactIds = Array.isArray(filterCriteria?.contactIds)
+    ? filterCriteria.contactIds.filter(
+        (id: unknown): id is string =>
+          typeof id === "string" && id.trim().length > 0,
+      )
+    : [];
+
+  // Manual/static segment: explicit contact selection takes precedence
+  if (manualContactIds.length > 0) {
+    where.id = { in: manualContactIds };
+    return where;
+  }
 
   // List of built-in fields
   const BUILT_IN_KEYS = new Set([
@@ -94,6 +106,8 @@ export function buildAudienceWhere(
     "defaultAddressCity",
     "defaultAddressZip",
     "defaultAddressPhone",
+    "contactIds",
+    "segmentType",
     // Add more as needed
   ]);
 

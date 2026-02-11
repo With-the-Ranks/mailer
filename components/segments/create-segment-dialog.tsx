@@ -33,18 +33,35 @@ interface CreateSegmentDialogProps {
 
 const FILTER_LABELS: Record<string, string> = {
   tags: "Tags",
-  countries: "Countries",
-  organizations: "Organizations",
-  precincts: "Precincts",
-  defaultAddressPhone: "Phone",
-  defaultAddressZip: "Zip",
+  defaultAddressCompany: "Organization",
+  defaultAddressCountryCode: "Country",
+  defaultAddressProvinceCode: "Precinct",
   defaultAddressCity: "City",
+  defaultAddressZip: "Zip Code",
+  defaultAddressPhone: "Phone",
   defaultAddressAddress1: "Address",
   defaultAddressAddress2: "Address 2",
-  defaultAddressProvinceCode: "Province",
-  defaultAddressCountryCode: "Country",
-  // Add any additional labels you want here
 };
+
+function formatFilterLabel(key: string) {
+  if (FILTER_LABELS[key]) return FILTER_LABELS[key];
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function summarizeFilterValue(value: unknown) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "";
+    const values = value.map((v) => String(v));
+    const preview = values.slice(0, 2).join(", ");
+    return values.length > 2 ? `${preview} +${values.length - 2}` : preview;
+  }
+  if (value == null) return "";
+  return String(value).trim();
+}
 
 export function CreateSegmentDialog({
   listId,
@@ -133,24 +150,19 @@ export function CreateSegmentDialog({
   const getFilterSummary = () => {
     const summary: string[] = [];
 
-    if (searchValue) {
-      summary.push(`Search: "${searchValue}"`);
-    }
+    const searchSummary = summarizeFilterValue(searchValue);
+    if (searchSummary) summary.push(`Search: "${searchSummary}"`);
 
     Object.entries(activeFilters).forEach(([key, value]) => {
-      if (
-        key === "dateRange" || // skip dateRange if not used
-        !value ||
-        (Array.isArray(value) && value.length === 0)
-      ) {
+      if (key === "dateRange" || key === "contactIds" || key === "segmentType")
+        return;
+
+      const summaryValue = summarizeFilterValue(value);
+      if (!summaryValue) {
         return;
       }
-      const label = FILTER_LABELS[key] || key;
-      if (Array.isArray(value)) {
-        summary.push(`${label}: ${value.join(", ")}`);
-      } else {
-        summary.push(`${label}: ${value}`);
-      }
+      const label = formatFilterLabel(key);
+      summary.push(`${label}: ${summaryValue}`);
     });
 
     return summary;
