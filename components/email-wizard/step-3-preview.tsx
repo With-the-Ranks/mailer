@@ -124,7 +124,7 @@ export function Step3Preview() {
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium text-gray-900 dark:text-white">
-                    {formData.from || "With The Ranks"}
+                    {formData.from || "Mailer"}
                   </h3>
                   {formData.replyTo && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">

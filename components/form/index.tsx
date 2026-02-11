@@ -49,6 +49,7 @@ export default function Form({
     name: string;
     type: string;
     defaultValue: string;
+    required?: boolean;
     placeholder?: string;
     maxLength?: number;
     pattern?: string;
@@ -86,6 +87,7 @@ export default function Form({
   }, [inputAttrs.defaultValue, inputAttrs.type, colorFallback]);
 
   const [colorValue, setColorValue] = useState(initialColorValue);
+  const isRequired = inputAttrs.required ?? true;
 
   useEffect(() => {
     setColorValue(initialColorValue);
@@ -148,7 +150,7 @@ export default function Form({
           <div className="flex w-full max-w-md">
             <input
               {...inputAttrs}
-              required
+              required={isRequired}
               className="z-10 flex-1 rounded-l-md border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-hidden dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-stone-700"
             />
             <div className="flex items-center rounded-r-md border border-l-0 border-stone-300 bg-stone-100 px-3 text-base dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-stone-400">
@@ -171,7 +173,7 @@ export default function Form({
           <textarea
             {...inputAttrs}
             rows={3}
-            required
+            required={isRequired}
             className="w-full max-w-xl rounded-lg border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-hidden dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-stone-700"
           />
         ) : inputAttrs.type === "color" ? (
@@ -190,7 +192,7 @@ export default function Form({
               onChange={(e) => handleHexChange(e.target.value)}
               placeholder="#1547E6"
               pattern="^#([A-Fa-f0-9]{6})$"
-              required
+              required={isRequired}
               className="w-full rounded-lg border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-hidden dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-stone-700"
             />
           </div>
@@ -210,7 +212,7 @@ export default function Form({
         ) : (
           <input
             {...inputAttrs}
-            required
+            required={isRequired}
             className="w-full max-w-md rounded-lg border border-stone-300 text-base text-stone-900 placeholder-stone-300 focus:border-stone-500 focus:ring-stone-500 focus:outline-hidden dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-stone-700"
           />
         )}

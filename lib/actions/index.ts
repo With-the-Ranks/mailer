@@ -79,6 +79,7 @@ export const createOrganization = async (
     uid = session.user.id;
   }
   const name = formData.get("name") as string;
+  const normalizedName = name?.trim() || null;
   const description = formData.get("description") as string;
   // const subdomain = formData.get("subdomain") as string;
 
@@ -86,6 +87,7 @@ export const createOrganization = async (
     const response = await prisma.organization.create({
       data: {
         name,
+        fromName: normalizedName,
         description,
         logo: null,
       },
@@ -268,6 +270,13 @@ export const updateOrganization = withAdminAuth(
         response = await prisma.organization.update({
           where: { id: organization.id },
           data: { timezone: tz },
+        });
+        revalidatePath(`/organization/${organization.id}/settings`);
+      } else if (key === "fromName") {
+        const normalizedFromName = value?.trim() || null;
+        response = await prisma.organization.update({
+          where: { id: organization.id },
+          data: { fromName: normalizedFromName },
         });
         revalidatePath(`/organization/${organization.id}/settings`);
       } else if (key === "backgroundColor" || key === "buttonColor") {

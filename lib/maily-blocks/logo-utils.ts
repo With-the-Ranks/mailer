@@ -256,7 +256,7 @@ export function applyOrganizationBrandingToEmailContent<T>(
       const src = normalizeString(attrsRecord.src);
       const shouldReplaceSrc = !src || src === DEFAULT_TEMPLATE_LOGO_URL;
 
-      if (shouldReplaceSrc && preferredLogoSrc) {
+      if (shouldReplaceSrc && preferredLogoSrc && src !== preferredLogoSrc) {
         nextAttrs = {
           ...nextAttrs,
           src: preferredLogoSrc,

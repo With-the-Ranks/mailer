@@ -20,6 +20,7 @@ export default async function OrganizationSettingsIndex({
       where: { id: decodedId },
       select: {
         name: true,
+        fromName: true,
         logo: true,
         timezone: true,
       },
@@ -43,6 +44,20 @@ export default async function OrganizationSettingsIndex({
           defaultValue: data?.name ?? "",
           placeholder: "My Campaign Organization",
           maxLength: 32,
+        }}
+        handleSubmit={updateOrganization}
+      />
+      <Form
+        title="Default From Name"
+        description="Default sender name used for new emails."
+        helpText="Leave blank to fall back to your organization name."
+        inputAttrs={{
+          name: "fromName",
+          type: "text",
+          defaultValue: data?.fromName ?? "",
+          placeholder: data?.name ?? "My Campaign Organization",
+          maxLength: 64,
+          required: false,
         }}
         handleSubmit={updateOrganization}
       />

@@ -134,6 +134,7 @@ model EmailEvent {
 model Organization {
   id            String   @id @default(cuid())
   name          String?
+  fromName      String?
   description   String?  @db.Text
   logo          String?  @default("https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png") @db.Text
   font          String   @default("font-cal")
