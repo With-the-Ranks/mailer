@@ -39,7 +39,7 @@ export function ResizableTable<T>({
   const isEmpty = rowCount === 0;
   const hasRowClick = Boolean(onRowClick);
   const isInteractiveTarget = (target: EventTarget | null) => {
-    if (!(target instanceof HTMLElement)) return false;
+    if (!(target instanceof Element)) return false;
     return Boolean(
       target.closest("button") ||
       target.closest("a") ||

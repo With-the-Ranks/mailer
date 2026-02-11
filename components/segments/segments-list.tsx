@@ -39,6 +39,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  formatSegmentFilterLabel,
+  summarizeSegmentFilterValue,
+} from "@/lib/segments/filter-formatting";
 
 interface Segment {
   id: string;
@@ -53,39 +57,6 @@ interface Segment {
     name: string;
   };
   organizationId: string;
-}
-
-const FILTER_LABELS: Record<string, string> = {
-  tags: "Tags",
-  defaultAddressCompany: "Organization",
-  defaultAddressCountryCode: "Country",
-  defaultAddressProvinceCode: "Precinct",
-  defaultAddressCity: "City",
-  defaultAddressZip: "Zip Code",
-  defaultAddressPhone: "Phone",
-  defaultAddressAddress1: "Address",
-  defaultAddressAddress2: "Address 2",
-};
-
-function formatFilterLabel(key: string) {
-  if (FILTER_LABELS[key]) return FILTER_LABELS[key];
-  return key
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function summarizeFilterValue(value: unknown) {
-  if (Array.isArray(value)) {
-    if (value.length === 0) return "";
-    const values = value.map((v) => String(v));
-    const preview = values.slice(0, 2).join(", ");
-    return values.length > 2 ? `${preview} +${values.length - 2}` : preview;
-  }
-  if (value == null) return "";
-  const text = String(value).trim();
-  return text;
 }
 
 export function SegmentsList({
@@ -192,7 +163,7 @@ export function SegmentsList({
       return summary;
     }
 
-    const searchValue = summarizeFilterValue(filterCriteria.searchValue);
+    const searchValue = summarizeSegmentFilterValue(filterCriteria.searchValue);
     if (searchValue) summary.push(`Search: "${searchValue}"`);
 
     Object.entries(filterCriteria).forEach(([key, value]) => {
@@ -205,9 +176,9 @@ export function SegmentsList({
         return;
       }
 
-      const summaryValue = summarizeFilterValue(value);
+      const summaryValue = summarizeSegmentFilterValue(value);
       if (!summaryValue) return;
-      summary.push(`${formatFilterLabel(key)}: ${summaryValue}`);
+      summary.push(`${formatSegmentFilterLabel(key)}: ${summaryValue}`);
     });
 
     if (

@@ -9,14 +9,8 @@ import {
 } from "@/lib/validations";
 
 const normalizeText = (value: string | null | undefined) => value?.trim() || "";
-const normalizeEmail = (value: string | null | undefined) => {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-};
-const serializeContact = <T extends { email: string | null }>(contact: T) => ({
-  ...contact,
-  email: contact.email || "",
-});
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const serializeContact = <T extends { email: string }>(contact: T) => contact;
 
 // PUT: Update a contact
 export async function PUT(
@@ -70,7 +64,7 @@ export async function PUT(
 
     const updateData: Record<string, any> = { ...validatedData };
 
-    if ("email" in validatedData) {
+    if ("email" in validatedData && typeof validatedData.email === "string") {
       updateData.email = normalizeEmail(validatedData.email);
     }
     if ("firstName" in validatedData) {

@@ -6,18 +6,12 @@ import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
 
 const normalizeText = (value: string | null | undefined) => value?.trim() || "";
-const normalizeEmail = (value: string | null | undefined) => {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-};
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const readString = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
-const serializeContact = <T extends { email: string | null }>(contact: T) => ({
-  ...contact,
-  email: contact.email || "",
-});
+const serializeContact = <T extends { email: string }>(contact: T) => contact;
 const extractSubmissionSource = (formData: unknown) => {
   if (!isRecord(formData)) return { source: "", sourceCode: "" };
 
@@ -173,22 +167,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if contact with this email already exists in the list
-    if (normalizedEmail) {
-      const existingContact = await prisma.audience.findUnique({
-        where: {
-          audienceListId_email: {
-            audienceListId: validatedData.audienceListId,
-            email: normalizedEmail,
-          },
+    const existingContact = await prisma.audience.findUnique({
+      where: {
+        audienceListId_email: {
+          audienceListId: validatedData.audienceListId,
+          email: normalizedEmail,
         },
-      });
+      },
+    });
 
-      if (existingContact) {
-        return NextResponse.json(
-          { error: "Contact with this email already exists" },
-          { status: 409 },
-        );
-      }
+    if (existingContact) {
+      return NextResponse.json(
+        { error: "Contact with this email already exists" },
+        { status: 409 },
+      );
     }
 
     const contact = await prisma.audience.create({

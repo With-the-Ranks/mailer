@@ -7,10 +7,7 @@ import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
 
 const normalizeText = (value: string | null | undefined) => value?.trim() || "";
-const normalizeEmail = (value: string | null | undefined) => {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-};
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
 
 const bulkImportSchema = z.object({
   contacts: z.array(contactSchema),
@@ -79,7 +76,7 @@ export async function POST(request: NextRequest) {
         const normalizedLastName = normalizeText(contactData.lastName);
         const normalizedPhone = contactData.phone?.trim() || null;
 
-        if (skipDuplicates && normalizedEmail) {
+        if (skipDuplicates) {
           const existingContact = await prisma.audience.findUnique({
             where: {
               audienceListId_email: {

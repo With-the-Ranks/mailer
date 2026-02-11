@@ -3,14 +3,18 @@ import { z } from "zod";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const optionalString = z.string().optional().nullable();
-const optionalEmail = z
+const requiredEmail = z
+  .string()
+  .trim()
+  .min(1, "Email is required")
+  .refine((value) => emailRegex.test(value), "Invalid email address");
+const updatableEmail = z
   .string()
   .optional()
-  .nullable()
   .refine((value) => {
     if (value == null) return true;
     const trimmed = value.trim();
-    return trimmed.length === 0 || emailRegex.test(trimmed);
+    return trimmed.length > 0 && emailRegex.test(trimmed);
   }, "Invalid email address");
 
 export function hasPrimaryContactIdentifier(input: {
@@ -27,7 +31,7 @@ export function hasPrimaryContactIdentifier(input: {
 
 export const contactSchema = z
   .object({
-    email: optionalEmail,
+    email: requiredEmail,
     firstName: optionalString,
     lastName: optionalString,
     phone: optionalString,
@@ -58,7 +62,7 @@ export const contactSchema = z
   });
 
 export const updateContactSchema = z.object({
-  email: optionalEmail,
+  email: updatableEmail,
   firstName: optionalString,
   lastName: optionalString,
   phone: optionalString,

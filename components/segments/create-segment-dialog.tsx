@@ -20,6 +20,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  formatSegmentFilterLabel,
+  summarizeSegmentFilterValue,
+} from "@/lib/segments/filter-formatting";
 import type { Contact } from "@/lib/types";
 
 interface CreateSegmentDialogProps {
@@ -29,38 +33,6 @@ interface CreateSegmentDialogProps {
   activeFilters?: Record<string, any>;
   searchValue?: string;
   onSegmentCreated?: () => void;
-}
-
-const FILTER_LABELS: Record<string, string> = {
-  tags: "Tags",
-  defaultAddressCompany: "Organization",
-  defaultAddressCountryCode: "Country",
-  defaultAddressProvinceCode: "Precinct",
-  defaultAddressCity: "City",
-  defaultAddressZip: "Zip Code",
-  defaultAddressPhone: "Phone",
-  defaultAddressAddress1: "Address",
-  defaultAddressAddress2: "Address 2",
-};
-
-function formatFilterLabel(key: string) {
-  if (FILTER_LABELS[key]) return FILTER_LABELS[key];
-  return key
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function summarizeFilterValue(value: unknown) {
-  if (Array.isArray(value)) {
-    if (value.length === 0) return "";
-    const values = value.map((v) => String(v));
-    const preview = values.slice(0, 2).join(", ");
-    return values.length > 2 ? `${preview} +${values.length - 2}` : preview;
-  }
-  if (value == null) return "";
-  return String(value).trim();
 }
 
 export function CreateSegmentDialog({
@@ -150,18 +122,18 @@ export function CreateSegmentDialog({
   const getFilterSummary = () => {
     const summary: string[] = [];
 
-    const searchSummary = summarizeFilterValue(searchValue);
+    const searchSummary = summarizeSegmentFilterValue(searchValue);
     if (searchSummary) summary.push(`Search: "${searchSummary}"`);
 
     Object.entries(activeFilters).forEach(([key, value]) => {
       if (key === "dateRange" || key === "contactIds" || key === "segmentType")
         return;
 
-      const summaryValue = summarizeFilterValue(value);
+      const summaryValue = summarizeSegmentFilterValue(value);
       if (!summaryValue) {
         return;
       }
-      const label = formatFilterLabel(key);
+      const label = formatSegmentFilterLabel(key);
       summary.push(`${label}: ${summaryValue}`);
     });
 
