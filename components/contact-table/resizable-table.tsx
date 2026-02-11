@@ -89,7 +89,7 @@ export function ResizableTable<T>({
                       key={header.id}
                       style={{ width: header.getSize() }}
                       className={cn(
-                        "relative py-2 text-left text-xs font-bold tracking-wider whitespace-nowrap uppercase sm:py-3 dark:text-white [&_button]:h-auto [&_button]:px-0 [&_button]:py-0 [&_button]:text-xs [&_button]:font-bold [&_button]:tracking-wider [&_button]:uppercase [&_button:hover]:bg-transparent",
+                        "relative overflow-hidden py-2 text-left text-xs font-bold tracking-wider whitespace-nowrap uppercase sm:py-3 dark:text-white [&_button]:h-auto [&_button]:max-w-full [&_button]:overflow-hidden [&_button]:px-0 [&_button]:py-0 [&_button]:text-xs [&_button]:font-bold [&_button]:tracking-wider [&_button]:uppercase [&_button:hover]:bg-transparent",
                         header.column.id === "select"
                           ? "px-2 sm:px-3"
                           : header.column.id === "actions"
@@ -98,7 +98,14 @@ export function ResizableTable<T>({
                       )}
                     >
                       {header.isPlaceholder ? null : (
-                        <span className="whitespace-nowrap">
+                        <span
+                          className="block max-w-full truncate whitespace-nowrap"
+                          title={
+                            typeof header.column.columnDef.header === "string"
+                              ? header.column.columnDef.header
+                              : undefined
+                          }
+                        >
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
@@ -154,9 +161,8 @@ export function ResizableTable<T>({
                       role={hasRowClick ? "button" : undefined}
                       tabIndex={hasRowClick ? 0 : undefined}
                       className={cn(
-                        "border-[#D3D3D3] dark:hover:bg-neutral-800",
-                        hasRowClick &&
-                          "cursor-pointer hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset",
+                        "border-b border-[#D3D3D3] dark:border-[#4A4A4A] [&>td]:border-b [&>td]:border-[#D3D3D3] [&>td]:transition-colors hover:[&>td]:border-[#D3D3D3] hover:[&>td]:bg-gray-50 hover:[&>td]:shadow-[inset_0_1px_0_0_#D3D3D3,inset_0_-1px_0_0_#D3D3D3] dark:[&>td]:border-[#4A4A4A] dark:hover:[&>td]:border-[#4A4A4A] dark:hover:[&>td]:bg-neutral-800 dark:hover:[&>td]:shadow-[inset_0_1px_0_0_#4A4A4A,inset_0_-1px_0_0_#4A4A4A] hover:[&>td:first-child]:shadow-[inset_1px_0_0_0_#D3D3D3,inset_0_1px_0_0_#D3D3D3,inset_0_-1px_0_0_#D3D3D3] dark:hover:[&>td:first-child]:shadow-[inset_1px_0_0_0_#4A4A4A,inset_0_1px_0_0_#4A4A4A,inset_0_-1px_0_0_#4A4A4A] hover:[&>td:last-child]:shadow-[inset_-1px_0_0_0_#D3D3D3,inset_0_1px_0_0_#D3D3D3,inset_0_-1px_0_0_#D3D3D3] dark:hover:[&>td:last-child]:shadow-[inset_-1px_0_0_0_#4A4A4A,inset_0_1px_0_0_#4A4A4A,inset_0_-1px_0_0_#4A4A4A]",
+                        hasRowClick && "cursor-pointer",
                       )}
                       onClick={(event) => {
                         if (!onRowClick) return;

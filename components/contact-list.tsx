@@ -55,6 +55,38 @@ interface ContactListProps {
   initialContacts?: any[];
 }
 
+const RESERVED_COLUMN_IDS = new Set([
+  "select",
+  "actions",
+  "email",
+  "firstName",
+  "lastName",
+  "phone",
+  "defaultAddressCompany",
+  "defaultAddressCity",
+  "defaultAddressCountryCode",
+  "defaultAddressAddress1",
+  "defaultAddressAddress2",
+  "defaultAddressProvinceCode",
+  "defaultAddressZip",
+  "defaultAddressPhone",
+  "tags",
+  "note",
+  "createdAt",
+  "updatedAt",
+  "isUnsubscribed",
+  "signupFormName",
+  "signupSource",
+]);
+
+function formatColumnLabel(key: string) {
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function convertAudienceToContact(audience: any): Contact {
   return {
     id: audience.id,
@@ -195,7 +227,9 @@ export function ContactList({
 
   const loadContacts = React.useCallback(async () => {
     try {
-      const response = await fetch(`/api/contacts?audienceListId=${listId}`);
+      const response = await fetch(`/api/contacts?audienceListId=${listId}`, {
+        cache: "no-store",
+      });
       if (response.ok) {
         const data = await parseResponse(response);
         setContacts(data.map(convertAudienceToContact));
@@ -383,7 +417,7 @@ export function ContactList({
         Object.keys(contact.customFields).forEach((key) => keys.add(key));
       }
     });
-    return Array.from(keys);
+    return Array.from(keys).filter((key) => !RESERVED_COLUMN_IDS.has(key));
   }, [contacts, customFields]);
   const columns = React.useMemo(() => {
     const realColumns = createColumns({
@@ -394,10 +428,21 @@ export function ContactList({
 
     const hiddenCustomFieldColumns = customFieldKeys.map((key) => ({
       id: key,
-      header: key,
+      header: formatColumnLabel(key),
       accessorFn: (row: Contact) => row.customFields?.[key] ?? "",
-      cell: ({ getValue }: any) => getValue() || "—",
-      size: 120,
+      cell: ({ getValue }: any) => {
+        const value = getValue();
+        if (!value) return "—";
+        const text = String(value);
+        return (
+          <div className="max-w-full truncate" title={text}>
+            {text}
+          </div>
+        );
+      },
+      size: 180,
+      minSize: 140,
+      maxSize: 280,
       enableHiding: true,
       enableSorting: false,
     }));
@@ -503,6 +548,7 @@ export function ContactList({
         if (response.ok) {
           const result = await parseResponse(response);
           await loadContacts();
+          setPagination((prev) => ({ ...prev, pageIndex: 0 }));
           toast.success(
             `Import completed: ${result.results.successful} added, ${result.results.skipped} skipped, ${result.results.failed} failed`,
           );
