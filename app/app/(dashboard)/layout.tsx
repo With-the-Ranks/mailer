@@ -29,28 +29,14 @@ export default async function DashboardLayout({
       <div className="bg-dotted min-h-screen w-full overflow-x-hidden pt-5 dark:bg-[#0D0D0D]">
         <SidebarTrigger className="fixed top-4 left-4 z-50 md:hidden" />
         {organizationId && onboarding && (
-          <div className="fixed top-24 right-6 z-30 hidden w-[26rem] justify-end xl:flex">
-            <DashboardOnboardingRail
-              organizationId={organizationId}
-              userId={userId}
-              userRole={userRole}
-              onboarding={onboarding}
-            />
-          </div>
+          <DashboardOnboardingRail
+            organizationId={organizationId}
+            userId={userId}
+            userRole={userRole}
+            onboarding={onboarding}
+          />
         )}
         <main className="mx-auto w-full max-w-7xl px-4 pt-2 pb-8 sm:px-6 lg:px-8">
-          {organizationId && onboarding && (
-            <div className="xl:hidden">
-              <DashboardOnboardingRail
-                organizationId={organizationId}
-                userId={userId}
-                userRole={userRole}
-                onboarding={onboarding}
-                className="mb-6"
-                collapsedClassName="fixed top-4 right-4 z-30"
-              />
-            </div>
-          )}
           {children}
         </main>
       </div>
