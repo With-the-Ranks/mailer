@@ -71,7 +71,7 @@ export function TemplateSelector({
                 "hover:border-blue-300 hover:shadow-md dark:hover:border-blue-600",
                 isSelected
                   ? "border-blue-700 bg-blue-700 text-white shadow-lg dark:border-blue-600 dark:bg-blue-600"
-                  : "border-gray-200 bg-white text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300",
+                  : "border-gray-200 bg-white text-gray-700 dark:border-gray-700 dark:bg-[#2D2D2D] dark:text-gray-300",
                 (isLoading || isSelected) && "cursor-not-allowed opacity-75",
               )}
             >

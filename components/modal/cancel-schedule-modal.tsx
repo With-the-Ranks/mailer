@@ -1,11 +1,20 @@
 "use client";
 
-import { XCircle } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-import Modal from "@/components/modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
 interface CancelScheduleModalProps {
@@ -20,7 +29,7 @@ export default function CancelScheduleModal({
   organizationId,
 }: CancelScheduleModalProps) {
   const router = useRouter();
-  const [showModal, setShowModal] = useState(false);
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleUnschedule = async () => {
@@ -40,65 +49,52 @@ export default function CancelScheduleModal({
       toast.error("Could not cancel schedule.");
     } finally {
       setLoading(false);
-      setShowModal(false);
+      setOpen(false);
     }
   };
 
+  const scheduledLabel = new Date(scheduledTime).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
   return (
     <>
-      {/* Trigger: XCircle icon button */}
       <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setShowModal(true)}
+        variant="destructive"
+        size="sm"
+        onClick={() => setOpen(true)}
         disabled={loading}
         title="Cancel schedule"
       >
-        <XCircle size={20} />
+        <Trash2 className="h-4 w-4" />
       </Button>
 
-      {showModal && (
-        <Modal showModal={showModal} setShowModal={setShowModal}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleUnschedule();
-            }}
-            className="w-full rounded-lg bg-white text-left md:max-w-md md:border md:border-stone-200 md:shadow-sm dark:bg-black dark:md:border-stone-700"
-          >
-            <div className="relative flex flex-col space-y-4 p-5 md:p-10">
-              <h2 className="text-2xl dark:text-white">
-                Cancel Scheduled Email?
-              </h2>
-              <p className="text-base text-gray-500 dark:text-gray-400">
-                Scheduled for{" "}
-                <time dateTime={scheduledTime}>
-                  {new Date(scheduledTime).toLocaleString()}
-                </time>
-                . Are you sure you want to move it back to draft?
-              </p>
-            </div>
-            <div className="flex items-center justify-end space-x-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 md:px-10 dark:border-stone-700 dark:bg-stone-800">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowModal(false)}
-                disabled={loading}
-              >
-                Dismiss
-              </Button>
-              <Button
-                type="submit"
-                variant="default"
-                className={loading ? "cursor-not-allowed opacity-50" : ""}
-                disabled={loading}
-              >
-                Yes, Cancel
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )}
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Scheduled Email?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Scheduled for{" "}
+              <time dateTime={scheduledTime}>{scheduledLabel}</time>. Are you
+              sure you want to move it back to draft?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleUnschedule();
+              }}
+              disabled={loading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {loading ? "Cancelling..." : "Yes, cancel schedule"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

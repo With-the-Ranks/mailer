@@ -15,6 +15,8 @@ import {
 
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@/prisma/generated/prisma/client";
+import { queueBulkEmails, removeJobs, type EmailJobData } from "@/lib/queue";
 
 import { buildAudienceWhere, getUnsubscribeUrl, logError } from "../utils";
 
@@ -22,6 +24,7 @@ interface OrgEmailClient {
   client: EmailProviderClient;
   domain: string;
   provider: EmailProvider;
+  awsRegion?: string;
   configurationSetName?: string;
   isVerified: boolean;
   error?: string;
@@ -91,7 +94,15 @@ async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
     configurationSetName,
   });
 
-  return { client, domain, provider, configurationSetName, isVerified, error };
+  return {
+    client,
+    domain,
+    provider,
+    awsRegion,
+    configurationSetName,
+    isVerified,
+    error,
+  };
 }
 
 // Check if an email is in the suppression list (SES compliance)
@@ -298,6 +309,8 @@ export const sendBulkEmail = async ({
     client,
     domain,
     provider,
+    awsRegion,
+    configurationSetName,
     isVerified,
     error: domainError,
   } = await getEmailClientForOrg(organizationId);
@@ -389,6 +402,88 @@ export const sendBulkEmail = async ({
     if (recipients.length === 0) {
       return { error: "All recipients are on the suppression list" };
     }
+  }
+
+  // SES: schedule for future via queue (SES has no native scheduling)
+  const MAX_SCHEDULE_DAYS = 365;
+  const scheduledAt = scheduledTime ? new Date(scheduledTime) : null;
+  if (provider === "ses" && scheduledAt && scheduledAt.getTime() > Date.now()) {
+    const maxScheduleMs = MAX_SCHEDULE_DAYS * 24 * 60 * 60 * 1000;
+    if (scheduledAt.getTime() - Date.now() > maxScheduleMs) {
+      return {
+        error: `Scheduled time cannot be more than ${MAX_SCHEDULE_DAYS} days in the future`,
+      };
+    }
+    const jobs: EmailJobData[] = [];
+    let index = 0;
+    for (const audience of recipients) {
+      const customVars =
+        typeof audience.customFields === "string"
+          ? JSON.parse(audience.customFields)
+          : audience.customFields || {};
+      const vars = {
+        email: audience.email,
+        first_name: audience.firstName,
+        last_name: audience.lastName,
+        ...customVars,
+        unsubscribe_url: getUnsubscribeUrl({
+          email: audience.email,
+          listId: audience.audienceListId,
+          organizationId,
+        }),
+      };
+      const htmlContent = content
+        ? await parseContent(content, vars, previewText)
+        : "";
+      jobs.push({
+        emailId: id,
+        to: audience.email,
+        from: fromHeader,
+        subject: subject || "No Subject",
+        html: htmlContent || "",
+        text: previewText ?? "",
+        organizationId,
+        provider,
+        awsRegion,
+        configurationSetName,
+        headers: {
+          "X-Mailer-Email-ID": id,
+          "X-Intrepid-ID": id,
+        },
+        userId: session.user.id,
+        jobIdSuffix: `-${index}`,
+      });
+      index++;
+    }
+    const delayMs = scheduledAt.getTime() - Date.now();
+    const result = await queueBulkEmails(jobs, delayMs);
+    const allQueued =
+      result.failed === 0 && result.jobIds.length === recipients.length;
+    if (!allQueued) {
+      if (result.failed > 0) {
+        logError("Some scheduled jobs failed to queue", null, {
+          emailId: id,
+          failed: result.failed,
+          errors: result.errors,
+        });
+      }
+      return {
+        error:
+          result.failed > 0
+            ? `Failed to queue ${result.failed} of ${recipients.length} scheduled emails. Please try again.`
+            : "Failed to queue all scheduled emails. Please try again.",
+      };
+    }
+    await prisma.email.update({
+      where: { id },
+      data: {
+        published: true,
+        scheduledTime: scheduledAt,
+        providerUsed: provider,
+        scheduledJobIds: result.jobIds,
+      },
+    });
+    return { success: true };
   }
 
   try {
@@ -503,11 +598,50 @@ export const sendBulkEmail = async ({
 export const unscheduleEmail = async ({
   resendId,
   sesMessageId,
+  emailId,
+  scheduledJobIds,
 }: {
   resendId?: string;
   sesMessageId?: string;
+  emailId?: string;
+  scheduledJobIds?: string[] | null;
 }) => {
-  // Currently only Resend supports unscheduling
+  // SES: remove queued jobs and mark email as draft
+  if (scheduledJobIds && scheduledJobIds.length > 0 && emailId) {
+    try {
+      const { removed, errors: removeErrors } =
+        await removeJobs(scheduledJobIds);
+      const allRemoved = removed === scheduledJobIds.length;
+      if (!allRemoved) {
+        logError("Some scheduled jobs could not be removed", null, {
+          emailId,
+          removed,
+          total: scheduledJobIds.length,
+          errors: removeErrors,
+        });
+        return {
+          success: false,
+          error: `Could not remove ${scheduledJobIds.length - removed} of ${scheduledJobIds.length} scheduled jobs. They may have already been sent.`,
+        };
+      }
+      await prisma.email.update({
+        where: { id: emailId },
+        data: { published: false, scheduledJobIds: Prisma.JsonNull },
+      });
+      return { success: true };
+    } catch (err) {
+      logError("Error unscheduling SES email (queue removal)", err, {
+        emailId,
+        jobCount: scheduledJobIds.length,
+      });
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to unschedule",
+      };
+    }
+  }
+
+  // Resend: cancel via API
   if (resendId && isResendEnabled()) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -536,10 +670,9 @@ export const unscheduleEmail = async ({
     }
   }
 
-  if (sesMessageId) {
-    // SES doesn't support canceling scheduled emails
+  if (sesMessageId && !scheduledJobIds?.length) {
     return { error: "SES does not support canceling scheduled emails" };
   }
 
-  return { error: "No valid message ID provided" };
+  return { error: "No valid message ID or scheduled jobs provided" };
 };

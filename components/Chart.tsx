@@ -61,7 +61,7 @@ export default function Chart({ emailId }: { emailId: string }) {
 
   if (noData) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+      <div className="flex h-64 items-center justify-center rounded-lg bg-gray-100 dark:bg-[#2D2D2D]">
         <div className="text-center">
           <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             No data to display
@@ -83,7 +83,7 @@ export default function Chart({ emailId }: { emailId: string }) {
           type="monotone"
           dataKey="delivered"
           name="Delivered"
-          stroke="#252753"
+          stroke="#1d4ed8"
           strokeWidth={2}
           dot
         />
@@ -91,7 +91,7 @@ export default function Chart({ emailId }: { emailId: string }) {
           type="monotone"
           dataKey="opened"
           name="Opened"
-          stroke="#8884d8"
+          stroke="#8b5cf6"
           strokeWidth={2}
           dot
         />

@@ -5,13 +5,13 @@ import * as React from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface ResizableTableProps<T> {
   table: any;
@@ -36,13 +36,24 @@ export function ResizableTable<T>({
   const rowCount = table.getRowModel().rows?.length ?? 0;
   const isEmpty = rowCount === 0;
 
+  const tableMinHeight = "min-h-[20rem] sm:min-h-[30rem]";
+  const tableWidth = isEmpty ? "100%" : table.getCenterTotalSize();
+
   return (
     <div
-      className={`overflow-auto rounded-lg border bg-white dark:border-neutral-700 dark:bg-[#2D2D2D] ${isEmpty ? "min-h-128" : ""}`}
+      className={cn(
+        "relative overflow-x-auto overflow-y-hidden rounded-lg border bg-white dark:border-neutral-700 dark:bg-[#2D2D2D]",
+        tableMinHeight,
+      )}
     >
-      <Table
-        style={{ width: table.getCenterTotalSize() }}
-        className="bg-white dark:bg-[#2D2D2D]"
+      <table
+        style={{
+          width: tableWidth,
+          minWidth: isEmpty ? undefined : "100%",
+        }}
+        className={cn(
+          "w-full caption-bottom bg-white text-base dark:bg-[#2D2D2D]",
+        )}
       >
         <TableHeader>
           {table
@@ -52,10 +63,7 @@ export function ResizableTable<T>({
                 id: React.Key | null | undefined;
                 headers: any[];
               }) => (
-                <TableRow
-                  key={headerGroup.id}
-                  className="dark:bg-neutral-800/50"
-                >
+                <TableRow key={headerGroup.id} className="dark:bg-[#252525]">
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
@@ -117,20 +125,33 @@ export function ResizableTable<T>({
                 ),
               )
           ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="w-full align-top">
-                <div className="flex min-h-120 max-w-1/2 flex-col items-center justify-center gap-4 px-8 py-12">
-                  <EmptyState
-                    icon="table-properties"
-                    message="No contacts in this list"
-                    compact
-                  />
-                </div>
-              </TableCell>
-            </TableRow>
+            <>
+              <TableRow className="h-full [&>td]:border-0 [&>td]:p-0">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-full min-h-68 w-full sm:min-h-108"
+                  style={{ verticalAlign: "top" }}
+                />
+              </TableRow>
+            </>
           )}
         </TableBody>
-      </Table>
+      </table>
+      {isEmpty && (
+        <div
+          className="pointer-events-none absolute right-0 bottom-0 left-0 flex flex-col items-center justify-center px-3 py-6 sm:px-4 sm:py-8"
+          style={{ top: "3rem" }}
+          aria-hidden
+        >
+          <div className="flex min-h-68 flex-1 flex-col items-center justify-center gap-3 text-center sm:min-h-108 sm:gap-4">
+            <EmptyState
+              icon="table-properties"
+              message="No contacts in this list"
+              compact
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

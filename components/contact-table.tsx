@@ -41,20 +41,21 @@ export function ContactTable({
   selectedRowCount,
 }: ContactTableProps) {
   return (
-    <div>
-      <div className="rounded-lg border">
+    <div className="w-full min-w-0">
+      <div className="w-full min-w-0 rounded-lg border">
         <ResizableTable table={table} data={contacts} columns={columns} />
       </div>
 
-      <div className="flex flex-nowrap items-center justify-between gap-4 py-4">
-        <div className="text-muted-foreground min-w-0 flex-1 shrink text-base">
+      <div className="flex flex-col gap-3 py-4 xl:flex-row xl:flex-nowrap xl:items-center xl:justify-between xl:gap-4">
+        <div className="text-muted-foreground w-full text-sm md:text-base xl:min-w-0 xl:flex-1 xl:whitespace-nowrap">
           {selectedRowCount} of {contacts.length} contact(s) selected.
         </div>
-        <div className="flex shrink-0 flex-nowrap items-center gap-4 lg:gap-6">
+        <div className="flex w-full flex-wrap items-center justify-start gap-3 gap-y-2 xl:justify-end xl:gap-6">
           <div className="flex shrink-0 items-center gap-2">
-            <p className="text-base font-medium whitespace-nowrap">
-              Rows per page
-            </p>
+            <span className="text-sm font-medium whitespace-nowrap md:text-base">
+              <span className="sm:hidden">Rows</span>
+              <span className="hidden sm:inline">Rows per page</span>
+            </span>
             <Select
               value={`${pagination.pageSize}`}
               onValueChange={(value) => {
@@ -76,11 +77,11 @@ export function ContactTable({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex min-w-36 shrink-0 items-center justify-center text-base font-medium whitespace-nowrap">
-            Page {pagination.pageIndex + 1} of{" "}
-            {Math.ceil(contacts.length / pagination.pageSize)}
-          </div>
           <div className="flex shrink-0 items-center gap-2">
+            <span className="text-sm font-medium whitespace-nowrap sm:text-base md:text-base">
+              Page {pagination.pageIndex + 1} of{" "}
+              {Math.max(1, Math.ceil(contacts.length / pagination.pageSize))}
+            </span>
             <Button
               variant="outline"
               className="hidden h-8 w-8 p-0 lg:flex"
@@ -129,8 +130,10 @@ export function ContactTable({
               onClick={() =>
                 setPagination((prev) => ({
                   ...prev,
-                  pageIndex:
+                  pageIndex: Math.max(
+                    0,
                     Math.ceil(contacts.length / pagination.pageSize) - 1,
+                  ),
                 }))
               }
               disabled={

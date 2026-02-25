@@ -115,7 +115,7 @@ function StatCard({
   large?: boolean;
 }) {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+    <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
       <p className="text-sm font-bold text-black dark:text-white">{label}</p>
       <div className="mt-1 flex items-baseline justify-between gap-2">
         <span
@@ -235,16 +235,16 @@ export default function AnalyticsDetails({
     <div className="space-y-8">
       {/* Email Stats Section with Graph */}
       <section>
-        <div className="mb-6 flex flex-nowrap items-center justify-between gap-3">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between">
           <h2 className="min-w-0 shrink text-xl font-bold text-stone-900 sm:text-2xl dark:text-white">
             Email Performance
           </h2>
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-4">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-4">
             {/* Domain Filter */}
             <select
               value={selectedDomain}
               onChange={(e) => setSelectedDomain(e.target.value)}
-              className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-white"
+              className="max-w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm sm:max-w-[200px] dark:border-stone-600 dark:bg-[#2D2D2D] dark:text-white"
             >
               <option value="all">All Domains</option>
               {domains.map((domain) => (
@@ -255,10 +255,10 @@ export default function AnalyticsDetails({
             </select>
 
             {/* Time Range Toggle */}
-            <div className="flex rounded-lg border border-stone-300 dark:border-stone-600">
+            <div className="flex shrink-0 rounded-lg border border-stone-300 dark:border-stone-600">
               <button
                 onClick={() => setTimeRange("7")}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                className={`px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
                   timeRange === "7"
                     ? "bg-blue-700 text-white"
                     : "bg-white text-stone-700 hover:bg-stone-100 dark:bg-[#2D2D2D] dark:text-stone-300 dark:hover:bg-stone-700"
@@ -268,7 +268,7 @@ export default function AnalyticsDetails({
               </button>
               <button
                 onClick={() => setTimeRange("30")}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                className={`px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
                   timeRange === "30"
                     ? "bg-blue-700 text-white"
                     : "bg-white text-stone-700 hover:bg-stone-100 dark:bg-[#2D2D2D] dark:text-stone-300 dark:hover:bg-stone-700"
@@ -281,16 +281,16 @@ export default function AnalyticsDetails({
         </div>
 
         {/* Email Stats Grid */}
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
           {emailStatCards.map(({ label, value }) => (
             <div
               key={label}
-              className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]"
+              className="min-w-0 rounded-lg border border-[#D3D3D3] bg-white p-3 sm:p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]"
             >
               <p className="text-xs font-bold text-black sm:text-sm dark:text-white">
                 {label}
               </p>
-              <p className="mt-1 text-2xl font-black text-blue-700 sm:text-3xl lg:text-4xl dark:text-blue-400">
+              <p className="mt-1 text-xl font-black text-blue-700 sm:text-2xl lg:text-3xl xl:text-4xl dark:text-blue-400">
                 {value.toLocaleString()}
               </p>
             </div>
@@ -298,8 +298,8 @@ export default function AnalyticsDetails({
         </div>
 
         {/* Email Timeline Chart */}
-        <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
-          <div className="h-72">
+        <div className="min-w-0 overflow-x-auto rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
+          <div className="h-72 min-h-[280px]">
             {emailTimeline.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -402,7 +402,7 @@ export default function AnalyticsDetails({
         {/* Deliverability Pie Chart */}
         {deliverabilityData.length > 0 && (
           <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+            <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
               <p className="mb-4 text-sm font-medium text-stone-500 dark:text-stone-400">
                 Deliverability Breakdown
               </p>
@@ -433,7 +433,7 @@ export default function AnalyticsDetails({
             </div>
 
             {/* Recent Campaigns Performance */}
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+            <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
               <p className="mb-4 text-sm font-medium text-stone-500 dark:text-stone-400">
                 Campaign Performance
               </p>
@@ -470,7 +470,7 @@ export default function AnalyticsDetails({
 
         {/* Campaigns Table */}
         {campaigns.length > 0 && (
-          <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+          <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
             <p className="mb-4 text-sm font-medium text-stone-500 dark:text-stone-400">
               Recent Campaigns
             </p>
@@ -579,7 +579,7 @@ export default function AnalyticsDetails({
         </div>
 
         {/* List Growth Chart */}
-        <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+        <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
           <p className="mb-4 text-sm font-medium text-stone-500 dark:text-stone-400">
             List Growth Over Time
           </p>
@@ -673,7 +673,7 @@ export default function AnalyticsDetails({
             {signupForms.map((form) => (
               <div
                 key={form.id}
-                className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]"
+                className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]"
               >
                 <h3 className="mb-2 font-medium text-stone-900 dark:text-white">
                   {form.name}

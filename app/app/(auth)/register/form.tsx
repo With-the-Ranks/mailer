@@ -1,18 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
-import { isSafeCallbackPath } from "@/lib/utils";
 
-function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
+function RegisterForm({
+  onSuccess,
+}: {
+  callbackUrl?: string | null;
+  onSuccess?: (email: string) => void;
+}) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,21 +40,14 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
       return;
     }
 
-    // Identify user and capture registration event in PostHog
-    posthog.identify(formData.email, {
-      email: formData.email,
-    });
-    posthog.capture("user_registered", {
-      email: formData.email,
-    });
+    posthog.identify(formData.email, { email: formData.email });
+    posthog.capture("user_registered", { email: formData.email });
 
-    toast.success(
-      "Registration successful. Please check your email to verify.",
-    );
-    const nextUrl = isSafeCallbackPath(callbackUrl)
-      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl as string)}`
-      : "/login";
-    router.push(nextUrl);
+    try {
+      onSuccess?.(formData.email);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

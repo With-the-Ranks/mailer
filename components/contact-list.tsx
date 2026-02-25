@@ -515,10 +515,12 @@ export function ContactList({
     );
 
   return (
-    <div className="flex h-full w-full max-w-[calc(90vw-var(--sidebar-width))] flex-col space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">{listName}</h2>
+    <div className="flex h-full w-full max-w-full flex-col space-y-4 px-0 py-4 sm:px-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <h2 className="truncate text-2xl font-bold tracking-tight">
+            {listName}
+          </h2>
           <p className="text-muted-foreground">
             Manage your contact list for organizing, campaigns, and outreach •{" "}
             {contacts.length} contacts
@@ -526,8 +528,8 @@ export function ContactList({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="?action=add-contact" scroll={false}>
             <Button variant="default" size="sm">
               <UserPlusIcon className="mr-2 h-4 w-4" />
@@ -587,8 +589,8 @@ export function ContactList({
         table={table}
       />
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <ColumnVisibility table={table} customFields={customFieldKeys} />
           {selectedRowCount > 0 && (
             <Button variant="destructive" size="sm" onClick={handleBulkDelete}>

@@ -83,7 +83,7 @@ export function ColumnVisibility({
       >
         {Object.entries(columnGroups).map(([groupName, columnIds]) => (
           <div key={groupName}>
-            <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold uppercase tracking-wider">
+            <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold tracking-wider uppercase">
               {groupName}
             </DropdownMenuLabel>
             {columnIds.map((columnId) => {

@@ -45,7 +45,7 @@ export function HelpPanel({
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             "data-[state=closed]:slide-out-to-right-2 data-[state=open]:slide-in-from-right-2",
             "top-24 right-6 h-auto max-h-[calc(100vh-8rem)] p-0",
-            "dark:border-gray-700 dark:bg-gray-800",
+            "dark:border-gray-700 dark:bg-[#2D2D2D]",
             contentClassName,
           )}
         >

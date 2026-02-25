@@ -49,7 +49,7 @@ export default async function PublicSignupFormPage({
     if (bgColor) {
       return `text-white border-transparent`;
     }
-    return "bg-white text-gray-900 dark:bg-gray-800 dark:text-white";
+    return "bg-white text-gray-900 dark:bg-[#2D2D2D] dark:text-white";
   };
 
   const containerClass = `rounded-lg shadow-lg p-8 ${getContainerStyle()}`;
@@ -63,7 +63,7 @@ export default async function PublicSignupFormPage({
       : undefined;
   const pageClass = embed
     ? "min-h-screen"
-    : "min-h-screen bg-gray-50 py-12 dark:bg-gray-900";
+    : "min-h-screen bg-gray-50 py-12 dark:bg-[#0D0D0D]";
 
   return (
     <>

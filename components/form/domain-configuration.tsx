@@ -65,7 +65,7 @@ export default function DomainConfiguration({ domain }: { domain: string }) {
             <InlineSnippet>{domainJson.apexName}</InlineSnippet> to prove
             ownership of <InlineSnippet>{domainJson.name}</InlineSnippet>:
           </p>
-          <div className="my-5 flex items-start justify-start space-x-10 rounded-lg bg-stone-50 p-2 dark:bg-stone-800 dark:text-white">
+          <div className="my-5 flex items-start justify-start space-x-10 rounded-lg bg-stone-50 p-2 dark:bg-[#2D2D2D] dark:text-white">
             <div>
               <p className="text-base font-bold">Type</p>
               <p className="mt-2 font-mono text-base">{txtVerification.type}</p>
@@ -134,7 +134,7 @@ export default function DomainConfiguration({ domain }: { domain: string }) {
               ), set the following {recordType} record on your DNS provider to
               continue:
             </p>
-            <div className="flex items-center justify-start space-x-10 rounded-lg bg-stone-50 p-2 dark:bg-stone-800 dark:text-white">
+            <div className="flex items-center justify-start space-x-10 rounded-lg bg-stone-50 p-2 dark:bg-[#2D2D2D] dark:text-white">
               <div>
                 <p className="text-base font-bold">Type</p>
                 <p className="mt-2 font-mono text-base">{recordType}</p>

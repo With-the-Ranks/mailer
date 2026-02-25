@@ -87,7 +87,7 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
     <div className="flex w-full min-w-0 flex-col space-y-12">
       <div className="flex min-w-0 flex-col space-y-6">
         <h1 className="text-3xl font-bold dark:text-white">Reports</h1>
-        <div className="h-[400px] w-full rounded-lg border border-gray-200 bg-white py-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="h-[400px] w-full rounded-lg border border-[#D3D3D3] bg-white py-6 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
@@ -125,13 +125,13 @@ export default function EmailStats({ organizationId }: EmailStatsProps) {
               />
               <Bar
                 dataKey="sent"
-                fill={isDark ? "#3b82f6" : "#252753"}
+                fill={isDark ? "#3b82f6" : "#1d4ed8"}
                 name="Sent"
                 isAnimationActive={true}
               />
               <Bar
                 dataKey="opened"
-                fill="#82ca9d"
+                fill={isDark ? "#a78bfa" : "#8b5cf6"}
                 name="Opened"
                 isAnimationActive={true}
               />

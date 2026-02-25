@@ -175,26 +175,26 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
   return (
     <div className="flex flex-col">
       {/* Main Content Area */}
-      <div className="px-6 pb-6">
+      <div className="px-4 pb-6 sm:px-6">
         {/* Email Details Section - Separated with border-radius-lg */}
-        <div className="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
           {/* Email Name */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
             <label
               htmlFor="campaign-name"
-              className="w-32 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="w-full shrink-0 text-sm font-medium text-gray-700 sm:w-32 dark:text-gray-300"
             >
               Email Name
               <span className="ml-0.5 text-red-500">*</span>
             </label>
-            <div className="flex flex-1 items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
               <Input
                 id="campaign-name"
                 type="text"
                 placeholder="e.g., Organizing Kickoff"
                 value={formData.title}
                 onChange={(e) => updateFormData({ title: e.target.value })}
-                className="flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
+                className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
                 required
                 autoFocus
               />
@@ -203,10 +203,10 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
           </div>
 
           {/* Subject */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
             <label
               htmlFor="subject"
-              className="w-32 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="w-full shrink-0 text-sm font-medium text-gray-700 sm:w-32 dark:text-gray-300"
             >
               Subject
               <span className="ml-0.5 text-red-500">*</span>
@@ -217,16 +217,16 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
               placeholder="Email Subject"
               value={formData.subject}
               onChange={(e) => updateFormData({ subject: e.target.value })}
-              className="flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
+              className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
               required
             />
           </div>
 
           {/* Preview */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
             <label
               htmlFor="preview-text"
-              className="w-32 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="w-full shrink-0 text-sm font-medium text-gray-700 sm:w-32 dark:text-gray-300"
             >
               Preview
             </label>
@@ -236,15 +236,15 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
               placeholder="This appears in the inbox preview..."
               value={formData.previewText}
               onChange={(e) => updateFormData({ previewText: e.target.value })}
-              className="flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
+              className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
             />
           </div>
 
           {/* From Name */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
             <label
               htmlFor="from-name"
-              className="w-32 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="w-full shrink-0 text-sm font-medium text-gray-700 sm:w-32 dark:text-gray-300"
             >
               From Name
               <span className="ml-0.5 text-red-500">*</span>
@@ -255,16 +255,16 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
               placeholder="With The Ranks"
               value={formData.from}
               onChange={(e) => updateFormData({ from: e.target.value })}
-              className="flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
+              className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
               required
             />
           </div>
 
           {/* Reply-To */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
             <label
               htmlFor="reply-to"
-              className="w-32 shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="w-full shrink-0 text-sm font-medium text-gray-700 sm:w-32 dark:text-gray-300"
             >
               Reply-To
             </label>
@@ -274,14 +274,14 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
               placeholder="noreply@example.com"
               value={formData.replyTo}
               onChange={(e) => updateFormData({ replyTo: e.target.value })}
-              className="flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
+              className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
             />
           </div>
         </div>
 
         {/* Template Selector Section */}
         {!formData.template && !isNonEmptyContent(formData.content) && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
             <TemplateSelector
               selectedTemplate={formData.template}
               onTemplateSelect={handleTemplateSelect}
@@ -291,14 +291,14 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
 
         {/* Email Content Editor - when template is set OR we have saved content (reopening a draft) */}
         {(formData.template || isNonEmptyContent(formData.content)) && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email Content
               </label>
-              <div className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <div className="relative rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
                 {!hydrated && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-gray-800/80">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-[#2D2D2D]/80">
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                       <span className="text-sm text-gray-500">

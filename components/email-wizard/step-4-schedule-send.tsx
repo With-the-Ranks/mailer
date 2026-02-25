@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import type { Moment } from "moment";
-import moment from "moment";
+import moment from "moment-timezone";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,17 @@ import { useWizard } from "./wizard-context";
 
 type SendMode = "now" | "schedule";
 
+const DEFAULT_TIMEZONE = "America/New_York";
+
 interface Step4ScheduleSendProps {
   onFinalSend: () => Promise<void>;
+  timezone?: string;
 }
 
-export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
+export function Step4ScheduleSend({
+  onFinalSend,
+  timezone = DEFAULT_TIMEZONE,
+}: Step4ScheduleSendProps) {
   const { formData, organizationId, updateFormData } = useWizard();
   const [mode, setMode] = useState<SendMode>("now");
   const [testEmail, setTestEmail] = useState("");
@@ -27,7 +33,7 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
   const [localScheduledDate, setLocalScheduledDate] = useState<Moment>(() =>
     formData.scheduledTime
       ? moment(formData.scheduledTime)
-      : moment().add(1, "hour"),
+      : moment().tz(timezone).add(1, "hour"),
   );
 
   // Sync mode and localScheduledDate to formData.scheduledTime
@@ -53,7 +59,7 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
 
     setIsSendingTest(true);
     try {
-      await sendEmail({
+      const result = await sendEmail({
         to: testEmail,
         from: formData.from,
         subject: formData.subject,
@@ -62,7 +68,11 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
         organizationId,
         audienceListId: formData.audienceListId || undefined,
       });
-      toast.success("Test email sent successfully!");
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Test email sent successfully!");
+      }
     } catch (error) {
       toast.error("Failed to send test email");
       console.error("Test email error:", error);
@@ -77,8 +87,8 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
 
   return (
     <div className="flex h-full flex-col items-center justify-center bg-transparent">
-      <div className="w-full max-w-6xl p-6">
-        <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="w-full max-w-6xl p-4 sm:p-6">
+        <div className="space-y-8 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-8 dark:border-gray-700 dark:bg-[#2D2D2D]">
           {/* Header */}
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -192,16 +202,17 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
                   isValidTime={isValidTime}
                   setScheduledTimeValue={setLocalScheduledDateAndSync}
                   isDisabled={false}
+                  timezone={timezone}
                 />
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                  Timezone: <span className="font-medium">{timezone}</span>
                 </p>
               </div>
             )}
           </div>
 
           {/* Summary */}
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
             <h3 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">
               Email Summary
             </h3>
@@ -225,14 +236,20 @@ export function Step4ScheduleSend({ onFinalSend }: Step4ScheduleSendProps) {
                 </dd>
               </div>
               {mode === "schedule" && (
-                <div className="flex justify-between">
-                  <dt className="text-gray-600 dark:text-gray-400">
-                    Scheduled:
-                  </dt>
-                  <dd className="font-medium text-gray-900 dark:text-white">
-                    {localScheduledDate.format("YYYY-MM-DD HH:mm")}
-                  </dd>
-                </div>
+                <>
+                  <div className="flex justify-between">
+                    <dt className="text-gray-600 dark:text-gray-400">
+                      Scheduled:
+                    </dt>
+                    <dd className="font-medium text-gray-900 dark:text-white">
+                      {localScheduledDate
+                        .clone()
+                        .tz(timezone)
+                        .format("YYYY-MM-DD HH:mm")}{" "}
+                      {timezone}
+                    </dd>
+                  </div>
+                </>
               )}
             </dl>
           </div>

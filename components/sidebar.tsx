@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Ban,
   ChartLine,
   ChevronRight,
   CornerDownRight,
@@ -93,12 +94,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         (segments[0] === "email" && segments[1] === "create");
       const isOnAudiencePage = segments[0] === "audience";
       const isOnSegmentsPage = segments.includes("segments");
+      const isOnSuppressionPage = segments.includes("suppression");
       const isOnPeopleIndex =
         segments[0] === "organization" &&
         segments[2] === "audience" &&
         segments.length === 3;
       const isOnPeopleSection =
-        isOnAudiencePage || isOnSegmentsPage || isOnPeopleIndex;
+        isOnAudiencePage ||
+        isOnSegmentsPage ||
+        isOnPeopleIndex ||
+        isOnSuppressionPage;
       const isPublished = emailData?.published;
       const isOnEmailsListPage =
         segments[0] === "organization" && segments.length === 2;
@@ -120,6 +125,11 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             ? `/audience/${audienceListId}`
             : `/organization/${siteId}/audience`,
           isActive: isOnPeopleSection,
+          isParentPathActive:
+            pathname ===
+            (audienceListId
+              ? `/audience/${audienceListId}`
+              : `/organization/${siteId}/audience`),
           icon: TableProperties,
           submenu: isOnPeopleSection
             ? [
@@ -139,6 +149,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                   isActive: segments.includes("segments"),
                   icon: Filter,
                 },
+                {
+                  name: "Suppression List",
+                  href: `/organization/${siteId}/audience/suppression`,
+                  isActive: segments.includes("suppression"),
+                  icon: Ban,
+                },
               ]
             : undefined,
         },
@@ -147,6 +163,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           href: `/organization/${siteId}/signup-forms`,
           isActive:
             segments.includes("signup-forms") && !isOnCreateSignupFormPage,
+          isParentPathActive:
+            pathname === `/organization/${siteId}/signup-forms`,
           icon: Form,
           submenu: isOnSignupFormsSection
             ? [
@@ -163,6 +181,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           name: "Emails",
           href: `/organization/${siteId}`,
           isActive: isOnEmailsListPage && !isOnEmailPage, // Only highlight when on emails list, not on individual email
+          isParentPathActive: pathname === `/organization/${siteId}`,
           icon: Newspaper,
           submenu: isOnEmailPage
             ? [
@@ -275,24 +294,45 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                   <Collapsible
                     key={item.name}
                     asChild
-                    defaultOpen={true}
+                    defaultOpen={!!item.isActive}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
+                      <div className="flex w-full items-center rounded-lg pr-1">
                         <SidebarMenuButton
+                          asChild
                           tooltip={item.name}
-                          isActive={!!item.isActive}
-                          className="rounded-lg py-2 pr-4 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
+                          isActive={
+                            !!(item as { isParentPathActive?: boolean })
+                              .isParentPathActive
+                          }
+                          className="min-w-0 flex-1 rounded-lg py-2 pr-2 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
                         >
-                          <item.icon
-                            className="mr-1.5 text-black dark:text-white"
-                            size={24}
-                          />
-                          <span className="whitespace-nowrap">{item.name}</span>
-                          <ChevronRight className="ml-auto text-black transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 dark:text-white" />
+                          <Link
+                            href={item.href}
+                            className="flex items-center gap-1.5"
+                          >
+                            <item.icon
+                              className="shrink-0 text-black dark:text-white"
+                              size={24}
+                            />
+                            <span className="truncate whitespace-nowrap">
+                              {item.name}
+                            </span>
+                          </Link>
                         </SidebarMenuButton>
-                      </CollapsibleTrigger>
+                        <CollapsibleTrigger
+                          asChild
+                          className="flex shrink-0 items-center justify-center rounded-md p-1 text-black transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-300 dark:text-white dark:hover:bg-neutral-800 dark:focus-visible:ring-neutral-600"
+                        >
+                          <button
+                            type="button"
+                            aria-label={`Toggle ${item.name} submenu`}
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                        </CollapsibleTrigger>
+                      </div>
                       <CollapsibleContent>
                         <SidebarMenuSub>
                           {item.submenu.map((sub: any) => (

@@ -167,7 +167,7 @@ export default function PublicSignupForm({
     const isDarkTheme = Boolean(theme?.inputBg || theme?.buttonBg);
     return (
       <div
-        className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-gray-800"}`}
+        className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-[#2D2D2D]"}`}
       >
         <div
           className={`mb-4 text-6xl ${isDarkTheme ? "text-white" : "text-green-600"}`}

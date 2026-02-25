@@ -17,6 +17,7 @@ import {
 } from "@/lib/domains";
 import prisma from "@/lib/prisma";
 // import { seedOrgTemplates } from "@/lib/seedTemplates";
+import { isValidTimezone } from "@/lib/timezones";
 import { getBlurDataURL, logError } from "@/lib/utils";
 
 import { withAdminAuth, withEmailAuth } from "../auth";
@@ -221,6 +222,16 @@ export const updateOrganization = withAdminAuth(
           
           */
         }
+      } else if (key === "timezone") {
+        const tz = (value || "America/New_York").trim();
+        if (!isValidTimezone(tz)) {
+          return { error: "Invalid timezone" };
+        }
+        response = await prisma.organization.update({
+          where: { id: organization.id },
+          data: { timezone: tz },
+        });
+        revalidatePath(`/organization/${organization.id}/settings`);
       } else if (key === "image" || key === "logo") {
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
           return {
@@ -260,10 +271,10 @@ export const updateOrganization = withAdminAuth(
       // Intentionally not logging details here in production
       revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-        "page",
+        "max",
       );
       if (organization.customDomain) {
-        revalidateTag(`${organization.customDomain}-metadata`, "page");
+        revalidateTag(`${organization.customDomain}-metadata`, "max");
       }
 
       return response;
@@ -291,10 +302,10 @@ export const deleteOrganization = withAdminAuth(
       });
       revalidateTag(
         `${organization.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-metadata`,
-        "page",
+        "max",
       );
       if (response.customDomain) {
-        revalidateTag(`${response.customDomain}-metadata`, "page");
+        revalidateTag(`${response.customDomain}-metadata`, "max");
       }
       return response;
     } catch (error: any) {
@@ -421,15 +432,15 @@ export const updateEmail = async (data: Email, scheduledTime?: Date | null) => {
 
     revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-      "page",
+      "max",
     );
     revalidateTag(
       `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
-      "page",
+      "max",
     );
     if (email.organization?.customDomain) {
-      revalidateTag(`${email.organization.customDomain}-emails`, "page");
-      revalidateTag(`${email.organization.customDomain}-${email.slug}`, "page");
+      revalidateTag(`${email.organization.customDomain}-emails`, "max");
+      revalidateTag(`${email.organization.customDomain}-${email.slug}`, "max");
     }
 
     return response;
@@ -482,19 +493,19 @@ export const updatePostMetadata = withEmailAuth(
 
       revalidateTag(
         `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-emails`,
-        "page",
+        "max",
       );
       revalidateTag(
         `${email.organization?.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}-${email.slug}`,
-        "page",
+        "max",
       );
 
       // if the organization has a custom domain, we need to revalidate those tags too
       if (email.organization?.customDomain) {
-        revalidateTag(`${email.organization.customDomain}-emails`, "page");
+        revalidateTag(`${email.organization.customDomain}-emails`, "max");
         revalidateTag(
           `${email.organization.customDomain}-${email.slug}`,
-          "page",
+          "max",
         );
       }
 
@@ -705,6 +716,28 @@ export const getOrgAndAudienceList = async () => {
     userOrgs,
     userRole: currentRole || null,
   };
+};
+
+export const getOrganizationTimezone = async (
+  organizationId: string,
+): Promise<string | null> => {
+  const session = await getSession();
+  if (!session?.user.id) return null;
+  const member = await prisma.organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: session.user.id,
+        organizationId,
+      },
+    },
+    select: { organizationId: true },
+  });
+  if (!member) return null;
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { timezone: true },
+  });
+  return org?.timezone ?? null;
 };
 
 // SES Domain Management Actions

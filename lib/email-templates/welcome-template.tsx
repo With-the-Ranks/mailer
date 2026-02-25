@@ -67,7 +67,7 @@ export const WelcomeTemplate = () => (
         `}
       </style>
     </Head>
-    <Preview>Welcome to Mailer — email built for organizers</Preview>
+    <Preview>Welcome to Mailer. Email built for organizers.</Preview>
     <Tailwind
       config={
         {
@@ -97,7 +97,7 @@ export const WelcomeTemplate = () => (
               className="heading mt-2 text-3xl font-bold"
               style={{ fontFamily, color: "#000000", textAlign: "center" }}
             >
-              Welcome to Mailer — email built for organizers
+              Welcome to Mailer
             </Text>
             <Text
               className="body-text mt-4 text-lg"

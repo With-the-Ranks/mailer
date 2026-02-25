@@ -27,10 +27,10 @@ export function WizardProvider({
     setLeavePrompt({ href });
   }, []);
 
-  const saveEmail = useCallback(async () => {
+  const saveEmail = useCallback(async (): Promise<boolean> => {
     // Only save if campaign name (title) is filled out
     if (!state.formData.title?.trim()) {
-      return;
+      return false;
     }
 
     let currentEmailId = state.emailId;
@@ -51,7 +51,7 @@ export function WizardProvider({
         if ("error" in newEmail) {
           toast.error("Failed to create email: " + newEmail.error);
           setState((prev) => ({ ...prev, isSaving: false }));
-          return;
+          return false;
         }
 
         currentEmailId = newEmail.id;
@@ -72,7 +72,7 @@ export function WizardProvider({
         console.error("Create email error:", error);
         toast.error("Failed to create email");
         setState((prev) => ({ ...prev, isSaving: false }));
-        return;
+        return false;
       }
     }
 
@@ -103,19 +103,22 @@ export function WizardProvider({
 
       if ("error" in result) {
         toast.error("Failed to save: " + result.error);
-      } else {
-        toast.success("Draft saved");
-        setState((prev) => ({
-          ...prev,
-          isSaving: false,
-          isDirty: false,
-          lastSaved: new Date(),
-        }));
+        setState((prev) => ({ ...prev, isSaving: false }));
+        return false;
       }
+      toast.success("Draft saved");
+      setState((prev) => ({
+        ...prev,
+        isSaving: false,
+        isDirty: false,
+        lastSaved: new Date(),
+      }));
+      return true;
     } catch (error) {
       console.error("Save error:", error);
       toast.error("Failed to save email");
       setState((prev) => ({ ...prev, isSaving: false }));
+      return false;
     }
   }, [state.emailId, state.organizationId, state.formData]);
 

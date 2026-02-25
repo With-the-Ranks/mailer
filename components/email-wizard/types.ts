@@ -29,7 +29,7 @@ export interface WizardContextValue extends WizardState {
   goToNextStep: () => void;
   goToPreviousStep: () => void;
   canProceedToNextStep: () => boolean;
-  saveEmail: () => Promise<void>;
+  saveEmail: () => Promise<boolean>;
   leavePrompt: { href: string } | null;
   setLeavePrompt: (v: { href: string } | null) => void;
   requestLeave: (href: string) => void;

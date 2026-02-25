@@ -75,7 +75,7 @@ export default async function OrganizationHomePage({
             {emails.map((email: any) => (
               <li key={email.slug}>
                 <Link href={`/${email.slug}`} className="group block">
-                  <div className="flex flex-col items-center gap-4 rounded-xl border bg-white p-6 transition duration-300 hover:shadow-xl md:flex-row dark:border-stone-700 dark:bg-stone-800">
+                  <div className="flex flex-col items-center gap-4 rounded-xl border bg-white p-6 transition duration-300 hover:shadow-xl md:flex-row dark:border-stone-700 dark:bg-[#2D2D2D]">
                     {/* Image Container – rectangular 16:9 aspect ratio */}
                     <div className="relative aspect-video w-full shrink-0 md:w-1/3 lg:w-1/4">
                       <BlurImage

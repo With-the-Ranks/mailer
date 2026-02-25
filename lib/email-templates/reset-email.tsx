@@ -102,7 +102,7 @@ export const ResetPasswordEmail = ({ resetUrl }: ResetPasswordEmailProps) => (
               className="body-text mt-4 text-lg"
               style={{ fontFamily, color: "#000000", textAlign: "left" }}
             >
-              No worries — it happens! Click the button below to reset your
+              No worries, it happens! Click the button below to reset your
               password and get back to building great campaigns.
             </Text>
 

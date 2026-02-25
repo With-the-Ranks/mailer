@@ -15,10 +15,10 @@ interface WizardStepIndicatorProps {
 }
 
 const steps = [
-  { number: 1, label: "Create" },
-  { number: 2, label: "Target" },
-  { number: 3, label: "Preview" },
-  { number: 4, label: "Schedule & Send" },
+  { number: 1, label: "Create", shortLabel: "Create" },
+  { number: 2, label: "Target", shortLabel: "Target" },
+  { number: 3, label: "Preview", shortLabel: "Preview" },
+  { number: 4, label: "Schedule & Send", shortLabel: "Schedule" },
 ] as const;
 
 export function WizardStepIndicator({
@@ -38,7 +38,7 @@ export function WizardStepIndicator({
     if (isFinalStep && onFinalSubmit) {
       await onFinalSubmit();
     } else if (onNext) {
-      onNext();
+      await Promise.resolve(onNext());
     }
   };
 
@@ -58,67 +58,67 @@ export function WizardStepIndicator({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex w-full items-center justify-between gap-4">
-        {/* Back Button */}
-        {showBackButton && (
+    <div className="rounded-lg border border-gray-200 bg-white px-3 py-3 sm:px-4 dark:border-gray-700 dark:bg-[#2D2D2D]">
+      <div className="flex w-full items-center gap-2 sm:gap-4">
+        {/* Back - always visible */}
+        {showBackButton ? (
           <Button
             variant="ghost"
             onClick={goToPreviousStep}
             disabled={isSaving || isSending}
-            className="flex items-center gap-1.5 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            className="flex shrink-0 items-center gap-1.5 text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
             <span>&lt;</span> Back
           </Button>
-        )}
+        ) : null}
 
-        {/* Step Labels */}
-        <nav
-          aria-label="Progress"
-          className="flex w-full flex-1 items-center justify-between gap-6 pr-16"
-        >
-          {steps.map((step) => {
-            const isCurrent = currentStep === step.number;
-            const isClickable = isStepClickable(step.number);
+        {/* Step labels - scroll horizontally on narrow so Next stays visible */}
+        <nav aria-label="Progress" className="min-w-0 flex-1 overflow-x-auto">
+          <div className="flex items-center justify-between gap-3 sm:gap-6">
+            {steps.map((step) => {
+              const isCurrent = currentStep === step.number;
+              const isClickable = isStepClickable(step.number);
 
-            return (
-              <button
-                key={step.number}
-                type="button"
-                onClick={() => handleStepClick(step.number as WizardStep)}
-                disabled={!isClickable}
-                className={cn(
-                  "text-sm transition-colors",
-                  isCurrent
-                    ? "font-bold text-gray-900 dark:text-white"
-                    : "font-normal",
-                  isClickable
-                    ? "cursor-pointer hover:text-blue-700 dark:hover:text-blue-400"
-                    : "cursor-default opacity-50",
-                )}
-              >
-                <span className="text-gray-900 dark:text-white">
-                  {step.number}.
-                </span>{" "}
-                <span
+              return (
+                <button
+                  key={step.number}
+                  type="button"
+                  onClick={() => handleStepClick(step.number as WizardStep)}
+                  disabled={!isClickable}
                   className={cn(
+                    "shrink-0 text-sm whitespace-nowrap transition-colors",
                     isCurrent
-                      ? "text-gray-900 dark:text-white"
-                      : "text-gray-700 dark:text-gray-300",
+                      ? "font-bold text-gray-900 dark:text-white"
+                      : "font-normal",
+                    isClickable
+                      ? "cursor-pointer hover:text-blue-700 dark:hover:text-blue-400"
+                      : "cursor-default opacity-50",
                   )}
                 >
-                  {step.label}
-                </span>
-              </button>
-            );
-          })}
+                  <span className="text-gray-900 dark:text-white">
+                    {step.number}.
+                  </span>{" "}
+                  <span
+                    className={cn(
+                      isCurrent
+                        ? "text-gray-900 dark:text-white"
+                        : "text-gray-700 dark:text-gray-300",
+                    )}
+                  >
+                    <span className="sm:hidden">{step.shortLabel}</span>
+                    <span className="hidden sm:inline">{step.label}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        {/* Next Button */}
+        {/* Next - always visible, never cut off */}
         <Button
           onClick={handleNext}
           disabled={!canProceed || isSaving}
-          className="flex items-center gap-1.5 rounded-lg bg-blue-700 px-4 py-2 text-white hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-2 text-sm text-white hover:bg-blue-800 sm:px-4 sm:text-base dark:bg-blue-600 dark:hover:bg-blue-700"
         >
           {isFinalStep ? (
             <>

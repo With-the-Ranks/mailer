@@ -47,7 +47,7 @@ function RateGauge({ label, rate, threshold, maxDisplay }: RateGaugeProps) {
   const percentage = Math.min((rate / maxDisplay) * 100, 100);
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+    <div className="rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {label}
       </h3>
@@ -195,7 +195,7 @@ export default function SesOrgStats({ organizationId }: SesOrgStatsProps) {
           {statCards.map(({ label, value }) => (
             <div
               key={label}
-              className="flex flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]"
+              className="flex flex-col rounded-lg border border-[#D3D3D3] bg-white p-4 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]"
             >
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {label}
@@ -225,7 +225,7 @@ export default function SesOrgStats({ organizationId }: SesOrgStatsProps) {
 
         {/* Email Stats Chart */}
         {emailStats.length > 0 && (
-          <div className="h-[400px] w-full rounded-lg border border-gray-200 bg-white py-6 shadow-sm dark:border-gray-700 dark:bg-[#2D2D2D]">
+          <div className="h-[400px] w-full rounded-lg border border-[#D3D3D3] bg-white py-6 dark:border-[#D3D3D3] dark:bg-[#2D2D2D]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={emailStats}

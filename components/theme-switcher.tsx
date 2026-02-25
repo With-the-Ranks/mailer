@@ -21,7 +21,7 @@ export default function ThemeSwitcher() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex items-center justify-start gap-2 rounded-[34px] bg-neutral-100 p-1 outline outline-1 outline-offset-[-1px] outline-neutral-300 transition-all hover:opacity-80 dark:bg-neutral-800 dark:outline-neutral-700"
+      className="inline-flex items-center justify-start gap-2 rounded-[34px] bg-neutral-100 p-1 outline outline-1 outline-offset-[-1px] outline-neutral-300 transition-all hover:opacity-80 dark:bg-[#252525] dark:outline-neutral-700"
       aria-label="Toggle theme"
     >
       {/* Sun icon (shown when in light mode) */}
