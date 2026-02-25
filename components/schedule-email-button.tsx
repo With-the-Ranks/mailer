@@ -43,8 +43,9 @@ export default function ScheduleEmailButton({
   const handleDateSelect = useCallback(
     (date: Date | undefined) => {
       if (!date) return;
+      const selectedDay = moment.tz(date, timezone).format("YYYY-MM-DD");
       const newMoment = moment.tz(
-        `${moment(date).format("YYYY-MM-DD")} ${timeString}`,
+        `${selectedDay} ${timeString}`,
         "YYYY-MM-DD HH:mm",
         timezone,
       );
@@ -69,9 +70,7 @@ export default function ScheduleEmailButton({
 
   const disabledMatcher = useCallback(
     (date: Date) => {
-      const d = moment
-        .tz(moment(date).format("YYYY-MM-DD"), "YYYY-MM-DD", timezone)
-        .startOf("day");
+      const d = moment.tz(date, timezone).startOf("day");
       return !isValidTime(d);
     },
     [timezone, isValidTime],
