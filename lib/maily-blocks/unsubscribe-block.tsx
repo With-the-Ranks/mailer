@@ -2,7 +2,15 @@ import { UserMinus } from "lucide-react";
 
 import type { BlockItem } from "./types";
 
-export function createUnsubscribeBlock(): BlockItem {
+type UnsubscribeBlockOptions = {
+  linkColor?: string | null;
+};
+
+export function createUnsubscribeBlock(
+  options?: UnsubscribeBlockOptions,
+): BlockItem {
+  const linkColor = options?.linkColor || "#2563eb";
+
   return {
     title: "Unsubscribe",
     icon: <UserMinus className="h-4 w-4" />,
@@ -55,7 +63,7 @@ export function createUnsubscribeBlock(): BlockItem {
                     {
                       type: "textStyle",
                       attrs: {
-                        color: "#2563eb",
+                        color: linkColor,
                         fontSize: "12px",
                         textDecoration: "underline",
                       },

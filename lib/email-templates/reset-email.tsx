@@ -166,7 +166,7 @@ export const ResetPasswordEmail = ({ resetUrl }: ResetPasswordEmailProps) => (
                 className="font-bold"
                 style={{ fontFamily, color: "#000000" }}
               >
-                – The Mailer Team
+                - The Mailer Team
               </Text>
             </Container>
           </Container>

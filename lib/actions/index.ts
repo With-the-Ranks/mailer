@@ -27,6 +27,43 @@ const nanoid = customAlphabet(
   7,
 ); // 7-character random string
 
+function normalizeHexColorWithHash(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const withoutHash = trimmed.startsWith("#") ? trimmed.slice(1) : trimmed;
+  if (!/^[0-9a-fA-F]{6}$/.test(withoutHash)) {
+    return null;
+  }
+  return `#${withoutHash.toLowerCase()}`;
+}
+
+type BrandingColumnsResult = {
+  hasBackgroundColor: boolean;
+  hasButtonColor: boolean;
+};
+
+async function hasOrganizationBrandColorColumns(): Promise<boolean> {
+  const columns = await prisma.$queryRaw<BrandingColumnsResult[]>`
+    SELECT
+      EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Organization'
+          AND column_name = 'backgroundColor'
+      ) AS "hasBackgroundColor",
+      EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Organization'
+          AND column_name = 'buttonColor'
+      ) AS "hasButtonColor"
+  `;
+
+  return Boolean(columns[0]?.hasBackgroundColor && columns[0]?.hasButtonColor);
+}
+
 export const createOrganization = async (
   formData: FormData,
   userId?: string,
@@ -232,6 +269,39 @@ export const updateOrganization = withAdminAuth(
           data: { timezone: tz },
         });
         revalidatePath(`/organization/${organization.id}/settings`);
+      } else if (key === "backgroundColor" || key === "buttonColor") {
+        const normalizedColor = normalizeHexColorWithHash(value);
+        if (!normalizedColor) {
+          return {
+            error: `${key === "backgroundColor" ? "Background color" : "Button color"} must be a valid hex color`,
+          };
+        }
+
+        const hasColorColumns = await hasOrganizationBrandColorColumns();
+        if (!hasColorColumns) {
+          return {
+            error:
+              "Organization brand colors are not available yet. Please run the latest database migration and try again.",
+          };
+        }
+
+        if (key === "backgroundColor") {
+          await prisma.$executeRaw`
+            UPDATE "Organization"
+            SET "backgroundColor" = ${normalizedColor}, "updatedAt" = NOW()
+            WHERE "id" = ${organization.id}
+          `;
+        } else {
+          await prisma.$executeRaw`
+            UPDATE "Organization"
+            SET "buttonColor" = ${normalizedColor}, "updatedAt" = NOW()
+            WHERE "id" = ${organization.id}
+          `;
+        }
+        response = await prisma.organization.findUnique({
+          where: { id: organization.id },
+        });
+        revalidatePath(`/organization/${organization.id}/settings`);
       } else if (key === "image" || key === "logo") {
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
           return {
@@ -240,10 +310,30 @@ export const updateOrganization = withAdminAuth(
           };
         }
 
-        const file = formData.get(key) as File;
-        const filename = `${nanoid()}.${file.type.split("/")[1]}`;
+        const fileInput = formData.get(key);
+        if (!(fileInput instanceof File) || fileInput.size === 0) {
+          return { error: "Please select an image to upload." };
+        }
 
-        const { url } = await put(filename, file, {
+        const allowedTypes = new Set(["image/png", "image/jpeg"]);
+        if (!allowedTypes.has(fileInput.type)) {
+          return { error: "Invalid image type. Please upload PNG or JPEG." };
+        }
+
+        const extension =
+          fileInput.type === "image/png"
+            ? "png"
+            : fileInput.type === "image/jpeg"
+              ? "jpg"
+              : null;
+
+        if (!extension) {
+          return { error: "Unable to determine uploaded file type." };
+        }
+
+        const filename = `${nanoid()}.${extension}`;
+
+        const { url } = await put(filename, fileInput, {
           access: "public",
         });
 

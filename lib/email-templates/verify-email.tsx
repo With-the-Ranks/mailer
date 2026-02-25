@@ -175,7 +175,7 @@ export const VerifyEmail = ({ verificationUrl }: VerifyEmailProps) => (
                 className="font-bold"
                 style={{ fontFamily, color: "#000000" }}
               >
-                – The Mailer Team
+                - The Mailer Team
               </Text>
             </Container>
           </Container>

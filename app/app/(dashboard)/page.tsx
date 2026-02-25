@@ -90,18 +90,20 @@ export default async function Overview() {
             timezone={orgTimezone}
             organizationId={currentOrgId}
           />
-          <section>
-            <h2 className="mb-4 self-stretch text-left text-xl font-normal text-black dark:text-white">
-              Recent
-            </h2>
-            <div>
-              <EmailTable
-                emails={recentEmails}
-                hidePagination
-                firstColumnLabel="Name"
-              />
-            </div>
-          </section>
+          {recentEmails.length > 0 && (
+            <section>
+              <h2 className="mb-4 self-stretch text-left text-xl font-normal text-black dark:text-white">
+                Recent
+              </h2>
+              <div>
+                <EmailTable
+                  emails={recentEmails}
+                  hidePagination
+                  firstColumnLabel="Name"
+                />
+              </div>
+            </section>
+          )}
           <DashboardStats organizationId={currentOrgId} />
         </>
       )}

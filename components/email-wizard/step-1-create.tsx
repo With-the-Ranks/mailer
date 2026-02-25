@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createDefaultBlocks } from "@/lib/maily-blocks/default-blocks";
+import { applyOrganizationBrandingToEmailContent } from "@/lib/maily-blocks/logo-utils";
 import * as signupBlocks from "@/lib/maily-blocks/signup-block";
 import type { SignupForm } from "@/lib/maily-blocks/types";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,8 @@ interface Step1CreateProps {
     subdomain: string | null;
     logo: string | null;
     image: string | null;
+    backgroundColor: string | null;
+    buttonColor: string | null;
   } | null;
 }
 
@@ -44,9 +47,13 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
   const [signupForms, setSignupForms] = useState<SignupForm[]>([]);
   const [contentObj, setContentObj] = useState<any>(() => {
     try {
-      return formData.content
+      const parsed = formData.content
         ? JSON.parse(formData.content)
         : { type: "doc", content: [] };
+      return applyOrganizationBrandingToEmailContent(
+        parsed,
+        organizationData || undefined,
+      );
     } catch {
       return { type: "doc", content: [] };
     }
@@ -87,13 +94,18 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
           typeof formData.content === "string"
             ? JSON.parse(formData.content)
             : formData.content;
+        const parsedWithOrganizationBranding =
+          applyOrganizationBrandingToEmailContent(
+            parsed,
+            organizationData || undefined,
+          );
 
         // Only update contentObj if it's different (but keep hydrated true)
         const currentStr = JSON.stringify(contentObj);
-        const newStr = JSON.stringify(parsed);
+        const newStr = JSON.stringify(parsedWithOrganizationBranding);
 
         if (currentStr !== newStr) {
-          setContentObj(parsed);
+          setContentObj(parsedWithOrganizationBranding);
         }
       } catch (error) {
         console.error("Failed to parse content:", error);
@@ -103,7 +115,10 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
 
   // Create comprehensive blocks array with Maily blocks plus signup form blocks
   const blocks = useMemo(() => {
-    const signupFormBlocks = signupBlocks.createSignupFormBlocks(signupForms);
+    const signupFormBlocks = signupBlocks.createSignupFormBlocks(
+      signupForms,
+      organizationData || undefined,
+    );
     const defaultBlocks = createDefaultBlocks(organizationData || undefined);
 
     const finalBlocks = [
@@ -134,23 +149,28 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
         typeof templateContent === "string"
           ? JSON.parse(templateContent)
           : templateContent;
+      const parsedWithOrganizationBranding =
+        applyOrganizationBrandingToEmailContent(
+          parsed,
+          organizationData || undefined,
+        );
 
       // Validate parsed content
-      if (!parsed || typeof parsed !== "object") {
+      if (
+        !parsedWithOrganizationBranding ||
+        typeof parsedWithOrganizationBranding !== "object"
+      ) {
         throw new Error("Invalid template content");
       }
 
       // Update form data first (this triggers the useEffect)
       updateFormData({
         template: templateId,
-        content:
-          typeof templateContent === "string"
-            ? templateContent
-            : JSON.stringify(templateContent),
+        content: JSON.stringify(parsedWithOrganizationBranding),
       });
 
       // Then update local state
-      setContentObj(parsed);
+      setContentObj(parsedWithOrganizationBranding);
       setHydrated(false);
       setEditorKey((prev) => prev + 1);
 
