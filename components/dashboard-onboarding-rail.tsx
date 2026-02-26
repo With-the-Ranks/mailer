@@ -2,6 +2,7 @@
 
 import { GripHorizontal, ListChecks } from "lucide-react";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 
@@ -63,18 +64,41 @@ export default function DashboardOnboardingRail({
     startY: number;
   } | null>(null);
 
-  const fallbackState: OnboardingStateResponse = {
-    organizationId,
-    userRole,
-    onboarding,
-  };
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParamsString = searchParams.toString();
 
-  const { data } = useSWR<OnboardingStateResponse>(
+  const fallbackState = useMemo<OnboardingStateResponse>(
+    () => ({
+      organizationId,
+      userRole,
+      onboarding,
+    }),
+    [onboarding, organizationId, userRole],
+  );
+
+  const serverStateSignature = useMemo(
+    () =>
+      [
+        organizationId,
+        userRole ?? "none",
+        onboarding.completedCount,
+        onboarding.progressPercent,
+        onboarding.isComplete ? "1" : "0",
+        onboarding.shouldShow ? "1" : "0",
+        onboarding.steps.map((step) => `${step.id}:${step.completed ? 1 : 0}`),
+      ].join("|"),
+    [onboarding, organizationId, userRole],
+  );
+  const previousServerStateSignature = useRef(serverStateSignature);
+
+  const { data, mutate } = useSWR<OnboardingStateResponse>(
     "/api/onboarding-state",
-    (url: string) => fetch(url).then((res) => res.json()),
+    (url: string) =>
+      fetch(url, { cache: "no-store" }).then((res) => res.json()),
     {
       fallbackData: fallbackState,
-      refreshInterval: (latest) => (latest?.onboarding?.shouldShow ? 15000 : 0),
+      refreshInterval: (latest) => (latest?.onboarding?.shouldShow ? 5000 : 0),
       revalidateOnFocus: true,
     },
   );
@@ -132,15 +156,26 @@ export default function DashboardOnboardingRail({
     });
   }, [clampPosition, getPanelSize]);
 
-  if (!activeOnboarding) {
-    return null;
-  }
+  useEffect(() => {
+    if (previousServerStateSignature.current === serverStateSignature) {
+      return;
+    }
+    previousServerStateSignature.current = serverStateSignature;
+
+    void mutate(fallbackState, {
+      revalidate: true,
+    });
+  }, [fallbackState, mutate, serverStateSignature]);
 
   useEffect(() => {
-    if (activeOnboarding.isComplete) {
+    void mutate();
+  }, [mutate, pathname, searchParamsString]);
+
+  useEffect(() => {
+    if (activeOnboarding?.isComplete) {
       setCollapsed(false);
     }
-  }, [activeOnboarding.isComplete]);
+  }, [activeOnboarding?.isComplete]);
 
   useEffect(() => {
     try {
@@ -191,6 +226,10 @@ export default function DashboardOnboardingRail({
       // ignore storage errors
     }
   }, [organizationId, position, userId]);
+
+  if (!activeOnboarding) {
+    return null;
+  }
 
   const setCollapsedState = (next: boolean) => {
     if (!next) {
