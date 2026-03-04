@@ -83,6 +83,8 @@ function EmailWizardContent({
         !href ||
         href.startsWith("#") ||
         href.startsWith("javascript:") ||
+        href.startsWith("data:") ||
+        href.startsWith("vbscript:") ||
         a.target === "_blank" ||
         a.hasAttribute("download")
       )
