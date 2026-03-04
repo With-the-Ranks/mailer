@@ -1,7 +1,7 @@
 export const CONTACT_FIELDS = [
-  { key: "firstName", label: "First Name", required: true },
-  { key: "lastName", label: "Last Name", required: true },
-  { key: "email", label: "Email", required: true },
+  { key: "firstName", label: "First Name", required: false },
+  { key: "lastName", label: "Last Name", required: false },
+  { key: "email", label: "Email", required: false },
   { key: "phone", label: "Phone", required: false },
   { key: "note", label: "Note", required: false },
   { key: "tags", label: "Tags", required: false },

@@ -65,8 +65,8 @@ export function MappingStep({
                 <InfoIcon className="h-4 w-4" />
                 <AlertDescription>
                   Unmapped CSV columns will be automatically added as custom
-                  fields. Required fields (marked with *) must be mapped to
-                  proceed.
+                  fields. Each row should include at least one of name, email,
+                  or phone.
                 </AlertDescription>
               </Alert>
               <div className="flex justify-between">

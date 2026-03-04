@@ -29,6 +29,7 @@ import { ContactTable } from "./contact-table";
 import { AddContactSheet } from "./contact-table/add-contact-sheet";
 import { ColumnVisibility } from "./contact-table/column-visibility";
 import { createColumns } from "./contact-table/table-columns";
+import { ViewContactSheet } from "./contact-table/view-contact-sheet";
 import { TableFilters } from "./contact-table/table-filters";
 import {
   type CustomFieldDefinition,
@@ -54,12 +55,49 @@ interface ContactListProps {
   initialContacts?: any[];
 }
 
+const RESERVED_COLUMN_IDS = new Set([
+  "select",
+  "actions",
+  "email",
+  "firstName",
+  "lastName",
+  "phone",
+  "defaultAddressCompany",
+  "defaultAddressCity",
+  "defaultAddressCountryCode",
+  "defaultAddressAddress1",
+  "defaultAddressAddress2",
+  "defaultAddressProvinceCode",
+  "defaultAddressZip",
+  "defaultAddressPhone",
+  "tags",
+  "note",
+  "createdAt",
+  "updatedAt",
+  "isUnsubscribed",
+  "signupFormName",
+  "signupSource",
+]);
+
+function formatColumnLabel(key: string) {
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function convertAudienceToContact(audience: any): Contact {
   return {
     id: audience.id,
-    email: audience.email,
+    email: audience.email || "",
     firstName: audience.firstName,
     lastName: audience.lastName,
+    signupFormId: audience.signupFormId,
+    signupFormName: audience.signupFormName || "Dashboard",
+    signupFormSlug: audience.signupFormSlug,
+    signupSource: audience.signupSource || "",
+    signupSourceCode: audience.signupSourceCode,
     phone: audience.phone,
     note: audience.note,
     tags: audience.tags,
@@ -127,6 +165,8 @@ export function ContactList({
         select: true,
         actions: true,
         email: true,
+        signupFormName: true,
+        signupSource: true,
         firstName: true,
         lastName: true,
         phone: true,
@@ -164,6 +204,10 @@ export function ContactList({
   const [contactToDelete, setContactToDelete] = React.useState<string | null>(
     null,
   );
+  const [viewContactOpen, setViewContactOpen] = React.useState(false);
+  const [selectedContact, setSelectedContact] = React.useState<Contact | null>(
+    null,
+  );
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = React.useState(false);
   const [isInitialized, setIsInitialized] = React.useState(false);
   const searchParams = useSearchParams();
@@ -183,7 +227,9 @@ export function ContactList({
 
   const loadContacts = React.useCallback(async () => {
     try {
-      const response = await fetch(`/api/contacts?audienceListId=${listId}`);
+      const response = await fetch(`/api/contacts?audienceListId=${listId}`, {
+        cache: "no-store",
+      });
       if (response.ok) {
         const data = await parseResponse(response);
         setContacts(data.map(convertAudienceToContact));
@@ -361,31 +407,48 @@ export function ContactList({
   };
   const customFieldKeys = React.useMemo(() => {
     const keys = new Set<string>();
+    customFields.forEach((field) => {
+      if (field.name?.trim()) {
+        keys.add(field.name.trim());
+      }
+    });
     contacts.forEach((contact) => {
       if (contact.customFields) {
         Object.keys(contact.customFields).forEach((key) => keys.add(key));
       }
     });
-    return Array.from(keys);
-  }, [contacts]);
+    return Array.from(keys).filter((key) => !RESERVED_COLUMN_IDS.has(key));
+  }, [contacts, customFields]);
   const columns = React.useMemo(() => {
     const realColumns = createColumns({
       onUpdateContact: handleUpdateContact,
       onDeleteContact: handleDeleteContact,
+      customFields,
     });
 
     const hiddenCustomFieldColumns = customFieldKeys.map((key) => ({
       id: key,
-      header: key,
+      header: formatColumnLabel(key),
       accessorFn: (row: Contact) => row.customFields?.[key] ?? "",
-      cell: ({ getValue }: any) => getValue() || "—",
-      size: 120,
+      cell: ({ getValue }: any) => {
+        const value = getValue();
+        if (!value) return "—";
+        const text = String(value);
+        return (
+          <div className="max-w-full truncate" title={text}>
+            {text}
+          </div>
+        );
+      },
+      size: 180,
+      minSize: 140,
+      maxSize: 280,
       enableHiding: true,
       enableSorting: false,
     }));
 
     return [...realColumns, ...hiddenCustomFieldColumns];
-  }, [handleUpdateContact, handleDeleteContact, customFieldKeys]);
+  }, [handleUpdateContact, handleDeleteContact, customFieldKeys, customFields]);
 
   // Create filter functions for each custom field key
   const filterFns = React.useMemo(() => {
@@ -485,6 +548,7 @@ export function ContactList({
         if (response.ok) {
           const result = await parseResponse(response);
           await loadContacts();
+          setPagination((prev) => ({ ...prev, pageIndex: 0 }));
           toast.success(
             `Import completed: ${result.results.successful} added, ${result.results.skipped} skipped, ${result.results.failed} failed`,
           );
@@ -505,6 +569,9 @@ export function ContactList({
   const selectedRowCount = Object.keys(rowSelection).filter(
     (key) => (rowSelection as any)[key],
   ).length;
+  const selectedContacts = table
+    .getSelectedRowModel()
+    .rows.map((row) => row.original);
   const filteredContacts = table
     .getFilteredRowModel()
     .rows.map((row) => row.original);
@@ -513,6 +580,10 @@ export function ContactList({
     Object.values(activeFilters).some((v) =>
       Array.isArray(v) ? v.length > 0 : !!v,
     );
+  const handleRowClick = React.useCallback((contact: Contact) => {
+    setSelectedContact(contact);
+    setViewContactOpen(true);
+  }, []);
 
   return (
     <div className="flex h-full w-full max-w-full flex-col space-y-4 px-0 py-4 sm:px-4">
@@ -567,9 +638,12 @@ export function ContactList({
           customFields={customFields}
           onAddContact={handleAddContact}
         />
-        {hasActiveFilters && (
+        {(hasActiveFilters || selectedContacts.length > 0) && (
           <CreateSegmentDialog
             listId={listId}
+            selectedContacts={
+              selectedContacts.length > 0 ? selectedContacts : undefined
+            }
             filteredContacts={filteredContacts}
             activeFilters={activeFilters}
             searchValue={searchValue}
@@ -609,10 +683,18 @@ export function ContactList({
         table={table}
         columns={columns}
         contacts={contacts}
+        onRowClick={handleRowClick}
         pagination={pagination}
         setPagination={setPagination}
         selectedRowCount={selectedRowCount}
       />
+      {selectedContact && (
+        <ViewContactSheet
+          contact={selectedContact}
+          open={viewContactOpen}
+          onOpenChange={setViewContactOpen}
+        />
+      )}
       {/* Delete Confirmation Dialogs */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

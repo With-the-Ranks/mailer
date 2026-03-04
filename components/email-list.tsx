@@ -362,7 +362,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                     {editIndex === index ? (
                       <input
                         type="email"
-                        value={audience.email}
+                        value={audience.email || ""}
                         onChange={(e) =>
                           handleEditChange(index, "email", e.target.value)
                         }

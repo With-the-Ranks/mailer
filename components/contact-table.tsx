@@ -25,6 +25,7 @@ interface ContactTableProps {
   table: Table<Contact>;
   columns: any[];
   contacts: Contact[];
+  onRowClick?: (contact: Contact) => void;
   pagination: { pageIndex: number; pageSize: number };
   setPagination: React.Dispatch<
     React.SetStateAction<{ pageIndex: number; pageSize: number }>
@@ -36,14 +37,20 @@ export function ContactTable({
   table,
   columns,
   contacts,
+  onRowClick,
   pagination,
   setPagination,
   selectedRowCount,
 }: ContactTableProps) {
   return (
     <div className="w-full min-w-0">
-      <div className="w-full min-w-0 rounded-lg border">
-        <ResizableTable table={table} data={contacts} columns={columns} />
+      <div className="w-full min-w-0">
+        <ResizableTable
+          table={table}
+          data={contacts}
+          columns={columns}
+          onRowClick={onRowClick}
+        />
       </div>
 
       <div className="flex flex-col gap-3 py-4 xl:flex-row xl:flex-nowrap xl:items-center xl:justify-between xl:gap-4">

@@ -58,6 +58,8 @@ export default async function EmailCreatePage({
             subdomain: true,
             logo: true,
             image: true,
+            name: true,
+            fromName: true,
             timezone: true,
           },
         },
@@ -133,7 +135,11 @@ export default async function EmailCreatePage({
     formData: {
       title: existingEmail?.title || "",
       subject: existingEmail?.subject || "",
-      from: existingEmail?.from || "With The Ranks",
+      from:
+        existingEmail?.from ||
+        membership.organization.fromName?.trim() ||
+        membership.organization.name?.trim() ||
+        "Mailer",
       replyTo: existingEmail?.replyTo || "",
       previewText: existingEmail?.previewText || "",
       content: initialContent || JSON.stringify({ type: "doc", content: [] }),

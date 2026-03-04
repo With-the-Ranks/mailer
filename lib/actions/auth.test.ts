@@ -41,6 +41,7 @@ describe("registerUser", () => {
     prisma.organization.create.mockResolvedValue({
       id: "org-123",
       name: "Test Org",
+      fromName: "Test Org",
       subdomain: "test-org",
       customDomain: null,
       description: null,

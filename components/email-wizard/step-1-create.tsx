@@ -272,7 +272,7 @@ export function Step1Create({ organizationData }: Step1CreateProps) {
             <Input
               id="from-name"
               type="text"
-              placeholder="With The Ranks"
+              placeholder="Your organization name"
               value={formData.from}
               onChange={(e) => updateFormData({ from: e.target.value })}
               className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"

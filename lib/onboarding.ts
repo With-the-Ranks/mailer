@@ -17,6 +17,7 @@ export type OnboardingStep = {
 export type OnboardingInput = {
   organizationId: string;
   organizationName: string | null | undefined;
+  organizationFromName: string | null | undefined;
   organizationLogo: string | null | undefined;
   organizationTimezone: string | null | undefined;
   activeDomainStatus: string | null | undefined;
@@ -55,7 +56,7 @@ function isDomainVerified(status: string | null | undefined): boolean {
 
 export function buildOnboardingState(input: OnboardingInput): OnboardingState {
   const brandingComplete =
-    hasText(input.organizationName) &&
+    (hasText(input.organizationFromName) || hasText(input.organizationName)) &&
     hasCustomLogo(input.organizationLogo) &&
     hasText(input.organizationTimezone);
   const domainSetupComplete = isDomainVerified(input.activeDomainStatus);
@@ -68,7 +69,7 @@ export function buildOnboardingState(input: OnboardingInput): OnboardingState {
     {
       id: "branding",
       title: "Configure branding",
-      description: "Organization name, logo, and timezone",
+      description: "Organization name, default from name, logo, and timezone",
       href: `/organization/${input.organizationId}/settings`,
       completed: brandingComplete,
     },

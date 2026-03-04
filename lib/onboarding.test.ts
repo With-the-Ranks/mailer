@@ -6,6 +6,7 @@ function baseInput(overrides: Partial<OnboardingInput> = {}): OnboardingInput {
   return {
     organizationId: "org_123",
     organizationName: null,
+    organizationFromName: null,
     organizationLogo: null,
     organizationTimezone: null,
     activeDomainStatus: null,
@@ -45,9 +46,24 @@ describe("buildOnboardingState", () => {
     const result = buildOnboardingState(
       baseInput({
         organizationName: "Acme",
+        organizationFromName: "Acme Team",
         organizationLogo: "https://example.com/logo.png",
         organizationTimezone: "America/New_York",
         activeDomainStatus: null,
+      }),
+    );
+
+    const brandingStep = result.steps.find((step) => step.id === "branding");
+    expect(brandingStep?.completed).toBe(true);
+  });
+
+  test("brand step falls back to organization name when default from name is empty", () => {
+    const result = buildOnboardingState(
+      baseInput({
+        organizationName: "Acme",
+        organizationFromName: null,
+        organizationLogo: "https://example.com/logo.png",
+        organizationTimezone: "America/New_York",
       }),
     );
 
@@ -100,6 +116,7 @@ describe("buildOnboardingState", () => {
     const result = buildOnboardingState(
       baseInput({
         organizationName: "Acme",
+        organizationFromName: "Acme Team",
         organizationLogo: "https://example.com/logo.png",
         organizationTimezone: "America/New_York",
         activeDomainStatus: "success",

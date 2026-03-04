@@ -22,6 +22,7 @@ import {
 
 import type { BlockItem } from "./types";
 import {
+  DEFAULT_TEMPLATE_LOGO_URL,
   getPreferredOrganizationButtonColor,
   getPreferredOrganizationLogoSrc,
 } from "./logo-utils";
@@ -34,6 +35,7 @@ export const createDefaultBlocks = (organization?: {
   buttonColor?: string | null;
 }): BlockItem[] => {
   const preferredLogoSrc = getPreferredOrganizationLogoSrc(organization);
+  const logoSrc = preferredLogoSrc ?? DEFAULT_TEMPLATE_LOGO_URL;
   const preferredButtonColor =
     getPreferredOrganizationButtonColor(organization);
 
@@ -178,8 +180,8 @@ export const createDefaultBlocks = (organization?: {
           .insertContent({
             type: "logo",
             attrs: {
-              src: preferredLogoSrc ?? "",
-              alt: preferredLogoSrc ? "Organization logo" : "Upload your logo",
+              src: logoSrc,
+              alt: preferredLogoSrc ? "Organization logo" : "Mailer logo",
             },
           })
           .run();

@@ -30,6 +30,7 @@ export async function getCurrentOnboardingState(
         where: { id: currentOrgId },
         select: {
           name: true,
+          fromName: true,
           logo: true,
           timezone: true,
           activeDomain: {
@@ -64,6 +65,7 @@ export async function getCurrentOnboardingState(
     onboarding: buildOnboardingState({
       organizationId: currentOrgId,
       organizationName: org?.name,
+      organizationFromName: org?.fromName,
       organizationLogo: org?.logo,
       organizationTimezone: org?.timezone,
       activeDomainStatus: org?.activeDomain?.status,

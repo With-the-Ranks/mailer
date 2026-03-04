@@ -20,6 +20,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  formatSegmentFilterLabel,
+  summarizeSegmentFilterValue,
+} from "@/lib/segments/filter-formatting";
 import type { Contact } from "@/lib/types";
 
 interface CreateSegmentDialogProps {
@@ -30,21 +34,6 @@ interface CreateSegmentDialogProps {
   searchValue?: string;
   onSegmentCreated?: () => void;
 }
-
-const FILTER_LABELS: Record<string, string> = {
-  tags: "Tags",
-  countries: "Countries",
-  organizations: "Organizations",
-  precincts: "Precincts",
-  defaultAddressPhone: "Phone",
-  defaultAddressZip: "Zip",
-  defaultAddressCity: "City",
-  defaultAddressAddress1: "Address",
-  defaultAddressAddress2: "Address 2",
-  defaultAddressProvinceCode: "Province",
-  defaultAddressCountryCode: "Country",
-  // Add any additional labels you want here
-};
 
 export function CreateSegmentDialog({
   listId,
@@ -133,24 +122,19 @@ export function CreateSegmentDialog({
   const getFilterSummary = () => {
     const summary: string[] = [];
 
-    if (searchValue) {
-      summary.push(`Search: "${searchValue}"`);
-    }
+    const searchSummary = summarizeSegmentFilterValue(searchValue);
+    if (searchSummary) summary.push(`Search: "${searchSummary}"`);
 
     Object.entries(activeFilters).forEach(([key, value]) => {
-      if (
-        key === "dateRange" || // skip dateRange if not used
-        !value ||
-        (Array.isArray(value) && value.length === 0)
-      ) {
+      if (key === "dateRange" || key === "contactIds" || key === "segmentType")
+        return;
+
+      const summaryValue = summarizeSegmentFilterValue(value);
+      if (!summaryValue) {
         return;
       }
-      const label = FILTER_LABELS[key] || key;
-      if (Array.isArray(value)) {
-        summary.push(`${label}: ${value.join(", ")}`);
-      } else {
-        summary.push(`${label}: ${value}`);
-      }
+      const label = formatSegmentFilterLabel(key);
+      summary.push(`${label}: ${summaryValue}`);
     });
 
     return summary;

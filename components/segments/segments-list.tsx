@@ -39,6 +39,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  formatSegmentFilterLabel,
+  summarizeSegmentFilterValue,
+} from "@/lib/segments/filter-formatting";
 
 interface Segment {
   id: string;
@@ -150,29 +154,37 @@ export function SegmentsList({
   };
 
   const getFilterSummary = (filterCriteria: Record<string, any>) => {
-    const summary = [];
-
-    if (filterCriteria.searchValue) {
-      summary.push(`Search: "${filterCriteria.searchValue}"`);
+    const summary: string[] = [];
+    if (
+      Array.isArray(filterCriteria.contactIds) &&
+      filterCriteria.contactIds.length > 0
+    ) {
+      summary.push(`Manual selection (${filterCriteria.contactIds.length})`);
+      return summary;
     }
 
-    if (filterCriteria.tags?.length > 0) {
-      summary.push(`Tags: ${filterCriteria.tags.join(", ")}`);
-    }
+    const searchValue = summarizeSegmentFilterValue(filterCriteria.searchValue);
+    if (searchValue) summary.push(`Search: "${searchValue}"`);
 
-    if (filterCriteria.countries?.length > 0) {
-      summary.push(`Countries: ${filterCriteria.countries.join(", ")}`);
-    }
+    Object.entries(filterCriteria).forEach(([key, value]) => {
+      if (
+        key === "searchValue" ||
+        key === "contactIds" ||
+        key === "segmentType" ||
+        key === "dateRange"
+      ) {
+        return;
+      }
 
-    if (filterCriteria.organizations?.length > 0) {
-      summary.push(`Organizations: ${filterCriteria.organizations.join(", ")}`);
-    }
+      const summaryValue = summarizeSegmentFilterValue(value);
+      if (!summaryValue) return;
+      summary.push(`${formatSegmentFilterLabel(key)}: ${summaryValue}`);
+    });
 
-    if (filterCriteria.precincts?.length > 0) {
-      summary.push(`Precincts: ${filterCriteria.precincts.join(", ")}`);
-    }
-
-    if (filterCriteria.dateRange && filterCriteria.dateRange !== "all") {
+    if (
+      filterCriteria.dateRange &&
+      String(filterCriteria.dateRange) !== "all"
+    ) {
       summary.push(`Date Range: ${filterCriteria.dateRange}`);
     }
 

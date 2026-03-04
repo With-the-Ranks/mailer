@@ -140,6 +140,13 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = result.data;
+    const selectedContactIds = Array.from(
+      new Set(
+        (validatedData.contactIds || [])
+          .map((id) => id?.trim())
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
 
     if (!validatedData.audienceListId) {
       return NextResponse.json(
@@ -168,11 +175,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    let resolvedFilterCriteria =
+      validatedData.filterCriteria &&
+      typeof validatedData.filterCriteria === "object" &&
+      !Array.isArray(validatedData.filterCriteria)
+        ? { ...validatedData.filterCriteria }
+        : {};
+
+    if (selectedContactIds.length > 0) {
+      const validContacts = await prisma.audience.findMany({
+        where: {
+          audienceListId: validatedData.audienceListId,
+          id: { in: selectedContactIds },
+        },
+        select: { id: true },
+      });
+
+      const validContactIds = validContacts.map((contact) => contact.id);
+      if (validContactIds.length === 0) {
+        return NextResponse.json(
+          { error: "No valid contacts selected for manual segment" },
+          { status: 400 },
+        );
+      }
+
+      resolvedFilterCriteria = {
+        segmentType: "manual",
+        contactIds: validContactIds,
+      };
+    }
+
     // Calculate contactCount at creation (optional, for analytics)
     const contactCount = await prisma.audience.count({
       where: buildAudienceWhere(
         validatedData.audienceListId,
-        validatedData.filterCriteria,
+        resolvedFilterCriteria,
       ),
     });
 
@@ -181,7 +218,7 @@ export async function POST(request: NextRequest) {
         name: validatedData.name,
         description: validatedData.description,
         audienceListId: validatedData.audienceListId,
-        filterCriteria: validatedData.filterCriteria as any,
+        filterCriteria: resolvedFilterCriteria as any,
         organizationId: audienceList.organizationId,
         contactCount, // store at creation, but always recalculate in GET
       },

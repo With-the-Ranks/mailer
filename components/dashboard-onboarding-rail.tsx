@@ -1,11 +1,13 @@
 "use client";
 
-import { ListChecks } from "lucide-react";
+import { GripHorizontal, ListChecks } from "lucide-react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 
 import type { OnboardingState } from "@/lib/onboarding";
+import { cn } from "@/lib/utils";
 
 import DashboardOnboarding from "./dashboard-onboarding";
 import { Button } from "./ui/button";
@@ -16,6 +18,7 @@ type DashboardOnboardingRailProps = {
   userRole: "ADMIN" | "MANAGER" | null;
   onboarding: OnboardingState;
   className?: string;
+  collapsedClassName?: string;
 };
 
 type OnboardingStateResponse = {
@@ -28,14 +31,39 @@ function getCollapsedKey(userId: string, organizationId: string): string {
   return `onboarding:collapsed:${userId}:${organizationId}`;
 }
 
+function getPositionKey(userId: string, organizationId: string): string {
+  return `onboarding:position:${userId}:${organizationId}`;
+}
+
+type PanelPosition = {
+  x: number;
+  y: number;
+};
+
+const PANEL_GAP = 8;
+const PANEL_TOP_OFFSET = 16;
+const PANEL_RIGHT_OFFSET = 16;
+
 export default function DashboardOnboardingRail({
   organizationId,
   userId,
   userRole,
   onboarding,
   className,
+  collapsedClassName,
 }: DashboardOnboardingRailProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [position, setPosition] = useState<PanelPosition>({
+    x: 24,
+    y: PANEL_TOP_OFFSET,
+  });
+  const dragStart = useRef<{
+    pointerX: number;
+    pointerY: number;
+    startX: number;
+    startY: number;
+  } | null>(null);
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
@@ -79,6 +107,54 @@ export default function DashboardOnboardingRail({
     data && data.organizationId === organizationId ? data : fallbackState;
   const activeOnboarding = activeState.onboarding;
   const activeUserRole = activeState.userRole;
+  const isCollapsedButtonVisible = collapsed && activeOnboarding?.shouldShow;
+
+  const getPanelSize = useCallback(() => {
+    if (typeof window === "undefined") {
+      return { width: 416, height: 520 };
+    }
+    return {
+      width: Math.min(416, Math.max(280, window.innerWidth - PANEL_GAP * 2)),
+      height: Math.min(560, Math.max(320, window.innerHeight - PANEL_GAP * 2)),
+    };
+  }, []);
+
+  const clampPosition = useCallback(
+    (next: PanelPosition): PanelPosition => {
+      if (typeof window === "undefined") return next;
+      const { width, height } = getPanelSize();
+      const maxX = Math.max(PANEL_GAP, window.innerWidth - width - PANEL_GAP);
+      const maxY = Math.max(PANEL_GAP, window.innerHeight - height - PANEL_GAP);
+
+      return {
+        x: Math.min(Math.max(PANEL_GAP, next.x), maxX),
+        y: Math.min(Math.max(PANEL_GAP, next.y), maxY),
+      };
+    },
+    [getPanelSize],
+  );
+
+  const defaultPosition = useMemo<PanelPosition>(() => {
+    if (typeof window === "undefined") {
+      return { x: 24, y: PANEL_TOP_OFFSET };
+    }
+    const { width } = getPanelSize();
+    return clampPosition({
+      x: window.innerWidth - width - PANEL_RIGHT_OFFSET,
+      y: PANEL_TOP_OFFSET,
+    });
+  }, [clampPosition, getPanelSize]);
+
+  const getAnchorPosition = useCallback((): PanelPosition => {
+    if (typeof window === "undefined") {
+      return { x: 24, y: PANEL_TOP_OFFSET };
+    }
+    const { width } = getPanelSize();
+    return clampPosition({
+      x: window.innerWidth - width - PANEL_RIGHT_OFFSET,
+      y: PANEL_TOP_OFFSET,
+    });
+  }, [clampPosition, getPanelSize]);
 
   useEffect(() => {
     if (previousServerStateSignature.current === serverStateSignature) {
@@ -112,11 +188,53 @@ export default function DashboardOnboardingRail({
     }
   }, [organizationId, userId]);
 
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(
+        getPositionKey(userId, organizationId),
+      );
+      if (!raw) {
+        setPosition(defaultPosition);
+        return;
+      }
+      const parsed = JSON.parse(raw) as PanelPosition;
+      if (typeof parsed?.x !== "number" || typeof parsed?.y !== "number") {
+        setPosition(defaultPosition);
+        return;
+      }
+      setPosition(clampPosition(parsed));
+    } catch {
+      setPosition(defaultPosition);
+    }
+  }, [clampPosition, defaultPosition, organizationId, userId]);
+
+  useEffect(() => {
+    const onResize = () => {
+      setPosition((prev) => clampPosition(prev));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [clampPosition]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        getPositionKey(userId, organizationId),
+        JSON.stringify(position),
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [organizationId, position, userId]);
+
   if (!activeOnboarding) {
     return null;
   }
 
   const setCollapsedState = (next: boolean) => {
+    if (!next) {
+      setPosition(getAnchorPosition());
+    }
     setCollapsed(next);
     try {
       window.localStorage.setItem(
@@ -128,9 +246,45 @@ export default function DashboardOnboardingRail({
     }
   };
 
-  if (collapsed && activeOnboarding.shouldShow) {
+  const handleDragStart = (
+    event: ReactPointerEvent<HTMLButtonElement | HTMLDivElement>,
+  ) => {
+    dragStart.current = {
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      startX: position.x,
+      startY: position.y,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const state = dragStart.current;
+      if (!state) return;
+      const deltaX = moveEvent.clientX - state.pointerX;
+      const deltaY = moveEvent.clientY - state.pointerY;
+      const next = clampPosition({
+        x: state.startX + deltaX,
+        y: state.startY + deltaY,
+      });
+      setPosition(next);
+    };
+    const onPointerUp = () => {
+      dragStart.current = null;
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+    };
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+  };
+
+  if (isCollapsedButtonVisible) {
     return (
-      <div className={className}>
+      <div
+        className={cn(
+          "fixed top-4 right-4 z-30",
+          className,
+          collapsedClassName,
+        )}
+      >
         <Button
           type="button"
           size="icon"
@@ -147,13 +301,29 @@ export default function DashboardOnboardingRail({
   }
 
   return (
-    <DashboardOnboarding
-      organizationId={organizationId}
-      userId={userId}
-      userRole={activeUserRole}
-      onboarding={activeOnboarding}
-      onCollapse={() => setCollapsedState(true)}
-      className={className}
-    />
+    <div
+      className={cn("fixed z-30 w-[min(26rem,calc(100vw-1rem))]", className)}
+      style={{ left: `${position.x}px`, top: `${position.y}px` }}
+    >
+      <div className="relative">
+        {activeOnboarding.shouldShow && (
+          <button
+            type="button"
+            className="absolute top-2 left-1/2 z-10 -translate-x-1/2 cursor-grab rounded-sm p-1 text-stone-500 hover:text-stone-700 active:cursor-grabbing dark:text-stone-400 dark:hover:text-stone-200"
+            onPointerDown={handleDragStart}
+            aria-label="Drag onboarding panel"
+          >
+            <GripHorizontal className="h-3.5 w-3.5" />
+          </button>
+        )}
+        <DashboardOnboarding
+          organizationId={organizationId}
+          userId={userId}
+          userRole={activeUserRole}
+          onboarding={activeOnboarding}
+          onCollapse={() => setCollapsedState(true)}
+        />
+      </div>
+    </div>
   );
 }

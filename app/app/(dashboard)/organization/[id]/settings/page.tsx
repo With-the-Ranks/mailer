@@ -4,6 +4,9 @@ import { getOrganizationBrandColors } from "@/lib/organization-branding";
 import prisma from "@/lib/prisma";
 import { getTimezoneOptions } from "@/lib/timezones";
 
+const LEGACY_DEFAULT_ORGANIZATION_LOGO_URL =
+  "https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png";
+
 export default async function OrganizationSettingsIndex({
   params,
 }: {
@@ -17,12 +20,17 @@ export default async function OrganizationSettingsIndex({
       where: { id: decodedId },
       select: {
         name: true,
+        fromName: true,
         logo: true,
         timezone: true,
       },
     }),
     getOrganizationBrandColors(decodedId),
   ]);
+  const logoValue =
+    data?.logo?.trim() === LEGACY_DEFAULT_ORGANIZATION_LOGO_URL
+      ? ""
+      : (data?.logo ?? "");
 
   return (
     <div className="flex flex-col space-y-6">
@@ -36,6 +44,20 @@ export default async function OrganizationSettingsIndex({
           defaultValue: data?.name ?? "",
           placeholder: "My Campaign Organization",
           maxLength: 32,
+        }}
+        handleSubmit={updateOrganization}
+      />
+      <Form
+        title="Default From Name"
+        description="Default sender name used for new emails."
+        helpText="Leave blank to fall back to your organization name."
+        inputAttrs={{
+          name: "fromName",
+          type: "text",
+          defaultValue: data?.fromName ?? "",
+          placeholder: data?.name ?? "My Campaign Organization",
+          maxLength: 64,
+          required: false,
         }}
         handleSubmit={updateOrganization}
       />
@@ -60,7 +82,7 @@ export default async function OrganizationSettingsIndex({
         inputAttrs={{
           name: "logo",
           type: "file",
-          defaultValue: data?.logo ?? "",
+          defaultValue: logoValue,
         }}
         handleSubmit={updateOrganization}
       />

@@ -100,9 +100,9 @@ export default async function EmailDetailPage({
       ),
     );
   } else if (email.audienceList) {
-    recipients = email.audienceList.audiences.map(
-      (a: { email: string }) => a.email,
-    );
+    recipients = email.audienceList.audiences
+      .map((a: { email: string | null }) => a.email)
+      .filter((recipient): recipient is string => Boolean(recipient?.trim()));
   }
 
   return (
