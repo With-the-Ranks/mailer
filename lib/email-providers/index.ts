@@ -1,3 +1,4 @@
+import { createConsoleProvider } from "./console";
 import { createResendProvider } from "./resend";
 import { createSesProvider } from "./ses";
 import type {
@@ -28,7 +29,11 @@ export function getDefaultProvider(): EmailProvider {
     | EmailProvider
     | undefined;
 
-  if (defaultProvider === "resend" || defaultProvider === "ses") {
+  if (
+    defaultProvider === "resend" ||
+    defaultProvider === "ses" ||
+    defaultProvider === "console"
+  ) {
     return defaultProvider;
   }
 
@@ -43,6 +48,9 @@ export function createEmailProvider(
   const { provider } = config;
 
   switch (provider) {
+    case "console":
+      return createConsoleProvider();
+
     case "resend":
       return createResendProvider({
         apiKey: config.apiKey,
@@ -56,7 +64,7 @@ export function createEmailProvider(
 
     default:
       throw new Error(
-        `Unknown email provider: "${config.provider}". Valid providers are: "ses", "resend".`,
+        `Unknown email provider: "${config.provider}". Valid providers are: "ses", "resend", "console".`,
       );
   }
 }
@@ -68,5 +76,6 @@ export function createDefaultProvider(): EmailProviderClient {
 }
 
 // Re-export provider classes for direct usage
+export { ConsoleProvider, createConsoleProvider } from "./console";
 export { SesProvider, createSesProvider } from "./ses";
 export { ResendProvider, createResendProvider } from "./resend";

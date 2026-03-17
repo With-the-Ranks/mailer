@@ -1,4 +1,4 @@
-export type EmailProvider = "ses" | "resend";
+export type EmailProvider = "ses" | "resend" | "console";
 
 export interface EmailAttachment {
   filename: string;

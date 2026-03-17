@@ -15,17 +15,29 @@ Mailer is a full-stack application designed to be the easiest way for organizers
 
 ## Getting Started
 
-To get started with Mailer, follow these steps:
+To get started with Mailer locally, follow these steps:
 
 1. **Install `pnpm`**:
    If you haven't installed `pnpm` yet, run:
    ```bash
-    npm install -g pnpm
+   npm install -g pnpm
    ```
-2. **Install dependencies and run the development server**:
+2. **Set up .env.local and update database URL**
+   ```bash
+   cp .env.example .env.local
+   sed -i "s/YOUR_DB_USER/$(whoami)/g" .env.local
+   ```
+3. **Create database and run migrations**
+
+```bash
+createdb mailer
+pnpm prisma migrate deploy
+```
+
+4. **Install dependencies and run the development server**:
    In your project directory, run:
    ```bash
-    pnpm i && pnpm dev
+   pnpm i && pnpm dev
    ```
    Your localhost should now be live at http://app.localhost:3000
 
