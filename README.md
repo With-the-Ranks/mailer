@@ -25,7 +25,7 @@ To get started with Mailer locally, follow these steps:
 2. **Set up .env.local and update database URL**
    ```bash
    cp .env.example .env.local
-   sed -i "s/YOUR_DB_USER/$(whoami)/g" .env.local
+   sed "s/YOUR_DB_USER/$(whoami)/g" .env.local > .env.local.tmp && mv .env.local.tmp .env.local
    ```
 3. **Create database and run migrations**
 

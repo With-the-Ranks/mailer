@@ -14,7 +14,7 @@ export class ConsoleProvider implements EmailProviderClient {
     if (html) {
       // Extract and log all links from the HTML content
       const links: string[] = [];
-      let match;
+      let match: RegExpExecArray | null;
       const regex = /href="([^"]+)"/g;
       while ((match = regex.exec(html)) !== null) {
         if (match[1].startsWith("http")) {
@@ -30,5 +30,8 @@ export class ConsoleProvider implements EmailProviderClient {
 }
 
 export function createConsoleProvider(): ConsoleProvider {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ConsoleProvider must not be used in production.");
+  }
   return new ConsoleProvider();
 }
