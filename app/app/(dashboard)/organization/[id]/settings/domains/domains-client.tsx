@@ -94,7 +94,7 @@ interface DnsRecord {
 }
 
 interface DomainsClientProps {
-  emailProvider: "ses" | "resend";
+  emailProvider: "ses" | "resend" | "console";
   organizationId: string;
   organizationName: string;
   domains: Domain[];

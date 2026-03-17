@@ -13,9 +13,14 @@ export class ConsoleProvider implements EmailProviderClient {
     if (text) console.log(text);
     if (html) {
       // Extract and log all links from the HTML content
-      const links = [...html.matchAll(/href="([^"]+)"/g)]
-        .map((m) => m[1])
-        .filter((l) => l.startsWith("http"));
+      const links: string[] = [];
+      let match;
+      const regex = /href="([^"]+)"/g;
+      while ((match = regex.exec(html)) !== null) {
+        if (match[1].startsWith("http")) {
+          links.push(match[1]);
+        }
+      }
       if (links.length) console.log("Links:\n" + links.join("\n"));
     }
     console.log("");

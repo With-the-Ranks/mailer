@@ -29,10 +29,10 @@ To get started with Mailer locally, follow these steps:
    ```
 3. **Create database and run migrations**
 
-```bash
-createdb mailer
-pnpm prisma migrate deploy
-```
+   ```bash
+   createdb mailer
+   pnpm prisma migrate deploy
+   ```
 
 4. **Install dependencies and run the development server**:
    In your project directory, run:
