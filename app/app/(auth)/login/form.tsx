@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import posthog from "posthog-js";
 import { useState } from "react";
@@ -17,7 +17,6 @@ function SignInForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"credentials" | "2fa">("credentials");
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
 
@@ -82,7 +81,7 @@ function SignInForm() {
 
     toast.success("Login Successful");
     const destination = isSafeCallbackPath(callbackUrl) ? callbackUrl! : "/";
-    router.push(destination);
+    window.location.assign(destination);
   };
 
   return (
