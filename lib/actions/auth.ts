@@ -86,6 +86,7 @@ export const registerUser = async (formData: FormData) => {
       user,
     };
   } catch (e: any) {
+    logError("registerUser failed", e);
     return { error: "Error creating user.", details: e.message };
   }
 };

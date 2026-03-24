@@ -24,6 +24,7 @@ import {
   updateOrganization,
   verifySesDomain,
 } from "@/lib/actions";
+import type { EmailProvider } from "@/lib/email-providers/types";
 import Form from "@/components/form";
 import {
   AlertDialog,
@@ -94,7 +95,7 @@ interface DnsRecord {
 }
 
 interface DomainsClientProps {
-  emailProvider: "ses" | "resend";
+  emailProvider: EmailProvider;
   organizationId: string;
   organizationName: string;
   domains: Domain[];
