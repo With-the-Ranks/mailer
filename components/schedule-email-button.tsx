@@ -70,8 +70,8 @@ export default function ScheduleEmailButton({
 
   const disabledMatcher = useCallback(
     (date: Date) => {
-      const d = moment.tz(date, timezone).startOf("day");
-      return !isValidTime(d);
+      const endOfSelectedDay = moment.tz(date, timezone).endOf("day");
+      return !isValidTime(endOfSelectedDay);
     },
     [timezone, isValidTime],
   );
