@@ -190,6 +190,23 @@ async function processSesEvent(event: SesEvent) {
   }
 
   if (!email) {
+    if (
+      event.eventType === "Bounce" &&
+      event.bounce?.bounceType === "Permanent"
+    ) {
+      const bouncedEmails = event.bounce.bouncedRecipients.map(
+        (r) => r.emailAddress,
+      );
+      await addToSuppressionList(bouncedEmails, "HARD_BOUNCE");
+    }
+
+    if (event.eventType === "Complaint" && event.complaint) {
+      const complainedEmails = event.complaint.complainedRecipients.map(
+        (r) => r.emailAddress,
+      );
+      await addToSuppressionList(complainedEmails, "COMPLAINT");
+    }
+
     // Log but don't fail - email might have been deleted
     logError("SES webhook: email not found", null, {
       sesMessageId,
