@@ -34,6 +34,7 @@ export default function ScheduleEmailButton({
   timezone = DEFAULT_TIMEZONE,
 }: ScheduleEmailProps) {
   const [open, setOpen] = useState(false);
+  const displayTimezone = timezone.replace(/_/g, " ");
 
   // Work in org timezone: use date in TZ for calendar, time string HH:mm for input
   const tzDate = scheduledTimeValue.clone().tz(timezone);
@@ -121,7 +122,7 @@ export default function ScheduleEmailButton({
                 />
               </div>
               <p className="text-muted-foreground text-xs">
-                Timezone: {timezone}
+                Timezone: {displayTimezone}
               </p>
             </div>
           </PopoverContent>

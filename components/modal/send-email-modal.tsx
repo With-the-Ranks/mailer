@@ -63,6 +63,7 @@ export function SendEmailModal({
   const [resolvedTimezone, setResolvedTimezone] = useState<string>(
     () => orgTimezone ?? "America/New_York",
   );
+  const displayTimezone = resolvedTimezone.replace(/_/g, " ");
   const [localScheduledDate, setLocalScheduledDate] =
     useState<Moment>(scheduledTimeValue);
 
@@ -246,7 +247,7 @@ export function SendEmailModal({
             timezone={resolvedTimezone}
           />
           <p className="mt-2 text-base text-gray-500">
-            Timezone: <span className="font-medium">{resolvedTimezone}</span>
+            Timezone: <span className="font-medium">{displayTimezone}</span>
           </p>
         </div>
       )}

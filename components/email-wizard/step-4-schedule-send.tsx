@@ -27,6 +27,7 @@ export function Step4ScheduleSend({
   timezone = DEFAULT_TIMEZONE,
 }: Step4ScheduleSendProps) {
   const { formData, organizationId, updateFormData } = useWizard();
+  const displayTimezone = timezone.replace(/_/g, " ");
   const [mode, setMode] = useState<SendMode>("now");
   const didInitMode = useRef(false);
   const [testEmail, setTestEmail] = useState("");
@@ -216,7 +217,8 @@ export function Step4ScheduleSend({
                   timezone={timezone}
                 />
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Timezone: <span className="font-medium">{timezone}</span>
+                  Timezone:{" "}
+                  <span className="font-medium">{displayTimezone}</span>
                 </p>
               </div>
             )}
