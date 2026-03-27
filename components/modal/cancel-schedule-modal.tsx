@@ -33,6 +33,7 @@ export default function CancelScheduleModal({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const displayTimeZone = timezone?.replace(/_/g, " ");
 
   const handleUnschedule = async () => {
     setLoading(true);
@@ -80,8 +81,8 @@ export default function CancelScheduleModal({
             <AlertDialogDescription>
               Scheduled for{" "}
               <time dateTime={scheduledTime}>{scheduledLabel}</time>. Are you
-              {timezone ? ` (${timezone})` : ""}. Are you sure you want to move
-              it back to draft?
+              {displayTimeZone ? ` (${displayTimeZone})` : ""}. Are you sure you
+              want to move it back to draft?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

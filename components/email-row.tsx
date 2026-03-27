@@ -49,6 +49,7 @@ export default function EmailRow({
   const published = data.published;
   const scheduled = published && new Date(data.scheduledTime) > now;
   const appTimeZone = data.organization?.timezone;
+  const displayTimeZone = appTimeZone?.replace(/_/g, " ");
 
   const timestamp = !published
     ? new Date(data.updatedAt)
@@ -148,9 +149,9 @@ export default function EmailRow({
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {formatTime(timestamp, appTimeZone)}
               </span>
-              {appTimeZone ? (
+              {displayTimeZone ? (
                 <span className="truncate text-[11px] text-gray-400 dark:text-gray-500">
-                  {appTimeZone}
+                  {displayTimeZone}
                 </span>
               ) : null}
             </div>

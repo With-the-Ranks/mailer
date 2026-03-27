@@ -38,6 +38,7 @@ export default async function EmailDetailPage({
   const isScheduled = email.scheduledTime > now;
   const isSent = !isScheduled;
   const timeZone = email.organization?.timezone;
+  const displayTimeZone = timeZone?.replace(/_/g, " ");
   const formatDateTime = (date: Date) =>
     date.toLocaleString("en-US", {
       dateStyle: "medium",
@@ -126,7 +127,7 @@ export default async function EmailDetailPage({
               <time dateTime={email.scheduledTime.toISOString()}>
                 {formatDateTime(email.scheduledTime)}
               </time>
-              {timeZone ? ` (${timeZone})` : ""}
+              {displayTimeZone ? ` (${displayTimeZone})` : ""}
             </span>
             <CancelScheduleModal
               emailId={email.id}
@@ -141,7 +142,7 @@ export default async function EmailDetailPage({
             <time dateTime={email.updatedAt.toISOString()}>
               {formatDateTime(email.updatedAt)}
             </time>
-            {timeZone ? ` (${timeZone})` : ""}
+            {displayTimeZone ? ` (${displayTimeZone})` : ""}
           </div>
         )}
       </section>
