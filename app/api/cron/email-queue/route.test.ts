@@ -10,7 +10,7 @@ vi.mock("@/lib/queue", () => ({
 
 const ORIGINAL_ENV = { ...process.env };
 
-describe("GET /api/cron/email-queue", () => {
+describe("POST /api/cron/email-queue", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
@@ -26,10 +26,11 @@ describe("GET /api/cron/email-queue", () => {
 
   test("returns 503 when Redis is not configured", async () => {
     delete process.env.REDIS_URL;
-    const { GET } = await import("./route");
+    const { POST } = await import("./route");
 
-    const response = await GET(
+    const response = await POST(
       new Request("http://localhost/api/cron/email-queue", {
+        method: "POST",
         headers: { authorization: "Bearer test-secret" },
       }),
     );
@@ -49,9 +50,10 @@ describe("GET /api/cron/email-queue", () => {
       delayed: 3,
     });
 
-    const { GET } = await import("./route");
-    const responsePromise = GET(
+    const { POST } = await import("./route");
+    const responsePromise = POST(
       new Request("http://localhost/api/cron/email-queue", {
+        method: "POST",
         headers: { authorization: "Bearer test-secret" },
       }),
     );
@@ -78,9 +80,10 @@ describe("GET /api/cron/email-queue", () => {
   test("returns 500 when queue processing fails", async () => {
     mockGetQueueStats.mockRejectedValue(new Error("queue failed"));
 
-    const { GET } = await import("./route");
-    const responsePromise = GET(
+    const { POST } = await import("./route");
+    const responsePromise = POST(
       new Request("http://localhost/api/cron/email-queue", {
+        method: "POST",
         headers: { authorization: "Bearer test-secret" },
       }),
     );
@@ -96,10 +99,12 @@ describe("GET /api/cron/email-queue", () => {
   });
 
   test("returns 401 when auth token is missing or invalid", async () => {
-    const { GET } = await import("./route");
+    const { POST } = await import("./route");
 
-    const response = await GET(
-      new Request("http://localhost/api/cron/email-queue"),
+    const response = await POST(
+      new Request("http://localhost/api/cron/email-queue", {
+        method: "POST",
+      }),
     );
     const body = await response.json();
 
@@ -118,9 +123,11 @@ describe("GET /api/cron/email-queue", () => {
       delayed: 0,
     });
 
-    const { GET } = await import("./route");
-    const responsePromise = GET(
-      new Request("http://localhost/api/cron/email-queue"),
+    const { POST } = await import("./route");
+    const responsePromise = POST(
+      new Request("http://localhost/api/cron/email-queue", {
+        method: "POST",
+      }),
     );
 
     await vi.advanceTimersByTimeAsync(15_000);
@@ -133,7 +140,7 @@ describe("GET /api/cron/email-queue", () => {
     expect(mockStartEmailWorker).toHaveBeenCalledTimes(1);
   });
 
-  test("accepts POST requests with token in query string", async () => {
+  test("rejects POST requests without the authorization header when CRON_SECRET is set", async () => {
     mockGetQueueStats.mockResolvedValue({
       waiting: 1,
       active: 0,
@@ -143,20 +150,15 @@ describe("GET /api/cron/email-queue", () => {
     });
 
     const { POST } = await import("./route");
-    const responsePromise = POST(
-      new Request("http://localhost/api/cron/email-queue?token=test-secret", {
+    const response = await POST(
+      new Request("http://localhost/api/cron/email-queue", {
         method: "POST",
       }),
     );
-
-    await vi.advanceTimersByTimeAsync(15_000);
-
-    const response = await responsePromise;
     const body = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(body.ok).toBe(true);
-    expect(body.stats.waiting).toBe(1);
-    expect(mockStartEmailWorker).toHaveBeenCalledTimes(1);
+    expect(response.status).toBe(401);
+    expect(body.error).toBe("Unauthorized");
+    expect(mockStartEmailWorker).not.toHaveBeenCalled();
   });
 });

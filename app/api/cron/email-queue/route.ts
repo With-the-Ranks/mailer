@@ -9,12 +9,9 @@ export const runtime = "nodejs";
 
 async function runCron(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
-  const url = new URL(request.url);
-  const querySecret = url.searchParams.get("token");
   if (
     cronSecret &&
-    request.headers.get("authorization") !== `Bearer ${cronSecret}` &&
-    querySecret !== cronSecret
+    request.headers.get("authorization") !== `Bearer ${cronSecret}`
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -54,10 +51,6 @@ async function runCron(request: Request) {
       { status: 500 },
     );
   }
-}
-
-export async function GET(request: Request) {
-  return runCron(request);
 }
 
 export async function POST(request: Request) {

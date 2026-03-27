@@ -134,7 +134,7 @@ Both providers can coexist - you can use different providers for different domai
 
 Scheduled SES emails are stored in Redis and only send when the queue worker is woken up. In this app, the worker wake-up endpoint is:
 
-`GET /api/cron/email-queue`
+`POST /api/cron/email-queue`
 
 To make scheduled sends work reliably, create a QStash schedule that calls this endpoint every minute.
 
@@ -144,14 +144,16 @@ To make scheduled sends work reliably, create a QStash schedule that calls this 
 2. Go to **Schedules**.
 3. Click **Create Schedule**.
 4. Set the destination URL to your live cron endpoint, for example `https://your-app-domain.com/api/cron/email-queue`.
-5. Leave the default HTTP method as `POST` if the UI does not let you change it. The endpoint accepts both `GET` and `POST`.
-6. If you set `CRON_SECRET`, include it either as `Authorization: Bearer <your CRON_SECRET>` or by appending `?token=your-cron-secret` to the URL.
+5. Set the HTTP method to `POST`.
+6. If you set `CRON_SECRET`, send it in the `Authorization` header as `Bearer <your CRON_SECRET>`.
 7. Set the cron expression to `* * * * *`.
 8. Save the schedule.
 
 QStash evaluates cron expressions in `UTC` by default. That is fine for this endpoint because it should run every minute regardless of your campaign timezone.
 
 It can take up to about a minute for a newly created schedule to start firing.
+
+If `CRON_SECRET` is not set, the endpoint still works without auth. That avoids breaking setups that have not configured a shared secret yet, but header-based auth is recommended for any public deployment.
 
 ### Domain Not Verifying
 
