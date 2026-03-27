@@ -136,23 +136,50 @@ async function addToSuppressionList(
   sourceEmailId?: string,
 ) {
   for (const email of emails) {
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
       await prisma.emailSuppression.upsert({
-        where: { email },
+        where: { email: normalizedEmail },
         update: {
           reason,
           sourceEmail: sourceEmailId,
         },
         create: {
-          email,
+          email: normalizedEmail,
           reason,
           sourceEmail: sourceEmailId,
         },
       });
     } catch (error) {
-      logError("Failed to add email to suppression list", error, { email });
+      logError("Failed to add email to suppression list", error, {
+        email: normalizedEmail,
+      });
     }
   }
+}
+
+function getSuppressionData(
+  event: SesEvent,
+): { emails: string[]; reason: string } | null {
+  if (
+    event.eventType === "Bounce" &&
+    event.bounce?.bounceType === "Permanent"
+  ) {
+    return {
+      emails: event.bounce.bouncedRecipients.map((r) => r.emailAddress),
+      reason: "HARD_BOUNCE",
+    };
+  }
+
+  if (event.eventType === "Complaint" && event.complaint) {
+    return {
+      emails: event.complaint.complainedRecipients.map((r) => r.emailAddress),
+      reason: "COMPLAINT",
+    };
+  }
+
+  return null;
 }
 
 // Process SES event and update database
@@ -190,21 +217,12 @@ async function processSesEvent(event: SesEvent) {
   }
 
   if (!email) {
-    if (
-      event.eventType === "Bounce" &&
-      event.bounce?.bounceType === "Permanent"
-    ) {
-      const bouncedEmails = event.bounce.bouncedRecipients.map(
-        (r) => r.emailAddress,
+    const suppressionData = getSuppressionData(event);
+    if (suppressionData) {
+      await addToSuppressionList(
+        suppressionData.emails,
+        suppressionData.reason,
       );
-      await addToSuppressionList(bouncedEmails, "HARD_BOUNCE");
-    }
-
-    if (event.eventType === "Complaint" && event.complaint) {
-      const complainedEmails = event.complaint.complainedRecipients.map(
-        (r) => r.emailAddress,
-      );
-      await addToSuppressionList(complainedEmails, "COMPLAINT");
     }
 
     // Log but don't fail - email might have been deleted
@@ -270,23 +288,13 @@ async function processSesEvent(event: SesEvent) {
     }
   }
 
-  // Handle hard bounces - add to suppression list
-  if (
-    event.eventType === "Bounce" &&
-    event.bounce?.bounceType === "Permanent"
-  ) {
-    const bouncedEmails = event.bounce.bouncedRecipients.map(
-      (r) => r.emailAddress,
+  const suppressionData = getSuppressionData(event);
+  if (suppressionData) {
+    await addToSuppressionList(
+      suppressionData.emails,
+      suppressionData.reason,
+      email.id,
     );
-    await addToSuppressionList(bouncedEmails, "HARD_BOUNCE", email.id);
-  }
-
-  // Handle complaints - add to suppression list
-  if (event.eventType === "Complaint" && event.complaint) {
-    const complainedEmails = event.complaint.complainedRecipients.map(
-      (r) => r.emailAddress,
-    );
-    await addToSuppressionList(complainedEmails, "COMPLAINT", email.id);
   }
 }
 
