@@ -25,6 +25,7 @@ export default async function EmailDetailPage({
     where: { id: decodeURIComponent(id) },
     include: {
       audienceList: { include: { audiences: true } },
+      organization: { select: { timezone: true } },
     },
   });
   if (!email || email.userId !== session.user.id) return notFound();
@@ -36,6 +37,13 @@ export default async function EmailDetailPage({
   const now = new Date();
   const isScheduled = email.scheduledTime > now;
   const isSent = !isScheduled;
+  const timeZone = email.organization?.timezone;
+  const formatDateTime = (date: Date) =>
+    date.toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      ...(timeZone ? { timeZone } : {}),
+    });
 
   let previewHtml = "<p>No preview available</p>";
   if (email.content) {
@@ -116,21 +124,24 @@ export default async function EmailDetailPage({
             <span className="text-base font-medium text-yellow-600 dark:text-yellow-400">
               Scheduled for{" "}
               <time dateTime={email.scheduledTime.toISOString()}>
-                {new Date(email.scheduledTime).toLocaleString()}
+                {formatDateTime(email.scheduledTime)}
               </time>
+              {timeZone ? ` (${timeZone})` : ""}
             </span>
             <CancelScheduleModal
               emailId={email.id}
               scheduledTime={email.scheduledTime.toISOString()}
               organizationId={email.organizationId || undefined}
+              timezone={timeZone}
             />
           </div>
         ) : (
           <div className="text-base text-gray-500 dark:text-gray-400">
             Sent at{" "}
             <time dateTime={email.updatedAt.toISOString()}>
-              {new Date(email.updatedAt).toLocaleString()}
+              {formatDateTime(email.updatedAt)}
             </time>
+            {timeZone ? ` (${timeZone})` : ""}
           </div>
         )}
       </section>
