@@ -32,13 +32,13 @@ function Calendar({
     ),
     nav: cn("flex items-center gap-1", defaultClassNames?.nav),
     button_previous: cn(
-      "absolute left-1",
+      "absolute left-1 z-10",
       buttonVariants({ variant: "outline" }),
       "h-9 w-9 bg-transparent p-0 opacity-50 hover:opacity-100",
       defaultClassNames?.button_previous,
     ),
     button_next: cn(
-      "absolute right-1",
+      "absolute right-1 z-10",
       buttonVariants({ variant: "outline" }),
       "h-9 w-9 bg-transparent p-0 opacity-50 hover:opacity-100",
       defaultClassNames?.button_next,

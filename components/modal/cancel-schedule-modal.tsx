@@ -21,16 +21,19 @@ interface CancelScheduleModalProps {
   emailId: string;
   scheduledTime: string;
   organizationId?: string;
+  timezone?: string | null;
 }
 
 export default function CancelScheduleModal({
   emailId,
   scheduledTime,
   organizationId,
+  timezone,
 }: CancelScheduleModalProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const displayTimeZone = timezone?.replace(/_/g, " ");
 
   const handleUnschedule = async () => {
     setLoading(true);
@@ -53,9 +56,10 @@ export default function CancelScheduleModal({
     }
   };
 
-  const scheduledLabel = new Date(scheduledTime).toLocaleString(undefined, {
+  const scheduledLabel = new Date(scheduledTime).toLocaleString("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
+    ...(timezone ? { timeZone: timezone } : {}),
   });
 
   return (
@@ -77,7 +81,8 @@ export default function CancelScheduleModal({
             <AlertDialogDescription>
               Scheduled for{" "}
               <time dateTime={scheduledTime}>{scheduledLabel}</time>. Are you
-              sure you want to move it back to draft?
+              {displayTimeZone ? ` (${displayTimeZone})` : ""}. Are you sure you
+              want to move it back to draft?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -21,16 +21,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { deleteEmail } from "@/lib/actions";
 
-const fmtDate = (d: Date) =>
-  d.toLocaleDateString(undefined, {
+const formatDate = (date: Date, timeZone?: string | null) =>
+  date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    ...(timeZone ? { timeZone } : {}),
   });
-const fmtTime = (d: Date) =>
-  d.toLocaleTimeString(undefined, {
+
+const formatTime = (date: Date, timeZone?: string | null) =>
+  date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
+    ...(timeZone ? { timeZone, timeZoneName: "short" as const } : {}),
   });
 
 export default function EmailRow({
@@ -45,6 +48,8 @@ export default function EmailRow({
   const now = new Date();
   const published = data.published;
   const scheduled = published && new Date(data.scheduledTime) > now;
+  const appTimeZone = data.organization?.timezone;
+  const displayTimeZone = appTimeZone?.replace(/_/g, " ");
 
   const timestamp = !published
     ? new Date(data.updatedAt)
@@ -139,11 +144,16 @@ export default function EmailRow({
                 {timeLabel}
               </span>
               <span className="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
-                {fmtDate(timestamp)}
+                {formatDate(timestamp, appTimeZone)}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {fmtTime(timestamp)}
+                {formatTime(timestamp, appTimeZone)}
               </span>
+              {displayTimeZone ? (
+                <span className="truncate text-[11px] text-gray-400 dark:text-gray-500">
+                  {displayTimeZone}
+                </span>
+              ) : null}
             </div>
           </Link>
         </td>
@@ -160,6 +170,7 @@ export default function EmailRow({
                 <CancelScheduleModal
                   emailId={data.id}
                   scheduledTime={data.scheduledTime.toISOString()}
+                  timezone={appTimeZone}
                 />
               </>
             )}
