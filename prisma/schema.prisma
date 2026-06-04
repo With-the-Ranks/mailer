@@ -2,13 +2,12 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") // uses connection pooling
-  directUrl = env("DATABASE_URL_UNPOOLED") // uses a direct connection
+  provider = "postgresql"
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "./generated/prisma"
 }
 
 enum OrganizationRole {
@@ -100,8 +99,11 @@ model Email {
   published      Boolean       @default(false)
   scheduledTime  DateTime      @default(now())
   resendId       String?       @db.Text
+  sesMessageId   String?       @db.Text
+  providerUsed   String?       @default("ses")
+  scheduledJobIds Json?        // BullMQ job IDs (string[]) for SES scheduled sends; unschedule = remove from queue
 
-  audienceListId String?       
+  audienceListId String?
   audienceList   AudienceList? @relation(fields: [audienceListId], references: [id], onDelete: Cascade)
 
   segmentId      String?
@@ -115,6 +117,7 @@ model Email {
   @@unique([slug, organizationId])
   @@index([organizationId])
   @@index([userId])
+  @@index([sesMessageId])
 }
 
 model EmailEvent {
@@ -131,6 +134,7 @@ model EmailEvent {
 model Organization {
   id            String   @id @default(cuid())
   name          String?
+  fromName      String?
   description   String?  @db.Text
   logo          String?  @default("https://p8xzrdk6askgal6s.public.blob.vercel-storage.com/V9V9woJ-p15PivASjXuq5gIW6xpgCb6Pes69i3.png") @db.Text
   font          String   @default("font-cal")
@@ -139,6 +143,9 @@ model Organization {
   subdomain     String?  @unique
   customDomain  String?  @unique
   message404    String?  @default("Blimey! You've found a page that doesn't exist.") @db.Text
+  timezone      String?  @default("America/New_York") // Validated in app: IANA names via lib/timezones (moment.tz.names())
+  backgroundColor String? @default("#ffffff")
+  buttonColor     String? @default("#1547E6")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   users         User[] @relation("UserOrganization")  // Legacy - will be removed after migration
@@ -163,11 +170,20 @@ model EmailDomain {
   domain         String        @unique
   providerId     String
   status         String?
-  provider       String        @default("resend")
+  provider       String        @default("ses")
   organization   Organization  @relation(fields: [organizationId], references: [id])
   organizationId String
 
   activeFor      Organization? @relation("ActiveDomain")
+
+  // SES-specific fields
+  awsRegion      String?       @default("us-east-1")
+  dkimPublicKey  String?       @db.Text
+  dkimSelector   String?       @default("mailer")
+  dkimStatus     String?
+  spfStatus      String?
+  clickTracking  Boolean       @default(false)
+  openTracking   Boolean       @default(false)
 
   createdAt      DateTime      @default(now())
 }
@@ -379,8 +395,29 @@ model OrganizationInvitation {
   organizationId String
   invitedBy      User             @relation("InvitationSender", fields: [invitedById], references: [id])
   invitedById    String
-  
+
   @@index([organizationId])
   @@index([token])
   @@index([email])
+}
+
+model SesRegionSettings {
+  id              String   @id @default(cuid())
+  region          String   @unique
+  topicArn        String?
+  configGeneral   String?
+  configClick     String?
+  configOpen      String?
+  configFull      String?
+  emailsPerSecond Int      @default(14) @map("emailRateLimit")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EmailSuppression {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  reason      String
+  sourceEmail String?
+  createdAt   DateTime @default(now())
 }

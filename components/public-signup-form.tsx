@@ -41,6 +41,10 @@ interface SignupForm {
 
 interface PublicSignupFormProps {
   signupForm: SignupForm;
+  attribution?: {
+    source?: string;
+    sourceCode?: string;
+  };
   theme?: {
     buttonBg?: string;
     buttonText?: string;
@@ -51,10 +55,13 @@ interface PublicSignupFormProps {
 
 export default function PublicSignupForm({
   signupForm,
+  attribution,
   theme,
 }: PublicSignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+  const [submittedAt] = useState(() => Date.now());
 
   // Create validation schema based on form fields
   const createValidationSchema = (fields: SignupFormField[]) => {
@@ -65,9 +72,28 @@ export default function PublicSignupForm({
 
       switch (field.type) {
         case "email":
+          fieldSchema = field.required
+            ? z.string().email("Please enter a valid email address")
+            : z
+                .union([
+                  z.string().email("Please enter a valid email address"),
+                  z.literal(""),
+                ])
+                .optional();
+          break;
+        case "phone":
+          fieldSchema = field.required
+            ? z.string().min(10, "Please enter a valid phone number")
+            : z
+                .union([
+                  z.string().min(10, "Please enter a valid phone number"),
+                  z.literal(""),
+                ])
+                .optional();
+          break;
+        case "name":
         case "firstName":
         case "lastName":
-        case "phone":
         case "defaultAddressZip":
         case "defaultAddressCity":
         case "defaultAddressProvinceCode":
@@ -75,41 +101,35 @@ export default function PublicSignupForm({
         case "defaultAddressAddress1":
         case "defaultAddressAddress2":
         case "defaultAddressCompany":
-        case "note":
         case "tags":
-          if (field.type === "email") {
-            fieldSchema = z
-              .string()
-              .email("Please enter a valid email address");
-          } else if (field.type === "phone") {
-            fieldSchema = z
-              .string()
-              .min(10, "Please enter a valid phone number");
-          } else {
-            fieldSchema = z.string().min(1, "This field is required");
-          }
+          fieldSchema = field.required
+            ? z.string().min(1, "This field is required")
+            : z.string().optional();
           break;
+        case "note":
         case "textarea":
-          fieldSchema = z.string().min(1, "This field is required");
+          fieldSchema = field.required
+            ? z.string().min(1, "This field is required")
+            : z.string().optional();
           break;
         case "select":
         case "radio":
-          fieldSchema = z.string().min(1, "Please select an option");
+          fieldSchema = field.required
+            ? z.string().min(1, "Please select an option")
+            : z.string().optional();
           break;
         case "checkbox":
-          fieldSchema = z
-            .array(z.string())
-            .min(1, "Please select at least one option");
+          fieldSchema = field.required
+            ? z.array(z.string()).min(1, "Please select at least one option")
+            : z.array(z.string()).optional();
           break;
         default:
-          fieldSchema = z.string().min(1, "This field is required");
+          fieldSchema = field.required
+            ? z.string().min(1, "This field is required")
+            : z.string().optional();
       }
 
-      if (field.required) {
-        schemaFields[field.name] = fieldSchema;
-      } else {
-        schemaFields[field.name] = fieldSchema.optional();
-      }
+      schemaFields[field.name] = fieldSchema;
     });
 
     return z.object(schemaFields);
@@ -131,6 +151,17 @@ export default function PublicSignupForm({
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      const payload = {
+        ...data,
+        _hp: honeypot,
+        _submittedAt: submittedAt,
+        _source: attribution?.source || "",
+        _sourceCode: attribution?.sourceCode || "",
+        _pageUrl:
+          typeof window !== "undefined" ? window.location.href : undefined,
+        _referrer:
+          typeof document !== "undefined" ? document.referrer : undefined,
+      };
       const response = await fetch(
         `/api/signup-forms/${signupForm.id}/submit`,
         {
@@ -138,7 +169,7 @@ export default function PublicSignupForm({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -167,7 +198,7 @@ export default function PublicSignupForm({
     const isDarkTheme = Boolean(theme?.inputBg || theme?.buttonBg);
     return (
       <div
-        className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-gray-800"}`}
+        className={`rounded-lg p-8 text-center ${isDarkTheme ? "bg-transparent" : "bg-white dark:bg-[#2D2D2D]"}`}
       >
         <div
           className={`mb-4 text-6xl ${isDarkTheme ? "text-white" : "text-green-600"}`}
@@ -191,7 +222,20 @@ export default function PublicSignupForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="relative space-y-6">
+      <div className="pointer-events-none absolute -top-[9999px] -left-[9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="company-field">Company</label>
+        <input
+          id="company-field"
+          name="company"
+          type="text"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
+      </div>
       {signupForm.fields.map((field) => (
         <div key={field.id} className="space-y-2">
           <Label htmlFor={field.name}>
@@ -201,6 +245,7 @@ export default function PublicSignupForm({
 
           {field.type === "text" ||
           field.type === "email" ||
+          field.type === "name" ||
           field.type === "firstName" ||
           field.type === "lastName" ||
           field.type === "phone" ||
@@ -211,7 +256,6 @@ export default function PublicSignupForm({
           field.type === "defaultAddressAddress1" ||
           field.type === "defaultAddressAddress2" ||
           field.type === "defaultAddressCompany" ||
-          field.type === "note" ||
           field.type === "tags" ? (
             <Input
               id={field.name}
@@ -238,7 +282,7 @@ export default function PublicSignupForm({
                   : undefined
               }
             />
-          ) : field.type === "textarea" ? (
+          ) : field.type === "note" || field.type === "textarea" ? (
             <Textarea
               id={field.name}
               placeholder={field.placeholder || undefined}
@@ -294,7 +338,8 @@ export default function PublicSignupForm({
                     id={`${field.name}-${option}`}
                     value={option}
                     onCheckedChange={(checked) => {
-                      const currentValues = watch(field.name) || [];
+                      const currentValues =
+                        (watch(field.name) as string[]) || [];
                       if (checked) {
                         setValue(field.name, [...currentValues, option]);
                       } else {

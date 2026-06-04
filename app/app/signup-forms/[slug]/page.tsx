@@ -5,6 +5,15 @@ import PublicSignupForm from "@/components/public-signup-form";
 import { isValidHexColor } from "@/lib/color-validation";
 import prisma from "@/lib/prisma";
 
+function getQueryValue(
+  search: { [key: string]: string | string[] | undefined },
+  key: string,
+) {
+  const value = search[key];
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+}
+
 export default async function PublicSignupFormPage({
   params,
   searchParams,
@@ -40,6 +49,14 @@ export default async function PublicSignupFormPage({
   const bgColor = search.bg as string | undefined;
   const embed = search.embed === "true";
   const hideTitle = search.hideTitle === "true" || search.notitle === "true";
+  const sourceCode =
+    getQueryValue(search, "sourceCode") ||
+    getQueryValue(search, "source_code") ||
+    getQueryValue(search, "sc");
+  const source =
+    getQueryValue(search, "source") ||
+    getQueryValue(search, "utm_source") ||
+    (embed ? "embed" : "direct");
 
   // Apply custom theme styles
   const getContainerStyle = () => {
@@ -49,7 +66,7 @@ export default async function PublicSignupFormPage({
     if (bgColor) {
       return `text-white border-transparent`;
     }
-    return "bg-white text-gray-900 dark:bg-gray-800 dark:text-white";
+    return "bg-white text-gray-900 dark:bg-[#2D2D2D] dark:text-white";
   };
 
   const containerClass = `rounded-lg shadow-lg p-8 ${getContainerStyle()}`;
@@ -63,7 +80,7 @@ export default async function PublicSignupFormPage({
       : undefined;
   const pageClass = embed
     ? "min-h-screen"
-    : "min-h-screen bg-gray-50 py-12 dark:bg-gray-900";
+    : "min-h-screen bg-gray-50 py-12 dark:bg-[#0D0D0D]";
 
   return (
     <>
@@ -78,6 +95,10 @@ export default async function PublicSignupFormPage({
             )}
             <PublicSignupForm
               signupForm={signupForm}
+              attribution={{
+                source,
+                sourceCode,
+              }}
               theme={{
                 buttonBg: (() => {
                   const btnBg = search.buttonBg as string | undefined;

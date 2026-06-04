@@ -1,9 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
-import { updateContactSchema } from "@/lib/validations";
+import {
+  hasPrimaryContactIdentifier,
+  updateContactSchema,
+} from "@/lib/validations";
+
+const normalizeText = (value: string | null | undefined) => value?.trim() || "";
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const serializeContact = <T extends { email: string }>(contact: T) => contact;
 
 // PUT: Update a contact
 export async function PUT(
@@ -25,7 +32,7 @@ export async function PUT(
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -46,17 +53,52 @@ export async function PUT(
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
 
-    // Verify the audience list belongs to the user's organization
-    if (contact.audienceList.organizationId !== session.user.organizationId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    // Check if user has access to the organization that owns this contact's audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      contact.audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const updateData: Record<string, any> = { ...validatedData };
+
+    if ("email" in validatedData && typeof validatedData.email === "string") {
+      updateData.email = normalizeEmail(validatedData.email);
+    }
+    if ("firstName" in validatedData) {
+      updateData.firstName = normalizeText(validatedData.firstName);
+    }
+    if ("lastName" in validatedData) {
+      updateData.lastName = normalizeText(validatedData.lastName);
+    }
+    if ("phone" in validatedData) {
+      updateData.phone = validatedData.phone?.trim() || null;
+    }
+
+    const nextIdentity = {
+      email: "email" in updateData ? updateData.email : contact.email,
+      firstName:
+        "firstName" in updateData ? updateData.firstName : contact.firstName,
+      lastName:
+        "lastName" in updateData ? updateData.lastName : contact.lastName,
+      phone: "phone" in updateData ? updateData.phone : contact.phone,
+    };
+
+    if (!hasPrimaryContactIdentifier(nextIdentity)) {
+      return NextResponse.json(
+        { error: "At least one of name, email, or phone is required" },
+        { status: 400 },
+      );
     }
 
     const updatedContact = await prisma.audience.update({
       where: { id },
-      data: validatedData,
+      data: updateData as any,
     });
 
-    return NextResponse.json(updatedContact);
+    return NextResponse.json(serializeContact(updatedContact));
   } catch (error) {
     logError("Error updating contact", error);
 
@@ -64,6 +106,17 @@ export async function PUT(
       return NextResponse.json(
         { error: "Invalid JSON in request body" },
         { status: 400 },
+      );
+    }
+    if (
+      typeof error === "object" &&
+      error &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "Contact with this email already exists" },
+        { status: 409 },
       );
     }
 
@@ -96,9 +149,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Contact not found" }, { status: 404 });
     }
 
-    // Verify the audience list belongs to the user's organization
-    if (contact.audienceList.organizationId !== session.user.organizationId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    // Check if user has access to the organization that owns this contact's audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      contact.audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     await prisma.audience.delete({

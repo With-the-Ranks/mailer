@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import Logo from "@/components/logo";
 import FormButton from "@/components/form/form-button";
 
 interface ForgotPasswordFormProps {
@@ -66,26 +66,15 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
   };
 
   return (
-    <div className="mx-5 bg-blue-700 py-10 sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="flex items-center justify-center gap-2">
-        <div className="relative h-4 w-4">
-          <Image
-            src="/mailer.svg"
-            alt="Mailer"
-            width={16}
-            height={16}
-            className="h-4 w-4"
-          />
-        </div>
-        <div className="flex h-7 w-20 justify-start text-3xl leading-8 font-bold text-white">
-          Mailer
-        </div>
+    <div className="mx-5 rounded-lg border border-gray-200 bg-white py-10 shadow-lg sm:mx-auto sm:w-full sm:max-w-md dark:border-neutral-700 dark:bg-[#2D2D2D]">
+      <div className="flex items-center justify-center">
+        <Logo />
       </div>
 
-      <h1 className="mt-6 text-center text-3xl !text-white">
+      <h1 className="mt-6 text-center text-3xl font-semibold text-gray-900 dark:text-white">
         {token ? "Reset Password" : "Forgot Password"}
       </h1>
-      <p className="mt-2 text-center text-base text-white">
+      <p className="mt-2 text-center text-base text-gray-600 dark:text-gray-400">
         {token
           ? "Enter your new password below."
           : "Enter your email and we'll send you a reset link."}
@@ -102,7 +91,7 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
-              className="my-4 w-full rounded-none border border-white bg-white/10 px-3 py-2 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="my-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
             />
             <FormButton isSubmitting={isSubmitting} label="Reset Password" />
           </form>
@@ -115,22 +104,28 @@ export default function ForgotPasswordForm({ token }: ForgotPasswordFormProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
-              className="my-4 w-full rounded-none border border-white bg-white/10 px-3 py-2 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="my-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
             />
             <FormButton isSubmitting={isSubmitting} label="Send Reset Link" />
           </form>
         )}
       </div>
 
-      <div className="mt-5 text-center text-base text-white">
-        <Link href="/login" className="underline hover:text-gray-200">
+      <div className="mt-5 text-center text-base text-gray-600 dark:text-gray-400">
+        <Link
+          href="/login"
+          className="text-blue-700 underline hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+        >
           Back to login
         </Link>
       </div>
 
-      <div className="mt-2 text-center text-base text-white">
+      <div className="mt-2 text-center text-base text-gray-600 dark:text-gray-400">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="underline hover:text-gray-200">
+        <Link
+          href="/register"
+          className="text-blue-700 underline hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-400"
+        >
           Sign up
         </Link>
       </div>

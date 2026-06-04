@@ -1,10 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { logError } from "@/lib/utils";
 import { contactSchema } from "@/lib/validations";
+
+const normalizeText = (value: string | null | undefined) => value?.trim() || "";
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
 
 const bulkImportSchema = z.object({
   contacts: z.array(contactSchema),
@@ -26,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -37,10 +40,9 @@ export async function POST(request: NextRequest) {
 
     const { contacts, audienceListId, skipDuplicates } = result.data;
 
-    const audienceList = await prisma.audienceList.findFirst({
+    const audienceList = await prisma.audienceList.findUnique({
       where: {
         id: audienceListId,
-        organizationId: session.user.organizationId,
       },
     });
 
@@ -49,6 +51,15 @@ export async function POST(request: NextRequest) {
         { error: "Audience list not found" },
         { status: 404 },
       );
+    }
+
+    // Check if user is a member of the organization that owns this audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const results = {
@@ -60,12 +71,17 @@ export async function POST(request: NextRequest) {
 
     for (const contactData of contacts) {
       try {
+        const normalizedEmail = normalizeEmail(contactData.email);
+        const normalizedFirstName = normalizeText(contactData.firstName);
+        const normalizedLastName = normalizeText(contactData.lastName);
+        const normalizedPhone = contactData.phone?.trim() || null;
+
         if (skipDuplicates) {
           const existingContact = await prisma.audience.findUnique({
             where: {
               audienceListId_email: {
                 audienceListId,
-                email: contactData.email,
+                email: normalizedEmail,
               },
             },
           });
@@ -75,7 +91,14 @@ export async function POST(request: NextRequest) {
           }
         }
         await prisma.audience.create({
-          data: { ...contactData, audienceListId },
+          data: {
+            ...contactData,
+            email: normalizedEmail,
+            firstName: normalizedFirstName,
+            lastName: normalizedLastName,
+            phone: normalizedPhone,
+            audienceListId,
+          } as any,
         });
         results.successful++;
       } catch (error) {

@@ -1,0 +1,111 @@
+---
+title: Suppression List
+description: Manage email addresses that should not receive emails
+---
+
+# Suppression List
+
+The suppression list contains email addresses that should not receive any emails from your organization. This helps protect your sender reputation and ensures compliance with email best practices.
+
+## Why Use a Suppression List?
+
+- **Protect sender reputation** - Avoid sending to addresses that bounce or complain
+- **Reduce costs** - Don't waste emails on undeliverable addresses
+- **Improve deliverability** - Email providers reward senders who respect bounces
+- **Stay compliant** - Honor user requests to stop receiving emails
+
+## Accessing the Suppression List
+
+1. Go to **People** in the sidebar
+2. Click **Suppression List**
+
+## How Addresses Get Added
+
+Addresses are added to the suppression list automatically when:
+
+| Event | Description |
+|-------|-------------|
+| **Hard Bounce** | Email permanently undeliverable (invalid address) |
+| **Spam Complaint** | Recipient marked your email as spam |
+| **Manual Block** | You manually add an address |
+
+## Managing Entries
+
+### View Suppressed Addresses
+
+The suppression list shows:
+- Email address
+- Reason for suppression
+- Date added
+
+Use the search bar to find specific addresses.
+
+### Add an Address Manually
+
+1. Click **Add Email**
+2. Enter the email address
+3. The address will be immediately blocked from receiving emails
+
+### Remove an Address
+
+1. Find the address in the list
+2. Click the delete icon
+3. Confirm removal
+
+> **Warning**: Removing an address allows it to receive emails again. Only remove addresses if you're sure the issue is resolved.
+
+## Suppression vs Unsubscribe
+
+These are different concepts:
+
+| Suppression List | Unsubscribed |
+|-----------------|--------------|
+| Technical blocks (bounces, complaints) | User preference |
+| Cannot receive any emails | Can re-subscribe |
+| Managed by organization | Managed by recipient |
+| Found in People → Suppression List | Found in audience contact details |
+
+## Best Practices
+
+### Review Regularly
+
+Check your suppression list periodically to:
+- Identify patterns in bounces
+- Clean up old entries if addresses become valid
+- Monitor for unusual spam complaints
+
+### Before Importing Contacts
+
+Before importing a new contact list:
+1. Clean the list of known bad addresses
+2. Use email verification services for old lists
+3. Start with a small batch to identify issues
+
+### High Complaint Rates
+
+If you're seeing many spam complaints:
+- Review your signup process (ensure consent)
+- Make unsubscribe links prominent
+- Check email content isn't misleading
+- Verify you're sending to opted-in contacts
+
+## Impact on Sending
+
+When you send an email campaign:
+
+1. System checks each recipient against suppression list
+2. Suppressed addresses are automatically skipped
+3. You'll see "suppressed" in delivery reports
+4. This does not count toward your email limit
+
+## Exporting the List
+
+To export your suppression list:
+1. Go to **People → Suppression List**
+2. Click **Export** (if available)
+3. Download as CSV
+
+This is useful for:
+- Backing up your suppression data
+- Cleaning external lists before import
+- Compliance documentation

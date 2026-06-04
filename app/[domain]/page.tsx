@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import BlurImage from "@/components/blur-image";
+import Logo from "@/components/logo";
 import { getEmailsForOrganization, getOrganizationData } from "@/lib/fetchers";
 import prisma from "@/lib/prisma";
 import { placeholderBlurhash, toDateString } from "@/lib/utils";
@@ -20,14 +20,19 @@ export async function generateStaticParams() {
   });
 
   const allPaths = allOrganizations
-    .flatMap(({ subdomain, customDomain }) => [
-      subdomain && {
-        domain: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    .flatMap(
+      (org: { subdomain: string | null; customDomain: string | null }) => {
+        const { subdomain, customDomain } = org;
+        return [
+          subdomain && {
+            domain: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+          },
+          customDomain && {
+            domain: customDomain,
+          },
+        ];
       },
-      customDomain && {
-        domain: customDomain,
-      },
-    ])
+    )
     .filter(Boolean);
 
   return allPaths;
@@ -70,7 +75,7 @@ export default async function OrganizationHomePage({
             {emails.map((email: any) => (
               <li key={email.slug}>
                 <Link href={`/${email.slug}`} className="group block">
-                  <div className="flex flex-col items-center gap-4 rounded-xl border bg-white p-6 transition duration-300 hover:shadow-xl md:flex-row dark:border-stone-700 dark:bg-stone-800">
+                  <div className="flex flex-col items-center gap-4 rounded-xl border bg-white p-6 transition duration-300 hover:shadow-xl md:flex-row dark:border-stone-700 dark:bg-[#2D2D2D]">
                     {/* Image Container – rectangular 16:9 aspect ratio */}
                     <div className="relative aspect-video w-full shrink-0 md:w-1/3 lg:w-1/4">
                       <BlurImage
@@ -104,20 +109,9 @@ export default async function OrganizationHomePage({
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20">
-          <Image
-            alt="missing email"
-            src="/empty-state.png"
-            width={400}
-            height={400}
-            className="dark:hidden"
-          />
-          <Image
-            alt="missing email"
-            src="/empty-state.png"
-            width={400}
-            height={400}
-            className="hidden dark:block"
-          />
+          <div className="scale-150">
+            <Logo showText={false} clickable={false} />
+          </div>
           <p className="mt-6 text-2xl text-stone-600 dark:text-stone-400">
             No emails yet.
           </p>

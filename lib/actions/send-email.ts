@@ -1,31 +1,126 @@
 "use server";
 
 import { Maily } from "@maily-to/render";
+import { render } from "@react-email/render";
 import type { CreateEmailOptions } from "resend";
 import { Resend } from "resend";
 
+import {
+  createEmailProvider,
+  getDefaultProvider,
+  isResendEnabled,
+  type EmailProvider,
+  type EmailProviderClient,
+} from "@/lib/email-providers";
+
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@/prisma/generated/prisma/client";
+import { queueBulkEmails, removeJobs, type EmailJobData } from "@/lib/queue";
 
 import { buildAudienceWhere, getUnsubscribeUrl, logError } from "../utils";
 
-async function getEmailClientForOrg(orgId?: string) {
-  let apiKey = process.env.RESEND_API_KEY!;
-  let domain = process.env.EMAIL_DOMAIN!;
+interface OrgEmailClient {
+  client: EmailProviderClient;
+  domain: string;
+  provider: EmailProvider;
+  awsRegion?: string;
+  configurationSetName?: string;
+  isVerified: boolean;
+  error?: string;
+}
+
+async function getEmailClientForOrg(orgId?: string): Promise<OrgEmailClient> {
+  let domain = process.env.EMAIL_DOMAIN || "localhost";
+  let provider: EmailProvider = getDefaultProvider();
+  let apiKey: string | undefined;
+  let awsRegion: string | undefined;
+  let isVerified = false;
+  let error: string | undefined;
 
   if (orgId) {
     const org = await prisma.organization.findUnique({
       where: { id: orgId },
       include: { activeDomain: true },
     });
+
     if (org) {
-      if (org.emailApiKey) apiKey = org.emailApiKey;
-      if (org.activeDomain?.domain)
+      // Use org's custom API key for Resend if available
+      if (org.emailApiKey) {
+        apiKey = org.emailApiKey;
+      }
+
+      if (org.activeDomain) {
+        // Check if domain is verified
+        const domainStatus = org.activeDomain.status?.toLowerCase();
+        if (domainStatus !== "success" && domainStatus !== "verified") {
+          error = `Domain ${org.activeDomain.domain} is not verified. Please complete domain verification before sending emails.`;
+        } else {
+          isVerified = true;
+        }
+
+        // From address always uses the org's active sending domain (domain management)
         domain = `mailer@${org.activeDomain.domain}`;
+        // Use the domain's provider setting (defaults to "ses")
+        provider = (org.activeDomain.provider as EmailProvider) || "ses";
+        awsRegion = org.activeDomain.awsRegion || undefined;
+      } else {
+        // No active domain configured - do not send; require domain management setup
+        error =
+          "No sending domain configured. Add and verify a domain in Settings → Domains, then set it as Active.";
+      }
+    } else {
+      // Organization not found
+      error = "Organization not found.";
     }
+  } else {
+    // No organization ID - use default domain (for system emails)
+    isVerified = true; // System emails use default verified domain
   }
 
-  return { resend: new Resend(apiKey), domain };
+  // Validate that Resend is enabled if trying to use it
+  if (provider === "resend" && !isResendEnabled()) {
+    // Fall back to SES if Resend is not enabled
+    provider = "ses";
+  }
+
+  // Use configuration set for event tracking (SNS webhooks). Set AWS_SES_CONFIG_SET in env to your SES configuration set name (e.g. mailer-events).
+  const configurationSetName = process.env.AWS_SES_CONFIG_SET || undefined;
+
+  const client = createEmailProvider({
+    provider,
+    apiKey,
+    awsRegion,
+    configurationSetName,
+  });
+
+  return {
+    client,
+    domain,
+    provider,
+    awsRegion,
+    configurationSetName,
+    isVerified,
+    error,
+  };
+}
+
+// Check if an email is in the suppression list (SES compliance)
+async function isEmailSuppressed(email: string): Promise<boolean> {
+  const suppressed = await prisma.emailSuppression.findUnique({
+    where: { email },
+  });
+  return !!suppressed;
+}
+
+// Filter out suppressed emails from a list of recipients
+async function filterSuppressedRecipients(emails: string[]): Promise<string[]> {
+  const suppressedRecords = await prisma.emailSuppression.findMany({
+    where: { email: { in: emails } },
+    select: { email: true },
+  });
+  const suppressedSet = new Set(suppressedRecords.map((s) => s.email));
+  return emails.filter((e) => !suppressedSet.has(e));
 }
 
 const parseContent = async (
@@ -78,26 +173,80 @@ export const sendEmail = async ({
   organizationId,
   audienceListId,
 }: SendEmailOpts) => {
-  const { resend, domain } = await getEmailClientForOrg(organizationId);
-  const fromHeader = `${from} <${domain}>`;
-  const payload: CreateEmailOptions = {
-    from: fromHeader,
-    to: [to],
-    subject: subject || "No Subject",
-    text: previewText ?? "",
-  };
+  const {
+    client,
+    domain,
+    provider,
+    isVerified,
+    error: domainError,
+  } = await getEmailClientForOrg(organizationId);
+
+  // Check if domain is verified (required for organization emails)
+  if (organizationId && !isVerified) {
+    return { error: domainError || "Domain not verified" };
+  }
+
+  // From address must always be the verified domain from domain management (never a user-entered email).
+  // If "from" looks like an email (e.g. user typed it in the From Name field), use only the local part as display name.
+  const displayName = from.includes("@")
+    ? from.split("@")[0]?.trim() || "Mailer"
+    : from.trim() || "Mailer";
+  const fromHeader = `${displayName} <${domain}>`;
+
+  // For SES, check suppression list
+  if (provider === "ses") {
+    const suppressed = await isEmailSuppressed(to);
+    if (suppressed) {
+      return { error: `Email ${to} is on the suppression list` };
+    }
+  }
+
+  let htmlContent: string | undefined;
 
   if (html) {
-    payload.html = html;
+    htmlContent = html;
   } else if (react) {
-    payload.react = react;
+    // Render React email component to HTML
+    // For Resend, we can either use their built-in React support or render ourselves
+    // For SES, we must render to HTML first
+    if (provider === "resend" && isResendEnabled()) {
+      // Use Resend directly for React components (they handle rendering)
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const payload: CreateEmailOptions = {
+        from: fromHeader,
+        to: [to],
+        subject: subject || "No Subject",
+        text: previewText ?? "",
+        react,
+      };
+
+      try {
+        const { data, error } = await resend.emails.send(payload);
+        if (error) {
+          const msg = typeof error === "string" ? error : JSON.stringify(error);
+          return { error: msg };
+        }
+        return { data };
+      } catch (err) {
+        logError("sendEmail thrown error", err);
+        return { error: "Something went wrong" };
+      }
+    } else {
+      // For SES (or any other provider), render React to HTML using @react-email/render
+      try {
+        htmlContent = await render(react);
+      } catch (err) {
+        logError("Failed to render React email", err);
+        return { error: "Failed to render email template" };
+      }
+    }
   } else if (content) {
     const unsubUrl = getUnsubscribeUrl({
       email: to,
       listId: audienceListId || undefined,
       organizationId,
     });
-    payload.html = await parseContent(
+    htmlContent = await parseContent(
       content,
       {
         unsubscribe_url: unsubUrl,
@@ -108,19 +257,28 @@ export const sendEmail = async ({
     throw new Error("sendEmail: need content, html, or react");
   }
 
-  try {
-    const { data, error } = await resend.emails.send(payload);
+  const result = await client.sendEmail({
+    from: fromHeader,
+    to,
+    subject: subject || "No Subject",
+    html: htmlContent,
+    text: previewText ?? "",
+  });
 
-    if (error) {
-      const msg = typeof error === "string" ? error : JSON.stringify(error);
-      return { error: msg };
+  if (result.error) {
+    let message = result.error;
+    // In SES sandbox, the recipient (To) must also be verified; clarify for the user
+    if (
+      provider === "ses" &&
+      /not verified|identities failed/i.test(result.error) &&
+      result.error.includes(to)
+    ) {
+      message = `${result.error} In SES sandbox mode, the recipient address must be verified in the AWS SES console (Verified identities), or request production access.`;
     }
-
-    return { data };
-  } catch (err) {
-    logError("sendEmail thrown error", err);
-    return { error: "Something went wrong" };
+    return { error: message };
   }
+
+  return { data: { id: result.messageId } };
 };
 
 export const sendBulkEmail = async ({
@@ -147,10 +305,54 @@ export const sendBulkEmail = async ({
   const session = await getSession();
   if (!session?.user.id) return { error: "Not authenticated" };
 
-  const { resend, domain } = await getEmailClientForOrg(organizationId);
-  const fromHeader = `${from} <${domain}>`;
+  const {
+    client,
+    domain,
+    provider,
+    awsRegion,
+    configurationSetName,
+    isVerified,
+    error: domainError,
+  } = await getEmailClientForOrg(organizationId);
 
-  let recipients: any[] = [];
+  // Check if domain is verified (required for bulk emails)
+  if (!isVerified) {
+    return {
+      error:
+        domainError ||
+        "Domain not verified. Please verify your sending domain before sending emails.",
+    };
+  }
+
+  const displayName = from.includes("@")
+    ? from.split("@")[0]?.trim() || "Mailer"
+    : from.trim() || "Mailer";
+  const fromHeader = `${displayName} <${domain}>`;
+
+  let recipients: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    customFields: unknown;
+    audienceListId: string;
+  }[] = [];
+  const toRecipients = <
+    T extends {
+      email: string | null;
+      firstName: string;
+      lastName: string;
+      customFields: unknown;
+      audienceListId: string;
+    },
+  >(
+    items: T[],
+  ) =>
+    items.flatMap((item) => {
+      const normalizedEmail = item.email?.trim();
+      if (!normalizedEmail) return [];
+      return [{ ...item, email: normalizedEmail }];
+    });
+
   if (segmentId) {
     const segment = await prisma.segment.findUnique({
       where: { id: segmentId },
@@ -160,19 +362,21 @@ export const sendBulkEmail = async ({
       segment.filterCriteria &&
       typeof segment.filterCriteria === "object" &&
       !Array.isArray(segment.filterCriteria)
-        ? (segment.filterCriteria as Record<string, any>)
+        ? (segment.filterCriteria as Record<string, unknown>)
         : {};
     const whereClause = buildAudienceWhere(
       segment.audienceListId,
       filterCriteria,
     );
     // Add filter to exclude unsubscribed contacts
-    recipients = await prisma.audience.findMany({
-      where: {
-        ...whereClause,
-        isUnsubscribed: false,
-      },
-    });
+    recipients = toRecipients(
+      await prisma.audience.findMany({
+        where: {
+          ...whereClause,
+          isUnsubscribed: false,
+        },
+      }),
+    );
   } else if (audienceListId) {
     const audienceList = await prisma.audienceList.findUnique({
       where: { id: audienceListId },
@@ -185,12 +389,120 @@ export const sendBulkEmail = async ({
       },
     });
     if (!audienceList) return { error: "Audience list not found" };
-    recipients = audienceList.audiences;
+    recipients = toRecipients(audienceList.audiences);
   } else {
-    return { error: "Must provide either segmentId or audienceListId" };
+    // No segment and no audienceListId: use org's first audience list (all contacts)
+    const firstList = await prisma.audienceList.findFirst({
+      where: { organizationId },
+      include: {
+        audiences: {
+          where: { isUnsubscribed: false },
+        },
+      },
+    });
+    if (!firstList)
+      return {
+        error:
+          "No audience list found for this organization. Create an audience list first.",
+      };
+    recipients = toRecipients(firstList.audiences);
   }
 
   if (recipients.length === 0) return { error: "No recipients found" };
+
+  // For SES, filter out suppressed recipients
+  if (provider === "ses") {
+    const recipientEmails = recipients.map((r) => r.email);
+    const validEmails = await filterSuppressedRecipients(recipientEmails);
+    const validEmailSet = new Set(validEmails);
+    recipients = recipients.filter((r) => validEmailSet.has(r.email));
+
+    if (recipients.length === 0) {
+      return { error: "All recipients are on the suppression list" };
+    }
+  }
+
+  // SES: schedule for future via queue (SES has no native scheduling)
+  const MAX_SCHEDULE_DAYS = 365;
+  const scheduledAt = scheduledTime ? new Date(scheduledTime) : null;
+  if (provider === "ses" && scheduledAt && scheduledAt.getTime() > Date.now()) {
+    const maxScheduleMs = MAX_SCHEDULE_DAYS * 24 * 60 * 60 * 1000;
+    if (scheduledAt.getTime() - Date.now() > maxScheduleMs) {
+      return {
+        error: `Scheduled time cannot be more than ${MAX_SCHEDULE_DAYS} days in the future`,
+      };
+    }
+    const jobs: EmailJobData[] = [];
+    let index = 0;
+    for (const audience of recipients) {
+      const customVars =
+        typeof audience.customFields === "string"
+          ? JSON.parse(audience.customFields)
+          : audience.customFields || {};
+      const vars = {
+        email: audience.email,
+        first_name: audience.firstName,
+        last_name: audience.lastName,
+        ...customVars,
+        unsubscribe_url: getUnsubscribeUrl({
+          email: audience.email,
+          listId: audience.audienceListId,
+          organizationId,
+        }),
+      };
+      const htmlContent = content
+        ? await parseContent(content, vars, previewText)
+        : "";
+      jobs.push({
+        emailId: id,
+        to: audience.email,
+        from: fromHeader,
+        subject: subject || "No Subject",
+        html: htmlContent || "",
+        text: previewText ?? "",
+        organizationId,
+        provider,
+        awsRegion,
+        configurationSetName,
+        headers: {
+          "X-Mailer-Email-ID": id,
+          "X-Intrepid-ID": id,
+        },
+        userId: session.user.id,
+        jobIdSuffix: `-${index}`,
+      });
+      index++;
+    }
+    const delayMs = scheduledAt.getTime() - Date.now();
+    const result = await queueBulkEmails(jobs, delayMs);
+    const allQueued =
+      result.failed === 0 && result.jobIds.length === recipients.length;
+    if (!allQueued) {
+      if (result.failed > 0) {
+        logError("Some scheduled jobs failed to queue", null, {
+          emailId: id,
+          failed: result.failed,
+          errors: result.errors,
+        });
+      }
+      return {
+        error:
+          result.failed > 0
+            ? `Failed to queue ${result.failed} of ${recipients.length} scheduled emails. Please try again.`
+            : "Failed to queue all scheduled emails. Please try again.",
+      };
+    }
+    await prisma.email.update({
+      where: { id },
+      data: {
+        published: true,
+        scheduledTime: scheduledAt,
+        providerUsed: provider,
+        scheduledJobIds: result.jobIds,
+      },
+    });
+    return { success: true };
+  }
 
   try {
     for (const audience of recipients) {
@@ -213,39 +525,52 @@ export const sendBulkEmail = async ({
         ? await parseContent(content, vars, previewText)
         : "";
 
-      const emailData = {
+      const result = await client.sendEmail({
         from: fromHeader,
-        to: [audience.email],
+        to: audience.email,
         subject: subject || "No Subject",
         html: htmlContent || "",
-        text: "",
-        scheduledAt: scheduledTime,
+        text: previewText ?? "",
         tags: [
           { name: "intrepidId", value: id },
           { name: "userId", value: session.user.id },
         ],
-        react: "",
-      };
-      const { data, error } = await resend.emails.send(emailData);
+        headers: {
+          "X-Mailer-Email-ID": id,
+          "X-Intrepid-ID": id,
+        },
+        scheduledAt: scheduledTime || undefined,
+      });
 
       let eventType = "sent";
-      let errorMessage = null;
-      let resendId = data?.id ?? null;
+      let messageId = result.messageId;
 
-      if (error) {
+      if (result.error) {
         eventType = "failed";
-        errorMessage =
-          typeof error === "string" ? error : JSON.stringify(error);
-        resendId = null; // Failed, so no resendId
+        messageId = null;
         logError("Failed to send email", null, {
           to: audience.email,
-          error: errorMessage,
+          error: result.error,
         });
-      } else {
-        // Still update email with resendId if you want (optional)
+      } else if (messageId) {
+        // Update email with provider-specific message ID
+        const updateData: {
+          resendId?: string;
+          sesMessageId?: string;
+          providerUsed: string;
+        } = {
+          providerUsed: provider,
+        };
+
+        if (provider === "resend") {
+          updateData.resendId = messageId;
+        } else {
+          updateData.sesMessageId = messageId;
+        }
+
         await prisma.email.update({
           where: { id },
-          data: { resendId },
+          data: updateData,
         });
       }
 
@@ -259,10 +584,28 @@ export const sendBulkEmail = async ({
             timestamp: new Date(),
           },
         });
-      } catch (err: any) {
-        if (err.code !== "P2002") logError("Error logging email event", err);
+      } catch (err: unknown) {
+        if (
+          err &&
+          typeof err === "object" &&
+          "code" in err &&
+          err.code !== "P2002"
+        ) {
+          logError("Error logging email event", err);
+        }
       }
     }
+
+    // Mark email as published and set scheduledTime
+    await prisma.email.update({
+      where: { id },
+      data: {
+        published: true,
+        scheduledTime: scheduledTime ? new Date(scheduledTime) : new Date(),
+        providerUsed: provider,
+      },
+    });
+
     return { success: true };
   } catch (e) {
     logError("Error sending bulk email", e);
@@ -270,7 +613,84 @@ export const sendBulkEmail = async ({
   }
 };
 
-export const unscheduleEmail = async ({ resendId }: { resendId: string }) => {
-  const { resend } = await getEmailClientForOrg();
-  await resend.emails.cancel(resendId);
+export const unscheduleEmail = async ({
+  resendId,
+  sesMessageId,
+  emailId,
+  scheduledJobIds,
+}: {
+  resendId?: string;
+  sesMessageId?: string;
+  emailId?: string;
+  scheduledJobIds?: string[] | null;
+}) => {
+  // SES: remove queued jobs and mark email as draft
+  if (scheduledJobIds && scheduledJobIds.length > 0 && emailId) {
+    try {
+      const { removed, errors: removeErrors } =
+        await removeJobs(scheduledJobIds);
+      const allRemoved = removed === scheduledJobIds.length;
+      if (!allRemoved) {
+        logError("Some scheduled jobs could not be removed", null, {
+          emailId,
+          removed,
+          total: scheduledJobIds.length,
+          errors: removeErrors,
+        });
+        return {
+          success: false,
+          error: `Could not remove ${scheduledJobIds.length - removed} of ${scheduledJobIds.length} scheduled jobs. They may have already been sent.`,
+        };
+      }
+      await prisma.email.update({
+        where: { id: emailId },
+        data: { published: false, scheduledJobIds: Prisma.JsonNull },
+      });
+      return { success: true };
+    } catch (err) {
+      logError("Error unscheduling SES email (queue removal)", err, {
+        emailId,
+        jobCount: scheduledJobIds.length,
+      });
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to unschedule",
+      };
+    }
+  }
+
+  // Resend: cancel via API
+  if (resendId && isResendEnabled()) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const result = await resend.emails.cancel(resendId);
+
+      const error = (result as { error?: unknown })?.error;
+      if (error) {
+        const errorMsg =
+          typeof error === "string"
+            ? error
+            : (error as { message?: string })?.message || JSON.stringify(error);
+        logError("Failed to cancel Resend email", null, {
+          resendId,
+          error: errorMsg,
+        });
+        return { success: false, error: errorMsg };
+      }
+
+      return { success: true };
+    } catch (err) {
+      logError("Error canceling scheduled email", err, { resendId });
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to cancel email",
+      };
+    }
+  }
+
+  if (sesMessageId && !scheduledJobIds?.length) {
+    return { error: "SES does not support canceling scheduled emails" };
+  }
+
+  return { error: "No valid message ID or scheduled jobs provided" };
 };

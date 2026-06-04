@@ -18,13 +18,24 @@ export async function POST(
   const emailId = decodeURIComponent(id);
   const email = await prisma.email.findUnique({
     where: { id: emailId },
-    select: { resendId: true },
+    select: {
+      resendId: true,
+      providerUsed: true,
+      scheduledJobIds: true,
+    },
   });
 
   if (!email) {
     return NextResponse.json({ error: "Email not found" }, { status: 404 });
   }
-  if (!email.resendId) {
+
+  const isSesScheduled =
+    email.providerUsed === "ses" &&
+    Array.isArray(email.scheduledJobIds) &&
+    email.scheduledJobIds.length > 0;
+  const isResendScheduled = !!email.resendId;
+
+  if (!isSesScheduled && !isResendScheduled) {
     return NextResponse.json(
       { error: "No scheduled email to cancel" },
       { status: 400 },
@@ -32,9 +43,24 @@ export async function POST(
   }
 
   try {
-    // cancel via Resend API
-    await unscheduleEmail({ resendId: email.resendId });
-    // mark back to draft
+    // Handle both providers when both are present
+    if (isSesScheduled) {
+      const result = await unscheduleEmail({
+        emailId,
+        scheduledJobIds: email.scheduledJobIds as string[],
+      });
+      if (result.error) {
+        return NextResponse.json({ error: result.error }, { status: 500 });
+      }
+    }
+    if (isResendScheduled) {
+      const result = await unscheduleEmail({
+        resendId: email.resendId!,
+      });
+      if (result.error) {
+        return NextResponse.json({ error: result.error }, { status: 500 });
+      }
+    }
     await prisma.email.update({
       where: { id: emailId },
       data: { published: false },

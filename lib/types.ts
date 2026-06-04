@@ -82,6 +82,11 @@ export interface Contact {
   email: string;
   firstName: string;
   lastName: string;
+  signupFormId?: string;
+  signupFormName?: string;
+  signupFormSlug?: string;
+  signupSource?: string;
+  signupSourceCode?: string;
   phone?: string;
   note?: string;
   tags?: string;

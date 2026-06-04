@@ -1,10 +1,22 @@
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
+import { EmptyState } from "@/components/empty-state";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@/prisma/generated/prisma/client";
 
 import AudienceCard from "./audience-card";
+
+type AudienceListWithRelations = Prisma.AudienceListGetPayload<{
+  include: {
+    organization: true;
+    _count: {
+      select: {
+        audiences: true;
+      };
+    };
+  };
+}>;
 
 export default async function Audiences({
   organizationId,
@@ -38,21 +50,16 @@ export default async function Audiences({
 
   return audienceLists.length > 0 ? (
     <div className="justify-left flex">
-      {audienceLists.map((audienceList) => (
+      {audienceLists.map((audienceList: AudienceListWithRelations) => (
         <AudienceCard key={audienceList.id} data={audienceList} />
       ))}
     </div>
   ) : (
-    <div className="flex flex-col items-center space-x-4">
-      <Image
-        alt="missing audiences"
-        src="/empty-state.png"
-        width={400}
-        height={400}
+    <div className="flex flex-col items-center justify-center space-y-6 py-20">
+      <EmptyState
+        icon="table-properties"
+        message="You do not have any audience lists yet. Create one to get started."
       />
-      <p className="text-lg text-stone-500">
-        You do not have any audience lists yet. Create one to get started.
-      </p>
     </div>
   );
 }

@@ -23,9 +23,7 @@ export default async function SiteEmails({
   }
 
   const data = await prisma.organization.findUnique({
-    where: {
-      id: organizationId,
-    },
+    where: { id: organizationId },
   });
 
   if (!data) {

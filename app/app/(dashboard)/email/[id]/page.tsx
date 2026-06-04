@@ -4,7 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import Chart from "@/components/Chart";
 import CancelScheduleModal from "@/components/modal/cancel-schedule-modal";
 import EmailPreview from "@/components/modal/preview-email";
+import SesEmailStats from "@/components/SesEmailStats";
 import { getSession } from "@/lib/auth";
+import { getDefaultProvider } from "@/lib/email-providers";
 import prisma from "@/lib/prisma";
 import { getUnsubscribeUrl } from "@/lib/utils";
 
@@ -23,14 +25,26 @@ export default async function EmailDetailPage({
     where: { id: decodeURIComponent(id) },
     include: {
       audienceList: { include: { audiences: true } },
+      organization: { select: { timezone: true } },
     },
   });
   if (!email || email.userId !== session.user.id) return notFound();
+
+  // Determine provider: use email's providerUsed if set, otherwise fall back to default
+  const emailProvider = email.providerUsed || getDefaultProvider();
   if (!email.published) redirect(`/email/${email.id}`);
 
   const now = new Date();
   const isScheduled = email.scheduledTime > now;
   const isSent = !isScheduled;
+  const timeZone = email.organization?.timezone;
+  const displayTimeZone = timeZone?.replace(/_/g, " ");
+  const formatDateTime = (date: Date) =>
+    date.toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      ...(timeZone ? { timeZone } : {}),
+    });
 
   let previewHtml = "<p>No preview available</p>";
   if (email.content) {
@@ -88,10 +102,16 @@ export default async function EmailDetailPage({
       { label: "Clicks", value: clickedCount },
     ];
     recipients = Array.from(
-      new Set(sentEvents.map((e) => e.emailTo).filter((a): a is string => !!a)),
+      new Set(
+        sentEvents
+          .map((e: { emailTo: string | null }) => e.emailTo)
+          .filter((a: string | null): a is string => !!a),
+      ),
     );
   } else if (email.audienceList) {
-    recipients = email.audienceList.audiences.map((a) => a.email);
+    recipients = email.audienceList.audiences
+      .map((a: { email: string | null }) => a.email)
+      .filter((recipient): recipient is string => Boolean(recipient?.trim()));
   }
 
   return (
@@ -105,21 +125,24 @@ export default async function EmailDetailPage({
             <span className="text-base font-medium text-yellow-600 dark:text-yellow-400">
               Scheduled for{" "}
               <time dateTime={email.scheduledTime.toISOString()}>
-                {new Date(email.scheduledTime).toLocaleString()}
+                {formatDateTime(email.scheduledTime)}
               </time>
+              {displayTimeZone ? ` (${displayTimeZone})` : ""}
             </span>
             <CancelScheduleModal
               emailId={email.id}
               scheduledTime={email.scheduledTime.toISOString()}
               organizationId={email.organizationId || undefined}
+              timezone={timeZone}
             />
           </div>
         ) : (
           <div className="text-base text-gray-500 dark:text-gray-400">
             Sent at{" "}
             <time dateTime={email.updatedAt.toISOString()}>
-              {new Date(email.updatedAt).toLocaleString()}
+              {formatDateTime(email.updatedAt)}
             </time>
+            {displayTimeZone ? ` (${displayTimeZone})` : ""}
           </div>
         )}
       </section>
@@ -127,24 +150,30 @@ export default async function EmailDetailPage({
       {isSent && (
         <>
           <section className="mb-8 space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {stats.map(({ label, value }) => (
-                <div
-                  key={label}
-                  className="flex flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800"
-                >
-                  <span className="text-base font-medium text-gray-500 dark:text-gray-400">
-                    {label}
-                  </span>
-                  <span className="mt-1 text-2xl font-semibold dark:text-white">
-                    {value}
-                  </span>
+            {emailProvider === "ses" ? (
+              <SesEmailStats emailId={email.id} />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {stats.map(({ label, value }) => (
+                    <div
+                      key={label}
+                      className="flex flex-col rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]"
+                    >
+                      <span className="text-base font-medium text-gray-500 dark:text-gray-400">
+                        {label}
+                      </span>
+                      <span className="mt-1 text-2xl font-semibold dark:text-white">
+                        {value}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-              <Chart emailId={email.id} />
-            </div>
+                <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-[#2D2D2D]">
+                  <Chart emailId={email.id} />
+                </div>
+              </>
+            )}
           </section>
           <section className="mb-8">
             <h2 className="mb-4 text-xl font-semibold sm:text-2xl dark:text-gray-100">
@@ -152,8 +181,8 @@ export default async function EmailDetailPage({
             </h2>
             {recipients.length ? (
               <div className="overflow-x-auto rounded-lg shadow-sm">
-                <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-[#2D2D2D]">
+                  <thead className="bg-gray-50 dark:bg-[#252525]">
                     <tr>
                       <th className="px-4 py-2 text-left text-base font-medium text-gray-500 dark:text-gray-300">
                         Recipient Email
@@ -190,8 +219,8 @@ export default async function EmailDetailPage({
           </h2>
           {recipients.length ? (
             <div className="overflow-x-auto rounded-lg shadow-sm">
-              <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-[#2D2D2D]">
+                <thead className="bg-gray-50 dark:bg-[#252525]">
                   <tr>
                     <th className="px-4 py-2 text-left text-base font-medium text-gray-500 dark:text-gray-300">
                       Recipient Email

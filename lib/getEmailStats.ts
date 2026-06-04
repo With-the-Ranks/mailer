@@ -16,7 +16,7 @@ export async function getEmailStatsByUser(userId: string) {
     },
   });
 
-  const emailIds = emails.map((e) => e.id);
+  const emailIds = emails.map((e: { id: string }) => e.id);
 
   const events = await prisma.emailEvent.findMany({
     where: {
@@ -39,13 +39,23 @@ export async function getEmailStatsByUser(userId: string) {
     }
   }
 
-  return emails.map(({ id, subject, audienceList }) => ({
-    emailId: id,
-    subject,
-    sent: audienceList?.audiences.length ?? 0,
-    opened: eventMap[id]?.opened ?? 0,
-    clicked: eventMap[id]?.clicked ?? 0,
-  }));
+  return emails.map(
+    ({
+      id,
+      subject,
+      audienceList,
+    }: {
+      id: string;
+      subject: string | null;
+      audienceList: { audiences: { id: string }[] } | null;
+    }) => ({
+      emailId: id,
+      subject,
+      sent: audienceList?.audiences.length ?? 0,
+      opened: eventMap[id]?.opened ?? 0,
+      clicked: eventMap[id]?.clicked ?? 0,
+    }),
+  );
 }
 
 export async function getEmailStatsByOrganization(organizationId: string) {
@@ -64,7 +74,7 @@ export async function getEmailStatsByOrganization(organizationId: string) {
     },
   });
 
-  const emailIds = emails.map((e) => e.id);
+  const emailIds = emails.map((e: { id: string }) => e.id);
 
   const events = await prisma.emailEvent.findMany({
     where: {
@@ -87,11 +97,21 @@ export async function getEmailStatsByOrganization(organizationId: string) {
     }
   }
 
-  return emails.map(({ id, subject, audienceList }) => ({
-    emailId: id,
-    subject,
-    sent: audienceList?.audiences.length ?? 0,
-    opened: eventMap[id]?.opened ?? 0,
-    clicked: eventMap[id]?.clicked ?? 0,
-  }));
+  return emails.map(
+    ({
+      id,
+      subject,
+      audienceList,
+    }: {
+      id: string;
+      subject: string | null;
+      audienceList: { audiences: { id: string }[] } | null;
+    }) => ({
+      emailId: id,
+      subject,
+      sent: audienceList?.audiences.length ?? 0,
+      opened: eventMap[id]?.opened ?? 0,
+      clicked: eventMap[id]?.clicked ?? 0,
+    }),
+  );
 }

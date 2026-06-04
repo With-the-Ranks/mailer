@@ -5,10 +5,11 @@ import { Loader2 } from "lucide-react";
 import type { Moment } from "moment";
 import moment from "moment";
 import posthog from "posthog-js";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import ScheduleEmailButton from "@/components/schedule-email-button";
+import { getOrganizationTimezone } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +34,8 @@ interface SendEmailModalProps {
   content: string;
   emailId: string;
   audienceListId?: string | null;
+  /** Org timezone for schedule picker (e.g. America/New_York). When set, times are shown and interpreted in this zone. */
+  timezone?: string;
 }
 
 export function SendEmailModal({
@@ -48,6 +51,7 @@ export function SendEmailModal({
   content,
   emailId,
   audienceListId: audienceListIdProp,
+  timezone: orgTimezone,
 }: SendEmailModalProps) {
   const modal = useModal();
   const [testEmail, setTestEmail] = useState("");
@@ -56,16 +60,30 @@ export function SendEmailModal({
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
 
   const [mode, setMode] = useState<"now" | "schedule">("now");
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [resolvedTimezone, setResolvedTimezone] = useState<string>(
+    () => orgTimezone ?? "America/New_York",
+  );
+  const displayTimezone = resolvedTimezone.replace(/_/g, " ");
   const [localScheduledDate, setLocalScheduledDate] =
     useState<Moment>(scheduledTimeValue);
+
+  useEffect(() => {
+    if (orgTimezone) {
+      setResolvedTimezone(orgTimezone);
+      return;
+    }
+    getOrganizationTimezone(organizationId).then((tz) => {
+      if (tz) setResolvedTimezone(tz);
+    });
+  }, [organizationId, orgTimezone]);
 
   const handleSendTest = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!testEmail) return;
     setIsSendingTest(true);
+    let errorMessage: string | null = null;
     try {
-      await sendEmail({
+      const result = await sendEmail({
         to: testEmail,
         from,
         subject,
@@ -74,16 +92,23 @@ export function SendEmailModal({
         organizationId,
         audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
-      posthog.capture("test_email_sent", {
-        email_id: emailId,
-        organization_id: organizationId,
-      });
-      toast.success("Test email sent");
+      if (result?.error) errorMessage = result.error;
     } catch (error) {
-      toast.error("Failed to send test email");
+      errorMessage = "Failed to send test email";
       posthog.captureException(error);
+    } finally {
+      setIsSendingTest(false);
+      if (errorMessage) {
+        toast.error(errorMessage);
+        posthog.captureException(new Error(errorMessage));
+      } else {
+        posthog.capture("test_email_sent", {
+          email_id: emailId,
+          organization_id: organizationId,
+        });
+        toast.success("Test email sent");
+      }
     }
-    setIsSendingTest(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -201,7 +226,7 @@ export function SendEmailModal({
             type="button"
             onClick={() => setMode(m)}
             variant={mode === m ? "default" : "ghost"}
-            className={`rounded-none px-4 py-1 text-base font-medium ${
+            className={`px-4 py-1 text-base font-medium ${
               mode === m ? "" : "hover:bg-gray-50"
             }`}
             aria-label={m === "now" ? "Send Now" : "Schedule"}
@@ -219,13 +244,10 @@ export function SendEmailModal({
             isValidTime={isValidTime}
             setScheduledTimeValue={setLocalScheduledDate}
             isDisabled={isSubmitting || isScheduleDisabled}
+            timezone={resolvedTimezone}
           />
           <p className="mt-2 text-base text-gray-500">
-            Timezone:{" "}
-            <span className="font-medium">
-              {scheduledTimeValue.format("Z")}
-            </span>{" "}
-            ({timezone})
+            Timezone: <span className="font-medium">{displayTimezone}</span>
           </p>
         </div>
       )}

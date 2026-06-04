@@ -217,7 +217,7 @@ export default function TwoFactorAuth() {
                   alt="2FA QR Code"
                   width={200}
                   height={200}
-                  className="rounded-md border"
+                  className="rounded-lg border"
                 />
               )}
             </div>

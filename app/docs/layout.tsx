@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           enabled: true,
         }}
         theme={{
-          enabled: false,
+          enabled: true,
           defaultTheme: "light",
         }}
       >
@@ -38,11 +38,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
                 return {
                   ...option,
-                  icon: (
-                    <div className="bg-fd-primary/10 rounded-md p-1 text-white">
-                      {icon}
-                    </div>
-                  ),
+                  icon: <div className="rounded-lg p-1">{icon}</div>,
                 };
               },
             },

@@ -1,7 +1,7 @@
-import type { Organization } from "@prisma/client";
-import Image from "next/image";
+import type { Organization } from "@/prisma/generated/prisma/client";
 import { redirect } from "next/navigation";
 
+import { EmptyState } from "@/components/empty-state";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -43,17 +43,11 @@ export default async function Organizations({
       ))}
     </div>
   ) : (
-    <div className="mt-20 flex flex-col items-center space-x-4">
-      {/* <h1 className="font-cal text-4xl">No Sites Yet</h1> */}
-      <Image
-        alt="missing organization"
-        src="/empty-state.png"
-        width={400}
-        height={400}
+    <div className="mt-20 flex flex-col items-center justify-center space-y-6 py-20">
+      <EmptyState
+        icon="building2"
+        message="You do not have any organizations yet. Create one to get started."
       />
-      <p className="text-lg text-stone-500">
-        You do not have any organizations yet. Create one to get started.
-      </p>
     </div>
   );
 }

@@ -17,7 +17,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 interface UploadStepProps {
   file: File | null;
   csvData: string[][];
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onDownloadSample: () => void;
 }

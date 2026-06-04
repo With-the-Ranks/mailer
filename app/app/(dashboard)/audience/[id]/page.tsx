@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { ContactList } from "@/components/contact-list";
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export default async function AudiencePage({
@@ -30,6 +30,15 @@ export default async function AudiencePage({
   });
 
   if (!data) {
+    notFound();
+  }
+
+  // Check if user is a member of the organization that owns this audience list
+  const hasAccess = await isOrgMember(
+    session.user.id as string,
+    data.organizationId,
+  );
+  if (!hasAccess) {
     notFound();
   }
 

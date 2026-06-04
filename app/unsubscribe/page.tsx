@@ -473,13 +473,13 @@ function UnsubscribeForm({
       </section>
 
       {submitState.status === "error" && (
-        <div className="rounded-md border border-red-100 bg-red-50 p-3 text-base text-red-700">
+        <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-base text-red-700">
           {submitState.message}
         </div>
       )}
 
       {submitState.status === "success" && (
-        <div className="rounded-md border border-green-100 bg-green-50 p-3 text-base text-green-700">
+        <div className="rounded-lg border border-green-100 bg-green-50 p-3 text-base text-green-700">
           {submitState.message}
         </div>
       )}
@@ -595,7 +595,7 @@ function ManualEntryForm({
       </div>
 
       {submitState.status === "error" && (
-        <div className="rounded-md border border-red-100 bg-red-50 p-3 text-base text-red-700">
+        <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-base text-red-700">
           {submitState.message}
         </div>
       )}

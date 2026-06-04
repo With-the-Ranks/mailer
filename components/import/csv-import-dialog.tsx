@@ -220,6 +220,16 @@ export function CsvImportDialog({
           }
         });
 
+        const hasPrimaryInfo = Boolean(
+          contact.email?.trim() ||
+          contact.phone?.trim() ||
+          contact.firstName?.trim() ||
+          contact.lastName?.trim(),
+        );
+        if (!hasPrimaryInfo) {
+          throw new Error("Row must include at least name, email, or phone");
+        }
+
         importedContacts.push(contact);
         setImportProgress((prev) => ({
           ...prev,

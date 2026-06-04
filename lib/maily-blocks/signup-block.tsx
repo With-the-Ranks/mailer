@@ -1,11 +1,21 @@
 import { FileText } from "lucide-react";
 
 import type { BlockItem, SignupForm } from "./types";
+import { getPreferredOrganizationButtonColor } from "./logo-utils";
+
+type OrganizationBranding = {
+  buttonColor?: string | null;
+} | null;
 
 // Create a default signup block that uses the first available signup form
-export function createDefaultSignupBlock(signupForms: SignupForm[]): BlockItem {
+export function createDefaultSignupBlock(
+  signupForms: SignupForm[],
+  organization?: OrganizationBranding,
+): BlockItem {
   const firstForm =
     signupForms && signupForms.length > 0 ? signupForms[0] : null;
+  const preferredButtonColor =
+    getPreferredOrganizationButtonColor(organization);
 
   return {
     title: "Signup Form",
@@ -47,9 +57,9 @@ export function createDefaultSignupBlock(signupForms: SignupForm[]): BlockItem {
                     showIfKey: null,
                     textColor: "#ffffff",
                     paddingTop: 12,
-                    buttonColor: "#3611C9",
+                    buttonColor: preferredButtonColor ?? "#1547E6",
                     paddingLeft: 32,
-                    borderRadius: "round",
+                    borderRadius: "smooth",
                     paddingRight: 32,
                     isUrlVariable: false,
                     isTextVariable: false,
@@ -92,10 +102,16 @@ export function createDefaultSignupBlock(signupForms: SignupForm[]): BlockItem {
 }
 
 // Create dynamic signup form blocks from API data
-export function createSignupFormBlocks(signupForms: SignupForm[]): BlockItem[] {
+export function createSignupFormBlocks(
+  signupForms: SignupForm[],
+  organization?: OrganizationBranding,
+): BlockItem[] {
   if (!signupForms || signupForms.length === 0) {
     return [];
   }
+
+  const preferredButtonColor =
+    getPreferredOrganizationButtonColor(organization);
 
   return signupForms.map((form) => ({
     title: form.name,
@@ -138,9 +154,9 @@ export function createSignupFormBlocks(signupForms: SignupForm[]): BlockItem[] {
                     showIfKey: null,
                     textColor: "#ffffff",
                     paddingTop: 12,
-                    buttonColor: "#3611C9",
+                    buttonColor: preferredButtonColor ?? "#1547E6",
                     paddingLeft: 32,
-                    borderRadius: "round",
+                    borderRadius: "smooth",
                     paddingRight: 32,
                     isUrlVariable: false,
                     isTextVariable: false,

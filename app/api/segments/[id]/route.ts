@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { buildAudienceWhere } from "@/lib/utils";
 import { logError } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { logError } from "@/lib/utils";
 const updateSegmentSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
   description: z.string().optional().nullable(),
-  filterCriteria: z.record(z.any()).optional(),
+  filterCriteria: z.record(z.string(), z.any()).optional(),
 });
 
 function safeFilterCriteria(filterCriteria: unknown): Record<string, any> {
@@ -39,8 +39,21 @@ export async function GET(
       },
     });
 
-    if (!segment || segment.organizationId !== session.user.organizationId) {
+    if (!segment) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    if (!segment.organizationId) {
+      return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    // Check if user has access to the organization that owns this segment
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      segment.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Dynamic contact count
@@ -75,13 +88,26 @@ export async function PUT(
     const body = await request.json();
     const validatedData = updateSegmentSchema.parse(body);
 
-    // Check segment exists and belongs to org
+    // Check segment exists and user has access
     const segment = await prisma.segment.findUnique({
       where: { id },
     });
 
-    if (!segment || segment.organizationId !== session.user.organizationId) {
+    if (!segment) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    if (!segment.organizationId) {
+      return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    // Check if user has access to the organization that owns this segment
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      segment.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Update segment
@@ -110,7 +136,7 @@ export async function PUT(
       return NextResponse.json(
         {
           error: "Validation failed",
-          details: error.errors.map((err) => ({
+          details: error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -138,13 +164,26 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check segment exists and belongs to org
+    // Check segment exists and user has access
     const segment = await prisma.segment.findUnique({
       where: { id },
     });
 
-    if (!segment || segment.organizationId !== session.user.organizationId) {
+    if (!segment) {
       return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    if (!segment.organizationId) {
+      return NextResponse.json({ error: "Segment not found" }, { status: 404 });
+    }
+
+    // Check if user has access to the organization that owns this segment
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      segment.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     await prisma.segment.delete({

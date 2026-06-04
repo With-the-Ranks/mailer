@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/auth";
+import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { buildAudienceWhere } from "@/lib/utils";
 import { logError } from "@/lib/utils";
@@ -24,28 +24,52 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const where: any = {
-      organizationId: session.user.organizationId,
-    };
+    let targetOrgId: string | null = null;
 
     if (audienceListId) {
       const audienceList = await prisma.audienceList.findUnique({
         where: { id: audienceListId },
       });
-      if (
-        !audienceList ||
-        audienceList.organizationId !== session.user.organizationId
-      ) {
+      if (!audienceList) {
         return NextResponse.json(
           { error: "Audience list not found" },
           { status: 404 },
         );
       }
-      where.audienceListId = audienceListId;
-    } else if (organizationId) {
-      if (organizationId !== session.user.organizationId) {
+      // Check if user has access to the organization that owns this audience list
+      const hasAccess = await isOrgMember(
+        session.user.id as string,
+        audienceList.organizationId,
+      );
+      if (!hasAccess) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
+      targetOrgId = audienceList.organizationId;
+    } else if (organizationId) {
+      // Check if user has access to this organization
+      const hasAccess = await isOrgMember(
+        session.user.id as string,
+        organizationId,
+      );
+      if (!hasAccess) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      targetOrgId = organizationId;
+    }
+
+    if (!targetOrgId) {
+      return NextResponse.json(
+        { error: "organizationId or audienceListId is required" },
+        { status: 400 },
+      );
+    }
+
+    const where: any = {
+      organizationId: targetOrgId,
+    };
+
+    if (audienceListId) {
+      where.audienceListId = audienceListId;
     }
 
     const segments = await prisma.segment.findMany({
@@ -58,19 +82,27 @@ export async function GET(request: NextRequest) {
 
     // Dynamically count contacts for each segment
     const segmentsWithCounts = await Promise.all(
-      segments.map(async (segment) => {
-        const filterCriteria =
-          segment.filterCriteria &&
-          typeof segment.filterCriteria === "object" &&
-          !Array.isArray(segment.filterCriteria)
-            ? (segment.filterCriteria as Record<string, any>)
-            : {};
+      segments.map(
+        async (segment: {
+          id: string;
+          filterCriteria: any;
+          audienceListId: string;
+          audienceList: { id: string; name: string };
+          [key: string]: any;
+        }) => {
+          const filterCriteria =
+            segment.filterCriteria &&
+            typeof segment.filterCriteria === "object" &&
+            !Array.isArray(segment.filterCriteria)
+              ? (segment.filterCriteria as Record<string, any>)
+              : {};
 
-        const count = await prisma.audience.count({
-          where: buildAudienceWhere(segment.audienceListId, filterCriteria),
-        });
-        return { ...segment, contactCount: count };
-      }),
+          const count = await prisma.audience.count({
+            where: buildAudienceWhere(segment.audienceListId, filterCriteria),
+          });
+          return { ...segment, contactCount: count };
+        },
+      ),
     );
 
     return NextResponse.json(segmentsWithCounts);
@@ -98,7 +130,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Invalid data",
-          details: result.error.errors.map((err) => ({
+          details: result.error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -108,6 +140,13 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = result.data;
+    const selectedContactIds = Array.from(
+      new Set(
+        (validatedData.contactIds || [])
+          .map((id) => id?.trim())
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
 
     if (!validatedData.audienceListId) {
       return NextResponse.json(
@@ -120,21 +159,57 @@ export async function POST(request: NextRequest) {
       where: { id: validatedData.audienceListId },
     });
 
-    if (
-      !audienceList ||
-      audienceList.organizationId !== session.user.organizationId
-    ) {
+    if (!audienceList) {
       return NextResponse.json(
         { error: "Audience list not found" },
         { status: 404 },
       );
     }
 
+    // Check if user has access to the organization that owns this audience list
+    const hasAccess = await isOrgMember(
+      session.user.id as string,
+      audienceList.organizationId,
+    );
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    let resolvedFilterCriteria =
+      validatedData.filterCriteria &&
+      typeof validatedData.filterCriteria === "object" &&
+      !Array.isArray(validatedData.filterCriteria)
+        ? { ...validatedData.filterCriteria }
+        : {};
+
+    if (selectedContactIds.length > 0) {
+      const validContacts = await prisma.audience.findMany({
+        where: {
+          audienceListId: validatedData.audienceListId,
+          id: { in: selectedContactIds },
+        },
+        select: { id: true },
+      });
+
+      const validContactIds = validContacts.map((contact) => contact.id);
+      if (validContactIds.length === 0) {
+        return NextResponse.json(
+          { error: "No valid contacts selected for manual segment" },
+          { status: 400 },
+        );
+      }
+
+      resolvedFilterCriteria = {
+        segmentType: "manual",
+        contactIds: validContactIds,
+      };
+    }
+
     // Calculate contactCount at creation (optional, for analytics)
     const contactCount = await prisma.audience.count({
       where: buildAudienceWhere(
         validatedData.audienceListId,
-        validatedData.filterCriteria,
+        resolvedFilterCriteria,
       ),
     });
 
@@ -143,8 +218,8 @@ export async function POST(request: NextRequest) {
         name: validatedData.name,
         description: validatedData.description,
         audienceListId: validatedData.audienceListId,
-        filterCriteria: validatedData.filterCriteria,
-        organizationId: session.user.organizationId,
+        filterCriteria: resolvedFilterCriteria as any,
+        organizationId: audienceList.organizationId,
         contactCount, // store at creation, but always recalculate in GET
       },
       include: {

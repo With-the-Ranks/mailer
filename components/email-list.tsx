@@ -1,6 +1,6 @@
 "use client";
 
-import type { Audience } from "@prisma/client";
+import type { Audience } from "@/prisma/generated/prisma/client";
 import { MoreVertical, PlusIcon, TrashIcon, UploadIcon } from "lucide-react";
 import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";
@@ -362,7 +362,7 @@ export function EmailList({ audienceListId, listName }: EmailListProps) {
                     {editIndex === index ? (
                       <input
                         type="email"
-                        value={audience.email}
+                        value={audience.email || ""}
                         onChange={(e) =>
                           handleEditChange(index, "email", e.target.value)
                         }

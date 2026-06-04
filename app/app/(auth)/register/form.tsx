@@ -1,18 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import FormButton from "@/components/form/form-button";
 import { registerUser } from "@/lib/actions/auth";
-import { isSafeCallbackPath } from "@/lib/utils";
 
-function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
+function RegisterForm({
+  onSuccess,
+}: {
+  callbackUrl?: string | null;
+  onSuccess?: (email: string) => void;
+}) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,21 +40,14 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
       return;
     }
 
-    // Identify user and capture registration event in PostHog
-    posthog.identify(formData.email, {
-      email: formData.email,
-    });
-    posthog.capture("user_registered", {
-      email: formData.email,
-    });
+    posthog.identify(formData.email, { email: formData.email });
+    posthog.capture("user_registered", { email: formData.email });
 
-    toast.success(
-      "Registration successful. Please check your email to verify.",
-    );
-    const nextUrl = isSafeCallbackPath(callbackUrl)
-      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl as string)}`
-      : "/login";
-    router.push(nextUrl);
+    try {
+      onSuccess?.(formData.email);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,7 +59,7 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
         onChange={handleChange}
         placeholder="Email"
         disabled={isSubmitting}
-        className="mt-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-4 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
         required
       />
       <input
@@ -74,10 +69,10 @@ function RegisterForm({ callbackUrl }: { callbackUrl?: string | null }) {
         onChange={handleChange}
         placeholder="Password"
         disabled={isSubmitting}
-        className="my-4 w-full max-w-md rounded-none border border-white bg-white/10 text-base text-white placeholder-white/70 focus:border-white focus:ring-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="my-4 w-full max-w-md rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 placeholder-gray-500 focus:border-blue-700 focus:ring-blue-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500"
         required
       />
-      <FormButton isSubmitting={isSubmitting} label="Register" />
+      <FormButton isSubmitting={isSubmitting} label="Sign up" />
     </form>
   );
 }

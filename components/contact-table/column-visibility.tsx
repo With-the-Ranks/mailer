@@ -35,7 +35,7 @@ const getColumnGroups = (customFields: string[]) => ({
   "Organizing Data": ["tags"],
   "Custom Fields": customFields,
   Additional: ["note"],
-  Metadata: ["createdAt", "updatedAt"],
+  Metadata: ["createdAt", "updatedAt", "signupFormName", "signupSource"],
 });
 
 export function ColumnVisibility({
@@ -49,6 +49,8 @@ export function ColumnVisibility({
       select: "Select",
       actions: "Actions",
       email: "Email",
+      signupFormName: "Signup Form",
+      signupSource: "Source",
       firstName: "First Name",
       lastName: "Last Name",
       phone: "Phone",
@@ -79,11 +81,11 @@ export function ColumnVisibility({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="max-h-96 w-56 overflow-y-auto"
+        className="max-h-96 w-64 overflow-y-auto rounded-lg border border-[#D3D3D3] bg-white p-1.5 dark:bg-[#2D2D2D] dark:text-white"
       >
-        {Object.entries(columnGroups).map(([groupName, columnIds]) => (
+        {Object.entries(columnGroups).map(([groupName, columnIds], index) => (
           <div key={groupName}>
-            <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold uppercase tracking-wider">
+            <DropdownMenuLabel className="text-muted-foreground px-2 py-1.5 text-xs font-semibold tracking-wider uppercase">
               {groupName}
             </DropdownMenuLabel>
             {columnIds.map((columnId) => {
@@ -95,13 +97,15 @@ export function ColumnVisibility({
                   key={columnId}
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  className="pl-6"
+                  className="rounded-md py-2 pl-7 text-sm"
                 >
                   {getColumnDisplayName(columnId)}
                 </DropdownMenuCheckboxItem>
               );
             })}
-            <DropdownMenuSeparator />
+            {index < Object.keys(columnGroups).length - 1 && (
+              <DropdownMenuSeparator className="my-1" />
+            )}
           </div>
         ))}
       </DropdownMenuContent>

@@ -3,18 +3,34 @@ on:
   push:
     branches: [main, stage]
   pull_request:
-    branches: [main, stage]
+    types: [opened, reopened, synchronize, ready_for_review]
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      # Needed for prisma.config + runtime imports during tests
+      DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock"
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "pnpm"
+
       - name: Install dependencies
-        run: npm install -g pnpm@8 && pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
       - name: Run Vitest tests
         run: pnpm test

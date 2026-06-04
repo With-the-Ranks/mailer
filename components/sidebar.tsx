@@ -1,22 +1,20 @@
 "use client";
 
 import {
-  ArrowLeft,
-  BookOpen,
+  Ban,
+  ChartLine,
   ChevronRight,
+  CornerDownRight,
   Edit3,
+  FileQuestion,
   Filter,
-  FormInput,
+  Form,
   Info,
   LayoutDashboard,
-  List,
   Newspaper,
   Settings,
-  TrendingUp,
-  UploadIcon,
-  Users,
+  TableProperties,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   useParams,
@@ -26,7 +24,11 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
+import Logo from "@/components/logo";
+import LogoutButton from "@/components/logout-button";
 import OrganizationSwitcher from "@/components/organization-switcher";
+import { SidebarCreateButtonGroup } from "@/components/sidebar-create-button-group";
+import ThemeSwitcher from "@/components/theme-switcher";
 import {
   Collapsible,
   CollapsibleContent,
@@ -84,80 +86,32 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const navItems = useMemo(() => {
     if (loading) return [];
 
-    // Email context
-    if (segments[0] === "email" && id) {
-      const isPublished = emailData?.published;
-      return [
-        {
-          name: "Back to Dashboard",
-          href: siteId ? `/organization/${siteId}` : "/organizations",
-          icon: ArrowLeft,
-        },
-        isPublished && {
-          name: "Details",
-          href: `/email/${id}/`,
-          isActive: segments.length === 2,
-          icon: Info,
-        },
-        !isPublished && {
-          name: "Editor",
-          href: `/email/${id}/editor`,
-          isActive: segments.includes("editor"),
-          icon: Edit3,
-        },
-      ].filter(Boolean);
-    }
-
-    // Audience or Segments context
-    if (
-      segments[0] === "audience" ||
-      segments[0] === "segments" ||
-      pathname.includes("/segments")
-    ) {
-      return [
-        {
-          name: "Back to Dashboard",
-          href: "/",
-          icon: ArrowLeft,
-        },
-        {
-          name: "People",
-          icon: Users,
-          submenu: [
-            {
-              name: "Contacts",
-              href: `/audience/${audienceListId}`,
-              isActive: segments[0] === "audience" && segments.length === 2,
-              icon: List,
-            },
-            {
-              name: "Add Contact",
-              href: `/audience/${audienceListId}?action=add-contact`,
-              icon: Edit3,
-            },
-            {
-              name: "Import Contacts",
-              href: `/audience/${audienceListId}?action=import`,
-              icon: UploadIcon,
-            },
-            {
-              name: "Custom Fields",
-              href: `/audience/${audienceListId}?action=custom-fields`,
-              icon: Settings,
-            },
-            {
-              name: "Segments",
-              href: `/organization/${siteId}/segments`,
-              isActive: segments.includes("segments"),
-              icon: Filter,
-            },
-          ],
-        },
-      ];
-    }
-
-    // Main org nav
+    // Main org nav - always show these core items
     if (organizationFound) {
+      const isOnEmailPage = segments[0] === "email" && id;
+      const isOnCreateEmailPage =
+        pathname === `/email/create` ||
+        (segments[0] === "email" && segments[1] === "create");
+      const isOnAudiencePage = segments[0] === "audience";
+      const isOnSegmentsPage = segments.includes("segments");
+      const isOnSuppressionPage = segments.includes("suppression");
+      const isOnPeopleIndex =
+        segments[0] === "organization" &&
+        segments[2] === "audience" &&
+        segments.length === 3;
+      const isOnPeopleSection =
+        isOnAudiencePage ||
+        isOnSegmentsPage ||
+        isOnPeopleIndex ||
+        isOnSuppressionPage;
+      const isPublished = emailData?.published;
+      const isOnEmailsListPage =
+        segments[0] === "organization" && segments.length === 2;
+      const signupFormsIdx = segments.indexOf("signup-forms");
+      const isOnCreateSignupFormPage =
+        signupFormsIdx >= 0 && segments[signupFormsIdx + 1] === "edit";
+      const isOnSignupFormsSection = segments.includes("signup-forms");
+
       return [
         {
           name: "Dashboard",
@@ -167,30 +121,99 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         },
         {
           name: "People",
-          href: `/audience/${audienceListId}`,
-          isActive:
-            pathname === `/audience/${audienceListId}` ||
-            pathname === `/organization/${siteId}/audience` ||
-            pathname === `/organization/${siteId}/audience/lists`,
-          icon: Users,
+          href: audienceListId
+            ? `/audience/${audienceListId}`
+            : `/organization/${siteId}/audience`,
+          isActive: isOnPeopleSection,
+          isParentPathActive:
+            pathname ===
+            (audienceListId
+              ? `/audience/${audienceListId}`
+              : `/organization/${siteId}/audience`),
+          icon: TableProperties,
+          submenu: isOnPeopleSection
+            ? [
+                ...(audienceListId
+                  ? [
+                      {
+                        name: "Create Contact",
+                        href: `/audience/${audienceListId}?action=add-contact`,
+                        isActive: false,
+                        icon: CornerDownRight,
+                      },
+                    ]
+                  : []),
+                {
+                  name: "Segments",
+                  href: `/organization/${siteId}/segments`,
+                  isActive: segments.includes("segments"),
+                  icon: Filter,
+                },
+                {
+                  name: "Suppression List",
+                  href: `/organization/${siteId}/audience/suppression`,
+                  isActive: segments.includes("suppression"),
+                  icon: Ban,
+                },
+              ]
+            : undefined,
         },
         {
           name: "Signup Forms",
           href: `/organization/${siteId}/signup-forms`,
-          isActive: segments.includes("signup-forms"),
-          icon: FormInput,
+          isActive:
+            segments.includes("signup-forms") && !isOnCreateSignupFormPage,
+          isParentPathActive:
+            pathname === `/organization/${siteId}/signup-forms`,
+          icon: Form,
+          submenu: isOnSignupFormsSection
+            ? [
+                {
+                  name: "Create Form",
+                  href: `/organization/${siteId}/signup-forms/edit`,
+                  isActive: isOnCreateSignupFormPage,
+                  icon: CornerDownRight,
+                },
+              ]
+            : undefined,
         },
         {
           name: "Emails",
           href: `/organization/${siteId}`,
-          isActive: segments.length === 2,
+          isActive: isOnEmailsListPage && !isOnEmailPage, // Only highlight when on emails list, not on individual email
+          isParentPathActive: pathname === `/organization/${siteId}`,
           icon: Newspaper,
+          submenu: isOnEmailPage
+            ? [
+                isPublished && {
+                  name: "Details",
+                  href: `/email/${id}/`,
+                  isActive: segments.length === 2,
+                  icon: Info,
+                },
+                !isPublished && {
+                  name: "Editor",
+                  href: `/email/${id}/editor`,
+                  isActive: segments.includes("editor"),
+                  icon: Edit3,
+                },
+              ].filter(Boolean)
+            : isOnEmailsListPage || isOnCreateEmailPage
+              ? [
+                  {
+                    name: "Create Email",
+                    href: `/email/create?organizationId=${siteId}`,
+                    isActive: isOnCreateEmailPage,
+                    icon: CornerDownRight,
+                  },
+                ]
+              : undefined,
         },
         {
           name: "Reports",
           href: `/organization/${siteId}/analytics`,
           isActive: segments.includes("analytics"),
-          icon: TrendingUp,
+          icon: ChartLine,
         },
         // Only show Settings for ADMIN users
         ...(userRole === "ADMIN"
@@ -204,10 +227,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             ]
           : []),
         {
-          name: "Documentation",
+          name: "Support",
           href: "/docs",
           isActive: pathname.includes("/docs"),
-          icon: BookOpen,
+          icon: FileQuestion,
         },
       ];
     }
@@ -231,7 +254,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         name: "Documentation",
         href: "/docs",
         isActive: pathname.includes("/docs"),
-        icon: BookOpen,
+        icon: FileQuestion,
       },
     ];
   }, [
@@ -249,30 +272,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar
       collapsible="icon"
-      className={`bg-sidebar text-sidebar-foreground h-full border-r ${state === "expanded" ? "p-4" : ""}`}
+      className={`h-full border-r border-neutral-300 bg-white text-black dark:border-neutral-700 dark:bg-[#2D2D2D] dark:text-white ${state === "expanded" ? "p-8" : ""}`}
     >
-      <SidebarHeader>
-        <Link
-          href="/"
-          className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground inline-flex items-baseline gap-2 rounded-md transition-all duration-200 ${state === "expanded" ? "justify-start px-2 py-1.5" : "justify-center p-1.5"}`}
-        >
-          <div className="relative h-4 w-4">
-            <Image
-              src="/mailer.svg"
-              width={16}
-              height={16}
-              alt="Mailer Logo"
-              className="h-4 w-4"
-            />
-          </div>
-          {state === "expanded" && (
-            <div className="flex h-7 w-20 justify-start text-3xl leading-8 font-bold text-white">
-              Mailer
-            </div>
-          )}
-        </Link>
+      <SidebarHeader className={`mb-4 ${state === "expanded" ? "p-0" : "p-2"}`}>
+        <Logo />
         {userOrgs.length > 0 && state === "expanded" && (
-          <div className="px-2 py-2">
+          <div className="mt-4">
             <OrganizationSwitcher
               organizations={userOrgs}
               currentOrgId={siteId || undefined}
@@ -283,27 +288,51 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               {navItems.map((item) =>
                 item.submenu ? (
                   <Collapsible
                     key={item.name}
                     asChild
-                    defaultOpen={true}
+                    defaultOpen={!!item.isActive}
                     className="group/collapsible"
                   >
                     <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
+                      <div className="flex w-full items-center rounded-lg pr-1">
                         <SidebarMenuButton
+                          asChild
                           tooltip={item.name}
-                          isActive={item.isActive}
-                          className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
+                          isActive={
+                            !!(item as { isParentPathActive?: boolean })
+                              .isParentPathActive
+                          }
+                          className="min-w-0 flex-1 rounded-lg py-2 pr-2 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
                         >
-                          <item.icon className="mr-2" size={18} />
-                          <span>{item.name}</span>
-                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          <Link
+                            href={item.href}
+                            className="flex items-center gap-1.5"
+                          >
+                            <item.icon
+                              className="shrink-0 text-black dark:text-white"
+                              size={24}
+                            />
+                            <span className="truncate whitespace-nowrap">
+                              {item.name}
+                            </span>
+                          </Link>
                         </SidebarMenuButton>
-                      </CollapsibleTrigger>
+                        <CollapsibleTrigger
+                          asChild
+                          className="flex shrink-0 items-center justify-center rounded-md p-1 text-black transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-300 dark:text-white dark:hover:bg-neutral-800 dark:focus-visible:ring-neutral-600"
+                        >
+                          <button
+                            type="button"
+                            aria-label={`Toggle ${item.name} submenu`}
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                        </CollapsibleTrigger>
+                      </div>
                       <CollapsibleContent>
                         <SidebarMenuSub>
                           {item.submenu.map((sub: any) => (
@@ -311,14 +340,24 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={sub.isActive}
-                                className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
+                                className="min-w-fit overflow-visible rounded-lg py-1.5 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white [&>span:last-child]:overflow-visible [&>span:last-child]:whitespace-nowrap [&>svg]:text-black hover:[&>svg]:text-black data-[active=true]:[&>svg]:text-black dark:[&>svg]:text-white dark:hover:[&>svg]:text-white dark:data-[active=true]:[&>svg]:text-white"
                               >
                                 <Link
                                   href={sub.href}
-                                  className="flex items-center"
+                                  className="flex items-center gap-1"
+                                  scroll={
+                                    sub.href?.includes?.("action=add-contact")
+                                      ? false
+                                      : undefined
+                                  }
                                 >
-                                  <sub.icon className="mr-2" size={16} />
-                                  <span>{sub.name}</span>
+                                  <sub.icon
+                                    className="mr-0 shrink-0 text-black dark:text-white"
+                                    size={16}
+                                  />
+                                  <span className="whitespace-nowrap">
+                                    {sub.name}
+                                  </span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -331,19 +370,22 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton
                       asChild
-                      isActive={item.isActive}
+                      isActive={!!item.isActive}
                       tooltip={item.name}
-                      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
+                      className="rounded-lg py-2 pr-4 pl-2 text-sm font-normal text-black transition-all hover:bg-neutral-100 hover:font-bold hover:text-black focus-visible:ring-neutral-300 data-[active=true]:bg-neutral-100 data-[active=true]:font-bold data-[active=true]:text-black dark:text-white dark:hover:bg-neutral-800 dark:hover:text-white dark:data-[active=true]:bg-neutral-800 dark:data-[active=true]:text-white"
                     >
                       <Link
                         href={item.href}
                         className="flex items-center"
-                        {...(item.name === "Documentation"
+                        {...(item.name === "Support"
                           ? { target: "_blank", rel: "noopener noreferrer" }
                           : {})}
                       >
-                        <item.icon className="mr-2" size={18} />
-                        <span>{item.name}</span>
+                        <item.icon
+                          className="mr-1.5 text-black dark:text-white"
+                          size={24}
+                        />
+                        <span className="whitespace-nowrap">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -352,20 +394,29 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {organizationFound && state === "expanded" && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <div className="px-0">
+                <SidebarCreateButtonGroup
+                  siteId={siteId}
+                  audienceListId={audienceListId}
+                />
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       {loading ? null : (
-        <SidebarFooter>
-          <div className="flex flex-col items-center justify-center gap-2">
-            {state === "expanded" && (
-              <Image
-                src="/wtr.png"
-                alt="With the Ranks"
-                width={129}
-                height={58}
-                className="h-14 w-32"
-              />
-            )}
+        <SidebarFooter className="p-0">
+          <div className="flex w-full flex-col gap-2">
             {children}
+            {state === "expanded" && (
+              <div className="flex w-full items-center justify-between">
+                <ThemeSwitcher />
+                <LogoutButton />
+              </div>
+            )}
           </div>
         </SidebarFooter>
       )}

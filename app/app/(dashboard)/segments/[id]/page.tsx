@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 import { ContactTable } from "@/components/contact-table";
 import { createColumns } from "@/components/contact-table/table-columns";
+import { ViewContactSheet } from "@/components/contact-table/view-contact-sheet";
 import { Button } from "@/components/ui/button";
 import type { Contact } from "@/lib/types";
 
@@ -21,6 +22,8 @@ export default function SegmentContactsPage() {
   const { id } = useParams() as { id: string };
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [segment, setSegment] = useState<any>(null);
+  const [viewContactOpen, setViewContactOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   // Table state
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
@@ -99,6 +102,10 @@ export default function SegmentContactsPage() {
   const selectedRowCount = Object.keys(rowSelection).filter(
     (key) => (rowSelection as any)[key],
   ).length;
+  const handleRowClick = (contact: Contact) => {
+    setSelectedContact(contact);
+    setViewContactOpen(true);
+  };
 
   return (
     <div className="flex h-full w-full max-w-(--breakpoint-2xl) flex-col space-y-4 p-4">
@@ -123,10 +130,18 @@ export default function SegmentContactsPage() {
         table={table}
         columns={columns}
         contacts={contacts}
+        onRowClick={handleRowClick}
         pagination={pagination}
         setPagination={setPagination}
         selectedRowCount={selectedRowCount}
       />
+      {selectedContact && (
+        <ViewContactSheet
+          contact={selectedContact}
+          open={viewContactOpen}
+          onOpenChange={setViewContactOpen}
+        />
+      )}
     </div>
   );
 }

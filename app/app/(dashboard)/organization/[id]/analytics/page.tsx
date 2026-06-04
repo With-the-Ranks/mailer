@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import EmailStats from "@/components/EmailStats";
+import AnalyticsDetails from "@/components/AnalyticsDetails";
 import { getSession, isOrgMember } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
@@ -30,5 +30,9 @@ export default async function OrganizationAnalytics({
     notFound();
   }
 
-  return <EmailStats organizationId={organizationId} />;
+  return (
+    <div className="p-4 md:p-8">
+      <AnalyticsDetails organizationId={organizationId} />
+    </div>
+  );
 }

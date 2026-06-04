@@ -1,0 +1,184 @@
+---
+title: AWS SES Integration
+description: Set up Amazon SES for scalable, cost-effective email delivery
+---
+
+# AWS SES Integration
+
+Mailer supports Amazon Simple Email Service (SES) as an email provider. SES offers enterprise-grade email delivery at a fraction of the cost of other providers.
+
+## Why Use AWS SES?
+
+- **High deliverability** - AWS's infrastructure ensures reliable delivery
+- **Scalable** - Handle millions of emails without infrastructure changes
+- **Full control** - Manage your own sending reputation and domains
+- **Pay as you go** - No monthly minimums or commitments
+
+## Prerequisites
+
+Before setting up SES, you'll need:
+
+- An AWS account with billing enabled
+- A domain you own for sending emails
+- Access to your domain's DNS settings
+- A Redis instance for the email queue (Upstash recommended for Vercel)
+
+## Quick Setup
+
+### 1. Create AWS Credentials
+
+1. Go to AWS Console → IAM → Users
+2. Create a new user named `mailer-ses-user`
+3. Attach the `AmazonSESFullAccess` policy
+4. Create an access key and save the credentials
+
+> For production, use a custom policy with minimal permissions. See the [full setup guide](/docs/SES_SETUP.md) for details.
+
+### 2. Set Environment Variables
+
+Add these to your environment:
+
+```bash
+AWS_SES_ACCESS_KEY_ID=your-access-key
+AWS_SES_SECRET_ACCESS_KEY=your-secret-key
+AWS_DEFAULT_REGION=us-east-1
+
+# Redis for email queue
+REDIS_URL=redis://your-redis-url:6379
+
+# Your app URL (for webhooks)
+PUBLIC_APP_URL=https://your-app.vercel.app
+```
+
+### 3. Add Your Domain
+
+1. Go to **Organization Settings → Domains**
+2. Click **Add Domain**
+3. Enter your domain name
+4. Select your AWS region
+5. Click **Add Domain**
+
+### 4. Configure DNS Records
+
+After adding a domain, you'll see required DNS records:
+
+| Type            | Purpose              |
+| --------------- | -------------------- |
+| **MX**          | Bounce handling      |
+| **TXT (SPF)**   | Email authentication |
+| **TXT (DKIM)**  | Email signing        |
+| **TXT (DMARC)** | Domain policy        |
+
+Add these records to your DNS provider (Cloudflare, Route53, etc.).
+
+### 5. Verify Domain
+
+1. Wait for DNS propagation (up to 48 hours)
+2. Click **Check Status** to refresh verification
+3. Once verified, click **Set Active**
+
+## Event Tracking
+
+SES automatically tracks email events through webhooks:
+
+| Event          | Description                           |
+| -------------- | ------------------------------------- |
+| **Sent**       | Email accepted by SES                 |
+| **Delivered**  | Email delivered to recipient's server |
+| **Opened**     | Recipient opened the email            |
+| **Clicked**    | Recipient clicked a link              |
+| **Bounced**    | Email couldn't be delivered           |
+| **Complained** | Recipient marked as spam              |
+
+These events appear in your email analytics and update in real-time.
+
+## Suppression List
+
+SES requires maintaining a suppression list to protect your sender reputation. Mailer automatically:
+
+- Adds hard bounces to the suppression list
+- Adds spam complaints to the suppression list
+- Prevents sending to suppressed addresses
+
+Manage your suppression list at **People → Suppression List**.
+
+## SES Sandbox Mode
+
+New AWS accounts start in "sandbox mode" with limitations:
+
+- Can only send to verified email addresses
+- 200 emails per day limit
+- 1 email per second rate
+
+### Request Production Access
+
+1. Go to AWS Console → SES → Account Dashboard
+2. Click **Request production access**
+3. Describe your email use case
+4. Wait for approval (usually 24-48 hours)
+
+## Switching from Resend
+
+If you're currently using Resend and want to switch to SES:
+
+1. Set up AWS credentials and environment variables
+2. Add and verify your domain in SES
+3. Update the domain's provider setting to "ses"
+4. Test with a small batch before full migration
+
+Both providers can coexist - you can use different providers for different domains.
+
+## Troubleshooting
+
+### Scheduled Emails with QStash
+
+Scheduled SES emails are stored in Redis and only send when the queue worker is woken up. In this app, the worker wake-up endpoint is:
+
+`POST /api/cron/email-queue`
+
+To make scheduled sends work reliably, create a QStash schedule that calls this endpoint every minute.
+
+#### QStash Dashboard Setup
+
+1. Open your QStash project in Upstash.
+2. Go to **Schedules**.
+3. Click **Create Schedule**.
+4. Set the destination URL to your live cron endpoint, for example `https://your-app-domain.com/api/cron/email-queue`.
+5. Set the HTTP method to `POST`.
+6. If you set `CRON_SECRET`, send it in the `Authorization` header as `Bearer <your CRON_SECRET>`.
+7. Set the cron expression to `* * * * *`.
+8. Save the schedule.
+
+QStash evaluates cron expressions in `UTC` by default. That is fine for this endpoint because it should run every minute regardless of your campaign timezone.
+
+It can take up to about a minute for a newly created schedule to start firing.
+
+If `CRON_SECRET` is not set, the endpoint still works without auth. That avoids breaking setups that have not configured a shared secret yet, but header-based auth is recommended for any public deployment.
+
+### Domain Not Verifying
+
+- Check DNS records are correctly configured
+- Wait up to 48 hours for propagation
+- Use [MXToolbox](https://mxtoolbox.com) to verify records
+
+### Emails Not Sending
+
+- Verify AWS credentials are correct
+- Check if account is still in sandbox mode
+- Look for errors in the application logs
+
+### Events Not Tracking
+
+- Ensure `PUBLIC_APP_URL` is set correctly
+- Check SNS subscription in AWS Console
+- Verify webhook endpoint is accessible
+
+### Rate Limiting
+
+SES has sending limits based on account reputation. The email queue automatically respects these limits with retry logic.
+
+## Resources
+
+- [Full SES Setup Guide](/docs/SES_SETUP.md) - Detailed technical setup
+- [AWS SES Documentation](https://docs.aws.amazon.com/ses/)
+- [AWS SES Pricing](https://aws.amazon.com/ses/pricing/)

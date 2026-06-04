@@ -174,18 +174,20 @@ export const removeCustomFieldFromAudienceList = async (
   );
 
   try {
-    const updated = await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`
+    const updated = await prisma.$transaction(
+      async (tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0]) => {
+        await tx.$executeRaw`
           UPDATE "Audience"
           SET "customFields" = "customFields" - ${fieldToRemove}
           WHERE "audienceListId" = ${audienceListId}
         `;
 
-      return tx.audienceList.update({
-        where: { id: audienceListId },
-        data: { customFields: updatedFields },
-      });
-    });
+        return tx.audienceList.update({
+          where: { id: audienceListId },
+          data: { customFields: updatedFields },
+        });
+      },
+    );
 
     return updated;
   } catch {
