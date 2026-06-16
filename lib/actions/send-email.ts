@@ -18,7 +18,12 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@/prisma/generated/prisma/client";
 import { queueBulkEmails, removeJobs, type EmailJobData } from "@/lib/queue";
 
-import { buildAudienceWhere, getUnsubscribeUrl, logError } from "../utils";
+import {
+  buildAudienceWhere,
+  fixResponsiveImageHeights,
+  getUnsubscribeUrl,
+  logError,
+} from "../utils";
 
 interface OrgEmailClient {
   client: EmailProviderClient;
@@ -143,7 +148,7 @@ const parseContent = async (
       html = html.replaceAll(placeholder, value);
     }
 
-    return html;
+    return fixResponsiveImageHeights(html);
   } catch (error) {
     logError("Error parsing content", error);
     throw new Error("Failed to parse email content");
