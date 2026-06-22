@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
-import { getUnsubscribeUrl } from "@/lib/utils";
+import { fixResponsiveImageHeights, getUnsubscribeUrl } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   if (request.method !== "POST") {
@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
       const placeholder = `{{${key}}}`;
       html = html.replaceAll(placeholder, value);
     }
+    html = fixResponsiveImageHeights(html);
 
     return NextResponse.json({ html });
   } catch (err: any) {

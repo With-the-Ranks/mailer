@@ -30,6 +30,26 @@ export const truncate = (str: string, num: number) => {
   return str.slice(0, num) + "...";
 };
 
+export function fixResponsiveImageHeights(html: string) {
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const styleMatch = tag.match(/\sstyle=(["'])(.*?)\1/i);
+    if (!styleMatch) return tag;
+
+    const [, quote, style] = styleMatch;
+    if (!/(^|;)\s*max-width\s*:\s*100%\s*(;|$)/i.test(style)) return tag;
+
+    const normalizedStyle = style.replace(
+      /(^|;)\s*height\s*:\s*(?!auto\b)[^;]*/i,
+      "$1height:auto",
+    );
+
+    return tag.replace(
+      styleMatch[0],
+      ` style=${quote}${normalizedStyle}${quote}`,
+    );
+  });
+}
+
 export const getBlurDataURL = async (url: string | null) => {
   if (!url) {
     return "data:image/webp;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
