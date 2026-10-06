@@ -165,6 +165,7 @@ export type SendEmailOpts = {
   react?: React.ReactElement;
   organizationId?: string;
   audienceListId?: string | null;
+  replyTo?: string | null;
 };
 
 export const sendEmail = async ({
@@ -177,6 +178,7 @@ export const sendEmail = async ({
   react,
   organizationId,
   audienceListId,
+  replyTo,
 }: SendEmailOpts) => {
   const {
     client,
@@ -268,6 +270,7 @@ export const sendEmail = async ({
     subject: subject || "No Subject",
     html: htmlContent,
     text: previewText ?? "",
+    replyTo: replyTo?.trim() || undefined,
   });
 
   if (result.error) {
@@ -296,6 +299,7 @@ export const sendBulkEmail = async ({
   id,
   organizationId,
   segmentId,
+  replyTo,
 }: {
   audienceListId?: string | null;
   from: string;
@@ -306,6 +310,7 @@ export const sendBulkEmail = async ({
   id: string;
   organizationId: string;
   segmentId?: string | null;
+  replyTo?: string | null;
 }) => {
   const session = await getSession();
   if (!session?.user.id) return { error: "Not authenticated" };
@@ -465,6 +470,7 @@ export const sendBulkEmail = async ({
         subject: subject || "No Subject",
         html: htmlContent || "",
         text: previewText ?? "",
+        replyTo: replyTo?.trim() || undefined,
         organizationId,
         provider,
         awsRegion,
@@ -536,6 +542,7 @@ export const sendBulkEmail = async ({
         subject: subject || "No Subject",
         html: htmlContent || "",
         text: previewText ?? "",
+        replyTo: replyTo?.trim() || undefined,
         tags: [
           { name: "intrepidId", value: id },
           { name: "userId", value: session.user.id },

@@ -355,6 +355,44 @@ describe("sendBulkEmail SES scheduling", () => {
     expect(delayMs).toBeLessThanOrEqual(24 * 60 * 60 * 1000 + 5000);
   });
 
+  test("passes replyTo into queued job data", async () => {
+    const { sendBulkEmail } = await import("@/lib/actions/send-email");
+    const scheduledTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+    await sendBulkEmail({
+      id: "email-1",
+      organizationId: "org-1",
+      from: "Sender",
+      subject: "Subject",
+      content: null,
+      previewText: null,
+      replyTo: " replies@example.com ",
+      scheduledTime,
+    });
+
+    const [jobs] = mockQueueBulkEmails.mock.calls[0];
+    expect(jobs[0].replyTo).toBe("replies@example.com");
+  });
+
+  test("omits replyTo from queued job data when it is whitespace only", async () => {
+    const { sendBulkEmail } = await import("@/lib/actions/send-email");
+    const scheduledTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+    await sendBulkEmail({
+      id: "email-1",
+      organizationId: "org-1",
+      from: "Sender",
+      subject: "Subject",
+      content: null,
+      previewText: null,
+      replyTo: "   ",
+      scheduledTime,
+    });
+
+    const [jobs] = mockQueueBulkEmails.mock.calls[0];
+    expect(jobs[0].replyTo).toBeUndefined();
+  });
+
   test("saves scheduledJobIds to database when all jobs queued", async () => {
     const { default: prisma } = await import("@/lib/prisma");
     const { sendBulkEmail } = await import("@/lib/actions/send-email");
