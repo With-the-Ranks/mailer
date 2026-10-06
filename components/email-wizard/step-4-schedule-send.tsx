@@ -77,6 +77,7 @@ export function Step4ScheduleSend({
         subject: formData.subject,
         content: formData.content,
         previewText: formData.previewText,
+        replyTo: formData.replyTo,
         organizationId,
         audienceListId: formData.audienceListId || undefined,
       });

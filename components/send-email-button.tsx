@@ -21,6 +21,7 @@ interface SendEmailButtonProps {
   subject: string;
   previewText: string;
   from: string;
+  replyTo?: string | null;
   content: string;
   emailId: string;
   onSent?: () => void;
@@ -40,6 +41,7 @@ export default function SendEmailButton({
   subject,
   previewText,
   from,
+  replyTo,
   content,
   emailId,
   onConfirm,
@@ -60,6 +62,7 @@ export default function SendEmailButton({
         subject={subject}
         previewText={previewText}
         from={from}
+        replyTo={replyTo}
         content={content}
         emailId={emailId}
         onConfirm={(scheduledTime) => {

@@ -129,6 +129,7 @@ function EmailWizardContent({
         subject: formData.subject,
         content: formData.content,
         previewText: formData.previewText,
+        replyTo: formData.replyTo,
         segmentId: formData.selectedSegment || undefined,
         scheduledTime,
         organizationId,

@@ -31,6 +31,7 @@ interface SendEmailModalProps {
   subject: string;
   previewText: string;
   from: string;
+  replyTo?: string | null;
   content: string;
   emailId: string;
   audienceListId?: string | null;
@@ -48,6 +49,7 @@ export function SendEmailModal({
   subject,
   previewText,
   from,
+  replyTo,
   content,
   emailId,
   audienceListId: audienceListIdProp,
@@ -89,6 +91,7 @@ export function SendEmailModal({
         subject,
         content,
         previewText,
+        replyTo,
         organizationId,
         audienceListId: audienceListIdProp || selectedAudienceList || undefined,
       });
@@ -135,6 +138,7 @@ export function SendEmailModal({
         subject,
         content,
         previewText,
+        replyTo,
         scheduledTime: mode === "now" ? "" : when,
         id: emailId,
         organizationId,
